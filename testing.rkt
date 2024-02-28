@@ -1,6 +1,6 @@
 #lang racket
 
-;; -----------------------------------------------------------------------------
+;; ---------------------------------------------------------------------------------------------------
 (provide
  ;; SYNTAX 
  #; (def-module module-kind exported-function imported-sub-modules ...)
@@ -15,7 +15,7 @@
 
 (require (for-syntax syntax/parse))
 
-(define-syntax (def-module stx)
+(define-syntax (def-module-mf stx)
   (syntax-parse stx
     [(_ module% exported keywords ...)
      #'(define-syntax (module% stx)
@@ -28,7 +28,23 @@
                 (require (submod ".." keywords)) ...
                 ,@#'(def (... ...))))]))]))
 
-;; -----------------------------------------------------------------------------
+(define-syntax (def-module stx)
+  (syntax-parse stx
+    [(_ module% exported keywords ...)
+     #`(define-syntax module% (make-def-module-transformer #'exported #'(keywords ...)))]))
+
+(define-for-syntax ((make-def-module-transformer exported0 lib0) stx)
+  (define/syntax-parse exported exported0)
+  (define/syntax-parse (lib ...) lib0)
+  (syntax-parse stx
+    [(_ m def ...)
+     #:with (rr ...) (map (λ (k) (datum->syntax stx `(require (submod ".." ,k)))) (attribute lib))
+     #`(module m #,(datum->syntax stx 'racket)
+         (#,(datum->syntax stx 'provide) exported)
+         rr ...
+         def ...)]))
+
+;; ---------------------------------------------------------------------------------------------------
 ;; test them all
 
 (provide
