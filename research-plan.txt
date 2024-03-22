@@ -39,9 +39,12 @@ task, can we systematically and automatically transform the code to an equivalen
 one such that the LLM is more likely to succeed for the given task?
 
 Q': Given a piece of code where an LLM fails to produce sufficient test
-inputs and predict test outputs, can we we systematically and
+inputs and predict test outputs (without running the code)^*, can we we systematically and
 automatically  transform the code to an equivalent one such that the LLM
 succeeds for these two tasks? 
+
+* Because human developers should not run the code when creating tests.
+
 
 ;; ======
 ;; Method
@@ -51,7 +54,7 @@ succeeds for these two tasks?
 ;;; ===========
 
 ++ Adequate test suite for a piece of code: A test suite with mutation
-score 1 for the given piece of code. 
+score 1 for the given piece of code (test suite kills all mutants). 
 
 ++ Test scenario: Given a piece of code, a test scenario is a set of (i)
 complete tests; (ii) partial tests that miss inputs and (iii) partial
@@ -67,7 +70,7 @@ An alternative is to consider lower thresholds of adequacy than mutation
 score 1. 
 
 ++ Transformation strategy: A series of steps that each transforms a piece
-of code in language A to another equivalent piece of code. An incomplete
+of code in language A to another equivalent piece of code in A. An incomplete
 list of transformations includes: : closure conversion, lambda lifting,
 inlining, replacement of patterns and idioms with ``elementary'' code, and
 replacement of recursive functions with loops and parameter passing with
@@ -103,15 +106,15 @@ inputs with ? and, analogously, for the second subset replace outputs with
 ;;;; Note
 ;;;; ====
 
-The above construction implies a space of options. The two obvious ones is
-that a scenario is created by replacing all inputs or all outputs with ?.
+The above construction implies a space of options. The two obvious ones
+are that a scenario is created by replacing all inputs or all outputs with ?.
 But there are many different points in between that may be worth
 considering. 
 
 ++ Inputs to the process: 
 (1) a collection of quality code (as defined above) for
 a given language (here Racket)
-(2) a comprehensive test such suite (mutation score 1) for each element of
+(2) a comprehensive test suite (mutation score 1) for each element of
 the collection
 (3) an LLM 
 (4) a set of automatic (correct) transformations 
