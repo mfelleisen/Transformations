@@ -1,0 +1,183 @@
+;; =======
+;; Context
+;; =======
+
+Recently, there is a lot of racket about how Large Language Models(LLMs)
+will revolutionize software development. The LLM enthusiasts have already
+declared that AI developers will soon replace human developers.  In
+contrast, skeptics point out to the gargantuan amount of training that was
+needed for the current technology to generate mostly correct code and
+tests for simple intro-to-programming assignments.
+
+Until we find out whether LLMs end up taking over from humans, a promising way
+for developers to benefit from LLMs is to integrate them with development
+  tools. Problem is LLMs seem to be particular ineffective in
+  ``understanding'' code that modern developers would agree is quality
+  code.  Such code  uses (i) (higher-order) abstractions that avoid code
+  duplication and that increase reuse and composeability; (ii) patterns
+  that enforce correctness properties and enable evolution; and (iii)
+  idioms that increase code comprehension among the users of a language.
+  Possibly due to their training, the efficacy of LLMs is significantly
+  higher for code that does not have these characteristics and is,
+  instead, written with an impoverished set of features. Moreover, LLMs
+  perform significantly better with respect to code, purpose statement and
+  test generation tasks when dealing with code that is written in a
+  textbook imperative manner.  
+
+  However, an established programming languages technique is that
+  different representations of code are used for different tasks. Hence,
+  in the context of LLM-based tools, a solution to the limitations of
+  current LLM technology could be the automatic transformation of quality
+  code to LLM-friendly code.
+
+;; =================
+;; Research question
+;; =================
+
+Q: Given a task  and a piece of code where an LLM behaves poorly for the
+task, can we systematically and automatically transform the code to an equivalent
+one such that the LLM is more likely to succeed for the given task?
+
+Q': Given a piece of code where an LLM fails to produce sufficient test
+inputs and predict test outputs, can we we systematically and
+automatically  transform the code to an equivalent one such that the LLM
+succeeds for these two tasks? 
+
+;; ======
+;; Method
+;; ======
+
+;;; Definitions
+;;; ===========
+
+++ Adequate test suite for a piece of code: A test suite with mutation
+score 1 for the given piece of code. 
+
+++ Test scenario: Given a piece of code, a test scenario is a set of (i)
+complete tests; (ii) partial tests that miss inputs and (iii) partial
+tests that miss outputs such that if the partial tests are filled the
+resulting test suite is adequate. 
+
+++ Solved test scenario: A test scenario is solved if its partial tests
+are filled in resulting in an adequate test suite.
+
+;;;; Note
+;;;; ====
+An alternative is to consider lower thresholds of adequacy than mutation
+score 1. 
+
+++ Transformation strategy: A series of steps that each transforms a piece
+of code in language A to another equivalent piece of code. An incomplete
+list of transformations includes: : closure conversion, lambda lifting,
+inlining, replacement of patterns and idioms with ``elementary'' code, and
+replacement of recursive functions with loops and parameter passing with
+imperative updates.
+
+
+;;; Hypothesis
+;;; ==========
+
+H: Is a transformation strategy successful in improving LLM's performance
+in solving test scenarios.
+
+H': Is a transformation strategy X more successful that strategy Y  in
+improving LLM's performance in solving test scenarios. 
+
+;;;; Note
+;;;; ====
+LLM performance is intentionally vague. A way to quantify performance is a
+percentage of solved scenarios given a population of scenarios to be
+solved. Another could be based on some distance metric from solution such
+as the difference between mutation score 1 and mutation score achieved for
+all scenarios. Finally, it is also possible to consider number of
+transformation steps that a strategy has to apply before succeeding. 
+
+;;; Experimental Process
+;;; ====================
+
+++ Construction of scenarios: Given a piece of code and a test suite,
+select two disjoint subsets of tests.  For the first subset replace test
+inputs with ? and, analogously, for the second subset replace outputs with
+?. 
+
+;;;; Note
+;;;; ====
+
+The above construction implies a space of options. The two obvious ones is
+that a scenario is created by replacing all inputs or all outputs with ?.
+But there are many different points in between that may be worth
+considering. 
+
+++ Inputs to the process: 
+(1) a collection of quality code (as defined above) for
+a given language (here Racket)
+(2) a comprehensive test such suite (mutation score 1) for each element of
+the collection
+(3) an LLM 
+(4) a set of automatic (correct) transformations 
+
+
+++ The process: (1) For each element of the collection we construct a test
+scenario.  (2) We ask the LLM to solve it.  (3) If the LLM fails, the
+process applies one of the available transformations based on a strategy
+and tries again from step (2).  (4) If the LLM succeeds the process stops,
+and a score is computed for the solution based on the number of rounds of
+the process. 
+
+++ Experimental results/takeaways: 
+(1) If a transformation strategy succeeds in a large number of scenarios
+then it is a candidate for becoming the core of a tool.
+
+;;;; Note
+;;;; ====
+The above description requires the description of a number of candidate
+strategies in advance. 
+
+;;; Alternative View
+;;; ================
+
+One could see the experimental process as an exploration of a lattice
+where each configuration is created by applying a series of
+transformations to the starting piece of code. In this case the
+exploration of the lattice, or better downwards chains in the lattice,
+could be the one revealing the most successful strategies.
+
+;; =============
+;; Open problems
+;; =============
+
+
+(1) Construction of a satisfying corpus of programs
+ ++ The corpus should cover variety of patterns, idioms, use of high-level
+ abstractions.
+ ++ Each element of the corpus should come with an adequate test suite.
+
+;;;; Note
+;;;; ====
+This part seems to require significant manual effort.  
+
+
+;;;; Note
+;;;; ====
+Maybe a good idea here is to limit ourselves to a functional subset of
+Racket. 
+
+
+(2) Implementation of a satisfying set of transformations.
+
+;;;; Note
+;;;; ====
+This part could be delegated to an LLM given that there are sufficient
+tests to test that it does things correctly.
+
+(3) Determination of transformation strategies.
+
+;;;; Note
+;;;; ====
+This part will require some insight from manual experimentation and trial-and-error.
+
+
+(4) If any LLMs are going to be used for preparing the experiment, or if
+early experimental results are used to fine-tune the LLMs that are going
+to be used for the experiment proper, there needs to be extra care to
+avoid bias.
