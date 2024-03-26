@@ -43,7 +43,7 @@ def get_embeddings(texts, model_name='nomic-ai/nomic-embed-text-v1.5'):
     return np.array(embeddings)
 
 
-def plot_embeddings(embeddings, labels, problem_names):
+def plot_embeddings(embeddings, labels, problem_names, output_file=None):
     # use PCA to reduce the dimensionality for 2D plotting
     pca = PCA(n_components=2)
     reduced_embeddings = pca.fit_transform(embeddings)
@@ -52,17 +52,22 @@ def plot_embeddings(embeddings, labels, problem_names):
     plt.figure(figsize=(12, 12))
     texts = []
     unique_labels = set(labels)
-    for label in unique_labels:
-        index = [i for i, l in enumerate(labels) if l == label]
-        plt.scatter(
-            reduced_embeddings[index, 0], reduced_embeddings[index, 1], label=f'Cluster {label}')
-        # add text labels for each point
-        for i in index:
-            texts.append(plt.text(
-                reduced_embeddings[i, 0], reduced_embeddings[i, 1], problem_names[i], ha='center', va='center', fontsize=9))
 
-    # adjust the text so they don't overlap
-    adjust_text(texts, arrowprops=dict(arrowstyle='->', color='k', lw=0.5))
+    with open(output_file, 'w') if output_file else dummy_context() as f:
+        for label in unique_labels:
+            index = [i for i, l in enumerate(labels) if l == label]
+            plt.scatter(
+                reduced_embeddings[index, 0], reduced_embeddings[index, 1], label=f'Cluster {label}')
+
+            # add text labels for each point and write to file if required
+            for i in index:
+                texts.append(plt.text(
+                    reduced_embeddings[i, 0], reduced_embeddings[i, 1], problem_names[i], ha='center', va='center', fontsize=9))
+                if f:
+                    f.write(f"{problem_names[i]} {reduced_embeddings[i, 0]} {reduced_embeddings[i, 1]} {label}\n")
+
+        # adjust the text so they don't overlap
+        adjust_text(texts, arrowprops=dict(arrowstyle='->', color='k', lw=0.5))
 
     plt.legend()
     plt.show()
@@ -94,7 +99,7 @@ def main(args):
 
     # plot the embeddings with cluster labels
     problem_names = list([name for name, _ in problems])
-    plot_embeddings(embeddings, labels, problem_names)
+    plot_embeddings(embeddings, labels, problem_names, args.output)
 
 
 if __name__ == "__main__":
@@ -102,6 +107,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', type=Path, required=True,
                         help='Path to directory containing code files')
+    parser.add_argument('--output', type=str, required=False,
+                        help='Output file to write textual representation of clusters')
     parser.add_argument('-k', type=int, default=3,
                         help='Number of clusters to create')
     args = parser.parse_args()
