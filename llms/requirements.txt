@@ -1,0 +1,7 @@
+numpy
+torch
+transformers
+scikit-learn
+matplotlib
+adjustText
+tqdm
