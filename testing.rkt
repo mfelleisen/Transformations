@@ -38,9 +38,11 @@
   (define/syntax-parse (lib ...) lib0)
   (syntax-parse stx
     [(_ m def ...)
+     #:with racket (datum->syntax stx 'racket)
+     #:with provide (datum->syntax stx 'provide)
      #:with (rr ...) (map (λ (k) (datum->syntax stx `(require (submod ".." ,k)))) (attribute lib))
-     #`(module m #,(datum->syntax stx 'racket)
-         (#,(datum->syntax stx 'provide) exported)
+     #`(module m racket
+         (provide exported)
          rr ...
          def ...)]))
 
