@@ -17,6 +17,9 @@
 
 ;; -----------------------------------------------------------------------------
 (module% modern
+  (define from #false)
+  (define rationale "none")
+
   (define (sum-sublists lst)
     (for/sum ([1lst lst])
       (for/sum ([n 1lst])
@@ -24,11 +27,17 @@
 
 ;; -----------------------------------------------------------------------------
 (module% 2010-style
+  (define from #false)
+  (define rationale "none")
+  
   (define (sum-sublists lst)
     (foldl + 0 (map (lambda (sub) (foldl + 0 sub)) lst))))
 
 ;; -----------------------------------------------------------------------------
-(module% unfold-fold-and-map ;; uses only first-order functions 
+(module% unfold-fold-and-map ;; uses only first-order functions
+  (define from #false)
+  (define rationale "none")
+  
   (define (sum-sublists lst)
     (fold-outer (map lst)))
 
@@ -56,6 +65,9 @@
 
 ;; -----------------------------------------------------------------------------
 (module% hoist-fold ;; and eliminate duplicate
+  (define from #false)
+  (define rationale "none")
+
   (define (sum-sublists lst)
     (fold (map lst)))
 
@@ -77,6 +89,9 @@
 
 ;; -----------------------------------------------------------------------------
 (module% cps ;; notice that this one uses `lambda` -- more features?
+  (define from #false)
+  (define rationale "none")
+  
   (define (sum-sublists lst)
     (map lst (λ (x) (fold x return))))
 
@@ -104,7 +119,10 @@
     (k v)))
 
 ;; -----------------------------------------------------------------------------
-(module% closurized 
+(module% closurized
+  (define from #false)
+  (define rationale "none")
+
   (define (sum-sublists lst)
     (map lst 'fold1))
 
@@ -136,9 +154,11 @@
       [`(cons ,k ,x)   (return-to k (cons x v))]
       [`(cdr ,k ,lst) (map (rest lst) `(cons ,k ,v))])))
 
-
 ;; -----------------------------------------------------------------------------
-(module% asm ;; and inline the inner fold 
+(module% asm ;; and inline the inner fold
+  (define from #false)
+  (define rationale "none")
+
   (define lst #false)
   (define k   'fold1)
   (define v   #false)
@@ -181,6 +201,9 @@
 
 ;; -----------------------------------------------------------------------------
 (module% c-style
+  (define from #false)
+  (define rationale "none")
+  
   (define (sum-sublists lst)
     (define sum 0)
     (for ([1lst lst])

@@ -54,3 +54,5 @@ def fallingSquares(positions: List[List[int]]) -> List[int]:
         intervals.append((h, R))
 
     return ans
+
+print(fallingSquares([ [1,2], [2,2], [2,1] ]))
