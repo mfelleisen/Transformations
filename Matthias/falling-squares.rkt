@@ -58,6 +58,54 @@
   (define [height scene] (apply max (vector->list scene))))
 
 ;; ---------------------------------------------------------------------------------------------------
+(module% inline
+
+  (define from '[[base "inline"]])
+  (define rationale "inline all functions")
+
+  (define/contract (falling-squares l) fs/c
+    #; {type Scene = [vector Natural]}
+    ;; it records the height of the stack of resting squares at each index
+    ;; `(vector-ref scene i)` is the height of the stack 
+    (for/fold ([scene (make-vector WIDTH 0)] [maxs '()] #:result (reverse maxs)) ([square l])
+      (match-define [list x-left side] square)
+      (define left  (- x-left 1))
+      (define right (+ left side))
+      (define height-at (apply max (for/list ([i (in-range left right 1)]) (vector-ref scene i))))
+      (define nu-height (+ height-at side))
+      (define scene++ 
+        (for/vector ([h (in-vector scene)] [i (in-naturals)])
+          (if (or (< i left) (<= right i)) h nu-height)))
+      (define height++ (apply max (vector->list scene++)))
+      (values scene++ (cons height++ maxs)))))
+
+;; ---------------------------------------------------------------------------------------------------
+(module% c
+
+  (define from '[[inline "imperative everything"]])
+  (define rationale "use assignment statements plus for/list; took several steps actually")
+
+  (define/contract (falling-squares l) fs/c
+    #; {type Scene = [vector Natural]}
+    ;; it records the height of the stack of resting squares at each index
+    ;; `(vector-ref scene i)` is the height of the stack
+    (define scene  (make-vector WIDTH 0))
+    (define max-of 0)
+
+    (for/list ([square l])
+      (match-define [list x-left side] square)
+      (define left  (- x-left 1))
+      (define right (+ left side))
+      (define height-at 0)
+      (for ([i (in-range left right 1)])
+        (set! height-at (max (vector-ref scene i) height-at)))
+      (define nu-height (+ height-at side))
+      (for ([i (in-range left right 1)])
+        (vector-set! scene i nu-height))
+      (set! max-of (max nu-height max-of))
+      max-of)))
+
+;; ---------------------------------------------------------------------------------------------------
 (module% accumulator 
 
   (define from '[[base "accumulate max"]])
@@ -231,7 +279,7 @@
 
 (test falling-squares
       in
-      base stateful-scene state-accu accumulator object
+      base inline c stateful-scene state-accu accumulator object
       [#:show-graph #true]
       with
       ;; my silly tests:
