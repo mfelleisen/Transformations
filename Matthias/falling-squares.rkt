@@ -182,11 +182,56 @@
     scene))
 
 ;; ---------------------------------------------------------------------------------------------------
+(module% object
+
+  (define from '[[state-accu "use class"]])
+  (define rationale "turn struct and functions into a class and methods, instantiate once")
+
+  (define/contract (falling-squares l) fs/c
+    (define scene [new scene%])
+    (for/fold ([maxs '()] #:result (reverse maxs)) ([square l])
+      (send scene add-square square)
+      (cons (get-field max-height scene) maxs)))
+
+  #; {type Scene = [instanceof/c Scene% (class/c [add-square ->m void?])]}
+  
+  (define scene%
+    (class object%
+      (super-new)
+
+      ;; it records the height of the stack of resting squares at each index
+      #; (vector-ref heights scene i) ; is the height of the stack at i
+      (field [heights    (make-vector WIDTH 0)])
+
+      ;; is the maximum height of all heights     
+      (field [max-height 0])
+  
+      #; {Square -> Void}
+      ;; EFFECT a `(list x side)` square increases the height between x-1 and x-1+side 
+      (define/public (add-square square)
+        (match-define [list x-left side] square)
+        (define left  (- x-left 1))
+        (define right (+ left side))
+        (define nu-height (+ side (height-between left right)))
+        (add-height-to-all! left right nu-height)
+        (set! max-height (max max-height nu-height)))
+  
+      #; {Natural Natural -> Scene}
+      ;; the max height of the scene on [left, right)
+      (define/private (height-between left right)
+        (apply max (for/list ([i (in-range left right 1)]) (vector-ref heights i))))
+
+      #; {Natural Natural Natural+ -> Scene}
+      (define/private (add-height-to-all! left right nu-height)
+        (for ([i (in-range left right 1)])
+          (vector-set! heights i nu-height))))))
+
+;; ---------------------------------------------------------------------------------------------------
 ;; test them all 
 
 (test falling-squares
       in
-      base stateful-scene state-accu accumulator
+      base stateful-scene state-accu accumulator object
       [#:show-graph #true]
       with
       ;; my silly tests:

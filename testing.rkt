@@ -119,12 +119,15 @@
 
 #; {[Listof node] [Listof edge] -> ImageSnip}
 (define [main nodes0 edges0]
-  (define target (make-bitmap 400 400))
+  (define width  600)
+  (define height 800)
+  (define center `[,(quotient width 2) . ,(quotient height 2)])
+  (define target (make-bitmap width height))
   (define dc (new bitmap-dc% [bitmap target]))
   (define is (make-object image-snip% target))
   (define nodes (map node->clnode nodes0))
   (define edges (map edge->cledge edges0))
-  (draw-circular-layout #:dc dc #:nodes nodes #:edges edges #:center '(200 . 200) #:scale 10)
+  (draw-circular-layout #:dc dc #:nodes nodes #:edges edges #:center center #:scale 10)
   is)
 
 ;; ---------------------------------------------------------------------------------------------------
