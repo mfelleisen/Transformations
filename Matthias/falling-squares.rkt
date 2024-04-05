@@ -91,8 +91,9 @@
     ;; `(vector-ref scene i)` is the height of the stack
     (define scene  (make-vector WIDTH 0))
     (define max-of 0)
+    (define the-list '())
 
-    (for/list ([square l])
+    (for ([square l])
       (match-define [list x-left side] square)
       (define left  (- x-left 1))
       (define right (+ left side))
@@ -103,7 +104,9 @@
       (for ([i (in-range left right 1)])
         (vector-set! scene i nu-height))
       (set! max-of (max nu-height max-of))
-      max-of)))
+      (set! the-list (cons max-of the-list)))
+
+    (reverse the-list)))
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% accumulator 
@@ -289,16 +292,18 @@
       ;; llms's tests:
       (check-equal? (falling-squares (list (list 1 2) (list 5 3) (list 3 1))) (list 2 3 3) "1")
       (check-equal? (falling-squares (list (list 1 2) (list 2 2) (list 3 2))) (list 2 4 6) "2")
-      
-      (check-equal? (falling-squares (list (list 1 2) (list 2 2) (list 2 1))) (list 2 4 5) "3")
+
       ;; corrected from faulty solution in ../llms/
+      (check-equal? (falling-squares (list (list 1 2) (list 2 2) (list 2 1))) (list 2 4 5) "3")
+      
       ;; scene 1:  [2 2]; scene 2: [2 4 4]; scene 3: [2 5 4]
   
       (check-equal? (falling-squares (list (list 1 1))) (list 1) "4")
       (check-equal? (falling-squares (list (list 1 2) (list 2 3) (list 6 1))) (list 2 5 5) "5")
       (check-equal? (falling-squares (list (list 1 2) (list 3 2) (list 5 2))) (list 2 2 2) "6")
-      (check-equal? (falling-squares (list (list 1 2) (list 2 2) (list 1 2))) (list 2 4 6) "7")
+
       ;; corrected from faulty solution in ../llms/
+      (check-equal? (falling-squares (list (list 1 2) (list 2 2) (list 1 2))) (list 2 4 6) "7")      
       ;; scene 1: [2 2] scene 2: [2 4] scene 3 [6 4 6]
       ;; 1. ||
       ;; 2.  ||
@@ -306,8 +311,9 @@
       ;; 3. ||
       ;;     ||
       ;;    ||
-      
-      (check-exn exn:fail:contract? (λ () (falling-squares (list (list 100 100) (list 200 100))) "8"))
+
       ;; corrected from faulty solution in ../llms/ -- which created a test that violates constraints
+      (check-exn exn:fail:contract? (λ () (falling-squares (list (list 100 100) (list 200 100))) "8"))
+
       )
 
