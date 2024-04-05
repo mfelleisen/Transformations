@@ -57,9 +57,9 @@ Each code file has this structure:
   - sumOfDistanceInTree CD
 
 - Green:
-  - maximumGap MF 
+  - maximumGap MF -- done 
   - minimumEffort CD 
 
 - Blue:
-  - isScramble MF 
+  - isScramble MF -- source too slow (hmph) -- 
   - shortest_common_supersequence CD
