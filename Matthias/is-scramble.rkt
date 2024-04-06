@@ -18,21 +18,109 @@
 (def-module module% is general)
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% base
+"a plain stream solution is too INEFFICIENT (build stream of all scrambles, check membership)"
+
+;; ---------------------------------------------------------------------------------------------------
+(module% base2
   (define from '[])
-  (define rationale "")
+  (define rationale "compare the two strings (as lists) in parallel")
   
-  (define/contract (is s t) is/c #false))
+  (define/contract (is s t) is/c
+    (define k (string->list s))
+    (define l (string->list t))
+    (cond
+      [(equal? k l)            #true]
+      [(equal? (reverse k) l)  #true]
+      [(different-letters k l) #false]
+      [else #; (not (empty? k)) 
+            (compare-in-parallel k l (length k))]))
+  
+  #; {[Listof Char] [Listof Char] -> Boolean}
+  ;; ASSUME |k| == |l|, |k| > 0
+  (define (compare-in-parallel k l L) 
+    (cond
+      [(empty? (rest k)) (equal? k l)]
+      [else
+       (for/or ([i (in-range 1 L)])
+         (or
+          (and (compare-in-parallel (take k i) (take l i) i)
+               (compare-in-parallel (drop k i) (drop l i) (- L i)))
+          (and (compare-in-parallel (take k i) (drop l (- L i)) i)
+               (compare-in-parallel (drop k i) (take l (- L i)) (- L i)))))]))
+  
+  #; {[Listof Char] [Listof Char] -> Boolean}
+  (define (different-letters k l)
+    (not (equal? (sort k char<?) (sort l char<?)))))
+
+;; ---------------------------------------------------------------------------------------------------
+(module% inline
+  (define from '[[base2 "local recursion"]])
+  (define rationale "compare the two strings (as lists) in parallel")
+  
+  (define/contract (is s t) is/c
+    (define k (string->list s))
+    (define l (string->list t))
+    (cond
+      [(equal? k l)            #true]
+      [(equal? (reverse k) l)  #true]
+      [(not (equal? (sort k char<?) (sort l char<?))) #false]
+      [else #; (not (empty? k))
+            (let compare-in-parallel ([k k] [l l] [L (length k)])
+              (cond
+                [(empty? (rest k)) (equal? k l)]
+                [else
+                 (for/or ([i (in-range 1 L)])
+                   (or
+                    (and (compare-in-parallel (take k i) (take l i) i)
+                         (compare-in-parallel (drop k i) (drop l i) (- L i)))
+                    (and (compare-in-parallel (take k i) (drop l (- L i)) i)
+                         (compare-in-parallel (drop k i) (take l (- L i)) (- L i)))))]))])))
+
+;; ---------------------------------------------------------------------------------------------------
+(module% accumulator
+  (define from '[[base2 "accumulator"]])
+  (define rationale "the accumulator records the length of list to compare")
+  
+  (define/contract (is s t) is/c
+    (define k (string->list s))
+    (define l (string->list t))
+    (cond
+      [(equal? k l)            #true]
+      [(equal? (reverse k) l)  #true]
+      [(different-letters k l) #false]
+      [else #; (not (empty? k)) 
+            (compare-in-parallel k l)]))
+  
+  #; {[Listof Char] [Listof Char] -> Boolean}
+  ;; ASSUME |k| == |l|, |k| > 0
+  (define (compare-in-parallel k l) 
+    (cond
+      [(empty? (rest k)) (equal? k l)]
+      [else
+       (define L (length k))
+       (for/or ([i (in-range 1 L)])
+         (or
+          (and (compare-in-parallel (take k i) (take l i))
+               (compare-in-parallel (drop k i) (drop l i)))
+          (and (compare-in-parallel (take k i) (drop l (- L i)))
+               (compare-in-parallel (drop k i) (take l (- L i))))))]))
+  
+  #; {[Listof Char] [Listof Char] -> Boolean}
+  (define (different-letters k l)
+    (not (equal? (sort k char<?) (sort l char<?)))))
 
 ;; ---------------------------------------------------------------------------------------------------
 (test is
       in
-      base
+      base2 accumulator inline
       [#:show-graph #false]
       with
-
+      
       (check-exn #px"same length" (λ () (is "aaaa" "aaa")))
+      
       (check-true (is "abcde" "ebcda"))
+
+      ) #; (
       (check-true (is "abb" "bba"))
       (check-true (is "web" "bwe"))
       (check-true (is "bac" "bca"))
