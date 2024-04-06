@@ -80,6 +80,7 @@
          rr ...
          ;; add more test cases here
          (let ([exported ss])
+           (eprintf "testing ~a\n" 'name)
            test-case
            ...)
          ...
