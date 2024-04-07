@@ -1,5 +1,17 @@
 #lang racket
 
+(module vocabulary racket
+
+  (provide FUNCTIONAL INLINE VECTOR IMPERATIVE ACCUMULATOR CLASS LETLOOP)
+
+  (define FUNCTIONAL  "plain functional")
+  (define INLINE      "inline all functions")
+  (define VECTOR      "use mutable vectors")
+  (define IMPERATIVE  "imperative everything")
+  (define ACCUMULATOR "use accumulator")
+  (define CLASS       "introduce class")
+  (define LETLOOP     "local let-loop"))
+
 ;; ---------------------------------------------------------------------------------------------------
 (provide
  ;; SYNTAX 
@@ -30,10 +42,13 @@
      #:with rationale (datum->syntax stx 'rationale)
 
      #:with racket (datum->syntax stx 'racket)
+     #:with vocab  (datum->syntax stx '(require (submod "../testing.rkt" vocabulary)))
      #:with provide (datum->syntax stx 'provide)
      #:with (rr ...) (map (λ (k) (datum->syntax stx `(require (submod ".." ,k)))) (attribute lib))
+
      #`(module m racket
          (provide exported from rationale)
+         vocab
          rr ...
          def ...)]))
 

@@ -101,7 +101,7 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% inline
-  (define from '[[base2 "local recursion"]])
+  (define from `[[base2 ,LETLOOP]])
   (define rationale "compare the two strings (as lists) in parallel")
   
   (define/contract (is s t) is/c
@@ -125,7 +125,7 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% accumulator
-  (define from '[[base2 "accumulator"]])
+  (define from `[[base2 ,ACCUMULATOR]])
   (define rationale "the accumulator records the length of list to compare")
   
   (define/contract (is s t) is/c
@@ -161,7 +161,7 @@
       in
       ; base ; is too inefficient to get thru "datastructure"
       base2 accumulator inline
-      [#:show-graph #false]
+      [#:show-graph #true]
       with
       
       (check-exn #px"same length" (λ () (is "aaaa" "aaa")))

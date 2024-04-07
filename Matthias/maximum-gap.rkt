@@ -86,7 +86,7 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% inline
-  (define from '[[stateful-interval "inline"]])
+  (define from `[[stateful-interval ,INLINE]])
   (define rationale "inline all functions and avoid parameter passing")
   
   (define/contract [mg l] mg/c
@@ -114,7 +114,7 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% c
-  (define from '[[inline "mperative everything"]])
+  (define from `[[inline ,IMPERATIVE]])
   (define rationale "inline all functions and avoid parameter passing")
   
   (define/contract [mg l] mg/c
@@ -151,7 +151,7 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% object
-  (define from '[[stateful-interval "use class"]])
+  (define from `[[stateful-interval ,CLASS]])
   (define rationale "linearity constraint is bad: the most natural approach is to make a mask")
   
   (define/contract [mg l] mg/c

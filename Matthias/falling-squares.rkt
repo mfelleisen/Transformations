@@ -60,7 +60,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% inline
 
-  (define from '[[base "inline"]])
+  (define from `[[base ,INLINE]])
   (define rationale "inline all functions")
 
   (define/contract (falling-squares l) fs/c
@@ -82,7 +82,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% c
 
-  (define from '[[inline "imperative everything"]])
+  (define from `[[inline ,IMPERATIVE]])
   (define rationale "use assignment statements plus for/list; took several steps actually")
 
   (define/contract (falling-squares l) fs/c
@@ -111,7 +111,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% accumulator 
 
-  (define from '[[base "accumulate max"]])
+  (define from `[[base ,ACCUMULATOR]])
   (define rationale "keep track maximum height via srructural accumulator")
 
   (define/contract (falling-squares l) fs/c
@@ -152,7 +152,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% stateful-scene 
 
-  (define from '[[base "imperative heights"]])
+  (define from `[[base ,VECTOR]])
   (define rationale "notice single-threaded scene; make imperative to avoid duplication")
 
   (define/contract (falling-squares l) fs/c
@@ -193,7 +193,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% state-accu 
 
-  (define from '[[stateful-scene "accumulate max"] [accumulator "stateful heights"]])
+  (define from `[[stateful-scene ,ACCUMULATOR] [accumulator ,VECTOR]])
   (define rationale "notice single-threaded scene; make imperative to avoid duplication")
 
   (define/contract (falling-squares l) fs/c
@@ -235,7 +235,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% object
 
-  (define from '[[state-accu "use class"]])
+  (define from `[[state-accu ,CLASS]])
   (define rationale "turn struct and functions into a class and methods, instantiate once")
 
   (define/contract (falling-squares l) fs/c
