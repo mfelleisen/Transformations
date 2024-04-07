@@ -18,7 +18,54 @@
 (def-module module% is general)
 
 ;; ---------------------------------------------------------------------------------------------------
-"a plain stream solution is too INEFFICIENT (build stream of all scrambles, check membership)"
+(module% base
+  (define from '[])
+  (define rationale "INEFFICIENT (build stream of all scrambles, check membership)")
+  
+  (define/contract (is s t) is/c
+    (eprintf "~a vs ~a\n" s t)
+    (define k (string->list s))
+    (define l (string->list t))
+    (cond
+      [(equal? k l)            #true]
+      [(equal? (reverse k) l)  #true]
+      [(different-letters k l) #false]
+      [else (stream-member? l (all-of k))]))
+
+  #; {[NEListof Char] -> [Streamof [NEListof Char]]}
+  (define (all-of k)
+    (cond
+      [(empty? (rest k)) (stream k)]
+      [else
+       (let all-pivots ([i (- (length k) 1)])
+         (cond
+           [(zero? i) (stream)]
+           [else
+            (define front* (all-of (take k i)))
+            (define back*  (all-of (drop k i)))
+            (x-product* front* back* (λ () (all-pivots (sub1 i))))]))]))
+
+  #; {[Streamof word] [Streamof Word] [-> [Streamof Word]] -> [Streamof Word]}
+  (define (x-product* front0 back0 f)
+    (let outer ([front* front0] [back* back0])
+      (cond
+        [(stream-empty? front*) (f)]
+        [else 
+         (define w (stream-first front*))
+         (let inner ([q back*])
+           (cond
+             [(stream-empty? q) (outer (stream-rest front*) back*)]
+             [else
+              (define u (stream-first q))
+              (stream* (append u w) (append w u) (inner (stream-rest q)))]))])))
+  
+  #; {X [Streamof X] -> Boolean}
+  (define (stream-member? x s)
+    (for/first ([y (in-stream s)] #:when (and (eq? (first x) (first y)) (equal? x y))) #true))
+  
+  #; {[Listof Char] [Listof Char] -> Boolean}
+  (define (different-letters k l)
+    (not (equal? (sort k char<?) (sort l char<?)))))
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% base2
@@ -112,19 +159,19 @@
 ;; ---------------------------------------------------------------------------------------------------
 (test is
       in
+      ; base ; is too inefficient to get thru "datastructure"
       base2 accumulator inline
       [#:show-graph #false]
       with
       
       (check-exn #px"same length" (λ () (is "aaaa" "aaa")))
       
-      (check-true (is "abcde" "ebcda"))
-
-      ) #; (
       (check-true (is "abb" "bba"))
       (check-true (is "web" "bwe"))
       (check-true (is "bac" "bca"))
+      (check-true (is "abcde" "ebcda"))
       (check-true (is "datastructure" "tastructureda"))
+      
       (check-true (is "rat" "tar"))
       (check-true (is "t" "t"))
       (check-true (is "asd" "dsa"))
