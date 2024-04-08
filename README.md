@@ -6,7 +6,9 @@
 - `the-311-project.rkt` ~~ this is transforming a simple sum-of-numbers function a la EoPL 
 - `profit.rkt` ~~ this is a semantic transformation a la Darlington (from FP to Imperative) 
 
-- `testing.rkt` ~~ macros to make life simpler in the other files 
+- `testing.rkt`
+  - macros to make life simpler in the other files
+  - top of the file is a "vocabulary" submodule for from justifications 
 
 ###
 
@@ -25,7 +27,7 @@ Each code file has this structure:
 (def-module module% f general) ;; module% can be chosen to be something different
 
 (module% name1
-   (define from .. association list of module names and rationale strings ..)
+   (define from .. association list of module names and justification strings ..)
    (define rationale "some arbitrary comment for now")
    
    (define/contract (f ...) f/c ...)
