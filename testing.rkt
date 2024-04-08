@@ -2,7 +2,7 @@
 
 (module vocabulary racket
 
-  (provide FUNCTIONAL INLINE VECTOR IMPERATIVE ACCUMULATOR CLASS LETLOOP)
+  (provide FUNCTIONAL INLINE VECTOR IMPERATIVE ACCUMULATOR CLASS LETLOOP CPS LambdaLift)
 
   (define FUNCTIONAL  "plain functional")
   (define INLINE      "inline all functions")
@@ -10,7 +10,9 @@
   (define IMPERATIVE  "imperative everything")
   (define ACCUMULATOR "use accumulator")
   (define CLASS       "introduce class")
-  (define LETLOOP     "local let-loop"))
+  (define LETLOOP     "local let-loop")
+  (define CPS         "cps")
+  (define LambdaLift  "ll"))
 
 ;; ---------------------------------------------------------------------------------------------------
 (provide

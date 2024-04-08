@@ -71,7 +71,7 @@
 (module% base2
   (define from '[])
   (define rationale "compare the two strings (as lists) in parallel")
-  
+
   (define/contract (is s t) is/c
     (define k (string->list s))
     (define l (string->list t))
@@ -80,20 +80,21 @@
       [(equal? (reverse k) l)  #true]
       [(different-letters k l) #false]
       [else #; (not (empty? k)) 
-            (compare-in-parallel k l (length k))]))
+            (compare-in-parallel k l)]))
   
   #; {[Listof Char] [Listof Char] -> Boolean}
   ;; ASSUME |k| == |l|, |k| > 0
-  (define (compare-in-parallel k l L) 
+  (define (compare-in-parallel k l) 
     (cond
       [(empty? (rest k)) (equal? k l)]
       [else
+       (define L (length k))
        (for/or ([i (in-range 1 L)])
          (or
-          (and (compare-in-parallel (take k i) (take l i) i)
-               (compare-in-parallel (drop k i) (drop l i) (- L i)))
-          (and (compare-in-parallel (take k i) (drop l (- L i)) i)
-               (compare-in-parallel (drop k i) (take l (- L i)) (- L i)))))]))
+          (and (compare-in-parallel (take k i) (take l i))
+               (compare-in-parallel (drop k i) (drop l i)))
+          (and (compare-in-parallel (take k i) (drop l (- L i)))
+               (compare-in-parallel (drop k i) (take l (- L i))))))]))
   
   #; {[Listof Char] [Listof Char] -> Boolean}
   (define (different-letters k l)
@@ -136,21 +137,220 @@
       [(equal? (reverse k) l)  #true]
       [(different-letters k l) #false]
       [else #; (not (empty? k)) 
-            (compare-in-parallel k l)]))
+            (compare-in-parallel k l (length k))]))
   
   #; {[Listof Char] [Listof Char] -> Boolean}
-  ;; ASSUME |k| == |l|, |k| > 0
-  (define (compare-in-parallel k l) 
+  ;; ASSUME |k| == |l|, |k| > 0, |k| = L 
+  (define (compare-in-parallel k l L) 
     (cond
       [(empty? (rest k)) (equal? k l)]
       [else
-       (define L (length k))
        (for/or ([i (in-range 1 L)])
          (or
-          (and (compare-in-parallel (take k i) (take l i))
-               (compare-in-parallel (drop k i) (drop l i)))
-          (and (compare-in-parallel (take k i) (drop l (- L i)))
-               (compare-in-parallel (drop k i) (take l (- L i))))))]))
+          (and (compare-in-parallel (take k i) (take l i) i)
+               (compare-in-parallel (drop k i) (drop l i) (- L i)))
+          (and (compare-in-parallel (take k i) (drop l (- L i)) i)
+               (compare-in-parallel (drop k i) (take l (- L i)) (- L i)))))]))
+  
+  #; {[Listof Char] [Listof Char] -> Boolean}
+  (define (different-letters k l)
+    (not (equal? (sort k char<?) (sort l char<?)))))
+
+;; ---------------------------------------------------------------------------------------------------
+(module% cps
+  (define from `[[accumulator ,CPS]])
+  (define rationale "tail-calls")
+  
+  (define/contract (is s t) is/c
+    (define k (string->list s))
+    (define l (string->list t))
+    (cond
+      [(equal? k l)            #true]
+      [(equal? (reverse k) l)  #true]
+      [(different-letters k l) #false]
+      [else #; (not (empty? k)) 
+            (compare-in-parallel k l (length k))]))
+  
+  #; {[Listof Char] [Listof Char] -> Boolean}
+  ;; ASSUME |k| == |l|, |k| > 0, |k| = L
+  (define (compare-in-parallel k l L)
+    (let/ec return 
+      (let compare-in-parallel ([k k] [l l] [L L] [cont return])
+        (cond
+          [(empty? (rest k)) (cont (equal? k l))]
+          [else
+           (let 1success ([i 1] [inner cont])
+             (cond
+               [(>= i L) (inner #false)]
+               [else
+                (define k-front-i (take k i))
+                (define l-front-i (take l i))
+                (define k-back-i  (drop k i))
+                (define l-back-i  (drop l i))
+                (define l-switch-back (drop l (- L i)))
+                (define l-switch-front (take l (- L i)))
+
+                (define and1 ;; first and expression in cps
+                  (λ (x)
+                    (if x
+                        (compare-in-parallel k-back-i  l-back-i  (- L i)
+                                             (λ (y)
+                                               (if y
+                                                   (inner #true)
+                                                   (fail1 'hukairs))))
+                        (fail1 'hukairs))))
+
+                (define fail1 ;; failure of first and expression 
+                  (λ _ (compare-in-parallel k-front-i l-switch-back i and2)))
+
+                (define and2 ;; second and expression in cps 
+                  (λ (x)
+                    (if x
+                        (compare-in-parallel k-back-i  l-switch-front (- L i)
+                                             (λ (y)
+                                               (if y
+                                                   (inner #true)
+                                                   (fail2 'hukairs))))
+                        (fail2 'hukair))))
+                
+                (define fail2 ;; failure of second annd expression 
+                  (λ _ (1success (add1 i) inner)))
+
+                (compare-in-parallel k-front-i l-front-i i and1)]))]))))
+  
+  
+  #; {[Listof Char] [Listof Char] -> Boolean}
+  (define (different-letters k l)
+    (not (equal? (sort k char<?) (sort l char<?)))))
+
+;; ---------------------------------------------------------------------------------------------------
+(module% cps-ll
+  (define from `[[cps ,LambdaLift]])
+  (define rationale "lift out the loops to have basic functions, other than continuations")
+  
+  (define/contract (is s t) is/c
+    (define k (string->list s))
+    (define l (string->list t))
+    (cond
+      [(equal? k l)            #true]
+      [(equal? (reverse k) l)  #true]
+      [(different-letters k l) #false]
+      [else #; (not (empty? k)) 
+            (compare-in-parallel k l (length k))]))
+
+  #; {[Listof Char] [Listof Char] -> Boolean}
+  ;; ASSUME |k| == |l|, |k| > 0, |k| = L
+  (define (compare-in-parallel k l L)
+    (let/ec return
+      (cip k l L return)))
+
+  #; {[Listof Char] [Listof Char] Cont -> Boolean}
+  (define (cip k l L cont)
+    (cond
+      [(empty? (rest k)) (cont (equal? k l))]
+      [else (1success 1 k l L cont)]))
+
+  #; {Natural [Listof Char] [Listof Char] Cont -> Boolean}
+  (define (1success i k l L inner)
+    (cond
+      [(>= i L) (inner #false)]
+      [else
+       (define k-front-i (take k i))
+       (define l-front-i (take l i))
+       (define k-back-i  (drop k i))
+       (define l-back-i  (drop l i))
+       (define l-switch-back (drop l (- L i)))
+       (define l-switch-front (take l (- L i)))
+
+       (define and1 ;; first and expression in cps
+         (λ (x)
+           (if x
+               (cip k-back-i  l-back-i  (- L i)
+                    (λ (y)
+                      (if y
+                          (inner #true)
+                          (fail1 'hukairs))))
+               (fail1 'hukairs))))
+
+       (define fail1 ;; failure of first and expression 
+         (λ _ (cip k-front-i l-switch-back i and2)))
+
+       (define and2 ;; second and expression in cps 
+         (λ (x)
+           (if x
+               (cip k-back-i  l-switch-front (- L i)
+                    (λ (y)
+                      (if y
+                          (inner #true)
+                          (fail2 'hukairs))))
+               (fail2 'hukair))))
+                
+       (define fail2 ;; failure of second annd expression 
+         (λ _ (1success (add1 i) k l L inner)))
+
+       (cip k-front-i l-front-i i and1)]))
+  
+  #; {[Listof Char] [Listof Char] -> Boolean}
+  (define (different-letters k l)
+    (not (equal? (sort k char<?) (sort l char<?)))))
+
+;; ---------------------------------------------------------------------------------------------------
+(module% cps-data
+  (define from `[[cps-ll ,LambdaLift]])
+  (define rationale "lift out the loops to have basic functions, other than continuations")
+  
+  (define/contract (is s t) is/c
+    (define k (string->list s))
+    (define l (string->list t))
+    (cond
+      [(equal? k l)            #true]
+      [(equal? (reverse k) l)  #true]
+      [(different-letters k l) #false]
+      [else #; (not (empty? k)) 
+            (compare-in-parallel k l (length k))]))
+
+  #; {[Listof Char] [Listof Char] -> Boolean}
+  ;; ASSUME |k| == |l|, |k| > 0, |k| = L
+  (define (compare-in-parallel k l L)
+    (cip k l L 'return))
+
+  #; {[Listof Char] [Listof Char] Cont -> Boolean}
+  (define (cip k l L cont)
+    (cond
+      [(empty? (rest k)) (apply-k cont (equal? k l))]
+      [else (1success 1 k l L cont)]))
+
+  #; {Natural [Listof Char] [Listof Char] Cont -> Boolean}
+  (define (1success i k l L inner)
+    (cond
+      [(>= i L) (apply-k inner #false)]
+      [else
+       (define k-front-i (take k i))
+       (define l-front-i (take l i))
+       (define k-back-i  (drop k i))
+       (define l-back-i  (drop l i))
+       (define l-switch-back (drop l (- L i)))
+       (define l-switch-front (take l (- L i)))
+
+       (define fail2 `[fail2 ,(add1 i) ,k ,l ,L ,inner])
+       (define and2 `[and ,k-back-i ,l-switch-front ,(- L i) ,inner ,fail2])
+       (define fail1 `[fail1 ,k-front-i ,l-switch-back ,i ,and2])
+       (define and1 `[and ,k-back-i ,l-back-i ,(- L i) ,inner ,fail1])
+       
+       (cip k-front-i l-front-i i and1)]))
+
+  (define (apply-k k x)
+    (match k
+      ['return x]
+      [`[fail2 ,i+1 ,kk ,ll ,L ,inner]
+       (1success i+1 kk ll L inner)]
+      [`[fail1      ,kk ,ll ,i ,and2]
+       (cip kk ll i and2)]
+      [`[and ,kk ,ll ,L-i ,inner ,fail]
+       (if x (cip kk  ll L-i `[and-decide ,inner ,fail]) (apply-k fail 'hukairs))]
+      [`[and-decide ,inner ,fail]
+       (define y x)
+       (if y (apply-k inner #true) (apply-k fail 'hukairs))]))
   
   #; {[Listof Char] [Listof Char] -> Boolean}
   (define (different-letters k l)
@@ -160,7 +360,7 @@
 (test is
       in
       ; base ; is too inefficient to get thru "datastructure"
-      base2 accumulator inline
+      base2 accumulator cps cps-ll cps-data inline
       [#:show-graph #true]
       with
       
