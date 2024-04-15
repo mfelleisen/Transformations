@@ -98,7 +98,7 @@ def main(args):
 # question_dislikes = {dislikes}"""
         out += f"\n\n{meta_block}"
 
-        file_name = f"LeetCodeContests_{qid}_{title_slug}.py"
+        file_name = f"LeetCodeContests_{qid}_{name}.py"
         if args.difficulty is not None and difficulty.lower() != args.difficulty.lower():
             continue
 
