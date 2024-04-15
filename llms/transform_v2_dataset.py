@@ -1,6 +1,7 @@
 from pathlib import Path
 import datasets
 import json
+import ast
 
 
 def process_tests(tests_str, func_name):
@@ -100,6 +101,14 @@ def main(args):
         file_name = f"LeetCodeContests_{qid}_{title_slug}.py"
         if args.difficulty is not None and difficulty.lower() != args.difficulty.lower():
             continue
+
+        # sanity check with parsing
+        try:
+            ast.parse(out)
+        except Exception as e:
+            print(f"Failed to parse {file_name}: {e}")
+            continue
+
         with open(outdir / file_name, "w") as f:
             f.write(out)
 
