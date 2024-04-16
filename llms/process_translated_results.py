@@ -1,6 +1,7 @@
 from typing import Dict, Optional
 from pathlib import Path
 from utils import gunzip_json_read
+import json
 
 
 def proc_success(program: str, original_prompt: str) -> Optional[str]:
@@ -84,8 +85,17 @@ def stupid_taxonomizer(program: str) -> Dict[str, int]:
     }
 
 
+def load_question_info(path: Path) -> Dict[int, Dict[str, str]]:
+    objs = []
+    with open(path) as f:
+        for line in f:
+            objs.append(json.loads(line))
+    return {obj["meta"]["questionId"]: obj["meta"] for obj in objs}
+
+
 def main(args):
     files = list(args.results.glob("*.results.json.gz"))
+    question_info = load_question_info(args.sources)
     outdir = Path(args.output)
     outdir.mkdir(parents=True, exist_ok=True)
     for file in files:
@@ -93,6 +103,7 @@ def main(args):
         if data is not None:
             results = data["results"]
             name = data["name"]
+            qid = name.split("_")[1]
             path_to_write = outdir / f"{name}"
             successes = []
             for result in results:
@@ -119,6 +130,11 @@ def main(args):
                 with open(path_to_write / "taxonomy.csv", "w") as f:
                     f.write(taxonomy_buf)
 
+                with open(path_to_write / "question_info.json", "w") as f:
+                    f.write(json.dumps(question_info[qid]))
+
+
+THIS_DIR = Path(__file__).parent
 
 if __name__ == "__main__":
     import argparse
@@ -127,5 +143,7 @@ if __name__ == "__main__":
                         help="Path to the results directory")
     parser.add_argument("--output", type=str, required=True,
                         help="Path to the output directory")
+    parser.add_argument("--sources", type=Path,
+                        default=f"{THIS_DIR}/20240121-Jul.jsonl")
     args = parser.parse_args()
     main(args)
