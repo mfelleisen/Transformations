@@ -57,7 +57,7 @@ def stupid_taxonomizer(program: str) -> Dict[str, int]:
     mutation_indicators = ["set! ", "update! ",
                            "append! ", "remove! ", "delete! "]
     usage_mutation = 0
-    for_indicators = ["(for", "(while", "break", "continue"]
+    for_indicators = ["(for", "(while", "(break", "(continue"]
     usage_for = 0
     hof_indicators = ["(map", "(filter", "(reduce", "(fold", "(lambda"]
     usage_hof = 0
