@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 from pathlib import Path
 from utils import gunzip_json_read
 
@@ -49,6 +49,41 @@ def proc_success(program: str, original_prompt: str) -> Optional[str]:
     return program
 
 
+def stupid_taxonomizer(program: str) -> Dict[str, int]:
+    """
+    Just a demo... I know this is stupid
+    """
+    mutation_indicators = ["set! ", "update! ",
+                           "append! ", "remove! ", "delete! "]
+    usage_mutation = 0
+    for_indicators = ["(for", "(while", "break", "continue"]
+    usage_for = 0
+    hof_indicators = ["(map", "(filter", "(reduce", "(fold", "(lambda"]
+    usage_hof = 0
+    helper_indicators = ["(define "]
+    usage_helpers = -1  # we always have one define
+    for line in program.split("\n"):
+        for indicator in mutation_indicators:
+            if indicator in line:
+                usage_mutation += 1
+        for indicator in for_indicators:
+            if indicator in line:
+                usage_for += 1
+        for indicator in hof_indicators:
+            if indicator in line:
+                usage_hof += 1
+        for indicator in helper_indicators:
+            if indicator in line:
+                usage_helpers += 1
+
+    return {
+        "usage_mutation": usage_mutation,
+        "usage_for": usage_for,
+        "usage_hof": usage_hof,
+        "usage_helpers": usage_helpers
+    }
+
+
 def main(args):
     files = list(args.results.glob("*.results.json.gz"))
     outdir = Path(args.output)
@@ -71,12 +106,18 @@ def main(args):
 
             if len(successes) > 0:
                 path_to_write.mkdir(parents=True, exist_ok=True)
+                taxonomy_buf = "id,usage_mutation,usage_for,usage_hof,usage_helpers\n"
                 for i, success in enumerate(successes):
                     with open(path_to_write / f"{i}.rkt", "w") as f:
                         f.write(success)
+                    taxonomy = stupid_taxonomizer(success)
+                    taxonomy_buf += f"{i},{taxonomy['usage_mutation']},{taxonomy['usage_for']},{taxonomy['usage_hof']},{taxonomy['usage_helpers']}\n"
 
                 with open(path_to_write / "original.py", "w") as f:
                     f.write(data["original"])
+
+                with open(path_to_write / "taxonomy.csv", "w") as f:
+                    f.write(taxonomy_buf)
 
 
 if __name__ == "__main__":
