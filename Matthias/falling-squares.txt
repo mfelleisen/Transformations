@@ -14,7 +14,8 @@
 ;; After each square is dropped, you must record the height of the current
 ;; tallest stack of squares.
 
-;; Return an integer list ans where ans[i] represents the height described above after dropping the ith square.
+;; Return an integer list ans where ans[i] represents the height
+;; described above after dropping the ith square. 
 
 ;; Example 1:
 ;; Input: positions = [[1,2],[2,3],[6,1]]

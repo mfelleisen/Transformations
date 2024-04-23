@@ -54,6 +54,11 @@ Each code file has this structure:
 
 ### TODO
 
+- Matthias
+  - find-peaks
+  - count-test-devices
+  - sum-counts
+  
 - Orange:
   - fallingSquares  MF  -- wrong at source  -- done 
   - sumOfDistanceInTree CD
