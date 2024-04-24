@@ -2,9 +2,11 @@
 
 (module vocabulary racket
 
-  (provide FUNCTIONAL INLINE VECTOR IMPERATIVE ACCUMULATOR CLASS LETLOOP CPS LambdaLift)
+  (provide FUNCTIONAL FUNCTIONAL-VANILLA ACCUMULATOR-VANILLA INLINE VECTOR IMPERATIVE ACCUMULATOR CLASS LETLOOP CPS LambdaLift)
 
   (define FUNCTIONAL  "plain functional")
+  (define FUNCTIONAL-VANILLA  "vanilla recursive functions")
+  (define ACCUMULATOR-VANILLA  "vanilla recursive functions with accumulators")
   (define INLINE      "inline all functions")
   (define VECTOR      "use mutable vectors")
   (define IMPERATIVE  "imperative everything")
