@@ -2,19 +2,33 @@
 
 (module vocabulary racket
 
-  (provide FUNCTIONAL FUNCTIONAL-VANILLA ACCUMULATOR-VANILLA INLINE VECTOR IMPERATIVE ACCUMULATOR CLASS LETLOOP CPS LambdaLift)
+  (define-syntax (tags stx)
+    (syntax-case stx []
+      [(tags [a txt] ...)
+       (with-syntax ([TAGS (datum->syntax stx 'TAGS)])
+         #'(begin
+             (define a txt)
+             ...
+             (provide a)
+             ...
+             (define TAGS (list txt ...))
+             (provide TAGS)))]))
 
-  (define FUNCTIONAL  "plain functional")
-  (define FUNCTIONAL-VANILLA  "vanilla recursive functions")
-  (define ACCUMULATOR-VANILLA  "vanilla recursive functions with accumulators")
-  (define INLINE      "inline all functions")
-  (define VECTOR      "use mutable vectors")
-  (define IMPERATIVE  "imperative everything")
-  (define ACCUMULATOR "use accumulator")
-  (define CLASS       "introduce class")
-  (define LETLOOP     "local let-loop")
-  (define CPS         "cps")
-  (define LambdaLift  "ll"))
+  (tags 
+   (FUNCTIONAL  "plain functional")
+   (FUNCTIONAL-VANILLA  "vanilla recursive functions")
+   (ACCUMULATOR-VANILLA  "vanilla recursive functions with accumulators")
+   (HO          "use map, fold, etc.")
+   (INLINE      "inline all functions")
+   (VECTOR      "use mutable vectors")
+   (IMPERATIVE  "imperative everything")
+   (ACCUMULATOR "use accumulator")
+   (CLASS       "introduce class")
+   (LETLOOP     "local let-loop")
+   (CPS         "cps")
+   (LambdaLift  "ll")))
+
+(require 'vocabulary)
 
 ;; ---------------------------------------------------------------------------------------------------
 (provide
@@ -78,6 +92,7 @@
         )
      #:do [(define n* (map syntax-e (syntax->list #'(name ...))))
            (define p* (map (λ (n) (~a (symbol->string n) ":")) n*))]
+     #:with (nn ...) n*
      #:with (rr ...) (map (require-with-prefix stx) p* n*)
      #:with (ss ...) (map (with-prefix stx #'exported) p*)
 
@@ -86,6 +101,8 @@
      #:with show-graph
      (if (not (syntax-e #'sg)) #'(void)
          #'(let ()
+             (define all-modules (list 'nn ...))
+             (map (check-from all-modules) (list from ...) all-modules)
              (define nodes [list (node (~a 'name) "white") ...])
              (define edges
                (append
@@ -115,6 +132,23 @@
 (define-for-syntax ((with-prefix stx syntax-name) pre)
   (define name (syntax-e syntax-name))
   (datum->syntax stx (string->symbol (~a pre name))))
+
+#; {[Listof Symbol] -> Any Symbol -> Void}
+;; raise an exn if it isn't of the right shape
+(define ((check-from all-modules) from mod-name)
+  (unless (list? from)
+    (error 'from "list expected in module ~a, given ~s" mod-name from))
+  (unless (andmap (λ (x) (and (list? x) (= (length x) 2))) from)
+    (error 'from "list of pairs expected in module ~a, given ~s" mod-name from))
+  (for ([x from])
+    (match x
+      [(list name r)
+       (unless (member name all-modules)
+         (error 'from "module name expected in module ~a, given ~a" mod-name name))
+       (unless (member r TAGS)
+         (error 'from "rationale tag expected in module ~a, given ~a" mod-name r))]
+      [_
+       (error 'from "[module-name rationale-tag] expected in module ~a, given ~s" mod-name x)])))
 
 ;; run-time for `test`
 (require racket/gui/base)
