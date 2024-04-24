@@ -1,6 +1,7 @@
 #lang racket
 
-;; this one is so easy, an F I student can do it just before Thanksgiving. 
+;; this one is so easy, an F I student can do it just before Thanksgiving.
+;; After some work, this is coooool. I wa sable to eliminate the inner loop. 
 
 (require "../testing.rkt")
 
@@ -58,7 +59,47 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% plain-racket
-  (define from `[])
+  (define from `[[base-bsl ,LETLOOP]])
+  (define rationale "Racket: I have no clue why this is called 'count test devices'")
+
+  (define/contract (ctd percentages0) ctd/c
+    (let ctd ([percentages percentages0])
+      (cond
+        [(empty? percentages) 0]
+        [else
+         (define one (first percentages))
+         (if (> one 0)
+             (add1 (ctd (decrement (rest percentages))))
+             (ctd (rest percentages)))])))
+
+  #; {[Listof %] -> [Listof %]}
+  (define (decrement percentages)
+    (cond
+      [(empty? percentages) '()]
+      [else (cons (max 0 (sub1 (first percentages))) (decrement (rest percentages)))])))
+
+;; ---------------------------------------------------------------------------------------------------
+(module% ho-racket 
+  (define from `[[plain-racket ,LETLOOP]])
+  (define rationale "Racket: I have no clue why this is called 'count test devices'")
+
+  (define/contract (ctd percentages0) ctd/c
+    (let ctd ([percentages percentages0])
+      (cond
+        [(empty? percentages) 0]
+        [else
+         (define one (first percentages))
+         (if (> one 0)
+             (add1 (ctd (decrement (rest percentages))))
+             (ctd (rest percentages)))])))
+
+  #; {[Listof %] -> [Listof %]}
+  (define (decrement percentages)
+    (map (λ (x) (max 0 (- x 1))) percentages)))
+
+;; ---------------------------------------------------------------------------------------------------
+(module% inline-racket 
+  (define from `[[ho-racket ,LETLOOP]])
   (define rationale "Racket: I have no clue why this is called 'count test devices'")
 
   (define/contract (ctd percentages0) ctd/c
@@ -70,6 +111,47 @@
          (if (> one 0)
              (add1 (ctd (map (λ (x) (max 0 (- x 1))) (rest percentages))))
              (ctd (rest percentages)))]))))
+
+;; ---------------------------------------------------------------------------------------------------
+(module% accu-racket 
+  (define from `[[inline-racket ,ACCUMULATOR]])
+  (define rationale "Racket: I have no clue why this is called 'count test devices'")
+
+  (define/contract (ctd percentages0) ctd/c
+    (let ctd ([percentages percentages0] [count 0])
+      (cond
+        [(empty? percentages) count]
+        [else
+         (define one (first percentages))
+         (if (> one 0)
+             (ctd (map (λ (x) (max 0 (- x 1))) (rest percentages)) (add1 count))
+             (ctd (rest percentages) count))]))))
+
+;; ----------------------------------------------------------------------------------------
+(module% accu-2-racket 
+  (define from `[[accu-racket ,ACCUMULATOR]])
+  (define rationale "Racket: I have no clue why this is called 'count test devices'")
+
+  (define/contract (ctd percentages0) ctd/c
+    (let ctd ([percentages percentages0] [count 0] [delta 0])
+      (cond
+        [(empty? percentages) count]
+        [else
+         (define one (first percentages))
+         (if (> (- one delta) 0)
+             (ctd (rest percentages) (add1 count) (add1 delta))
+             (ctd (rest percentages) count        delta))]))))
+
+;; ---------------------------------------------------------------------------------------------------
+(module% for-racket 
+  (define from `[[accu-2-racket ,ACCUMULATOR]])
+  (define rationale "Racket: I have no clue why this is called 'count test devices'")
+
+  (define/contract (ctd percentages0) ctd/c
+    (for/fold ([count 0] [delta 0] #:result count) ([x percentages0])
+      (if (> (- x delta) 0)
+          (values (add1 count) (add1 delta))
+          (values count        delta)))))
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% base-isl+
@@ -134,11 +216,31 @@
   #; {[Listof %] -> [Listof %]}
   (define (decrement percentages)
     (map (λ (x) (max 0 (- x 1))) percentages)))
-           
+
+;; ---------------------------------------------------------------------------------------------------
+(module% base-isl+-2-accu
+  (define from `[[base-isl+-accu ,ACCUMULATOR]])
+  (define rationale "ISL+: I have no clue why this is called 'count test devices'")
+
+  (define/contract (ctd percentages) ctd/c
+    (ctd/bsl percentages 0 0))
+
+  #; {[Listof %] N -> N}
+  (define (ctd/bsl percentages counted# delta)
+    (cond
+      [(empty? percentages) counted#]
+      [else
+       (define one (first percentages))
+       (if (> (- one delta) 0)
+           (ctd/bsl (rest percentages) (add1 counted#) (add1 delta))
+           (ctd/bsl (rest percentages) counted#        delta))])))
+
 ;; ---------------------------------------------------------------------------------------------------
 (test ctd
       in
-      base-bsl base-isl+ base-isl+-accu base-bsl-accu plain-racket
+      base-bsl base-isl+ base-isl+-accu base-bsl-accu base-isl+-2-accu
+      plain-racket ho-racket inline-racket accu-racket accu-2-racket 
+      for-racket
       [#:show-graph #true]
       with
       (check-equal? (ctd (list 0 100)) 1)
