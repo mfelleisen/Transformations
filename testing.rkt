@@ -21,6 +21,8 @@
    (HO          "use map, fold, etc.")
    (INLINE      "inline all functions")
    (VECTOR      "use mutable vectors")
+   (IMPERATIVE-ACCU "turn accumulators into set! for plain loop")
+   (IMPERATIVE-FOLD "turn for/fold of dummy variable into for/list")
    (IMPERATIVE  "imperative everything")
    (ACCUMULATOR "use accumulator")
    (CLASS       "introduce class")
