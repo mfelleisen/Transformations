@@ -19,6 +19,7 @@
    (FUNCTIONAL-VANILLA  "vanilla recursive functions")
    (ACCUMULATOR-VANILLA  "vanilla recursive functions with accumulators")
    (HO          "use map, fold, etc.")
+   (FOR         "replace map, fold, etc. with for/ loops")
    (INLINE      "inline all functions")
    (VECTOR      "use mutable vectors")
    (IMPERATIVE-ACCU "turn accumulators into set! for plain loop")
