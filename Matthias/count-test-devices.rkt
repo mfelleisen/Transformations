@@ -3,6 +3,9 @@
 ;; this one is so easy, an F I student can do it just before Thanksgiving.
 ;; After some work, this is coooool. I wa sable to eliminate the inner loop. 
 
+;; "I have no clue why this is called 'count test devices'"
+;; if someone explained this, I might be able to turn it into an example for HtDP/V
+
 (require "../testing.rkt")
 
 (module general racket ;; constraints collected from problem statememt 
@@ -40,7 +43,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% base-bsl
   (define from '[])
-  (define rationale "BSL: I have no clue why this is called 'count test devices'")
+  (define rationale "this is a simple example of generative recursion -- change (rest .) to conform")
 
   (define/contract (ctd percentages) ctd/c
     (cond
@@ -60,7 +63,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% plain-racket
   (define from `[[base-bsl ,LETLOOP]])
-  (define rationale "Racket: I have no clue why this is called 'count test devices'")
+  (define rationale "this is Racket from a beginner who knows about `let loop`")
 
   (define/contract (ctd percentages0) ctd/c
     (let ctd ([percentages percentages0])
@@ -80,8 +83,8 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% ho-racket 
-  (define from `[[plain-racket ,LETLOOP]])
-  (define rationale "Racket: I have no clue why this is called 'count test devices'")
+  (define from `[[plain-racket ,HO]])
+  (define rationale "time to use `map` for `decrement`")
 
   (define/contract (ctd percentages0) ctd/c
     (let ctd ([percentages percentages0])
@@ -99,8 +102,8 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% inline-racket 
-  (define from `[[ho-racket ,LETLOOP]])
-  (define rationale "Racket: I have no clue why this is called 'count test devices'")
+  (define from `[[ho-racket ,INLINE]])
+  (define rationale "it is okay to inline `decrement` for Leet code")
 
   (define/contract (ctd percentages0) ctd/c
     (let ctd ([percentages percentages0])
@@ -115,7 +118,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% accu-racket 
   (define from `[[inline-racket ,ACCUMULATOR]])
-  (define rationale "Racket: I have no clue why this is called 'count test devices'")
+  (define rationale "a beginner may use an accumulator for counting because it feels 'natural'")
 
   (define/contract (ctd percentages0) ctd/c
     (let ctd ([percentages percentages0] [count 0])
@@ -127,10 +130,10 @@
              (ctd (map (λ (x) (max 0 (- x 1))) (rest percentages)) (add1 count))
              (ctd (rest percentages) count))]))))
 
-;; ----------------------------------------------------------------------------------------
+;; ---------------------------------------------------------------------------------------------------
 (module% accu-2-racket 
   (define from `[[accu-racket ,ACCUMULATOR]])
-  (define rationale "Racket: I have no clue why this is called 'count test devices'")
+  (define rationale "a strong beginner may realize that the -1 ops can be accumulated; think Wand 82")
 
   (define/contract (ctd percentages0) ctd/c
     (let ctd ([percentages percentages0] [count 0] [delta 0])
@@ -144,11 +147,11 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% for-racket 
-  (define from `[[accu-2-racket ,ACCUMULATOR]])
-  (define rationale "Racket: I have no clue why this is called 'count test devices'")
+  (define from `[[accu-2-racket ,HO]])
+  (define rationale  "the let-loop can now be turned into a for/fold")
 
   (define/contract (ctd percentages0) ctd/c
-    (for/fold ([count 0] [delta 0] #:result count) ([x percentages0])
+    (for/fold ([count 0] [delta 0] #:result count) ([x (in-list percentages0)])
       (if (> (- x delta) 0)
           (values (add1 count) (add1 delta))
           (values count        delta)))))
@@ -156,7 +159,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% base-isl+
   (define from `[[base-bsl ,HO]])
-  (define rationale "BSL: I have no clue why this is called 'count test devices'")
+  (define rationale "a beginner got to know ISL+")
 
   (define/contract (ctd percentages) ctd/c
     (cond
@@ -174,7 +177,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% base-bsl-accu
   (define from `[[base-bsl ,ACCUMULATOR]])
-  (define rationale "BSL: I have no clue why this is called 'count test devices'")
+  (define rationale "a beginner using accumulators with generative recursion")
 
   (define/contract (ctd percentages) ctd/c
     (ctd/bsl percentages 0))
@@ -198,7 +201,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% base-isl+-accu
   (define from `[[base-bsl-accu ,HO] [base-isl+ ,ACCUMULATOR]])
-  (define rationale "ISL+: I have no clue why this is called 'count test devices'")
+  (define rationale "a beginner got to know ISL+")
 
   (define/contract (ctd percentages) ctd/c
     (ctd/bsl percentages 0))
@@ -220,7 +223,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% base-isl+-2-accu
   (define from `[[base-isl+-accu ,ACCUMULATOR]])
-  (define rationale "ISL+: I have no clue why this is called 'count test devices'")
+  (define rationale "a strong beginner may realize that the -1 ops can be accumulated; think Wand 82")
 
   (define/contract (ctd percentages) ctd/c
     (ctd/bsl percentages 0 0))
@@ -238,7 +241,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (test ctd
       in
-      base-bsl base-isl+ base-isl+-accu base-bsl-accu base-isl+-2-accu
+      base-bsl  base-bsl-accu base-isl+ base-isl+-accu base-isl+-2-accu
       plain-racket ho-racket inline-racket accu-racket accu-2-racket 
       for-racket
       [#:show-graph #true]

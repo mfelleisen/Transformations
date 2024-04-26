@@ -55,9 +55,9 @@ Each code file has this structure:
 ### TODO
 
 - Matthias
-  - find-peaks
-  - count-test-devices
-  - sum-counts
+  - find-peaks -- done 
+  - count-test-devices -- done 
+  - sum-counts -- done 
   
 - Orange:
   - fallingSquares  MF  -- wrong at source  -- done 

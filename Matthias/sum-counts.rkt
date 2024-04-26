@@ -4,19 +4,8 @@
 
 (module general racket ;; constraints collected from problem statememt 
   (provide sc/c in-suffix)
-
   (require "in-suffix.rkt")
-
-  (define-syntax-rule (for/sum* ([k (in-list* l0)]) body ...)
-    (let loop ([l l0])
-      (cond
-        [(empty? l) 0]
-        [else (define k l)
-              (define s
-                (let ()
-                  body ...))
-              (+ s (loop (rest l)))])))
-
+  
   (define LENGTH 100)
   
   (define lon/c
@@ -30,7 +19,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% plain
   (define from '[])
-  (define rationale "")
+  (define rationale "one function per task")
 
   (define/contract (sc l0) sc/c
     (define L (length l0))
@@ -71,7 +60,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% elim-2
   (define from `[[elim ,FOR]])
-  (define rationale "eliminate all list allocations")
+  (define rationale "scan can use a for/sum loop")
 
   (define/contract (sc l0) sc/c
     (let loop ([l l0])
@@ -91,7 +80,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (module% elim-3
   (define from `[[elim-2 ,FOR]])
-  (define rationale "eliminate all list allocations")
+  (define rationale "sc can use a for/sum loop with the new `in-suffix` form")
   
   (define/contract (sc l0) sc/c
     (for/sum ([l (in-suffix l0)])
@@ -108,8 +97,8 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% inline
-  (define from `[])
-  (define rationale "eliminate all list allocations")
+  (define from `[[elim-2 ,INLINE]])
+  (define rationale "inline the `scan-for` into the `let loop`")
 
   (define/contract (sc l0) sc/c
     (let loop ([l l0])
@@ -125,8 +114,8 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% inline-2
-  (define from `[])
-  (define rationale "eliminate all list allocations")
+  (define from `[[inline ,FOR] [elim-3 ,INLINE]])
+  (define rationale "use for/sum with `in-suffix`")
   
   (define/contract (sc l0) sc/c
     (for/sum ([l (in-suffix l0)])
@@ -136,9 +125,20 @@
         (sqr (set-count seen))))))
 
 ;; ---------------------------------------------------------------------------------------------------
+(module% inline-3
+  (define from `[[elim-2 ,FOR] [inline-2 ,FOR]])
+  (define rationale "use a `for/fold` to eliminate the set!")
+  
+  (define/contract (sc l0) sc/c
+    (for/sum ([l (in-suffix l0)])
+      (for/fold ([seen (seteqv)] [sum 0] #:result sum) ([x (in-list l)])
+        (define s++n (set-add seen x))
+        (values s++n (+ sum (sqr (set-count s++n))))))))
+
+;; ---------------------------------------------------------------------------------------------------
 (test sc
       in
-      plain elim elim-2 elim-3 inline inline-2
+      plain elim elim-2 elim-3 inline inline-2 inline-3
       [#:show-graph #true]
       with
       (check-equal? (sc (list 1 2 1)) 15)

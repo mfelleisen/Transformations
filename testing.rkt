@@ -5,7 +5,7 @@
   (define-syntax (tags stx)
     (syntax-case stx []
       [(tags [a txt] ...)
-       (with-syntax ([TAGS (datum->syntax stx 'TAGS)])
+       (with-syntax ([TAGS (datum->syntax stx 'TAGS stx stx)])
          #'(begin
              (define a txt)
              ...
