@@ -26,6 +26,7 @@
    (IMPERATIVE-FOLD "turn for/fold of dummy variable into for/list")
    (IMPERATIVE  "imperative everything")
    (ACCUMULATOR "use accumulator")
+   [NO-ALLOC    "replace indexing via direct list traversal"]
    (CLASS       "introduce class")
    (LETLOOP     "local let-loop")
    (CPS         "cps")
