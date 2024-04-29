@@ -21,21 +21,20 @@
   ;;  * -target <= nums[j] - nums[i] <= target
 
   ;; Return the maximum number of jumps you can make to reach index n - 1.
-  ;; If there is no way to reach index n - 1, return -1.
+  ;; If there is no way to reach index n - 1, return #false.
 
-  (define max-jump/c (-> lon/c (and/c natural? (integer-in 0 TARGET)) (or/c -1 natural?))))
+  (define max-jump/c (-> lon/c (and/c natural? (integer-in 0 TARGET)) (or/c #false natural?))))
 
 (def-module module% max-jump general)
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% base
+(module% backwards-base
   (define from '[])
-  (define rationale "brute force dynamic programming")
+  (define rationale "'graph traversal' via recursion")
   
   (define/contract [max-jump l0 target] max-jump/c
     (define okay? (good? target))
-    (define best  (first (max-jump-aux l0 okay?)))
-    (or best -1))
+    (first (max-jump-aux l0 okay?)))
 
   #; {[Listof Real] [Real -> Boolean] -> [Listof (U False N)]}
   ;; compute the list of maximal jumps from `l0` to its end 
@@ -60,13 +59,12 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% no-listref
-  (define from `[[base ,NO-ALLOC]])
+  (define from `[[backwards-base ,NO-ALLOC]])
   (define rationale "brute force dynamic programming")
   
   (define/contract [max-jump l0 target] max-jump/c
     (define okay? (good? target))
-    (define best  (first (max-jump-aux l0 okay?)))
-    (or best -1))
+    (first (max-jump-aux l0 okay?)))
 
   #; {[NEListof Real] [Real -> Boolean] -> [Listof (U False N)]}
   ;; compute the list of maximal jumps from `l0` to its end 
@@ -89,107 +87,175 @@
     (<= (- target) (- num@j num@i) (+ target))))
 
 ;; ---------------------------------------------------------------------------------------------------
+(module% let-loop
+  (define from `[[no-listref ,LETLOOP]])
+  (define rationale "a micro step before I inline all functions")
+  
+  (define/contract [max-jump l0 target] max-jump/c
+    (define okay? (good? target))
+    (first (max-jump-aux l0 okay?)))
+
+  #; {[NEListof Real] [Real -> Boolean] -> [Listof (U False N)]}
+  ;; compute the list of maximal jumps from `l0` to its end 
+  (define (max-jump-aux l0 okay?)
+    (let max-jump-aux ([l l0])
+      (cond
+        [(empty? (rest l)) '[0]]
+        [else
+         (define R (rest l))
+         (define M (max-jump-aux R))
+         (define best (find-max-for (first l) R M okay?))
+         (cons best M)])))
+
+  #; {Real [Listof Real] [Listof N] [Real Real -> Boolean] -> (U False N)}
+  (define (find-max-for one R M okay?)
+    (for/first ([nxt R] [max-steps-from-nxt M] #:when (and max-steps-from-nxt (okay? nxt one)))
+      (+ 1 max-steps-from-nxt)))
+  
+  #; {[Real -> Boolean] -> Real Real -> Boolean}
+  (define ((good? target) num@j num@i)
+    (<= (- target) (- num@j num@i) (+ target))))
+
+;; ---------------------------------------------------------------------------------------------------
+(module% inline
+  (define from `[[let-loop ,INLINE]])
+  (define rationale "inline all functions")
+  
+  (define/contract [max-jump l0 target] max-jump/c
+    (define (okay? num@j num@i) (<= (- target) (- num@j num@i) (+ target)))
+    (define best*
+      (let max-jump-aux ([l l0])
+        (cond
+          [(empty? (rest l)) '[0]]
+          [else
+           (define R (rest l))
+           (define M (max-jump-aux R))
+           (define F (first l))
+           (define best
+             (for/first ([nxt R] [max-steps-from-nxt M] #:when (and max-steps-from-nxt (okay? nxt F)))
+               (+ 1 max-steps-from-nxt)))
+           (cons best M)])))
+    (first best*)))
+
+;; ---------------------------------------------------------------------------------------------------
+(module% forwards-base
+  (define from `[])
+  (define rationale "calculate distance to 0 (forward), not backward (distance from end)")
+  
+  (define/contract (max-jump l0 target) max-jump/c
+    (define N (length l0))
+    (define dist-to-0 (apply vector (cons 0 (make-list (- N 1) (- N)))))
+
+    (for ([x l0] [l (in-suffix l0)] [i (in-naturals)] #:when (vector-ref dist-to-0 i))
+      (for ([y (rest l)] [j (in-naturals (add1 i))] #:when (<= (abs (- y x)) target))
+        (vector-set! dist-to-0 j (max (vector-ref dist-to-0 j) (add1 (vector-ref dist-to-0 i))))))
+
+    (define r (vector-ref dist-to-0 (sub1 N)))
+    (and (>= r 0) r)))
+
+;; ---------------------------------------------------------------------------------------------------
 (test max-jump
       in
-      base no-listref
-      [#:show-graph #false]
+      backwards-base no-listref let-loop inline
+      forwards-base
+      [#:show-graph #true #:measure 1000]
       with
       (check-equal? (max-jump (list 1 3 6 4 1 2) 3) 5)
-      (check-equal? (max-jump (list 1 3 6 4 1 2) 0) -1)
-      (check-equal? (max-jump (list 0 1) 0) -1)
+      (check-equal? (max-jump (list 1 3 6 4 1 2) 0) #false)
+      (check-equal? (max-jump (list 0 1) 0) #false)
       (check-equal? (max-jump (list 0 1) 1) 1)
       (check-equal? (max-jump (list 0 1) 2) 1)
-      (check-equal? (max-jump (list 1 0) 0) -1)
+      (check-equal? (max-jump (list 1 0) 0) #false)
       (check-equal? (max-jump (list 1 0) 1) 1)
       (check-equal? (max-jump (list 1 0) 2) 1)
-      (check-equal? (max-jump (list 0 1 2) 0) -1)
+      (check-equal? (max-jump (list 0 1 2) 0) #false)
       (check-equal? (max-jump (list 0 1 2) 1) 2)
       (check-equal? (max-jump (list 0 1 2) 2) 2)
       (check-equal? (max-jump (list 0 1 2) 3) 2)
-      (check-equal? (max-jump (list 0 2 1) 0) -1)
+      (check-equal? (max-jump (list 0 2 1) 0) #false)
       (check-equal? (max-jump (list 0 2 1) 1) 1)
       (check-equal? (max-jump (list 0 2 1) 2) 2)
       (check-equal? (max-jump (list 0 2 1) 3) 2)
-      (check-equal? (max-jump (list 1 0 2) 0) -1)
+      (check-equal? (max-jump (list 1 0 2) 0) #false)
       (check-equal? (max-jump (list 1 0 2) 1) 1)
       (check-equal? (max-jump (list 1 0 2) 2) 2)
       (check-equal? (max-jump (list 1 0 2) 3) 2)
-      (check-equal? (max-jump (list 1 2 0) 0) -1)
+      (check-equal? (max-jump (list 1 2 0) 0) #false)
       (check-equal? (max-jump (list 1 2 0) 1) 1)
       (check-equal? (max-jump (list 1 2 0) 2) 2)
       (check-equal? (max-jump (list 1 2 0) 3) 2)
-      (check-equal? (max-jump (list 2 0 1) 0) -1)
+      (check-equal? (max-jump (list 2 0 1) 0) #false)
       (check-equal? (max-jump (list 2 0 1) 1) 1)
       (check-equal? (max-jump (list 2 0 1) 2) 2)
       (check-equal? (max-jump (list 2 0 1) 3) 2)
-      (check-equal? (max-jump (list 2 1 0) 0) -1)
+      (check-equal? (max-jump (list 2 1 0) 0) #false)
       (check-equal? (max-jump (list 2 1 0) 1) 2)
       (check-equal? (max-jump (list 2 1 0) 2) 2)
       (check-equal? (max-jump (list 2 1 0) 3) 2)
-      (check-equal? (max-jump (list 0 1 2 3) 0) -1)
+      (check-equal? (max-jump (list 0 1 2 3) 0) #false)
       (check-equal? (max-jump (list 0 1 2 3) 1) 3)
       (check-equal? (max-jump (list 0 1 2 3) 2) 3)
       (check-equal? (max-jump (list 0 1 2 3) 3) 3)
       (check-equal? (max-jump (list 0 1 2 3) 4) 3)
-      (check-equal? (max-jump (list 0 1 3 2) 0) -1)
+      (check-equal? (max-jump (list 0 1 3 2) 0) #false)
       (check-equal? (max-jump (list 0 1 3 2) 1) 2)
       (check-equal? (max-jump (list 0 1 3 2) 2) 3)
       (check-equal? (max-jump (list 0 1 3 2) 3) 3)
       (check-equal? (max-jump (list 0 1 3 2) 4) 3)
-      (check-equal? (max-jump (list 0 2 1 3) 0) -1)
-      (check-equal? (max-jump (list 0 2 1 3) 1) -1)
+      (check-equal? (max-jump (list 0 2 1 3) 0) #false)
+      (check-equal? (max-jump (list 0 2 1 3) 1) #false)
       (check-equal? (max-jump (list 0 2 1 3) 2) 3)
       (check-equal? (max-jump (list 0 2 1 3) 3) 3)
       (check-equal? (max-jump (list 0 2 1 3) 4) 3)
-      (check-equal? (max-jump (list 0 2 3 1) 0) -1)
+      (check-equal? (max-jump (list 0 2 3 1) 0) #false)
       (check-equal? (max-jump (list 0 2 3 1) 1) 1)
       (check-equal? (max-jump (list 0 2 3 1) 2) 3)
       (check-equal? (max-jump (list 0 2 3 1) 3) 3)
       (check-equal? (max-jump (list 0 2 3 1) 4) 3)
-      (check-equal? (max-jump (list 0 3 1 2) 0) -1)
+      (check-equal? (max-jump (list 0 3 1 2) 0) #false)
       (check-equal? (max-jump (list 0 3 1 2) 1) 2)
       (check-equal? (max-jump (list 0 3 1 2) 2) 2)
       (check-equal? (max-jump (list 0 3 1 2) 3) 3)
       (check-equal? (max-jump (list 0 3 1 2) 4) 3)
-      (check-equal? (max-jump (list 0 3 2 1) 0) -1)
+      (check-equal? (max-jump (list 0 3 2 1) 0) #false)
       (check-equal? (max-jump (list 0 3 2 1) 1) 1)
       (check-equal? (max-jump (list 0 3 2 1) 2) 2)
       (check-equal? (max-jump (list 0 3 2 1) 3) 3)
       (check-equal? (max-jump (list 0 3 2 1) 4) 3)
-      (check-equal? (max-jump (list 1 0 2 3) 0) -1)
+      (check-equal? (max-jump (list 1 0 2 3) 0) #false)
       (check-equal? (max-jump (list 1 0 2 3) 1) 2)
       (check-equal? (max-jump (list 1 0 2 3) 2) 3)
       (check-equal? (max-jump (list 1 0 2 3) 3) 3)
       (check-equal? (max-jump (list 1 0 2 3) 4) 3)
-      (check-equal? (max-jump (list 1 0 3 2) 0) -1)
+      (check-equal? (max-jump (list 1 0 3 2) 0) #false)
       (check-equal? (max-jump (list 1 0 3 2) 1) 1)
       (check-equal? (max-jump (list 1 0 3 2) 2) 2)
       (check-equal? (max-jump (list 1 0 3 2) 3) 3)
       (check-equal? (max-jump (list 1 0 3 2) 4) 3)
-      (check-equal? (max-jump (list 1 2 0 3) 0) -1)
+      (check-equal? (max-jump (list 1 2 0 3) 0) #false)
       (check-equal? (max-jump (list 1 2 0 3) 1) 2)
       (check-equal? (max-jump (list 1 2 0 3) 2) 2)
       (check-equal? (max-jump (list 1 2 0 3) 3) 3)
       (check-equal? (max-jump (list 1 2 0 3) 4) 3)
-      (check-equal? (max-jump (list 1 2 3 0) 0) -1)
+      (check-equal? (max-jump (list 1 2 3 0) 0) #false)
       (check-equal? (max-jump (list 1 2 3 0) 1) 1)
       (check-equal? (max-jump (list 1 2 3 0) 2) 2)
       (check-equal? (max-jump (list 1 2 3 0) 3) 3)
       (check-equal? (max-jump (list 1 2 3 0) 4) 3)
-      (check-equal? (max-jump (list 1 3 0 2) 0) -1)
+      (check-equal? (max-jump (list 1 3 0 2) 0) #false)
       (check-equal? (max-jump (list 1 3 0 2) 1) 1)
       (check-equal? (max-jump (list 1 3 0 2) 2) 2)
       (check-equal? (max-jump (list 1 3 0 2) 3) 3)
       (check-equal? (max-jump (list 1 3 0 2) 4) 3)
-      (check-equal? (max-jump (list 1 3 2 0) 0) -1)
+      (check-equal? (max-jump (list 1 3 2 0) 0) #false)
       (check-equal? (max-jump (list 1 3 2 0) 1) 1)
       (check-equal? (max-jump (list 1 3 2 0) 2) 3)
       (check-equal? (max-jump (list 1 3 2 0) 3) 3)
       (check-equal? (max-jump (list 1 3 2 0) 4) 3)
-      (check-equal? (max-jump (list 2 0 1 3) 0) -1)
+      (check-equal? (max-jump (list 2 0 1 3) 0) #false)
       (check-equal? (max-jump (list 2 0 1 3) 1) 1)
       (check-equal? (max-jump (list 2 0 1 3) 2) 3)
       (check-equal? (max-jump (list 2 0 1 3) 3) 3)
       (check-equal? (max-jump (list 2 0 1 3) 4) 3)
-      (check-equal? (max-jump (list 2 0 3 1) 0) -1)
+      (check-equal? (max-jump (list 2 0 3 1) 0) #false)
       (check-equal? (max-jump (list 2 0 3 1) 1) 1))
