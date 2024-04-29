@@ -90,8 +90,9 @@
 
 (define-syntax (test stx)
   (syntax-parse stx
-    [(_ exported (~datum in) name ...
-        [(~optional (~seq #:show-graph sg #;boolean) #:defaults ([sg #'#false]))]
+    [(_ exported (~datum in) name:id ...
+        [(~optional (~seq (~datum #:show-graph)  sg) #:defaults ([sg #'#false]))
+         (~optional (~seq (~datum #:measure)     mm) #:defaults ([mm #'#false]))]
         (~datum with) test-case ...
         )
      #:do [(define n* (map syntax-e (syntax->list #'(name ...))))
@@ -114,18 +115,26 @@
                   (map (λ (x) (edge (~a (first x)) (~a 'name) (second x))) local-edges))
                 ...))
              [main nodes edges]))
-                           
+
+     #:with timed (if (not (syntax-e #'mm)) #'identity #'timed)
+     
      #`(module+ test
          #,(datum->syntax stx '(require rackunit))
          rr ...
          ;; add more test cases here
          (let ([exported ss])
            (eprintf "testing ~a\n" 'name)
-           test-case
-           ...)
+           (timed mm
+            test-case
+            ...))
          ...
 
          show-graph)]))
+
+(define-syntax-rule (timed mm eb ...)
+  (time
+   (for ([i mm])
+     eb ...)))
 
 ;; compile time for `test`
 #; {Syntax -> [String Symbol -> Syntax]}
