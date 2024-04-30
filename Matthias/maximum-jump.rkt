@@ -129,8 +129,8 @@
           [(empty? (rest l)) '[0]]
           [else
            (define R (rest l))
-           (define M (max-jump-aux R))
            (define F (first l))
+           (define M (max-jump-aux R))
            (define best
              (for/first ([nxt R] [max-steps-from-nxt M] #:when (and max-steps-from-nxt (okay? nxt F)))
                (+ 1 max-steps-from-nxt)))
@@ -146,7 +146,7 @@
     (define N (length l0))
     (define dist-to-0 (apply vector (cons 0 (make-list (- N 1) (- N)))))
 
-    (for ([x l0] [l (in-suffix l0)] [i (in-naturals)] #:when (vector-ref dist-to-0 i))
+    (for ([x l0] [l (in-suffix l0)] [i (in-naturals)])
       (for ([y (rest l)] [j (in-naturals (add1 i))] #:when (<= (abs (- y x)) target))
         (vector-set! dist-to-0 j (max (vector-ref dist-to-0 j) (add1 (vector-ref dist-to-0 i))))))
 
@@ -154,11 +154,28 @@
     (and (>= r 0) r)))
 
 ;; ---------------------------------------------------------------------------------------------------
+(module% forwards-base-2
+  (define from `[[forwards-base ,NO-ALLOC]])
+  (define rationale "replace parallel datastructure (vectors) with proper data representation")
+
+  (struct node [weight {distance-to-0 #:mutable}] #:transparent)
+
+  (define/contract (max-jump l0 target) max-jump/c
+    (define N (length l0))
+    (define l (cons (node (first l0) 0) (map (λ (x) (node x (- N))) (rest l0))))
+
+    (for ([x l] [k (in-suffix l)])
+      (for ([y (rest k)] #:when (<= (abs (- (node-weight y) (node-weight x))) target))
+        (set-node-distance-to-0! y (max (node-distance-to-0 y) (add1 (node-distance-to-0 x))))))
+    (define r (node-distance-to-0 (last l)))
+    (and (>= r 0) r)))
+
+;; ---------------------------------------------------------------------------------------------------
 (test max-jump
       in
       backwards-base no-listref let-loop inline
-      forwards-base
-      [#:show-graph #true #:measure 1000]
+      forwards-base forwards-base-2
+      [#:show-graph #true #:measure 1]
       with
       (check-equal? (max-jump (list 1 3 6 4 1 2) 3) 5)
       (check-equal? (max-jump (list 1 3 6 4 1 2) 0) #false)
