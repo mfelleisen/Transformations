@@ -45,7 +45,9 @@
  ;; means programmers can now write 
  #; (module% (define f ...) ...)
  ;; and `f` is exported and defined in the context of `a` `b` and `c`
- def-module)
+ def-module
+
+ derive)
 
 (require (for-syntax syntax/parse))
 
@@ -73,6 +75,11 @@
          vocab
          rr ...
          def ...)]))
+
+(define-syntax (derive stx)
+  (syntax-parse stx
+    [(_ mod explanation)
+     (syntax-local-lift-require #'(submod ".." mod) #'`[mod ,explanation])]))
 
 ;; ---------------------------------------------------------------------------------------------------
 ;; test them all

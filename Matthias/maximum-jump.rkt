@@ -3,7 +3,8 @@
 (require "../testing.rkt")
 
 (module general racket ;; constraints collected from problem statememt 
-  (provide LENGTH LIMIT max-jump/c in-suffix)
+  (provide LENGTH LIMIT max-jump/c in-suffix derive)
+  (require "../testing.rkt")
   (require "in-suffix.rkt")
 
   (define LENGTH 1000)
@@ -155,7 +156,7 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% forwards-base-2
-  (define from `[[forwards-base ,NO-ALLOC]])
+  (define from `[,(derive forwards-base NO-ALLOC)])
   (define rationale "replace parallel datastructure (vectors) with proper data representation")
 
   (struct node [weight {distance-to-0 #:mutable}] #:transparent)
