@@ -10,11 +10,11 @@
   (define LENGTH 1000)
   (define LIMIT  109)
   (define TARGET (* 2 LIMIT))
-
+  
   (define lon/c
     (and/c (flat-named-contract 'small (listof (integer-in (- LIMIT) (+ LIMIT))))
            (flat-named-contract 'short (compose (integer-in 1 LENGTH) length))))
-
+  
   ;; You are given a 0-indexed array nums of n integers and an integer target.
 
   ;; You are initially positioned at index 0. In one step, you can jump from index i to any index j if
@@ -176,8 +176,18 @@
       in
       backwards-base no-listref let-loop inline
       forwards-base forwards-base-2
-      [#:show-graph #true #:measure 1]
+      [#:show-graph #true #:measure 10000]
       with
+
+      (define LIMIT  109)
+      (define osc1 (build-list LIMIT add1))
+      (define osc2 (build-list LIMIT (λ (x) (- LIMIT x))))
+      (define osc3 (build-list LIMIT (λ (x) (- (add1 x)))))
+      (define osc4 (build-list LIMIT (λ (x) (- x LIMIT))))
+      (define osc  (append osc1 osc2 osc3 osc4))
+      
+      (check-equal? (max-jump osc 2) (sub1 (* 4 LIMIT)))
+      
       (check-equal? (max-jump (list 1 3 6 4 1 2) 3) 5)
       (check-equal? (max-jump (list 1 3 6 4 1 2) 0) #false)
       (check-equal? (max-jump (list 0 1) 0) #false)
