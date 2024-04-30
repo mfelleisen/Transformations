@@ -123,7 +123,7 @@
                 ...))
              [main nodes edges]))
 
-     #:with timed (if (not (syntax-e #'mm)) #'identity #'timed)
+     #:with timed (if (not (syntax-e #'mm)) #'id #'timed)
      
      #`(module+ test
          #,(datum->syntax stx '(require rackunit))
@@ -138,10 +138,8 @@
 
          show-graph)]))
 
-(define-syntax-rule (timed mm eb ...)
-  (time
-   (for ([i mm])
-     eb ...)))
+(define-syntax-rule (timed mm eb ...) (time (for ([i mm]) eb ...)))
+(define-syntax-rule (id mm eb ...) (let () eb ...))
 
 ;; compile time for `test`
 #; {Syntax -> [String Symbol -> Syntax]}

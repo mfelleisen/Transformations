@@ -40,12 +40,11 @@
   #; {[Listof Real] [Real -> Boolean] -> [Listof (U False N)]}
   ;; compute the list of maximal jumps from `l0` to its end 
   (define (max-jump-aux l0 okay?)
-    (cond
-      [(empty? (rest l0)) '[0]]
-      [else
-       (define R (rest l0))
+    (match l0
+      [(list _) '[0]]
+      [(cons F R)
        (define M (max-jump-aux R okay?))
-       (define best (find-max-for (first l0) R M okay?))
+       (define best (find-max-for F R M okay?))
        (cons best M)]))
 
   #; {Real [Listof Real] [Listof N] [Real Real -> Boolean] -> (U False N)}
@@ -56,7 +55,7 @@
 
   #; {[Real -> Boolean] -> Real Real -> Boolean}
   (define ((good? target) num@j num@i)
-    (<= (- target) (- num@j num@i) (+ target))))
+    (<= (abs (- num@j num@i)) target)))
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% no-listref
@@ -70,22 +69,21 @@
   #; {[NEListof Real] [Real -> Boolean] -> [Listof (U False N)]}
   ;; compute the list of maximal jumps from `l0` to its end 
   (define (max-jump-aux l0 okay?)
-    (cond
-      [(empty? (rest l0)) '[0]]
-      [else
-       (define R (rest l0))
+    (match l0
+      [(list _) '[0]]
+      [(cons F R)
        (define M (max-jump-aux R okay?))
-       (define best (find-max-for (first l0) R M okay?))
+       (define best (find-max-for F R M okay?))
        (cons best M)]))
 
   #; {Real [Listof Real] [Listof N] [Real Real -> Boolean] -> (U False N)}
   (define (find-max-for one R M okay?)
-    (for/first ([nxt R] [max-steps-from-nxt M] #:when (and max-steps-from-nxt (okay? nxt one)))
-      (+ 1 max-steps-from-nxt)))
+    (for/first ([nxt (in-list R)] [steps (in-list M)] #:when (and steps (okay? nxt one)))
+      (+ 1 steps)))
   
   #; {[Real -> Boolean] -> Real Real -> Boolean}
   (define ((good? target) num@j num@i)
-    (<= (- target) (- num@j num@i) (+ target))))
+    (<= (abs (- num@j num@i)) target)))
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% let-loop
@@ -100,22 +98,21 @@
   ;; compute the list of maximal jumps from `l0` to its end 
   (define (max-jump-aux l0 okay?)
     (let max-jump-aux ([l l0])
-      (cond
-        [(empty? (rest l)) '[0]]
-        [else
-         (define R (rest l))
+      (match l
+        [(list _) '[0]]
+        [(cons F R)
          (define M (max-jump-aux R))
-         (define best (find-max-for (first l) R M okay?))
+         (define best (find-max-for F R M okay?))
          (cons best M)])))
 
   #; {Real [Listof Real] [Listof N] [Real Real -> Boolean] -> (U False N)}
   (define (find-max-for one R M okay?)
-    (for/first ([nxt R] [max-steps-from-nxt M] #:when (and max-steps-from-nxt (okay? nxt one)))
-      (+ 1 max-steps-from-nxt)))
+    (for/first ([nxt (in-list R)] [steps (in-list M)] #:when (and steps (okay? nxt one)))
+      (+ 1 steps)))
   
   #; {[Real -> Boolean] -> Real Real -> Boolean}
   (define ((good? target) num@j num@i)
-    (<= (- target) (- num@j num@i) (+ target))))
+    (<= (abs (- num@j num@i)) target)))
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% inline
@@ -123,20 +120,22 @@
   (define rationale "inline all functions")
   
   (define/contract [max-jump l0 target] max-jump/c
-    (define (okay? num@j num@i) (<= (- target) (- num@j num@i) (+ target)))
+    (define (okay? num@j num@i) (<= (abs (- num@j num@i)) target))
     (define best*
       (let max-jump-aux ([l l0])
-        (cond
-          [(empty? (rest l)) '[0]]
-          [else
-           (define R (rest l))
-           (define F (first l))
+        (match l
+          [(list _) '[0]]
+          [(cons F R)
            (define M (max-jump-aux R))
+           #;
+           (define best (ormap (λ (nxt from-nxt) (and from-nxt (okay? nxt F) (+ 1 from-nxt))) R M))
            (define best
-             (for/first ([nxt R] [max-steps-from-nxt M] #:when (and max-steps-from-nxt (okay? nxt F)))
-               (+ 1 max-steps-from-nxt)))
+             (for/first ([nxt (in-list R)] [steps (in-list M)] #:when (and steps (okay? nxt F)))
+               (+ 1 steps)))
            (cons best M)])))
     (first best*)))
+
+;; accumulator brings nothing; no associativity law recognizable 
 
 ;; ---------------------------------------------------------------------------------------------------
 (module% forwards-base
@@ -147,8 +146,8 @@
     (define N (length l0))
     (define dist-to-0 (apply vector (cons 0 (make-list (- N 1) (- N)))))
 
-    (for ([x l0] [l (in-suffix l0)] [i (in-naturals)])
-      (for ([y (rest l)] [j (in-naturals (add1 i))] #:when (<= (abs (- y x)) target))
+    (for ([x (in-list l0)] [l (in-suffix l0)] [i (in-naturals)])
+      (for ([y (in-list (rest l))] [j (in-naturals (add1 i))] #:when (<= (abs (- y x)) target))
         (vector-set! dist-to-0 j (max (vector-ref dist-to-0 j) (add1 (vector-ref dist-to-0 i))))))
 
     (define r (vector-ref dist-to-0 (sub1 N)))
@@ -165,18 +164,52 @@
     (define N (length l0))
     (define l (cons (node (first l0) 0) (map (λ (x) (node x (- N))) (rest l0))))
 
-    (for ([x l] [k (in-suffix l)])
-      (for ([y (rest k)] #:when (<= (abs (- (node-weight y) (node-weight x))) target))
+    (for ([x (in-list l)] [k (in-suffix l)])
+      (for ([y (in-list (rest k))] #:when (<= (abs (- (node-weight y) (node-weight x))) target))
         (set-node-distance-to-0! y (max (node-distance-to-0 y) (add1 (node-distance-to-0 x))))))
     (define r (node-distance-to-0 (last l)))
     (and (>= r 0) r)))
 
 ;; ---------------------------------------------------------------------------------------------------
+
+(module% graph
+
+  (define from '[])
+  (define rationale "build graph then traverse graph, via plain recursion")
+  
+  (define/contract [max-jump l0 target] max-jump/c
+    (define G (graph l0 target))
+    (search G 0 (sub1 (length l0))))
+
+  #; {type [Graph n] = <[k l ... m] ... []> || where k < l < ... < m}
+
+  #; {[Graph n] 0 n -> (U False N)}
+  (define (search G from0 to)
+    (let search ([from from0])
+      (cond
+        [(= from to) 0]
+        [(ormap search (vector-ref G from)) => add1]
+        [else #false])))
+       
+  #; {l : [Listof Real] Real -> [Graph (sub1 (length l))]}
+  (define (graph l0 target)
+    (for/vector ([x (in-list l0)] [l (in-suffix l0)] [i (in-naturals)])
+      (for/fold ([r '()] #:result (reverse r)) ([y (in-list (rest l))] [j (in-naturals (add1 i))])
+        (if (<= (abs (- y x)) target)
+            (cons j r)
+            r)))))
+
+;; ---------------------------------------------------------------------------------------------------
 (test max-jump
       in
+      graph
+
       backwards-base no-listref let-loop inline
       forwards-base forwards-base-2
-      [#:show-graph #true #:measure 10000]
+      [
+       ; #:show-graph #true
+       #:measure 10000
+       ]
       with
 
       (define LIMIT  109)
@@ -187,7 +220,7 @@
       (define osc  (append osc1 osc2 osc3 osc4))
       
       (check-equal? (max-jump osc 2) (sub1 (* 4 LIMIT)))
-      
+
       (check-equal? (max-jump (list 1 3 6 4 1 2) 3) 5)
       (check-equal? (max-jump (list 1 3 6 4 1 2) 0) #false)
       (check-equal? (max-jump (list 0 1) 0) #false)
