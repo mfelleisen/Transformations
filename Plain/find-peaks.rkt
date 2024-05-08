@@ -3,6 +3,161 @@
 (require "../testing-2.rkt")
 
 ;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai8
+
+(define (peaks-ai8 mountain)
+  ;; This function takes a list of integers representing mountain heights and returns a list of indices
+  ;; of all peak elements. A peak is defined as an element that is strictly greater than its neighboring elements.
+  ;; The first and last elements are not considered for peaks.
+  
+  ;; Use `map` to create a list of indices that are peaks, then filter out #f (false) values.
+  (filter-map
+   (lambda (i)
+     ;; Check if the current element is a peak by comparing it with its neighbors.
+     (and (> i 0) (< i (- (length mountain) 1)) ; Ensure index is not the first or last
+          (> (list-ref mountain i) (list-ref mountain (- i 1))) ; Current element > Previous element
+          (> (list-ref mountain i) (list-ref mountain (+ i 1))) ; Current element > Next element
+          i)) ; Return the index if it's a peak
+   (range (length mountain))))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai7 
+
+(define (peaks-ai7 mountain)
+  ;; Using `map` and `filter` to find indices of peaks in the mountain list
+  (filter-map
+    ;; Filter-map combines filtering and mapping in one step
+    ;; Here, we check if the current index `i` is a peak and return the index if true
+    (lambda (i)
+      (if (and (> (list-ref mountain i) (list-ref mountain (sub1 i)))  ; Check if current element > previous element
+               (> (list-ref mountain i) (list-ref mountain (add1 i)))) ; Check if current element > next element
+          i  ; Return the index if it's a peak
+          #f))  ; Return #f (false) to filter out non-peaks
+    ;; Generate a list of indices from 1 to (- (length mountain) 2) to avoid first and last elements
+    (range 1 (- (length mountain) 1))))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai6
+
+(define (peaks-ai6 mountain)
+  ;; This function uses a combination of `map`, `filter`, and `range` to find peaks in the list.
+  ;; It returns a list of indices where the peaks occur.
+  (filter-map
+   ;; `filter-map` is used to both filter and map in a single pass.
+   ;; It takes a function and a list, applies the function to each element of the list,
+   ;; and includes the result in the output list only if the function returns a non-#f value.
+   (lambda (i)
+     (let ((current (list-ref mountain i))
+           (prev (list-ref mountain (- i 1)))
+           (next (list-ref mountain (+ i 1))))
+       ;; Check if the current element is greater than both its neighbors.
+       (and (> current prev) (> current next) i)))
+   ;; Generate a range from 1 to (- (length mountain) 1) to avoid the first and last elements.
+   (range 1 (- (length mountain) 1))))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai5
+
+(define (peaks-ai5 mountain)
+  ;; Use the `map` function to iterate over the indices from 1 to (- (length mountain) 2),
+  ;; and then filter out the indices where the condition of being a peak is met.
+  (filter-map
+   (lambda (i) ; lambda function to check if the current element is a peak
+     (and (> (list-ref mountain i) (list-ref mountain (- i 1))) ; current > previous
+          (> (list-ref mountain i) (list-ref mountain (+ i 1))) ; current > next
+          i)) ; return the index if it's a peak
+   (range 1 (- (length mountain) 1)))) ; range from 1 to one before the last index
+
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai4
+
+(define (peaks-ai4 mountain)
+  ;; This function finds all the peaks in the given mountain list.
+  ;; A peak is an element that is strictly greater than its neighbors.
+  ;; The first and last elements are never considered as peaks.
+  (define (is-peak i)
+    ;; Helper function to determine if the element at index i is a peak.
+    (and (> (list-ref mountain i)
+            (list-ref mountain (sub1 i)))
+         (> (list-ref mountain i)
+            (list-ref mountain (add1 i)))))
+  
+  ;; Generate a list of indices from 1 to second last element index.
+  (define indices (range 1 (sub1 (length mountain))))
+  
+  ;; Filter indices where the element is a peak.
+  (filter is-peak indices))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai3
+
+(define (peaks-ai3 mountain)
+  ;; Function to find indices of peaks in the mountain list.
+  ;; A peak is defined as an element that is strictly greater than its neighboring elements.
+  ;; The first and last elements of the array are not considered peaks.
+  (define len (length mountain))  ; Store the length of the mountain list
+  (if (< len 3)                  ; If there are less than 3 elements, return an empty list
+      '()
+      (let loop ((i 1)            ; Start from index 1 to avoid the first element
+                 (peaks '()))     ; Initialize peaks as an empty list
+        (if (< i (- len 1))       ; Loop until the second last element
+            (if (and (> (list-ref mountain i) (list-ref mountain (- i 1)))  ; Check if current element is greater than the previous
+                     (> (list-ref mountain i) (list-ref mountain (+ i 1)))) ; and greater than the next
+                (loop (+ i 1) (cons i peaks))  ; If it's a peak, add index to peaks and continue
+                (loop (+ i 1) peaks))          ; Otherwise, just continue
+            (reverse peaks)))))  ; Return the list of peaks, reversed to maintain order of discovery
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai2
+
+(define (peaks-ai2 mountain)
+  ;; Define a helper function to check if an element at a given index is a peak
+  (define (is-peak? i)
+    (and (> (list-ref mountain i) (list-ref mountain (sub1 i)))  ;; Check if current is greater than previous
+         (> (list-ref mountain i) (list-ref mountain (add1 i))))) ;; Check if current is greater than next
+
+  ;; Generate a list of indices from 1 to (- (length mountain) 2) and filter those that are peaks
+  (filter is-peak? (range 1 (- (length mountain) 1))))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai1
+
+(define (peaks-ai1 mountain)
+  ;; This function finds all the peak indices in the given list `mountain`.
+  ;; A peak is defined as an element that is strictly greater than its neighbors.
+  ;; The first and last elements are not considered as potential peaks.
+  (define len (length mountain))
+  (if (< len 3) ; If there are less than 3 elements, there can't be any internal peaks.
+      '() ; Return an empty list
+      (let loop ((i 1) ; Start checking from the second element
+                 (peaks '())) ; Accumulate peaks in this list
+        (if (>= i (- len 1)) ; If we reach the last element, stop.
+            (reverse peaks) ; Return the accumulated list of peaks, reversed to maintain order.
+            (if (and (> (list-ref mountain i) (list-ref mountain (- i 1))) ; Check if current element is greater than the previous
+                     (> (list-ref mountain i) (list-ref mountain (+ i 1)))) ; and greater than the next.
+                (loop (+ i 1) (cons i peaks)) ; If it's a peak, add to peaks and continue.
+                (loop (+ i 1) peaks)))))) ; Otherwise, just continue.
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai0
+
+(define (peaks-ai0 mountain)
+  ;; Using filter-map to identify the indices of peaks
+  (define peaks
+    (filter-map
+     ;; Filter-map combines filtering and mapping in one step
+     ;; Here, we use a lambda function to check if the current element is a peak
+     (lambda (i)
+       (if (and (> (list-ref mountain i) (list-ref mountain (sub1 i)))  ;; Check if current element > previous element
+                (> (list-ref mountain i) (list-ref mountain (add1 i)))) ;; Check if current element > next element
+           i  ;; If both conditions are true, return the index
+           #f)) ;; Otherwise, return false, which will be filtered out
+     ;; Generate a list of indices from 1 to (- (length mountain) 2)
+     (range 1 (- (length mountain) 1))))
+  peaks)  ;; Return the list of peak indices
+
+;; ---------------------------------------------------------------------------------------------------
 ;; MODULE base-bsl
 
 (define (peaks-base-bsl measurements0) ;; contract  peaks/c
@@ -72,8 +227,9 @@
 ;; ---------------------------------------------------------------------------------------------------
 (test peaks
       in
-      base-bsl
-      functional imperative-simplified imperative
+      ai8 ai7 ai6 ai5 ai4 ai3 ai2 ai1 ai0
+
+      base-bsl functional imperative-simplified imperative
       [#:show-graph #true]
       with
       #;
