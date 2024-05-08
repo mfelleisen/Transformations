@@ -121,7 +121,7 @@
                 (let ([local-edges from])
                   (map (λ (x) (edge (~a (first x)) (~a 'name) (second x))) local-edges))
                 ...))
-             [main nodes edges]))
+             [draw-graph nodes edges]))
 
      #:with timed (if (not (syntax-e #'mm)) #'id #'timed)
      
@@ -168,6 +168,9 @@
       [_
        (error 'from "[module-name rationale-tag] expected in module ~a, given ~s" mod-name x)])))
 
+;; ---------------------------------------------------------------------------------------------------
+ (provide node edge draw-graph)
+
 ;; run-time for `test`
 (require racket/gui/base)
 
@@ -190,7 +193,7 @@
   (cledge from label 3 to #t))
 
 #; {[Listof node] [Listof edge] -> ImageSnip}
-(define [main nodes0 edges0]
+(define [draw-graph nodes0 edges0]
   (define width  600)
   (define height 800)
   (define center `[,(quotient width 2) . ,(quotient height 2)])

@@ -1,147 +1,116 @@
 #lang racket
 
-(require "../testing.rkt")
+(require "../testing-2.rkt")
 
-(module general racket ;; constraints collected from problem statememt 
-  (provide LENGTH LIMIT max-jump/c in-suffix derive)
-  (require "../testing.rkt")
-  (require "in-suffix.rkt")
-
+;; ---------------------------------------------------------------------------------------------------
   (define LENGTH 1000)
   (define LIMIT  109)
   (define TARGET (* 2 LIMIT))
-  
-  (define lon/c
-    (and/c (flat-named-contract 'small (listof (integer-in (- LIMIT) (+ LIMIT))))
-           (flat-named-contract 'short (compose (integer-in 1 LENGTH) length))))
-  
-  ;; You are given a 0-indexed array nums of n integers and an integer target.
-
-  ;; You are initially positioned at index 0. In one step, you can jump from index i to any index j if
-  ;;  * 0 <= i < j < n
-  ;;  * -target <= nums[j] - nums[i] <= target
-
-  ;; Return the maximum number of jumps you can make to reach index n - 1.
-  ;; If there is no way to reach index n - 1, return #false.
-
-  (define max-jump/c (-> lon/c (and/c natural? (integer-in 0 TARGET)) (or/c #false natural?))))
-
-(def-module module% max-jump general)
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% backwards-base
-  (define from '[])
-  (define rationale "'graph traversal' via recursion")
+;; MODULE backwards-base
   
-  (define/contract (max-jump l0 target) max-jump/c
-    (define okay? (good? target))
-    (first (max-jump-aux l0 okay?)))
+(define (max-jump-backwards-base l0 target) ;; contract  max-jump-backwards-base/c
+    (define okay? (good?-backwards-base? target))
+    (first (max-jump-backwards-base-aux-backwards-base l0 okay?)))
 
   #; {[Listof Real] [Real -> Boolean] -> [Listof (U False N)]}
   ;; compute the list of maximal jumps from `l0` to its end 
-  (define (max-jump-aux l0 okay?)
+(define (max-jump-backwards-base-aux-backwards-base l0 okay?)
     (match l0
       [(list _) '[0]]
       [(cons F R)
-       (define M (max-jump-aux R okay?))
-       (define best (find-max-for F R M okay?))
+       (define M (max-jump-backwards-base-aux-backwards-base R okay?))
+       (define best (find-max-for-backwards-base F R M okay?))
        (cons best M)]))
 
   #; {Real [Listof Real] [Listof N] [Real Real -> Boolean] -> (U False N)}
-  (define (find-max-for one R M okay?)
+(define (find-max-for-backwards-base one R M okay?)
     (for*/first ([step (in-range 0 (length R))]
                  [x (in-value (and (okay? (list-ref R step) one) (list-ref M step)))] #:when x)
       (+ 1 x)))
 
   #; {[Real -> Boolean] -> Real Real -> Boolean}
-  (define ((good? target) num@j num@i)
-    (<= (abs (- num@j num@i)) target)))
+(define ((good?-backwards-base? target) num@j num@i)
+    (<= (abs (- num@j num@i)) target))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% no-listref
-  (define from `[[backwards-base ,NO-ALLOC]])
-  (define rationale "brute force dynamic programming")
+;; MODULE no-listref
   
-  (define/contract (max-jump l0 target) max-jump/c
-    (define okay? (good? target))
-    (first (max-jump-aux l0 okay?)))
+(define (max-jump-no-listref l0 target) ;; contract  max-jump-no-listref/c
+    (define okay? (good?-no-listref? target))
+    (first (max-jump-no-listref-aux-no-listref l0 okay?)))
 
   #; {[NEListof Real] [Real -> Boolean] -> [Listof (U False N)]}
   ;; compute the list of maximal jumps from `l0` to its end 
-  (define (max-jump-aux l0 okay?)
+(define (max-jump-no-listref-aux-no-listref l0 okay?)
     (match l0
       [(list _) '[0]]
       [(cons F R)
-       (define M (max-jump-aux R okay?))
-       (define best (find-max-for F R M okay?))
+       (define M (max-jump-no-listref-aux-no-listref R okay?))
+       (define best (find-max-for-no-listref F R M okay?))
        (cons best M)]))
 
   #; {Real [Listof Real] [Listof N] [Real Real -> Boolean] -> (U False N)}
-  (define (find-max-for one R M okay?)
+(define (find-max-for-no-listref one R M okay?)
     (for/first ([nxt (in-list R)] [steps (in-list M)] #:when (and steps (okay? nxt one)))
       (+ 1 steps)))
   
   #; {[Real -> Boolean] -> Real Real -> Boolean}
-  (define ((good? target) num@j num@i)
-    (<= (abs (- num@j num@i)) target)))
+(define ((good?-no-listref? target) num@j num@i)
+    (<= (abs (- num@j num@i)) target))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% let-loop
-  (define from `[[no-listref ,LETLOOP]])
-  (define rationale "a micro step before I inline all functions")
+;; MODULE let-loop
   
-  (define/contract (max-jump l0 target) max-jump/c
-    (define okay? (good? target))
-    (first (max-jump-aux l0 okay?)))
+(define (max-jump-let-loop l0 target) ;; contract  max-jump-let-loop/c
+    (define okay? (good?-let-loop? target))
+    (first (max-jump-let-loop-aux-let-loop l0 okay?)))
 
   #; {[NEListof Real] [Real -> Boolean] -> [Listof (U False N)]}
   ;; compute the list of maximal jumps from `l0` to its end 
-  (define (max-jump-aux l0 okay?)
-    (let max-jump-aux ([l l0])
+(define (max-jump-let-loop-aux-let-loop l0 okay?)
+    (let max-jump-let-loop-aux-let-loop ([l l0])
       (match l
         [(list _) '[0]]
         [(cons F R)
-         (define M (max-jump-aux R))
-         (define best (find-max-for F R M okay?))
+         (define M (max-jump-let-loop-aux-let-loop R))
+         (define best (find-max-for-let-loop F R M okay?))
          (cons best M)])))
 
   #; {Real [Listof Real] [Listof N] [Real Real -> Boolean] -> (U False N)}
-  (define (find-max-for one R M okay?)
+(define (find-max-for-let-loop one R M okay?)
     (for/first ([nxt (in-list R)] [steps (in-list M)] #:when (and steps (okay? nxt one)))
       (+ 1 steps)))
   
   #; {[Real -> Boolean] -> Real Real -> Boolean}
-  (define ((good? target) num@j num@i)
-    (<= (abs (- num@j num@i)) target)))
+(define ((good?-let-loop? target) num@j num@i)
+    (<= (abs (- num@j num@i)) target))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% inline
+;; MODULE inline
   ;; turns out: accumulator brings nothing; no associativity law recognizable 
-  (define from `[[let-loop ,INLINE]])
-  (define rationale "inline all functions")
   
-  (define/contract (max-jump l0 target) max-jump/c
-    (define (okay? num@j num@i) (<= (abs (- num@j num@i)) target))
+(define (max-jump-inline l0 target) ;; contract  max-jump-inline/c
+(define (okay?-inline? num@j num@i) (<= (abs (- num@j num@i)) target))
     (define best*
-      (let max-jump-aux ([l l0])
+      (let max-jump-inline-aux ([l l0])
         (match l
           [(list _) '[0]]
           [(cons F R)
-           (define M (max-jump-aux R))
+           (define M (max-jump-inline-aux R))
            #;
-           (define best (ormap (λ (nxt from-nxt) (and from-nxt (okay? nxt F) (+ 1 from-nxt))) R M))
+           (define best (ormap (λ (nxt from-nxt) (and from-nxt (okay?-inline? nxt F) (+ 1 from-nxt))) R M))
            (define best
-             (for/first ([nxt (in-list R)] [steps (in-list M)] #:when (and steps (okay? nxt F)))
+             (for/first ([nxt (in-list R)] [steps (in-list M)] #:when (and steps (okay?-inline? nxt F)))
                (+ 1 steps)))
            (cons best M)])))
-    (first best*)))
+    (first best*))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% forwards-base
-  (define from `[])
-  (define rationale "calculate distance to 0 (forward), not backward (distance from end)")
+;; MODULE forwards-base
   
-  (define/contract (max-jump l0 target) max-jump/c
+(define (max-jump-forwards-base l0 target) ;; contract  max-jump-forwards-base/c
     (define N (length l0))
     (define dist-to-0 (apply vector (cons 0 (make-list (- N 1) (- N)))))
 
@@ -150,16 +119,13 @@
         (vector-set! dist-to-0 j (max (vector-ref dist-to-0 j) (add1 (vector-ref dist-to-0 i))))))
 
     (define r (vector-ref dist-to-0 (sub1 N)))
-    (and (>= r 0) r)))
+    (and (>= r 0) r))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% forwards-base-2
-  (define from `[,(derive forwards-base NO-ALLOC)])
-  (define rationale "replace parallel datastructure (vectors) with proper data representation")
+;; MODULE forwards-base-2
 
-  (struct node [weight {distance-to-0 #:mutable}] #:transparent)
-
-  (define/contract (max-jump l0 target) max-jump/c
+(define (max-jump-forwards-base-2 l0 target) ;; contract max-jump-forwards-base-2/c
+    (struct node [weight {distance-to-0 #:mutable}] #:transparent)
     (define N (length l0))
     (define l (cons (node (first l0) 0) (map (λ (x) (node x (- N))) (rest l0))))
 
@@ -167,28 +133,26 @@
       (for ([y (in-list (rest k))] #:when (<= (abs (- (node-weight y) (node-weight x))) target))
         (set-node-distance-to-0! y (max (node-distance-to-0 y) (add1 (node-distance-to-0 x))))))
     (define r (node-distance-to-0 (last l)))
-    (and (>= r 0) r)))
+    (and (>= r 0) r))
 
 ;; ---------------------------------------------------------------------------------------------------
+;; MODULE graph
 
-(module% graph
-  (require "../testing.rkt")
+(struct node [name #; string color #;color-string])
+(struct edge [from #; string label #;string to #;string])
 
-  (define from '[])
-  (define rationale "build graph then traverse graph, via plain recursion")
-  
-  (define/contract (max-jump l0 target) max-jump/c
-    (define G (graph l0 target))
+(define (max-jump-graph l0 target) ;; contract  max-jump-graph/c
+    (define G (graph-graph l0 target))
 
     #;
-    (define-values [nodes edges] (graph->nodes+edges G))
+    (define-values [nodes edges] (graph-graph->nodes+edges G))
     #;
-    (eprintf "~a\n" (draw-graph nodes edges))
+    (eprintf "~a\n" (draw-graph-graph nodes edges))
     
-    (search G 0 (sub1 (length l0))))
+    (search-graph G 0 (sub1 (length l0))))
 
   #; {Graph -> (values [Listof Node] [Listof Edge])}
-  (define (graph->nodes+edges G)
+(define (graph-graph->nodes+edges G)
     (define nodes
       (for/list ([x (in-range (vector-length G))])
         (node (~a x) "red")))
@@ -200,20 +164,20 @@
   #; {type [Graph n] = <[k l ... m] ... []> || where k < l < ... < m}
 
   #; {[Graph n] 0 n -> (U False N)}
-  (define (search G from0 to)
-    (let search ([from from0])
+(define (search-graph G from0 to)
+    (let search-graph ([from from0])
       (cond
         [(= from to) 0]
-        [(ormap search (vector-ref G from)) => add1]
+        [(ormap search-graph (vector-ref G from)) => add1]
         [else #false])))
        
   #; {l : [Listof Real] Real -> [Graph (sub1 (length l))]}
-  (define (graph l0 target)
+(define (graph-graph l0 target)
     (for/vector ([x (in-list l0)] [l (in-suffix l0)] [i (in-naturals)])
       (for/fold ([r '()] #:result (reverse r)) ([y (in-list (rest l))] [j (in-naturals (add1 i))])
         (if (<= (abs (- y x)) target)
             (cons j r)
-            r)))))
+            r))))
 
 ;; ---------------------------------------------------------------------------------------------------
 (test max-jump

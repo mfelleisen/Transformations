@@ -1,111 +1,65 @@
 #lang racket
 
-;; this one is so easy, an F I student can do it just before Thanksgiving.
-;; After some work, this is coooool. I wa sable to eliminate the inner loop. 
-
-;; "I have no clue why this is called 'count test devices'"
-;; if someone explained this, I might be able to turn it into an example for HtDP/V
-
-(require "../testing.rkt")
-
-(module general racket ;; constraints collected from problem statememt 
-  (provide ctd/c)
-
-  (define LENGTH 100)
-  (define %/c (integer-in 0 100))
-
-  (define lon/c
-    (and/c (flat-named-contract 'small (listof %/c))
-           (flat-named-contract 'short (compose (<=/c LENGTH) length))))
-
-  ;; You are given a 0-indexed integer array batteryPercentages having
-  ;; length n, denoting the battery percentages of n 0-indexed devices.
-
-  ;; Your task is to test each device i in order from 0 to n - 1, by
-  ;; performing the following test operations:
-
-  ;; If batteryPercentages[i] is greater than 0:
-  ;; Increment the count of tested devices.
-  ;; Decrease the battery percentage of all devices with indices j in
-  ;; the range [i + 1, n - 1] by 1, ensuring their battery percentage
-  ;; never goes below 0, i.e, batteryPercentages[j] = max(0,
-  ;; batteryPercentages[j] - 1).
-
-  ;; Move to the next device.
-  ;; Otherwise, move to the next device without performing any test.
-  ;; Return an integer denoting the number of devices that will be
-  ;; tested after performing the test operations in order.
-
-  (define ctd/c (-> lon/c natural?)))
-
-(def-module module% ctd general)
+(require "../testing-2.rkt")
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% base-bsl
-  (define from '[])
-  (define rationale "this is a simple example of generative recursion -- change (rest .) to conform")
+;; MODULE base-bsl
 
-  (define/contract (ctd percentages) ctd/c
+(define (ctd-base-bsl percentages) ;; contract  ctd/c
     (cond
       [(empty? percentages) 0]
       [else
        (define one (first percentages))
        (if (> one 0)
-           (add1 (ctd (decrement (rest percentages))))
-           (ctd (rest percentages)))]))
+           (add1 (ctd-base-bsl (decrement-base-bsl (rest percentages))))
+           (ctd-base-bsl (rest percentages)))]))
            
   #; {[Listof %] -> [Listof %]}
-  (define (decrement percentages)
+(define (decrement-base-bsl percentages)
     (cond
       [(empty? percentages) '()]
-      [else (cons (max 0 (sub1 (first percentages))) (decrement (rest percentages)))])))
+      [else (cons (max 0 (sub1 (first percentages))) (decrement-base-bsl (rest percentages)))]))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% plain-racket
-  (define from `[[base-bsl ,LETLOOP]])
-  (define rationale "this is Racket from a beginner who knows about `let loop`")
+;; MODULE plain-racket
 
-  (define/contract (ctd percentages0) ctd/c
+(define (ctd-plain-racket percentages0) ;; contract  ctd/c
     (let ctd-loop ([percentages percentages0])
       (cond
         [(empty? percentages) 0]
         [else
          (define one (first percentages))
          (if (> one 0)
-             (add1 (ctd-loop (decrement (rest percentages))))
+             (add1 (ctd-loop (decrement-plain-racket (rest percentages))))
              (ctd-loop (rest percentages)))])))
 
   #; {[Listof %] -> [Listof %]}
-  (define (decrement percentages)
+(define (decrement-plain-racket percentages)
     (cond
       [(empty? percentages) '()]
-      [else (cons (max 0 (sub1 (first percentages))) (decrement (rest percentages)))])))
+      [else (cons (max 0 (sub1 (first percentages))) (decrement-plain-racket (rest percentages)))]))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% ho-racket 
-  (define from `[[plain-racket ,HO]])
-  (define rationale "time to use `map` for `decrement`")
+;; MODULE ho-racket 
 
-  (define/contract (ctd percentages0) ctd/c
+(define (ctd-ho-racket  percentages0) ;; contract  ctd/c
     (let ctd-loop ([percentages percentages0])
       (cond
         [(empty? percentages) 0]
         [else
          (define one (first percentages))
          (if (> one 0)
-             (add1 (ctd-loop (decrement (rest percentages))))
+             (add1 (ctd-loop (decrement-ho-racket  (rest percentages))))
              (ctd-loop (rest percentages)))])))
 
   #; {[Listof %] -> [Listof %]}
-  (define (decrement percentages)
-    (map (λ (x) (max 0 (- x 1))) percentages)))
+(define (decrement-ho-racket  percentages)
+    (map (λ (x) (max 0 (- x 1))) percentages))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% inline-racket 
-  (define from `[[ho-racket ,INLINE]])
-  (define rationale "it is okay to inline `decrement` for Leet code")
+;; MODULE inline-racket 
 
-  (define/contract (ctd percentages0) ctd/c
+(define (ctd-inline-racket  percentages0) ;; contract  ctd/c
     (let ctd-loop ([percentages percentages0])
       (cond
         [(empty? percentages) 0]
@@ -113,14 +67,12 @@
          (define one (first percentages))
          (if (> one 0)
              (add1 (ctd-loop (map (λ (x) (max 0 (- x 1))) (rest percentages))))
-             (ctd-loop (rest percentages)))]))))
+             (ctd-loop (rest percentages)))])))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% accu-racket 
-  (define from `[[inline-racket ,ACCUMULATOR]])
-  (define rationale "a beginner may use an accumulator for counting because it feels 'natural'")
+;; MODULE accu-racket 
 
-  (define/contract (ctd percentages0) ctd/c
+(define (ctd-accu-racket  percentages0) ;; contract  ctd/c
     (let ctd-loop ([percentages percentages0] [count 0])
       (cond
         [(empty? percentages) count]
@@ -128,14 +80,12 @@
          (define one (first percentages))
          (if (> one 0)
              (ctd-loop (map (λ (x) (max 0 (- x 1))) (rest percentages)) (add1 count))
-             (ctd-loop (rest percentages) count))]))))
+             (ctd-loop (rest percentages) count))])))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% accu-2-racket 
-  (define from `[[accu-racket ,ACCUMULATOR]])
-  (define rationale "a strong beginner may realize that the -1 ops can be accumulated; think Wand 82")
+;; MODULE accu-2-racket 
 
-  (define/contract (ctd percentages0) ctd/c
+(define (ctd-accu-2-racket  percentages0) ;; contract  ctd/c
     (let ctd-loop ([percentages percentages0] [count 0] [delta 0])
       (cond
         [(empty? percentages) count]
@@ -143,100 +93,90 @@
          (define one (first percentages))
          (if (> (- one delta) 0)
              (ctd-loop (rest percentages) (add1 count) (add1 delta))
-             (ctd-loop (rest percentages) count        delta))]))))
+             (ctd-loop (rest percentages) count        delta))])))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% for-racket 
-  (define from `[[accu-2-racket ,HO]])
-  (define rationale  "the let-loop can now be turned into a for/fold")
+;; MODULE for-racket 
 
-  (define/contract (ctd percentages0) ctd/c
+(define (ctd-for-racket  percentages0) ;; contract  ctd/c
     (for/fold ([count 0] [delta 0] #:result count) ([x (in-list percentages0)])
       (if (> (- x delta) 0)
           (values (add1 count) (add1 delta))
-          (values count        delta)))))
+          (values count        delta))))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% base-isl+
-  (define from `[[base-bsl ,HO]])
-  (define rationale "a beginner got to know ISL+")
+;; MODULE base-isl+
 
-  (define/contract (ctd percentages) ctd/c
+(define (ctd-base-isl+ percentages) ;; contract  ctd/c
     (cond
       [(empty? percentages) 0]
       [else
        (define one (first percentages))
        (if (> one 0)
-           (add1 (ctd (decrement (rest percentages))))
-           (ctd (rest percentages)))]))
+           (add1 (ctd-base-isl+ (decrement-base-isl+ (rest percentages))))
+           (ctd-base-isl+ (rest percentages)))]))
            
   #; {[Listof %] -> [Listof %]}
-  (define (decrement percentages)
-    (map (λ (x) (max 0 (- x 1))) percentages)))
+(define (decrement-base-isl+ percentages)
+    (map (λ (x) (max 0 (- x 1))) percentages))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% base-bsl-accu
-  (define from `[[base-bsl ,ACCUMULATOR]])
-  (define rationale "a beginner using accumulators with generative recursion")
+;; MODULE base-bsl-accu
 
-  (define/contract (ctd percentages) ctd/c
-    (ctd/bsl percentages 0))
+(define (ctd-base-bsl-accu percentages) ;; contract  ctd/c
+    (ctd/bsl-base-bsl-accu percentages 0))
 
   #; {[Listof %] N -> N}
-  (define (ctd/bsl percentages counted#)
+(define (ctd/bsl-base-bsl-accu percentages counted#)
     (cond
       [(empty? percentages) counted#]
       [else
        (define one (first percentages))
        (if (> one 0)
-           (ctd/bsl (decrement (rest percentages)) (add1 counted#))
-           (ctd/bsl (rest percentages) counted#))]))
+           (ctd/bsl-base-bsl-accu (decrement-base-bsl-accu (rest percentages)) (add1 counted#))
+           (ctd/bsl-base-bsl-accu (rest percentages) counted#))]))
 
   #; {[Listof %] -> [Listof %]}
-  (define (decrement percentages)
+(define (decrement-base-bsl-accu percentages)
     (cond
       [(empty? percentages) '()]
-      [else (cons (max 0 (sub1 (first percentages))) (decrement (rest percentages)))])))
+      [else (cons (max 0 (sub1 (first percentages))) (decrement-base-bsl-accu (rest percentages)))]))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% base-isl+-accu
-  (define from `[[base-bsl-accu ,HO] [base-isl+ ,ACCUMULATOR]])
-  (define rationale "a beginner got to know ISL+")
+;; MODULE base-isl+-accu
 
-  (define/contract (ctd percentages) ctd/c
-    (ctd/bsl percentages 0))
+(define (ctd-base-isl+-accu percentages) ;; contract  ctd/c
+    (ctd/bsl-base-isl+-accu percentages 0))
 
   #; {[Listof %] N -> N}
-  (define (ctd/bsl percentages counted#)
+(define (ctd/bsl-base-isl+-accu percentages counted#)
     (cond
       [(empty? percentages) counted#]
       [else
        (define one (first percentages))
        (if (> one 0)
-           (ctd/bsl (decrement (rest percentages)) (add1 counted#))
-           (ctd/bsl (rest percentages) counted#))]))
+           (ctd/bsl-base-isl+-accu (decrement-base-isl+-accu (rest percentages)) (add1 counted#))
+           (ctd/bsl-base-isl+-accu (rest percentages) counted#))]))
 
   #; {[Listof %] -> [Listof %]}
-  (define (decrement percentages)
-    (map (λ (x) (max 0 (- x 1))) percentages)))
+(define (decrement-base-isl+-accu percentages)
+    (map (λ (x) (max 0 (- x 1))) percentages))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% base-isl+-2-accu
-  (define from `[[base-isl+-accu ,ACCUMULATOR]])
-  (define rationale "a strong beginner may realize that the -1 ops can be accumulated; think Wand 82")
+;; MODULE base-isl+-2-accu
 
-  (define/contract (ctd percentages) ctd/c
-    (ctd/bsl percentages 0 0))
+(define (ctd-base-isl+-2-accu percentages) ;; contract  ctd/c
+    (ctd/bsl-base-isl+-2-accu percentages 0 0))
 
   #; {[Listof %] N -> N}
-  (define (ctd/bsl percentages counted# delta)
+(define (ctd/bsl-base-isl+-2-accu percentages counted# delta)
     (cond
       [(empty? percentages) counted#]
       [else
        (define one (first percentages))
        (if (> (- one delta) 0)
-           (ctd/bsl (rest percentages) (add1 counted#) (add1 delta))
-           (ctd/bsl (rest percentages) counted#        delta))])))
+           (ctd/bsl-base-isl+-2-accu (rest percentages) (add1 counted#) (add1 delta))
+           (ctd/bsl-base-isl+-2-accu (rest percentages) counted#        delta))]))
 
 ;; ---------------------------------------------------------------------------------------------------
 (test ctd

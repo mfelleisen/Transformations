@@ -58,7 +58,20 @@ Each code file has this structure:
   - find-peaks -- done 
   - count-test-devices -- done 
   - sum-counts -- done 
-  
+
+ |    problem: Matthias/   | solutions: Matthias/       | originals: llms/old/		                       |
+ | ----------------------- | -------------------------- | ---------------------------------------------------- |
+ |  falling-squares.txt	   |  falling-squares.rkt      	| leetcode_hard_processed/LeetCode_505_fallingSquares/ |
+ |  is-scramble.txt	   |  is-scramble.rkt          	| leetcode_hard_processed/LeetCode_77_isScramble/      |
+ |  maximum-gap.txt	   |  gap.rkt          		| leetcode_hard_processed/LeetCode_124_maximumGap/     |
+
+ |    problem: Matthias/   | solutions: Matthias/       | originals: llms/v2\_processed/	               |
+ | ----------------------- | -------------------------- | ---------------------------------------------------- |
+ |  maximum-jump.txt	   |  maximum-jump.rkt         	| LeetCodeContests_2855_maximumJumps/     	       |
+ |  sum-counts.txt	   |  sum-counts.rkt           	| LeetCodeContests_3163_sumCounts/	       	       |
+ |  find-peaks.txt	   |  find-peaks.rkt           	| LeetCodeContests_3221_findPeaks/	       	       |
+ |  count-test-devices.txt |  count-test-devices.rkt    | LeetCodeContests_3220_countTestedDevices/   	       |
+
 - Orange:
   - fallingSquares  MF  -- wrong at source  -- done 
   - sumOfDistanceInTree CD

@@ -1,34 +1,20 @@
 #lang racket
 
-(require "../testing.rkt")
+(require "../testing-2.rkt")
 
-(module general racket ;; constraints collected from problem statememt 
-  (provide LENGTH LIMIT mg/c)
-
+;; ---------------------------------------------------------------------------------------------------
   (define LENGTH 105)
   (define LIMIT  (+ 109 1))
 
-  (define lon/c
-    (and/c (flat-named-contract 'small (listof (integer-in 0 LIMIT)))
-           (flat-named-contract 'short (compose (<=/c LENGTH) length))))
-
-  ;; You must write an algorithm that runs in linear time and uses linear extra space.
-  ;; Mine uses linear space in the size of the numbers on the given list, which by the
-  ;; constraints is linear in terms of the size of the given list. 
-  (define mg/c (-> lon/c natural?)))
-
-(def-module module% mg general)
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% base-not-linear
-  (define from '[])
-  (define rationale "linearity constraint is bad: the most natural approach is to make a mask")
+;; MODULE base-not-linear
   
-  (define/contract (mg l) mg/c
+(define (mg-base-not-linear l) ;; contract  mg/c
     (cond
       [(or (empty? l) (empty? (rest l))) 0]
       [else
-       (define M (make-mask l))
+       (define M (make-mask-base-not-linear l))
        (define L (vector-length M))
        (for/fold ([left 0] [mg 0] #:result (max mg (- L left 1))) ([i (in-range 1 L 1)])
          (cond
@@ -36,27 +22,25 @@
            [else                     (values i (max (- i left) mg))]))]))
 
   #; {[Listof N] -> [Vector (U 01 )]}
-  (define (make-mask l)
+(define (make-mask-base-not-linear l)
     (define max-of (apply max l))
     (define min-of (apply min l))
     (define width  (add1 (- max-of min-of)))
     (define M (make-vector width 0))
     (for ([x (in-list l)]) (vector-set! M (- x min-of) 1))
-    M))
+    M)
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% stateful-interval
-  (define from '[])
-  (define rationale "linearity constraint is bad: the most natural approach is to make a mask")
+;; MODULE stateful-interval
   
-  (define/contract (mg l) mg/c
+(define (mg-stateful-interval l) ;; contract  mg/c
     (cond
       [(or (empty? l) (empty? (rest l))) 0]
       [else
        (define largest   (apply max l))
        (define smallest  (apply min l))
-       (define intervals (populate-intervals l largest smallest))
-       (determine-maximum-gap intervals smallest)]))
+       (define intervals (populate-intervals-stateful-interval l largest smallest))
+       (determine-maximum-gap-stateful-interval intervals smallest)]))
 
   #; {type Intervals = [Vectorof Interval] || size is n+1 intervals}
   #; {type Interval  = (U False [List Natural Natural])}
@@ -64,7 +48,7 @@
   #; {[Vector False] Natural -> [Vector Interval]}
   ;; create intervals of size `(/ (- largest smallest) (length l))`
   ;; place each number x into the interval `(- x smallest)` to actually create the interval 
-  (define (populate-intervals l largest smallest)
+(define (populate-intervals-stateful-interval l largest smallest)
     (define total-width    (- largest smallest))
     (define interval-width (max (quotient total-width (length l)) 1))
     (define intervals      (make-vector (add1 (quotient total-width interval-width)) #false))
@@ -78,18 +62,16 @@
     intervals)
 
   #; {[Vector Interval] -> Natural}
-  (define (determine-maximum-gap P0 min-of)
+(define (determine-maximum-gap-stateful-interval P0 min-of)
     (for/fold ([max-gap 0] [previous-right min-of] #:result max-gap) ([I (in-vector P0)])
       (match I
         [#false            (values max-gap previous-right)]
-        [(list left right) (values (max #;(- right left) (- left previous-right) max-gap) right)]))))
+        [(list left right) (values (max #;(- right left) (- left previous-right) max-gap) right)])))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% inline
-  (define from `[[stateful-interval ,INLINE]])
-  (define rationale "inline all functions and avoid parameter passing")
+;; MODULE inline
   
-  (define/contract (mg l) mg/c
+(define (mg-inline l) ;; contract  mg/c
     (cond
       [(or (empty? l) (empty? (rest l))) 0]
       [else
@@ -110,14 +92,12 @@
        (for/fold ([max-gap 0] [previous-right smallest] #:result max-gap) ([I (in-vector intervals)])
          (match I
            [#false            (values max-gap previous-right)]
-           [(list left right) (values (max (- left previous-right) max-gap) right)]))])))
+           [(list left right) (values (max (- left previous-right) max-gap) right)]))]))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% c
-  (define from `[[inline ,IMPERATIVE]])
-  (define rationale "inline all functions and avoid parameter passing")
+;; MODULE c
   
-  (define/contract (mg l) mg/c
+(define (mg-c l) ;; contract  mg/c
     (cond
       [(or (empty? l) (empty? (rest l))) 0]
       [else
@@ -147,14 +127,12 @@
             (set! max-gap (max (- left previous-right) max-gap))
             (set! previous-right right)]))
 
-       max-gap])))
+       max-gap]))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% object
-  (define from `[[stateful-interval ,CLASS]])
-  (define rationale "linearity constraint is bad: the most natural approach is to make a mask")
+;; MODULE object
   
-  (define/contract (mg l) mg/c
+(define (mg-object l) ;; contract  mg/c
     (cond
       [(or (empty? l) (empty? (rest l))) 0]
       [else (send (new interval% [l l]) determine-maximum-gap)]))
@@ -189,7 +167,7 @@
             [(list left right) (values (max (- left previous-right) max-gap) right)])))
       
       (super-new)
-      (populate-intervals))))
+      (populate-intervals)))
     
 
 ;; ---------------------------------------------------------------------------------------------------
@@ -201,7 +179,8 @@
       
       (check-equal? (mg (list 1 0 1 0 1 0 1 0 1 0)) 1 "a")
 
-      ;; corrected from llms/ source 
+      ;; corrected from llms/ source
+      #;
       (check-exn #px"small" (λ () (mg (list 1 2 4 8 16 32 64 128 256 512))) "b")
       
       (check-equal? (mg (list 0 0 0 0 0 0 0 0 0 1)) 1 "c")
@@ -212,19 +191,23 @@
       (check-equal? (mg (list 1 2 3 4 5 6 7 8 9 10)) 1 "h")
 
       ;; corrected from llms/ source
+      #;
       (check-exn #px"small" (λ () (mg (list 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000)) "i"))
       
       (check-equal? (mg (list 10 20 30 40 50 60 70 80 90 100)) 10 "j")
       (check-equal? (mg (list 0 0 0 1 1 1 1 1 1 1)) 1 "k")
 
       ;; corrected from llms/ source
+      #;
       (check-exn #px"small" (λ () (mg (list 10 100 1000 10000 100000 1000000 10000000))) "l")
 
       ;; corrected from llms/ source
+      #;
       (check-exn #px"small" (λ () (mg (list 100 200 300 400 500 600 700 800 900 1000))) "m")
       (check-equal? (mg (list 3 6 9 1)) 3 "n")
 
       ;; corrected from llms/ source
+      #;
       (check-exn #px"small" (λ () (mg (list 1 10 100 1000 10000 100000 1000000))) "o")
       (check-equal? (mg (list 0 0 0 0 0 0 0 0 0 0)) 0 "p")
       (check-equal? (mg (list )) 0 "q")

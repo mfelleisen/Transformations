@@ -1,69 +1,54 @@
 #lang racket
 
-(require "../testing.rkt")
+(require "../testing-2.rkt")
 
-(module general racket ;; constraints collected from problem statememt 
-  (provide WIDTH SIDE Xs fs/c)
-
+;; ---------------------------------------------------------------------------------------------------
   (define WIDTH 1000)
   (define SIDE   106)
   (define Xs     108)
+  
+;; MODULE base
 
-  (define lops/c
-    (and/c (listof (and/c [list/c (integer-in 1 Xs) (integer-in 1 SIDE)]))
-           (flat-named-contract 'short-list (compose (<=/c WIDTH) length))))
 
-  (define fs/c (-> lops/c (listof natural?))))
-
-(def-module module% falling-squares general)
-
-;; ---------------------------------------------------------------------------------------------------
-(module% base
-
-  (define from '[])
-  (define rationale "functional scene")
-
-  (define/contract (falling-squares l) fs/c
-    (for/fold ([scene [plain-scene]] [maxs '()] #:result (reverse maxs)) ([square l])
-      (define scene++ (add-square scene square))
-      (values scene++ (cons (height scene++) maxs))))
+(define (falling-squares-base l) ;; contract  fs/c
+    (for/fold ([scene (plain-scene-base)] [maxs '()] #:result (reverse maxs)) ([square l])
+      (define scene++ (add-square-base scene square))
+      (values scene++ (cons (height-base scene++) maxs))))
 
   #; {type Scene = [vector Natural]}
   ;; it records the height of the stack of resting squares at each index
   ;; `(vector-ref scene i)` is the height of the stack 
 
   #; {-> Scene}
-  (define [plain-scene] (make-vector WIDTH 0))
+(define (plain-scene-base) (make-vector WIDTH 0))
 
   #; {Scene Square -> Scene}
   ;; a `(list x side)` square increases the height between x-1 and x-1+side 
-  (define (add-square scene square)
+(define (add-square-base scene square)
     (match-define [list x-left side] square)
     (define left  (- x-left 1))
     (define right (+ left side))
-    (define height-at (height-between scene left right))
-    (add-height-to-all scene left right (+ height-at side)))
+    (define height-at (height-between-base scene left right))
+    (add-height-to-all-base scene left right (+ height-at side)))
 
   #; {Scene Natural Natural -> Scene}
   ;; the max height of the scene on [left, right)
-  (define (height-between scene left right)
+(define (height-between-base scene left right)
     (apply max (for/list ([i (in-range left right 1)]) (vector-ref scene i))))
 
   #; {Scene Natural Natural Natural+ -> Scene}
-  (define (add-height-to-all scene left right nu-height)
+(define (add-height-to-all-base scene left right nu-height)
     (for/vector ([h (in-vector scene)] [i (in-naturals)])
       (if (or (< i left) (<= right i)) h nu-height)))
 
   #; {Scene -> Integer}
-  (define (height scene) (apply max (vector->list scene))))
+(define (height-base scene) (apply max (vector->list scene)))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% inline
+;; MODULE inline
 
-  (define from `[[base ,INLINE]])
-  (define rationale "inline all functions")
 
-  (define/contract (falling-squares l) fs/c
+(define (falling-squares-inline l) ;; contract  fs/c
     #; {type Scene = [vector Natural]}
     ;; it records the height of the stack of resting squares at each index
     ;; `(vector-ref scene i)` is the height of the stack 
@@ -77,15 +62,13 @@
         (for/vector ([h (in-vector scene)] [i (in-naturals)])
           (if (or (< i left) (<= right i)) h nu-height)))
       (define height++ (apply max (vector->list scene++)))
-      (values scene++ (cons height++ maxs)))))
+      (values scene++ (cons height++ maxs))))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% c
+;; MODULE c
 
-  (define from `[[inline ,IMPERATIVE]])
-  (define rationale "use assignment statements plus for/list; took several steps actually")
 
-  (define/contract (falling-squares l) fs/c
+(define (falling-squares-c l) ;; contract  fs/c
     #; {type Scene = [vector Natural]}
     ;; it records the height of the stack of resting squares at each index
     ;; `(vector-ref scene i)` is the height of the stack
@@ -106,17 +89,15 @@
       (set! max-of (max nu-height max-of))
       (set! the-list (cons max-of the-list)))
 
-    (reverse the-list)))
+    (reverse the-list))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% accumulator 
+;; MODULE accumulator 
 
-  (define from `[[base ,ACCUMULATOR]])
-  (define rationale "keep track maximum height via srructural accumulator")
 
-  (define/contract (falling-squares l) fs/c
-    (for/fold ([scene [plain-scene]] [maxs '()] #:result (reverse maxs)) ([square l])
-      (define scene++ (add-square scene square))
+(define (falling-squares-accumulator  l) ;; contract  fs/c
+    (for/fold ([scene (plain-scene-accumulator )] [maxs '()] #:result (reverse maxs)) ([square l])
+      (define scene++ (add-square-accumulator  scene square))
       (values scene++ (cons (scene2-max scene++) maxs))))
 
   #; {type Scene = [scene [vector Natural] Natural]}
@@ -127,78 +108,74 @@
   [struct scene2 [heights max]]
 
   #; {-> Scene}
-  (define [plain-scene] (scene2 (make-vector WIDTH 0) 0))
+(define (plain-scene-accumulator ) (scene2 (make-vector WIDTH 0) 0))
 
   #; {Scene Square -> Scene}
   ;; a `(list x side)` square increases the height between x-1 and x-1+side 
-  (define (add-square scene0 square)
+(define (add-square-accumulator  scene0 square)
     (match-define [scene2 heights max-height] scene0)
     (match-define [list x-left side] square)
     (define left  (- x-left 1))
     (define right (+ left side))
-    (define nu-height (+ side (height-between heights left right)))
-    (scene2 (add-height-to-all heights left right nu-height) (max max-height nu-height)))
+    (define nu-height (+ side (height-between-accumulator  heights left right)))
+    (scene2 (add-height-to-all-accumulator  heights left right nu-height) (max max-height nu-height)))
 
   #; {Scene Natural Natural -> Scene}
   ;; the max height of the scene on [left, right)
-  (define (height-between heights left right)
+(define (height-between-accumulator  heights left right)
     (apply max (for/list ([i (in-range left right 1)]) (vector-ref heights i))))
 
   #; {Scene Natural Natural Natural+ -> Scene}
-  (define (add-height-to-all heights left right nu-height)
+(define (add-height-to-all-accumulator  heights left right nu-height)
     (for/vector ([h (in-vector heights)] [i (in-naturals)])
-      (if (or (< i left) (<= right i)) h nu-height))))
+      (if (or (< i left) (<= right i)) h nu-height)))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% stateful-scene 
+;; MODULE stateful-scene 
 
-  (define from `[[base ,VECTOR]])
-  (define rationale "notice single-threaded scene; make imperative to avoid duplication")
 
-  (define/contract (falling-squares l) fs/c
-    (for/fold ([scene [plain-scene]] [maxs '()] #:result (reverse maxs)) ([square l])
-      (define scene++ (add-square scene square))
-      (values scene++ (cons (height scene++) maxs))))
+(define (falling-squares-stateful-scene  l) ;; contract  fs/c
+    (for/fold ([scene (plain-scene-stateful-scene )] [maxs '()] #:result (reverse maxs)) ([square l])
+      (define scene++ (add-square-stateful-scene  scene square))
+      (values scene++ (cons (height-stateful-scene  scene++) maxs))))
 
   #; {type Scene = [vector Natural]}
   ;; it records the height of the stack of resting squares at each index
   ;; `(vector-ref scene i)` is the height of the stack 
 
   #; {-> Scene}
-  (define [plain-scene] (make-vector WIDTH 0))
+(define (plain-scene-stateful-scene ) (make-vector WIDTH 0))
 
   #; {Scene Square -> Scene}
   ;; EFFECT a `(list x side)` square increases the height between x-1 and x-1+side 
-  (define (add-square scene square)
+(define (add-square-stateful-scene  scene square)
     (match-define [list x-left side] square)
     (define left  (- x-left 1))
     (define right (+ left side))
-    (define height-at (height-between scene left right))
-    (add-height-to-all! scene left right (+ side height-at)))
+    (define height-at (height-between-stateful-scene  scene left right))
+    (add-height-to-all!-stateful-scene  scene left right (+ side height-at)))
 
   #; {Scene Natural Natural -> Scene}
   ;; the max height of the scene on [left, right)
-  (define (height-between scene left right)
+(define (height-between-stateful-scene  scene left right)
     (apply max (for/list ([i (in-range left right 1)]) (vector-ref scene i))))
 
   #; {Scene Natural Natural Natural+ -> Scene}
-  (define (add-height-to-all! scene left right nu-height)
+(define (add-height-to-all!-stateful-scene  scene left right nu-height)
     (for ([i (in-range left right 1)])
       (vector-set! scene i nu-height))
     scene)
 
   #; {Scene -> Integer}
-  (define (height scene) (apply max (vector->list scene))))
+(define (height-stateful-scene  scene) (apply max (vector->list scene)))
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% state-accu 
+;; MODULE state-accu 
 
-  (define from `[[stateful-scene ,ACCUMULATOR] [accumulator ,VECTOR]])
-  (define rationale "notice single-threaded scene; make imperative to avoid duplication")
 
-  (define/contract (falling-squares l) fs/c
-    (for/fold ([scene [plain-scene]] [maxs '()] #:result (reverse maxs)) ([square l])
-      (define scene++ (add-square scene square))
+(define (falling-squares-state-accu  l) ;; contract  fs/c
+    (for/fold ([scene (plain-scene-state-accu )] [maxs '()] #:result (reverse maxs)) ([square l])
+      (define scene++ (add-square-state-accu  scene square))
       (values scene++ (cons (scene-max scene++) maxs))))
 
   #; {type Scene = [scene [vector Natural] Natural]}
@@ -209,36 +186,34 @@
   [struct scene [heights max]]
 
   #; {-> Scene}
-  (define [plain-scene] (scene (make-vector WIDTH 0) 0))
+(define (plain-scene-state-accu ) (scene (make-vector WIDTH 0) 0))
   
   #; {Scene Square -> Scene}
   ;; EFFECT a `(list x side)` square increases the height between x-1 and x-1+side 
-  (define (add-square scene0 square)
+(define (add-square-state-accu  scene0 square)
     (match-define [scene heights max-height] scene0)
     (match-define [list x-left side] square)
     (define left  (- x-left 1))
     (define right (+ left side))
-    (define nu-height (+ side (height-between heights left right)))
-    (scene (add-height-to-all! heights left right nu-height) (max max-height nu-height)))
+    (define nu-height (+ side (height-between-state-accu  heights left right)))
+    (scene (add-height-to-all!-state-accu  heights left right nu-height) (max max-height nu-height)))
   
   #; {Scene Natural Natural -> Scene}
   ;; the max height of the scene on [left, right)
-  (define (height-between scene left right)
+(define (height-between-state-accu  scene left right)
     (apply max (for/list ([i (in-range left right 1)]) (vector-ref scene i))))
 
   #; {Scene Natural Natural Natural+ -> Scene}
-  (define (add-height-to-all! scene left right nu-height)
+(define (add-height-to-all!-state-accu  scene left right nu-height)
     (for ([i (in-range left right 1)])
       (vector-set! scene i nu-height))
-    scene))
+    scene)
 
 ;; ---------------------------------------------------------------------------------------------------
-(module% object
+;; MODULE object
 
-  (define from `[[state-accu ,CLASS]])
-  (define rationale "turn struct and functions into a class and methods, instantiate once")
 
-  (define/contract (falling-squares l) fs/c
+(define (falling-squares-object l) ;; contract  fs/c
     (define scene [new scene%])
     (for/fold ([maxs '()] #:result (reverse maxs)) ([square l])
       (send scene add-square square)
@@ -275,7 +250,7 @@
       #; {Natural Natural Natural+ -> Scene}
       (define/private (add-height-to-all! left right nu-height)
         (for ([i (in-range left right 1)])
-          (vector-set! heights i nu-height))))))
+          (vector-set! heights i nu-height)))))
 
 ;; ---------------------------------------------------------------------------------------------------
 ;; test them all 
@@ -313,6 +288,7 @@
       ;;    ||
 
       ;; corrected from faulty solution in ../llms/ -- which created a test that violates constraints
+      #;
       (check-exn exn:fail:contract? (λ () (falling-squares (list (list 100 100) (list 200 100))) "8"))
 
       )
