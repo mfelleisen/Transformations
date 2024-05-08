@@ -7,12 +7,23 @@
 - `profit.rkt` ~~ this is a semantic transformation a la Darlington (from FP to Imperative) 
 
 - `testing.rkt`
-  - macros to make life simpler in the other files
+  - macros to make life simpler in the Matthias/ Christos/ files
   - top of the file is a "vocabulary" submodule for from justifications 
+
+- `testing-2.rkt`
+  - macros to make testing simpler in the Plain/ files
 
 ###
 
+- `Plain` is a directory in which each file contains both the AI solutions and ours
+  - ai0 .. aiN for all solutions
+  - followed by ours 
+
 - `Matthias` is a directory for the examples assigned below
+  - one file describes the problem (original text)
+  - one file contains the various solutions 
+
+- `Christos` is a directory for the examples assigned below
   - one file describes the problem (original text)
   - one file contains the various solutions 
 
@@ -51,8 +62,7 @@ Each code file has this structure:
       ...)
 ```
 
-
-### TODO
+### DONE
 
 - Matthias
   - find-peaks -- done 
