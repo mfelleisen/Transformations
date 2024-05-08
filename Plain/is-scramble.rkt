@@ -3,6 +3,132 @@
 (require "../testing-2.rkt")
 
 ;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai4
+
+(define (is-ai4 s1 s2)
+  ;; Base case: if the strings are equal, return true
+  (if (string=? s1 s2)
+      #t
+      (let* ([len1 (string-length s1)]
+             [len2 (string-length s2)])
+        ;; Check if strings have the same length and the same set of characters
+        (and (= len1 len2)
+             (equal? (sort (string->list s1) char<?)
+                     (sort (string->list s2) char<?))
+             ;; Check all possible splits
+             (let loop ([i 1])
+               (and (< i len1)
+                    (or (and (is-ai4 (substring s1 0 i) (substring s2 0 i))
+                             (is-ai4 (substring s1 i) (substring s2 i)))
+                        (and (is-ai4 (substring s1 0 i) (substring s2 (- len2 i)))
+                             (is-ai4 (substring s1 i) (substring s2 0 (- len2 i))))
+                        (loop (+ i 1)))))))))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai3 
+
+(define (is-ai3 s1 s2)
+  ;; Base case: if both strings are equal, they are considered scrambled versions of each other
+  (if (string=? s1 s2)
+      #t
+      (let* ((len1 (string-length s1))
+             (len2 (string-length s2)))
+        ;; If the strings have different lengths or different sets of characters, they cannot be scrambled versions
+        (if (or (not (= len1 len2))
+                (not (equal? (sort (string->list s1) char<?)
+                             (sort (string->list s2) char<?))))
+            #f
+            ;; Recursively check all possible splits of the string
+            (let loop ((i 1))
+              (if (> i (- len1 1))
+                  #f
+                  (or (and (is-ai3 (substring s1 0 i) (substring s2 0 i))
+                           (is-ai3 (substring s1 i) (substring s2 i)))
+                      (and (is-ai3 (substring s1 0 i) (substring s2 (- len2 i)))
+                           (is-ai3 (substring s1 i) (substring s2 0 (- len2 i))))
+                      (loop (+ i 1)))))))))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai2
+
+(define (is-ai2 s1 s2)
+  ;; Base case: if both strings are equal, return true.
+  (if (equal? s1 s2)
+      #t
+      ;; Check if the strings are not equal in length or their sorted versions are not equal,
+      ;; indicating they cannot be scrambles of each other.
+      (if (or (not (= (string-length s1) (string-length s2)))
+              (not (equal? (sort (string->list s1) char<?)
+                           (sort (string->list s2) char<?))))
+          #f
+          ;; Recursive case: try dividing the strings in all possible ways and check
+          ;; if one partition of s1 can be scrambled to match a corresponding partition of s2.
+          (let loop ((i 1))
+            (if (> i (- (string-length s1) 1))
+                #f
+                (or
+                 ;; Case 1: First part of s1 is a scramble of first part of s2 AND
+                 ;; second part of s1 is a scramble of second part of s2.
+                 (and (is-ai2 (substring s1 0 i) (substring s2 0 i))
+                      (is-ai2 (substring s1 i) (substring s2 i)))
+                 ;; Case 2: First part of s1 is a scramble of the last part of s2 AND
+                 ;; second part of s1 is a scramble of the first part of s2.
+                 (and (is-ai2 (substring s1 0 i) (substring s2 (- (string-length s2) i)))
+                      (is-ai2 (substring s1 i) (substring s2 0 (- (string-length s2) i))))
+                 ;; Recursive call to try the next partition.
+                 (loop (+ i 1))))))))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai1
+
+(define (is-ai1 s1 s2)
+  ;; Base case: if the two strings are equal, no need to scramble further.
+  (if (string=? s1 s2)
+      #t
+      (let* ((len (string-length s1))
+             (sorted-s1 (list->string (sort (string->list s1) char<?)))
+             (sorted-s2 (list->string (sort (string->list s2) char<?))))
+        ;; If the sorted versions of s1 and s2 are not equal, they cannot be scrambles of each other.
+        (if (or (not (= (string-length s1) (string-length s2)))
+                (not (string=? sorted-s1 sorted-s2)))
+            #f
+            ;; Recursive case: try splitting the strings in all possible ways to see if a scramble is possible.
+            (let loop ((i 1))
+              (if (> i (- len 1))
+                  #f  ;; If all splits have been tried and none worked, return false.
+                  (or (and (is-ai1 (substring s1 0 i) (substring s2 0 i))
+                           (is-ai1 (substring s1 i) (substring s2 i)))
+                      (and (is-ai1 (substring s1 0 i) (substring s2 (- len i)))
+                           (is-ai1 (substring s1 i) (substring s2 0 (- len i))))
+                      (loop (+ i 1)))))))))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai0
+
+(define (is-ai0 s1 s2)
+  ;; Base case: If the strings are equal, return true.
+  (if (string=? s1 s2)
+      #t
+      (let ([len (string-length s1)])
+        ;; If the lengths are different or the sorted strings are not equal, return false.
+        (if (or (not (= (string-length s2) len))
+                (not (equal? (sort (string->list s1) char<?)
+                             (sort (string->list s2) char<?))))
+            #f
+            (let loop ([i 1])  ;; Start looping from index 1, since we are splitting the strings.
+              (if (> i (- len 1))  ;; If i has reached the length of the string, return false.
+                  #f
+                  (or
+                   ;; Recursive check for the condition without swapping.
+                   (and (is-ai0 (substring s1 0 i) (substring s2 0 i))
+                        (is-ai0 (substring s1 i) (substring s2 i)))
+                   ;; Recursive check for the condition with swapping.
+                   (and (is-ai0 (substring s1 0 i) (substring s2 (- len i)))
+                        (is-ai0 (substring s1 i) (substring s2 0 (- len i))))
+                   ;; Loop for the next index.
+                   (loop (+ i 1)))))))))
+
+;; ---------------------------------------------------------------------------------------------------
 ;; MODULE base
   
 (define (is-base s t) ;; contract  is/c
@@ -331,6 +457,8 @@
 (test is
       in
       ; base ; is too inefficient to get thru "datastructure"
+      ai4 ai3 ai2 ai1 ai0
+
       base2 accumulator cps cps-ll cps-data inline
       [#:show-graph #true]
       with
