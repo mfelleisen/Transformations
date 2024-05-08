@@ -3,6 +3,144 @@
 (require "../testing-2.rkt")
 
 ;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai5
+
+(define (sc-ai5 nums)
+  ;; Calculates the sum of the squares of distinct counts of all subarrays of nums.
+  (define (subarray-distinct-squares start)
+    ;; Calculates the sum of squares of distinct counts for subarrays starting at 'start'
+    (define seen (make-hash))
+    (define (helper end total-sum)
+      ;; Recursive helper function to process subarrays from 'start' to 'end'
+      (if (= end (length nums))
+          total-sum
+          (begin
+            (hash-update! seen (list-ref nums end) add1 0) ; Update count of current element
+            (let ((distinct-count (hash-count seen))) ; Number of distinct elements
+              (helper (add1 end) (+ total-sum (expt distinct-count 2))))))) ; Add square of distinct count
+    (helper start 0))
+  
+  ;; Sum the results of subarray-distinct-squares for each starting point
+  (define (sum-starts i)
+    (if (= i (length nums))
+        0
+        (+ (subarray-distinct-squares i) (sum-starts (add1 i)))))
+  
+  (sum-starts 0))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai4
+
+(define (sc-ai4 nums)
+  ;; This function calculates the sum of the squares of distinct counts of all subarrays of nums.
+  (let ([n (length nums)])
+    (for/sum ([i n]) ; Loop over each possible starting index i
+      (let loop ([j i] [seen (hash)]) ; Loop over each possible ending index j starting from i
+        (if (> j (- n 1))
+            0 ; If j exceeds the bounds of nums, stop adding and return 0
+            (let* ([current-element (list-ref nums j)] ; Get the element at index j
+                   [updated-seen (hash-update seen current-element add1 0)] ; Update the count of the current element in the hash
+                   [distinct-count (hash-count updated-seen)]) ; Count the number of distinct elements
+              (+ (* distinct-count distinct-count) ; Add the square of the distinct count
+                 (loop (+ j 1) updated-seen)))))))) ; Recursive call for the next element
+  
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai3
+
+(define (sc-ai3 nums)
+  ;; Calculate the sum of squares of distinct counts of all subarrays of nums.
+  (define n (length nums))
+  
+  ;; Function to calculate the sum for all subarrays starting from index i.
+  (define (sum-from-start i)
+    (let loop ((j i) (seen (make-hash)) (total 0))
+      (cond
+        ;; When j reaches the end of the array, return the accumulated total.
+        [(>= j n) total]
+        [else
+         ;; Update the hash table with the count of the current element.
+         (hash-update! seen (list-ref nums j) add1 0)
+         ;; Calculate the distinct count as the number of keys in the hash table.
+         (let ((distinct-count (hash-count seen)))
+           ;; Recursively calculate for the next element in the subarray.
+           (loop (add1 j) seen (+ total (expt distinct-count 2))))])))
+  
+  ;; Sum the results of sum-from-start for each starting index in the array.
+  (for/fold ([total-sum 0]) ([i (in-range n)])
+    (+ total-sum (sum-from-start i))))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai2
+
+(define (sc-ai2 nums)
+  ;; Calculate the sum of the squares of distinct counts of all subarrays of nums.
+  (define (subarray-distinct-squares start)
+    ;; Compute squares of distinct counts for subarrays starting at 'start'.
+    (define (helper end seen)
+      ;; Recursive helper to process subarrays from 'start' to 'end' with 'seen' as the set of seen elements.
+      (if (> end (length nums))
+          0
+          (let* ((current-element (list-ref nums (- end 1)))
+                 (new-seen (set-add seen current-element))
+                 (distinct-count (set-count new-seen))
+                 (square (expt distinct-count 2)))
+            (+ square (helper (+ end 1) new-seen)))))
+    (helper (+ start 1) (set)))
+  
+  ;; Sum up all subarray squares starting from each index.
+  (define (sum-all-starts i)
+    (if (= i (length nums))
+        0
+        (+ (subarray-distinct-squares i) (sum-all-starts (+ i 1)))))
+  
+  (sum-all-starts 0))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai1
+
+(define (sc-ai1 nums)
+  (let ([n (length nums)])
+    ;; Function to calculate the sum of squares of distinct counts for all subarrays starting at index i
+    (define (sum-from-i i)
+      (if (= i n)
+          0
+          (let loop ([j i] [seen (hash)] [total 0])
+            (if (= j n)
+                total
+                (let* ([elem (list-ref nums j)]
+                       [new-seen (hash-update seen elem add1 0)]
+                       [distinct-count (hash-count new-seen)]
+                       [new-total (+ total (expt distinct-count 2))])
+                  (loop (+ j 1) new-seen new-total))))))
+    ;; Sum over all starting indices
+    (for/sum ([i (in-range n)])
+      (sum-from-i i))))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai0
+
+(define (sc-ai0 nums)
+  ;; Calculate the sum of the squares of distinct counts for all subarrays
+  (let ([n (length nums)])
+    ;; Initialize the total sum
+    (define total-sum 0)
+    ;; Iterate over each possible starting point of the subarray
+    (for ([i (in-range n)])
+      ;; Initialize a hash map to track distinct elements and their counts
+      (define seen (make-hash))
+      ;; Iterate over each possible ending point of the subarray starting from i
+      (for ([j (in-range i n)])
+        ;; Update the count of the current element in the hash map
+        (hash-update! seen (list-ref nums j) add1 0)
+        ;; Calculate the number of distinct elements
+        (define distinct-count (hash-count seen))
+        ;; Add the square of the distinct count to the total sum
+        (set! total-sum (+ total-sum (* distinct-count distinct-count))))
+      )
+    ;; Return the computed total sum
+    total-sum))
+
+;; ---------------------------------------------------------------------------------------------------
 ;; MODULE plain
 
 (define (sc-plain l0) ;; contract  sc/c
@@ -110,6 +248,8 @@
 ;; ---------------------------------------------------------------------------------------------------
 (test sc
       in
+      ai5 ai4 ai3 ai2 ai1 ai0
+
       plain elim elim-2 elim-3 inline inline-2 inline-3
       [#:show-graph #true]
       with
