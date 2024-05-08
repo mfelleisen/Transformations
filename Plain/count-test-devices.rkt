@@ -3,6 +3,25 @@
 (require "../testing-2.rkt")
 
 ;; ---------------------------------------------------------------------------------------------------
+(define (ctd-ai0 batteryPercentages)
+  ;; A helper function to simulate the testing and battery reduction process.
+  (define (test-devices lst tested-count)
+    (if (null? lst)
+        tested-count  ; If the list is empty, return the count of tested devices.
+        (let* ((first (car lst))  ; The battery percentage of the current device.
+               (rest (cdr lst))  ; The battery percentages of subsequent devices.
+               (is-tested (> first 0)))  ; Check if the current device can be tested.
+          (if is-tested
+              ;; If the device is tested, reduce the battery of subsequent devices
+              ;; and increment the tested count.
+              (test-devices (map (lambda (x) (max 0 (- x 1))) rest)
+                            (+ tested-count 1))
+              ;; If the device is not tested, just proceed to the next device.
+              (test-devices rest tested-count)))))
+  ;; Start the recursive testing process with the full list and an initial count of 0.
+  (test-devices batteryPercentages 0))
+
+;; ---------------------------------------------------------------------------------------------------
 ;; MODULE base-bsl
 
 (define (ctd-base-bsl percentages) ;; contract  ctd/c
@@ -181,6 +200,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 (test ctd
       in
+      ai0
       base-bsl  base-bsl-accu base-isl+ base-isl+-accu base-isl+-2-accu
       plain-racket ho-racket inline-racket accu-racket accu-2-racket 
       for-racket
