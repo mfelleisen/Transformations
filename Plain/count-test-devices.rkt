@@ -3,6 +3,8 @@
 (require "../testing-2.rkt")
 
 ;; ---------------------------------------------------------------------------------------------------
+;; MODULE ai0
+
 (define (ctd-ai0 batteryPercentages)
   ;; A helper function to simulate the testing and battery reduction process.
   (define (test-devices lst tested-count)
