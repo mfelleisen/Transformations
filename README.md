@@ -19,6 +19,18 @@
   - ai0 .. aiN for all solutions
   - followed by ours 
 
+*Note*
+
+The AI solutions are _adapted_ from the ones in the directories. Here are the changes I made: 
+
+1. I fixed the bugs that the AI injected into two of the solutions. 
+2. I replaced `-1` returns with `#false` returns. (It is _dumb_ to use sentinel values in 2024. It makes AI stand for Average Intelligence at best.) 
+3. I injected `inexact->exact` instead of going back to the old test cases with `check-within`.   
+		Inexact is an artifact of the implementation (using `-inf.0`) tricks, and again, implementation details should not leak in 2024. 
+
+
+
+
 - `Matthias` is a directory for the examples assigned below
   - one file describes the problem (original text)
   - one file contains the various solutions 
