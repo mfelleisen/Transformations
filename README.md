@@ -13,7 +13,7 @@
 - `testing-2.rkt`
   - macros to make testing simpler in the Plain/ files
 
-###
+### Plain 
 
 - `Plain` is a directory in which each file contains both the AI solutions and ours
   - ai0 .. aiN for all solutions
@@ -24,12 +24,11 @@
 The AI solutions are _adapted_ from the ones in the directories. Here are the changes I made: 
 
 1. I fixed the bugs that the AI injected into two of the solutions. 
-2. I replaced `-1` returns with `#false` returns. (It is _dumb_ to use sentinel values in 2024. It makes AI stand for Average Intelligence at best.) 
+2. I replaced `-1` returns with `#false` returns. (It is _dumb_ to use sentinel values in 2024. 
+   It makes AI stand for Average Intelligence at best.) 
 3. I injected `inexact->exact` instead of going back to the old test cases with `check-within`.   
-		Inexact is an artifact of the implementation (using `-inf.0`) tricks, and again, implementation details should not leak in 2024. 
-
-
-
+    Inexact is an artifact of the implementation (using `-inf.0`) tricks, 
+    and again, implementation details should not leak in 2024. 
 
 - `Matthias` is a directory for the examples assigned below
   - one file describes the problem (original text)
