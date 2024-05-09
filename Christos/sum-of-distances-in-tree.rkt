@@ -2,6 +2,7 @@
 
 (require "../testing.rkt")
 
+;; ---------------------------------------------------------------------------------------------------
 (module general racket ;; constraints collected from problem statememt 
 
   (provide MIN-NODES MAX-NODES sdt/c)
@@ -52,8 +53,8 @@
   
 (def-module module% sum-of-distances-in-tree general)
 
-(module%
- base
+;; ---------------------------------------------------------------------------------------------------
+(module% base
 
  (define from '[])
  (define rationale "functional with comprehensions and limited recursion")
@@ -80,9 +81,8 @@
      (for/sum ([j (in-range n)])
        (find-path-length i j es empty)))))
 
-
-(module%
- accumulator
+;; ---------------------------------------------------------------------------------------------------
+(module% accumulator
 
  (define from `[[base ,ACCUMULATOR]])
  (define rationale "functional with comprehensions and accumulators")
@@ -122,104 +122,103 @@
          (values (+ sum (find-path-length i j es empty 0)))))
      (values (append sums (list one-more-sum))))))
 
+;; ---------------------------------------------------------------------------------------------------
+(module% assembly
 
-(module%
- assembly
+  (define from `[])
+  (define rationale "imperative code in o(n)")
 
- (define from `[])
- (define rationale "imperative code in o(n)")
+  (define/contract (sum-of-distances-in-tree n es) sdt/c
 
- (define/contract (sum-of-distances-in-tree n es) sdt/c
+    (define children (make-hash))
 
-   (define children (make-hash))
-
-   (for ([e es])
-     (hash-update! children
-                   (first e)
-                   (λ (v) (cons (second e) v))
-                   empty)
-     (hash-update! children
-                   (second e)
-                   (λ (v) (cons (first e) v))
-                   empty)) 
+    (for ([e es])
+      (hash-update! children
+	(first e)
+	(λ (v) (cons (second e) v))
+	empty)
+      (hash-update! children
+	(second e)
+	(λ (v) (cons (first e) v))
+	empty)) 
 
    
-   (define distances-descendents (make-hash))
-   (define number-of-descendents (make-hash))
+    (define distances-descendents (make-hash))
+    (define number-of-descendents (make-hash))
    
-   (define parents (make-hash))
+    (define parents (make-hash))
    
-   (define distances-total (make-hash))
+    (define distances-total (make-hash))
 
 
-   (define seen empty)
-   (define current 0)
-   (define to-do (list current))
-   (define child-d-d 0)
-   (define child-n-of-d 0)     
-   (define cs empty)
+    (define seen empty)
+    (define current 0)
+    (define to-do (list current))
+    (define child-d-d 0)
+    (define child-n-of-d 0)     
+    (define cs empty)
    
-   (define (pull-info current seen)
-     (define cs (hash-ref children current empty))
-     (for ([child cs]
-           #:unless (member child seen))
-       (pull-info child (cons current seen))
-       (set! child-d-d (hash-ref distances-descendents child 0))
-       (set! child-n-of-d (hash-ref number-of-descendents child 0))
-       (hash-update! distances-descendents
-                     current
-                     (λ (s) (+ s 1 child-n-of-d child-d-d ))
-                     0)
-       (hash-update! number-of-descendents
-                     current
-                     (λ (s) (+ s 1 child-n-of-d))
-                     0)
-       (hash-set! parents child current)))
+    (define (pull-info current seen)
+      (define cs (hash-ref children current empty))
+      (for ([child cs]
+	    #:unless (member child seen))
+	(pull-info child (cons current seen))
+	(set! child-d-d (hash-ref distances-descendents child 0))
+	(set! child-n-of-d (hash-ref number-of-descendents child 0))
+	(hash-update! distances-descendents
+	  current
+	  (λ (s) (+ s 1 child-n-of-d child-d-d ))
+	  0)
+	(hash-update! number-of-descendents
+	  current
+	  (λ (s) (+ s 1 child-n-of-d))
+	  0)
+	(hash-set! parents child current)))
 
-   (pull-info 0 '())   
+    (pull-info 0 '())   
 
-   (set! seen empty)
-   (set! current 0)
-   (set! to-do (list current))
-   (define maybe-parent #f)
-   (define d-d 0)
-   (define n-of-d 0)
-   (define t-d 0)
-   (set! cs empty)
+    (set! seen empty)
+    (set! current 0)
+    (set! to-do (list current))
+    (define maybe-parent #f)
+    (define d-d 0)
+    (define n-of-d 0)
+    (define t-d 0)
+    (set! cs empty)
   
-   (do () [(empty? to-do)]
+    (do () [(empty? to-do)]
 
-     (set! current (first to-do))
+      (set! current (first to-do))
      
-     (if (member current seen)
+      (if (member current seen)
          
-         (set! to-do (rest to-do))
+	  (set! to-do (rest to-do))
 
-         (begin
-           (set! seen (cons current seen))
-           (set! maybe-parent
-                 (hash-ref parents current #f))
-           (set! d-d
-                 (hash-ref distances-descendents current 0))
-           (set! n-of-d
-                 (hash-ref number-of-descendents current 0))
-           (set! t-d
-                 (if maybe-parent
-                     (+ d-d
-                        (- (hash-ref distances-total maybe-parent)
-                           (+ 1 n-of-d d-d))
-                        (- n 1 n-of-d))
-                     d-d))
-           (hash-set! distances-total current t-d)
-           (set! cs (hash-ref children current empty))
-           (set! to-do (append cs (rest to-do))))))
+	  (begin
+	    (set! seen (cons current seen))
+	    (set! maybe-parent
+	      (hash-ref parents current #f))
+	    (set! d-d
+	      (hash-ref distances-descendents current 0))
+	    (set! n-of-d
+	      (hash-ref number-of-descendents current 0))
+	    (set! t-d
+	      (if maybe-parent
+		  (+ d-d
+		     (- (hash-ref distances-total maybe-parent)
+			(+ 1 n-of-d d-d))
+		     (- n 1 n-of-d))
+		  d-d))
+	    (hash-set! distances-total current t-d)
+	    (set! cs (hash-ref children current empty))
+	    (set! to-do (append cs (rest to-do))))))
    
 
-     (for/list ([i (in-range n)])
-       (hash-ref distances-total i))))
+    (for/list ([i (in-range n)])
+      (hash-ref distances-total i))))
 
- (module%
-  c
+;; ---------------------------------------------------------------------------------------------------
+(module% c
 
   (define from `[])
   (define rationale "imperative code in o(n)")
@@ -292,9 +291,8 @@
     (for/list ([i (in-range n)])
       (hash-ref distances-total i))))
   
-
- (module%
-  functional-recursive
+;; ---------------------------------------------------------------------------------------------------
+(module% functional-recursive
 
   (define from `[[base ,FUNCTIONAL-VANILLA]])
   (define rationale "turning comprehensions to vanilla recursion")
@@ -335,9 +333,8 @@
           (cons (inner (- n 1) nodes) (outter (- n 1)))))
     (reverse (outter nodes))))
 
-
- (module%
-  accumulator-recursive
+;; ---------------------------------------------------------------------------------------------------
+(module% accumulator-recursive
 
   (define from `[[functional-recursive ,ACCUMULATOR-VANILLA]])
   (define rationale "turning vanilla to accumulator-based")
@@ -377,7 +374,8 @@
           (cons (inner (- n 1) nodes) (outter (- n 1)))))
     (reverse (outter nodes))))
 
- (test
+;; ---------------------------------------------------------------------------------------------------
+(test
   sum-of-distances-in-tree
   in
   base
