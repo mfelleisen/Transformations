@@ -179,12 +179,6 @@
   
   (define/contract (max-jump l0 target) max-jump/c
     (define G (graph l0 target))
-
-    #;
-    (define-values [nodes edges] (graph->nodes+edges G))
-    #;
-    (eprintf "~a\n" (draw-graph nodes edges))
-    
     (search G 0 (sub1 (length l0))))
 
   #; {Graph -> (values [Listof Node] [Listof Edge])}
@@ -227,6 +221,9 @@
        ; #:measure 10000
        ]
       with
+
+      (check-equal? (max-jump (list 1 3 5 6 3 2 1 2 1 3 4 3) 2) 10)
+      #; (max-jump-aux (list 1 3 5 6 3 2 1 2 1 3 4 3) 2)
 
       (define LIMIT  109)
       (define osc1 (build-list LIMIT add1))

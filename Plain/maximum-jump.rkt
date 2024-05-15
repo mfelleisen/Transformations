@@ -370,12 +370,6 @@
 
 (define (max-jump-graph l0 target) ;; contract  max-jump-graph/c
   (define G (graph-graph l0 target))
-
-  #;
-  (define-values [nodes edges] (graph-graph->nodes+edges G))
-  #;
-  (eprintf "~a\n" (draw-graph-graph nodes edges))
-    
   (search-graph G 0 (sub1 (length l0))))
 
 #; {Graph -> (values [Listof Node] [Listof Edge])}
