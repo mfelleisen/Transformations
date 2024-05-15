@@ -677,6 +677,33 @@
   (define child-d-d 0)
   (define child-n-of-d 0)     
   (define cs empty)
+
+  (do () [(empty? to-do)]
+
+    (set! current (first to-do))
+
+    (if (member current seen)
+        (set! to-do (rest to-do))
+        (let ([cs (hash-ref children current empty)])
+          (if (empty? cs)
+              (set! seen (cons current seen))
+              (for ([child cs])
+                (if (member child seen)
+                    (begin
+                      (set! child-d-d (hash-ref distances-descendents child 0))
+                      (set! child-n-of-d (hash-ref number-of-descendents child 0))
+                      (hash-update! distances-descendents
+                                    current
+                                    (λ (s) (+ s 1 child-n-of-d child-d-d ))
+                                    0)
+                      (hash-update! number-of-descendents
+                                    current
+                                    (λ (s) (+ s 1 child-n-of-d))
+                                    0)
+                      (hash-set! parents child current))
+                    (set! to-do (cons child to-do))))))))
+              
+              
    
   (define (pull-info-assembly current seen)
     (define cs (hash-ref children current empty))
