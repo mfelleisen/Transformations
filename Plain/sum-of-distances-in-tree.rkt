@@ -604,7 +604,7 @@
            
 
 
-(define (sum-of-distances-in-tree-base n es) ;; contract  sdt/c
+(define (sum-of-distances-in-tree-HIGH n es) ;; contract  sdt/c
   (for/list ([i (in-range n)])
     (for/sum ([j (in-range n)])
       (find-path-length-base i j es empty))))
@@ -891,7 +891,7 @@
  ai13 ai12 ai11 ai10 ai9 ai8 ai7 ai6 ai5 ai4 ai3 ai2 ai1 ai0
 
 
- base
+ HIGH
  accumulator
  functional-recursive
  accumulator-recursive

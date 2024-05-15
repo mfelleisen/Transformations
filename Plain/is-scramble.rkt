@@ -179,7 +179,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 ;; MODULE base2
 
-(define (is-base2 s t) ;; contract  is/c
+(define (is-HIGH s t) ;; contract  is/c
   (define k (string->list s))
   (define l (string->list t))
   (cond
@@ -459,7 +459,7 @@
       ; base ; is too inefficient to get thru "datastructure"
       ai4 ai3 ai2 ai1 ai0
 
-      base2 accumulator cps cps-ll cps-data inline
+      HIGH accumulator cps cps-ll cps-data inline
       [#:show-graph #true]
       with
       

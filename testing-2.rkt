@@ -27,7 +27,7 @@
         )
      #:do [(define n* (map syntax-e (syntax->list #'(name ...))))
            (define p* (map (λ (n) (~a (symbol->string n) ":")) n*))]
-     #:with (ss ...) (map (with-prefix stx #'exported) n*)
+     #:with (ss ...) (map (with-prefix stx #'exported) (syntax->list #'(name ...)))
      
      #`(module+ test
          #,(datum->syntax stx '(require rackunit))
@@ -42,13 +42,9 @@
 (define-syntax-rule (timed mm eb ...) (time (for ([i mm]) eb ...)))
 (define-syntax-rule (id mm eb ...) (let () eb ...))
 
-;; compile time for `test`
-#; {Syntax -> [String Symbol -> Syntax]}
-(define-for-syntax ((require-with-prefix stx) pre mod-name)
-  (datum->syntax stx `(require (prefix-in ,(string->symbol pre) (submod ".." ,mod-name)))))
-
 #; {Syntax -> [Symbol -> Syntax]}
 (define-for-syntax ((with-prefix stx syntax-name) pre)
+  (define synt (syntax-e pre))
   (define name (syntax-e syntax-name))
-  (datum->syntax stx (string->symbol (~a name "-" pre))))
+  (datum->syntax stx (string->symbol (~a name "-" synt)) pre stx))
 

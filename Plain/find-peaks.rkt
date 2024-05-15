@@ -182,7 +182,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 ;; MODULE functional
 
-(define (peaks-functional measurements0) ;; contract  peaks/c
+(define (peaks-HIGH measurements0) ;; contract  peaks/c
   #; {Real Real Real -> Boolean}
   (define (peak? left x right)
     (and (< left x) (> x right)))
@@ -229,7 +229,7 @@
       in
       ai8 ai7 ai6 ai5 ai4 ai3 ai2 ai1 ai0
 
-      base-bsl functional imperative-simplified imperative
+      base-bsl HIGH imperative-simplified imperative
       [#:show-graph #true]
       with
       #;

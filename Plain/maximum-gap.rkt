@@ -367,7 +367,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 ;; MODULE object
   
-(define (mg-object l) ;; contract  mg/c
+(define (mg-HIGH l) ;; contract  mg/c
   (cond
     [(or (empty? l) (empty? (rest l))) 0]
     [else (send (new interval% [l l]) determine-maximum-gap)]))
@@ -410,7 +410,7 @@
       in
       ai6 ai5 ai4 ai3 ai2 ai1 ai0
       
-      stateful-interval object inline c
+      stateful-interval HIGH inline c
       [#:show-graph #true]
       with
       

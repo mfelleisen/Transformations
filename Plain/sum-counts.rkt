@@ -198,7 +198,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 ;; MODULE elim-3
   
-(define (sc-elim-3 l0) ;; contract  sc/c
+(define (sc-HIGH l0) ;; contract  sc/c
   (for/sum ([l (in-suffix l0)])
     (scan-for-distinct-values-elim-3 l)))
 
@@ -250,7 +250,7 @@
       in
       ai5 ai4 ai3 ai2 ai1 ai0
 
-      plain elim elim-2 elim-3 inline inline-2 inline-3
+      plain elim elim-2 HIGH inline inline-2 inline-3
       [#:show-graph #true]
       with
       (check-equal? (sc (list 1 2 1)) 15)

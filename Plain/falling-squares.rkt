@@ -548,7 +548,7 @@
 ;; MODULE object
 
 
-(define (falling-squares-object l) ;; contract  fs/c
+(define (falling-squares-HIGH l) ;; contract  fs/c
   (define scene [new scene%])
   (for/fold ([maxs '()] #:result (reverse maxs)) ([square l])
     (send scene add-square square)
@@ -598,7 +598,7 @@
       ;; AI
       ai8 ai7 ai6 ai5 ai4 ai3 ai2 ai1 ai0
       ;; MINE
-      base inline c stateful-scene state-accu accumulator object
+      base inline c stateful-scene state-accu accumulator HIGH
       [#:show-graph #true]
       with
       ;; my silly tests:

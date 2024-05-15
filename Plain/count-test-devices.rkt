@@ -119,7 +119,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 ;; MODULE for-racket 
 
-(define (ctd-for-racket  percentages0) ;; contract  ctd/c
+(define (ctd-HIGH  percentages0) ;; contract  ctd/c
     (for/fold ([count 0] [delta 0] #:result count) ([x (in-list percentages0)])
       (if (> (- x delta) 0)
           (values (add1 count) (add1 delta))
@@ -205,7 +205,7 @@
       ai0
       base-bsl  base-bsl-accu base-isl+ base-isl+-accu base-isl+-2-accu
       plain-racket ho-racket inline-racket accu-racket accu-2-racket 
-      for-racket
+      HIGH
       [#:show-graph #true]
       with
       (check-equal? (ctd (list 0 100)) 1)

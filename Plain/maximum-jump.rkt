@@ -236,7 +236,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 ;; MODULE backwards-base
   
-(define (max-jump-backwards-base l0 target) ;; contract  max-jump-backwards-base/c
+(define (max-jump-backwards-HIGH l0 target) ;; contract  max-jump-backwards-base/c
   (define okay? (good?-backwards-base? target))
   (first (max-jump-backwards-base-aux-backwards-base l0 okay?)))
 
@@ -252,9 +252,11 @@
 
 #; {Real [Listof Real] [Listof N] [Real Real -> Boolean] -> (U False N)}
 (define (find-max-for-backwards-base one R M okay?)
-  (for*/first ([step (in-range 0 (length R))]
-               [x (in-value (and (okay? (list-ref R step) one) (list-ref M step)))] #:when x)
-    (+ 1 x)))
+  (define all
+    (for*/list ([step (in-range 0 (length R))]
+                [x (in-value (and (okay? (list-ref R step) one) (list-ref M step)))] #:when x)
+      (+ 1 x)))
+  (if (empty? all) #false (apply max all)))
 
 #; {[Real -> Boolean] -> Real Real -> Boolean}
 (define ((good?-backwards-base? target) num@j num@i)
@@ -407,7 +409,7 @@
 
       ai8 ai7 ai6 ai5 ai4 ai3 ai2 ai1 ai0
 
-      backwards-base no-listref let-loop inline forwards-base forwards-base-2
+      backwards-HIGH no-listref let-loop inline forwards-base forwards-base-2
       [
        #:show-graph #true
        ; #:measure 10000
