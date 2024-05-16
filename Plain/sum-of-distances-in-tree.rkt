@@ -585,34 +585,34 @@
 (define MAX-NODES (* 3 104))
 
 ;; ---------------------------------------------------------------------------------------------------
-;; MODULE base
+;; MODULE asl
 
-(define (find-children-base current es)
+(define (find-children-asl current es)
   (for/list ([e es]
              #:when (member current e))
     (match-define (list a b) e)
     (if (= current a) b a)))
  
-(define (find-path-length-base start end es seen)
+(define (find-path-length-asl start end es seen)
   (cond [(= start end) 0]
         [else
          (define maybe-path-length
-           (for/or ([child (find-children-base start es)]
+           (for/or ([child (find-children-asl start es)]
                     #:unless (member child seen))
-             (find-path-length-base child end es (cons start seen))))
+             (find-path-length-asl child end es (cons start seen))))
          (and maybe-path-length (+ 1 maybe-path-length))])) 
            
 
 
-(define (sum-of-distances-in-tree-HIGH n es) ;; contract  sdt/c
+(define (sum-of-distances-in-tree-asl n es) ;; contract  sdt/c
   (for/list ([i (in-range n)])
     (for/sum ([j (in-range n)])
-      (find-path-length-base i j es empty))))
+      (find-path-length-asl i j es empty))))
 
 ;; ---------------------------------------------------------------------------------------------------
-;; MODULE accumulator
+;; MODULE asl-accumulator
 
-(define (find-children-accumulator current es)
+(define (find-children-asl-accumulator current es)
   (for/fold ([children empty]              
              #:result children)
             ([e es]
@@ -620,21 +620,21 @@
     (match-define (list a b) e)
     (values (cons (if (= current a) b a) children))))
  
-(define (find-path-length-accumulator start end es seen path-length)
+(define (find-path-length-asl-accumulator start end es seen path-length)
   (cond [(= start end) path-length]
         [else
          (for/fold ([found #f]
                     #:result found)
-                   ([child (find-children-accumulator start es)]
+                   ([child (find-children-asl-accumulator start es)]
                     #:unless (member child seen))
            (values
             (or found
-                (find-path-length-accumulator
+                (find-path-length-asl-accumulator
                  child end es
                  (cons start seen)
                  (+ 1 path-length)))))]))
 
-(define (sum-of-distances-in-tree-accumulator n es) ;; contract  sdt/c
+(define (sum-of-distances-in-tree-asl-accumulator n es) ;; contract  sdt/c
   (for/fold ([sums empty]
              #:result sums)
             ([i (in-range n)])
@@ -642,8 +642,83 @@
       (for/fold ([sum 0]
                  #:result sum)
                 ([j (in-range n)])
-        (values (+ sum (find-path-length-accumulator i j es empty 0)))))
+        (values (+ sum (find-path-length-asl-accumulator i j es empty 0)))))
     (values (append sums (list one-more-sum)))))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE bsl
+
+(define (find-children-bsl current es)
+  (cond [(empty? es) empty]
+        [(member current (first es))
+         (define e (first es))
+         (define a (first e))
+         (define b (second e))
+         (define child
+           (if (= current a) b a))
+         (cons child (find-children-bsl current (rest es)))]
+        [else (find-children-bsl current (rest es))]))
+ 
+(define (find-path-length-bsl start end es seen)
+  (cond [(= start end) 0]
+        [(member start seen) #f]
+        [else
+         (define children (find-children-bsl start es))
+         (ormap 
+          (λ (child)
+            (define maybe-path
+              (find-path-length-bsl child end es (cons start seen)))
+            (and maybe-path (+ 1 maybe-path)))
+          children)]))
+           
+ 
+(define (sum-of-distances-in-tree-bsl nodes es) ;; contract  sdt/c
+  (define (inner-bsl source n)
+    (if (= n 0)
+        0
+        (+ (find-path-length-bsl source (- n 1) es empty)
+           (inner-bsl source (- n 1)))))
+  (define (outter-bsl n)
+    (if (= n 0)
+        empty
+        (cons (inner-bsl (- n 1) nodes) (outter-bsl (- n 1)))))
+  (reverse (outter-bsl nodes)))
+
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE bsl-accumulator
+
+(define (find-children-bsl-accumulator current es children)
+  (cond [(empty? es) children]
+        [(member current (first es))
+         (define e (first es))
+         (define a (first e))
+         (define b (second e))
+         (define child
+           (if (= current a) b a))
+         (find-children-bsl-accumulator current (rest es) (cons child children))]
+        [else (find-children-bsl-accumulator current (rest es) children)]))
+ 
+(define (find-path-length-bsl-accumulator start end es seen path-length)
+  (cond [(= start end) path-length]
+        [(member start seen) #f]
+        [else
+         (define children (find-children-bsl-accumulator start es empty))
+         (ormap 
+          (λ (child)
+            (find-path-length-bsl-accumulator child end es (cons start seen) (+ 1 path-length)))
+          children)]))
+ 
+(define (sum-of-distances-in-tree-bsl-accumulator nodes es) ;; contract  sdt/c
+  (define (inner-bsl-accumulator source n)
+    (if (= n 0)
+        0
+        (+ (find-path-length-bsl-accumulator source (- n 1) es empty 0)
+           (inner-bsl-accumulator source (- n 1)))))
+  (define (outter-bsl-accumulator n)
+    (if (= n 0)
+        empty
+        (cons (inner-bsl-accumulator (- n 1) nodes) (outter-bsl-accumulator (- n 1)))))
+  (reverse (outter-bsl-accumulator nodes)))
 
 ;; ---------------------------------------------------------------------------------------------------
 ;; MODULE assembly
@@ -816,80 +891,6 @@
   (for/list ([i (in-range n)])
     (hash-ref distances-total i)))
   
-;; ---------------------------------------------------------------------------------------------------
-;; MODULE functional-recursive
-
-(define (find-children-functional-recursive current es)
-  (cond [(empty? es) empty]
-        [(member current (first es))
-         (define e (first es))
-         (define a (first e))
-         (define b (second e))
-         (define child
-           (if (= current a) b a))
-         (cons child (find-children-functional-recursive current (rest es)))]
-        [else (find-children-functional-recursive current (rest es))]))
- 
-(define (find-path-length-functional-recursive start end es seen)
-  (cond [(= start end) 0]
-        [(member start seen) #f]
-        [else
-         (define children (find-children-functional-recursive start es))
-         (ormap 
-          (λ (child)
-            (define maybe-path
-              (find-path-length-functional-recursive child end es (cons start seen)))
-            (and maybe-path (+ 1 maybe-path)))
-          children)]))
-           
- 
-(define (sum-of-distances-in-tree-functional-recursive nodes es) ;; contract  sdt/c
-  (define (inner-functional-recursive source n)
-    (if (= n 0)
-        0
-        (+ (find-path-length-functional-recursive source (- n 1) es empty)
-           (inner-functional-recursive source (- n 1)))))
-  (define (outter-functional-recursive n)
-    (if (= n 0)
-        empty
-        (cons (inner-functional-recursive (- n 1) nodes) (outter-functional-recursive (- n 1)))))
-  (reverse (outter-functional-recursive nodes)))
-
-;; ---------------------------------------------------------------------------------------------------
-;; MODULE accumulator-recursive
-
-(define (find-children-accumulator-recursive current es children)
-  (cond [(empty? es) children]
-        [(member current (first es))
-         (define e (first es))
-         (define a (first e))
-         (define b (second e))
-         (define child
-           (if (= current a) b a))
-         (find-children-accumulator-recursive current (rest es) (cons child children))]
-        [else (find-children-accumulator-recursive current (rest es) children)]))
- 
-(define (find-path-length-accumulator-recursive start end es seen path-length)
-  (cond [(= start end) path-length]
-        [(member start seen) #f]
-        [else
-         (define children (find-children-accumulator-recursive start es empty))
-         (ormap 
-          (λ (child)
-            (find-path-length-accumulator-recursive child end es (cons start seen) (+ 1 path-length)))
-          children)]))
- 
-(define (sum-of-distances-in-tree-accumulator-recursive nodes es) ;; contract  sdt/c
-  (define (inner-accumulator-recursive source n)
-    (if (= n 0)
-        0
-        (+ (find-path-length-accumulator-recursive source (- n 1) es empty 0)
-           (inner-accumulator-recursive source (- n 1)))))
-  (define (outter-accumulator-recursive n)
-    (if (= n 0)
-        empty
-        (cons (inner-accumulator-recursive (- n 1) nodes) (outter-accumulator-recursive (- n 1)))))
-  (reverse (outter-accumulator-recursive nodes)))
 
 ;; ---------------------------------------------------------------------------------------------------
 (test
@@ -899,10 +900,10 @@
  ai13 ai12 ai11 ai10 ai9 ai8 ai7 ai6 ai5 ai4 ai3 ai2 ai1 ai0
 
 
- HIGH
- accumulator
- functional-recursive
- accumulator-recursive
+ asl
+ asl-accumulator
+ bsl
+ bsl-accumulator
  c
  assembly
  [#:show-graph #true]
