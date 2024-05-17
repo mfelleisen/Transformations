@@ -891,6 +891,77 @@
   (for/list ([i (in-range n)])
     (hash-ref distances-total i)))
   
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE HIGH
+
+(define (sum-of-distances-in-tree-HIGH n es) ;; contract  sdt/c
+
+  (define children
+    (for/fold ([cs (hash)])
+              ([e (append es (map reverse es))])
+        (hash-update cs
+                     (first e)
+                     (λ (v) (cons (second e) v))
+                     empty))) 
+
+
+  (struct info (d-ds n-of-ds ps))
+   
+ 
+  (define (pull-info-high current seen an-info)
+    (define cs (hash-ref children current empty))
+    (for/fold ([an-info-acc an-info])
+              ([child cs]
+          #:unless (member child seen))
+      (define an-info (pull-info-high child (cons current seen) an-info-acc))
+      (define d-ds (info-d-ds an-info))
+      (define n-of-ds (info-n-of-ds an-info))
+      (define ps (info-ps an-info))
+      (define child-d-d (hash-ref d-ds child 0))
+      (define child-n-of-ds (hash-ref n-of-ds child 0))
+      (info
+      (hash-update d-ds
+                    current
+                    (λ (s) (+ s 1 child-n-of-ds child-d-d))
+                    0)
+      (hash-update n-of-ds
+                   current
+                   (λ (s) (+ s 1 child-n-of-ds))
+                   0)
+      (hash-set ps child current))))
+
+  (define (push-info-high current seen t-ds d-ds n-of-ds ps)
+    (define maybe-p
+      (hash-ref ps current #f))
+    (define d-d
+      (hash-ref d-ds current 0))
+    (define n-of-d
+      (hash-ref n-of-ds current 0))
+    (define t-d
+      (if maybe-p
+          (+ d-d
+             (- (hash-ref t-ds maybe-p)
+                (+ 1 n-of-d d-d))
+             (- n 1 n-of-d))
+          d-d))
+    (define current-t-ds
+      (hash-set t-ds current t-d))
+    (define cs (hash-ref children current empty))
+    (for/fold ([t-ds current-t-ds])
+              ([child cs]
+               #:unless (member child seen))
+      (values (push-info-high child (cons current seen) t-ds d-ds n-of-ds ps))))
+ 
+ 
+     
+  (match-define (info d-ds n-of-ds ps)
+    (pull-info-high 0 '() (info (hash) (hash) (hash))))    
+  (define distances-total (push-info-high 0 '() (hash) d-ds n-of-ds ps))
+   
+
+  (for/list ([i (in-range n)])
+    (hash-ref distances-total i)))
+  
 
 ;; ---------------------------------------------------------------------------------------------------
 (test
@@ -906,6 +977,7 @@
  bsl-accumulator
  c
  assembly
+ HIGH
  [#:show-graph #true]
  with
     
