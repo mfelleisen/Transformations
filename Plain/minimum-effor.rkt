@@ -78,13 +78,33 @@
   ;; Return the final answer.
   ans)
 
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE HIGH
+;;
+(define (me-HIGH tasks)
 
+   (define sorted (sort tasks >= #:key (λ (e) (- (second e) (first e)))))
+
+  (define-values (credit total)
+    (for/fold ([credit 0]
+               [total 0])
+              ([task sorted])
+      (define threshold (second task))
+      (define cost (first task))
+      (define re-up
+        (if (< credit threshold)
+            (- threshold credit)
+            0))
+      (values (- (+ credit re-up) cost) (+ total re-up))))
+
+  total)
 
 (test me
       in
       ai0
       ai1
       ai2
+      HIGH
       [#:show-graph #true]
       with
 
