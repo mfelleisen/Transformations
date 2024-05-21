@@ -150,7 +150,7 @@ def main(args):
             model=args.model,
             messages=prompt,  # type: ignore
             n=args.attempts,
-            temperature=0.5,
+            temperature=0.75,
             top_p=0.95,
         )
 
@@ -181,6 +181,6 @@ if __name__ == "__main__":
     parser.add_argument("--high-dir", type=str, default="../Plain/")
     parser.add_argument("--programs-dir", type=str, default="./v2_processed")
     parser.add_argument("--model", type=str, default="gpt-4o")
-    parser.add_argument("--attempts", type=int, default=10)
+    parser.add_argument("--attempts", type=int, default=25)
     args = parser.parse_args()
     main(args)
