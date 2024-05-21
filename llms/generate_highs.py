@@ -57,7 +57,7 @@ def get_low_to_high_examples(high_dir_str: str) -> List[Tuple[str, str, str]]:
 
 
 SYSTEM = """You are a Racket expert. You are given a unidiomatic Racket program, and your task is to refactor the program to make it more idiomatic. You can assume that the input program is correct and that it has the same behavior as the refactored program.
-Idiomatic Racket code favors immutability, recursion, traversals, and higher-order functions. It is discouraged to use mutable data structures, loops, imperative programming constructs, and direct list indexing (e.g. list-ref).
+Idiomatic Racket code favors immutability, recursion, accumulators, traversals, and higher-order functions. It is discouraged to use mutable data structures, loops, imperative programming constructs, and direct list indexing (e.g. list-ref).
 Extremely important: do not change the name of the function, the number of arguments, or the behavior of the function. The refactored program should have the same behavior as the input program."""
 
 
