@@ -171,43 +171,45 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 
-(module% graph
-  (require "../testing.rkt")
+;; ---------------------------------------------------------------------------------------------------
+;; MODULE graph
 
-  (define from '[])
-  (define rationale "build graph then traverse graph, via plain recursion")
-  
-  (define/contract (max-jump l0 target) max-jump/c
-    (define G (graph l0 target))
-    (search G 0 (sub1 (length l0))))
+(module% graph 
+         (struct node [name #; string color #;color-string])
+         (struct edge [from #; string label #;string to #;string])
 
-  #; {Graph -> (values [Listof Node] [Listof Edge])}
-  (define (graph->nodes+edges G)
-    (define nodes
-      (for/list ([x (in-range (vector-length G))])
-        (node (~a x) "red")))
-    (define edges
-      (for/fold ([r '()]) ([row G] [from (in-naturals)])
-        (append r (map (λ (to) (edge (~a from) (~a to) "")) row))))
-    (values nodes edges))
+         (define (max-jump-graph l0 target) ;; contract  max-jump-graph/c
+           (define G (graph-graph l0 target))
+           (search-graph G 0 (sub1 (length l0))))
 
-  #; {type [Graph n] = <[k l ... m] ... []> || where k < l < ... < m}
+         #; {Graph -> (values [Listof Node] [Listof Edge])}
+         (define (graph-graph->nodes+edges G)
+           (define nodes
+             (for/list ([x (in-range (vector-length G))])
+               (node (~a x) "red")))
+           (define edges
+             (for/fold ([r '()]) ([row G] [from (in-naturals)])
+               (append r (map (λ (to) (edge (~a from) (~a to) "")) row))))
+           (values nodes edges))
 
-  #; {[Graph n] 0 n -> (U False N)}
-  (define (search G from0 to)
-    (let search ([from from0])
-      (cond
-        [(= from to) 0]
-        [(ormap search (vector-ref G from)) => add1]
-        [else #false])))
-       
-  #; {l : [Listof Real] Real -> [Graph (sub1 (length l))]}
-  (define (graph l0 target)
-    (for/vector ([x (in-list l0)] [l (in-suffix l0)] [i (in-naturals)])
-      (for/fold ([r '()] #:result (reverse r)) ([y (in-list (rest l))] [j (in-naturals (add1 i))])
-        (if (<= (abs (- y x)) target)
-            (cons j r)
-            r)))))
+         #; {type [Graph n] = <[k l ... m] ... []> || where k < l < ... < m}
+
+         #; {[Graph n] 0 n -> (U False N)}
+         (define (search-graph G from0 to)
+           (let search-graph ([from from0])
+             (cond
+               [(= from to) 0]
+               [else
+                (define all (map search-graph (vector-ref G from)))
+                (if (empty? all) #false (add1 (apply max all)))])))
+         
+         #; {l : [Listof Real] Real -> [Graph (sub1 (length l))]}
+         (define (graph-graph l0 target)
+           (for/vector ([x (in-list l0)] [l (in-suffix l0)] [i (in-naturals)])
+             (for/fold ([r '()] #:result (reverse r)) ([y (in-list (rest l))] [j (in-naturals (add1 i))])
+               (if (<= (abs (- y x)) target)
+                   (cons j r)
+                   r)))))
 
 ;; ---------------------------------------------------------------------------------------------------
 (test max-jump

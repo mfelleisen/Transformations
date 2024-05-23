@@ -223,7 +223,7 @@
   
   ;; Update dp for each index from 0 to n-1
   (define final-dp (for/fold ([dp dp]) ([i (in-range n)])
-                    (update-dp i dp)))
+                     (update-dp i dp)))
   
   ;; Check the last element of dp; if it's still -inf, return -1, otherwise return its value
   (if (= (last final-dp) -inf.0) #false (inexact->exact (last final-dp))))
@@ -236,7 +236,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 ;; MODULE backwards-base
   
-(define (max-jump-backwards-HIGH l0 target) ;; contract  max-jump-backwards-base/c
+(define (max-jump-backwards l0 target) ;; contract  max-jump-backwards-base/c
   (define okay? (good?-backwards-base? target))
   (first (max-jump-backwards-base-aux-backwards-base l0 okay?)))
 
@@ -265,7 +265,7 @@
 ;; ---------------------------------------------------------------------------------------------------
 ;; MODULE no-listref
   
-(define (max-jump-no-listref l0 target) ;; contract  max-jump-no-listref/c
+(define (max-jump-HIGH l0 target) ;; contract  max-jump-no-listref/c
   (define okay? (good?-no-listref? target))
   (first (max-jump-no-listref-aux-no-listref l0 okay?)))
 
@@ -281,8 +281,10 @@
 
 #; {Real [Listof Real] [Listof N] [Real Real -> Boolean] -> (U False N)}
 (define (find-max-for-no-listref one R M okay?)
-  (for/first ([nxt (in-list R)] [steps (in-list M)] #:when (and steps (okay? nxt one)))
-    (+ 1 steps)))
+  (define all 
+    (for/list ([nxt (in-list R)] [steps (in-list M)] #:when (and steps (okay? nxt one)))
+      (+ 1 steps)))
+  (if (empty? all) #false (apply max all)))
   
 #; {[Real -> Boolean] -> Real Real -> Boolean}
 (define ((good?-no-listref? target) num@j num@i)
@@ -308,8 +310,10 @@
 
 #; {Real [Listof Real] [Listof N] [Real Real -> Boolean] -> (U False N)}
 (define (find-max-for-let-loop one R M okay?)
-  (for/first ([nxt (in-list R)] [steps (in-list M)] #:when (and steps (okay? nxt one)))
-    (+ 1 steps)))
+  (define all 
+    (for/list ([nxt (in-list R)] [steps (in-list M)] #:when (and steps (okay? nxt one)))
+      (+ 1 steps)))
+  (if (empty? all) #false (apply max all)))
   
 #; {[Real -> Boolean] -> Real Real -> Boolean}
 (define ((good?-let-loop? target) num@j num@i)
@@ -327,12 +331,10 @@
         [(list _) '[0]]
         [(cons F R)
          (define M (max-jump-inline-aux R))
-         #;
-         (define best
-           (ormap (λ (nxt from-nxt) (and from-nxt (okay?-inline? nxt F) (+ 1 from-nxt))) R M))
-         (define best
-           (for/first ([nxt (in-list R)] [steps (in-list M)] #:when (and steps (okay?-inline? nxt F)))
+         (define all
+           (for/list ([nxt (in-list R)] [steps (in-list M)] #:when (and steps (okay?-inline? nxt F)))
              (+ 1 steps)))
+         (define best (if (empty? all) #false (apply max all)))
          (cons best M)])))
   (first best*))
 
@@ -365,56 +367,19 @@
   (and (>= r 0) r))
 
 ;; ---------------------------------------------------------------------------------------------------
-;; MODULE graph
-
-(struct node [name #; string color #;color-string])
-(struct edge [from #; string label #;string to #;string])
-
-(define (max-jump-graph l0 target) ;; contract  max-jump-graph/c
-  (define G (graph-graph l0 target))
-  (search-graph G 0 (sub1 (length l0))))
-
-#; {Graph -> (values [Listof Node] [Listof Edge])}
-(define (graph-graph->nodes+edges G)
-  (define nodes
-    (for/list ([x (in-range (vector-length G))])
-      (node (~a x) "red")))
-  (define edges
-    (for/fold ([r '()]) ([row G] [from (in-naturals)])
-      (append r (map (λ (to) (edge (~a from) (~a to) "")) row))))
-  (values nodes edges))
-
-#; {type [Graph n] = <[k l ... m] ... []> || where k < l < ... < m}
-
-#; {[Graph n] 0 n -> (U False N)}
-(define (search-graph G from0 to)
-  (let search-graph ([from from0])
-    (cond
-      [(= from to) 0]
-      [(ormap search-graph (vector-ref G from)) => add1]
-      [else #false])))
-       
-#; {l : [Listof Real] Real -> [Graph (sub1 (length l))]}
-(define (graph-graph l0 target)
-  (for/vector ([x (in-list l0)] [l (in-suffix l0)] [i (in-naturals)])
-    (for/fold ([r '()] #:result (reverse r)) ([y (in-list (rest l))] [j (in-naturals (add1 i))])
-      (if (<= (abs (- y x)) target)
-          (cons j r)
-          r))))
-
-;; ---------------------------------------------------------------------------------------------------
 (test max-jump
       in
-      graph
 
       ai8 ai7 ai6 ai5 ai4 ai3 ai2 ai1 ai0
 
-      backwards-HIGH no-listref let-loop inline forwards-base forwards-base-2
+      HIGH backwards let-loop inline forwards-base forwards-base-2
       [
        #:show-graph #true
        ; #:measure 10000
        ]
       with
+
+      (check-equal? (max-jump (list 1 3 5 6 3 2 1 2 1 3 4 3) 2) 10 "Ben's test")
 
       (define LIMIT  109)
       (define osc1 (build-list LIMIT add1))
