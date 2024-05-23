@@ -197,7 +197,7 @@
     (cond
       [(empty? other-offers) this-profit]
       [else 
-       (define possible-other-offers (possible-rest offers this-offer))
+       (define possible-other-offers (possible-rest other-offers this-offer))
        (define profit+this-profit
          (if possible-other-offers
              (+ this-profit (dp possible-other-offers))
