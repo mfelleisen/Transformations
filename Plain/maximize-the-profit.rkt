@@ -187,41 +187,45 @@
 
 (define (mp-HIGH n offers)
 
-   (define (other-possible this-end possible offers)
-    (define-values (low high)
-      (split-at offers (quotient (length offers) 2)))
-    (match high
-      [(list (list p-start _ _))
-       (if (< this-end p-start)
-           (other-possible this-end (append high possible) low)
-           possible)]
-      [(cons (list p-start _ _) _)
-       (if (< this-end p-start)
-           (other-possible this-end (append high possible) low)
-           (other-possible this-end possible high))]
-      [_ possible]))
+
+ 
      
          
   (define (dp offers)
+
+     (define (next-possible end last first)
+      (define pivot (+ first (quotient (- last first) 2)))
+      (match-define (list next-start _ _) (vector-ref offers pivot))
+      (cond [(= first last) (and (< end next-start) last)]
+            [(>= end next-start) (next-possible end last (+ 1 pivot))]
+            [else (next-possible end pivot first)]))
+
+    
     (define memo-table (make-hash))
-    (define (memoize offer profit)
-      (hash-set! memo-table offer profit)
+    
+    (define (memoize offer-index profit)
+      (hash-set! memo-table offer-index profit)
       profit)
-    (define (memo-dp offers)
-      (match-define (cons this-offer other-offers) offers)
-      (match-define (list _ this-end this-profit) this-offer)
-      (or (hash-ref memo-table this-offer #f)
-          (match other-offers
-            ['() (memoize this-offer this-profit)]
-            [(app (curry other-possible this-end '()) (list os ..1))
+    
+    (define last (sub1 (vector-length offers)))
+    (define (last-offer? i) (= i last))
+    
+    (define (memo-dp this)
+      (match-define (list _ this-end this-profit) (vector-ref offers this))
+      (or (hash-ref memo-table this #f)
+          (match this
+            [(app last-offer? #t) (memoize this this-profit)]
+            [(app (curry next-possible this-end last)
+                  (? number? i))
              (memoize
-              this-offer
-              (max (memo-dp other-offers) (+ this-profit (memo-dp os))))]
-            [_ (memoize this-offer (max (memo-dp other-offers) this-profit))])))
-      (memo-dp offers))
+              this
+              (max (memo-dp (+ 1 this)) (+ this-profit (memo-dp i))))]
+            [_ (memoize this (max (memo-dp (+ 1 this)) this-profit))])))
+    
+    (memo-dp 0))
        
        
-  (define sorted-offers (sort offers < #:key first))
+  (define sorted-offers (list->vector (sort offers < #:key first)))
 
   (dp sorted-offers))
 
@@ -238,9 +242,9 @@
       with
 
       ;; llm test
-      #;(check-equal? (mp 5 (list (list 0 0 1) (list 0 2 2) (list 1 3 2))) 3)
-      #;(check-equal? (mp 5 (list (list 0 0 1) (list 0 2 10) (list 1 3 2))) 10)
-      #;(check-equal? (mp 4 (list (list 1 3 10) (list 1 3 3) (list 0 0 1) (list 0 0 7))) 17)
+      (check-equal? (mp 5 (list (list 0 0 1) (list 0 2 2) (list 1 3 2))) 3)
+      (check-equal? (mp 5 (list (list 0 0 1) (list 0 2 10) (list 1 3 2))) 10)
+      (check-equal? (mp 4 (list (list 1 3 10) (list 1 3 3) (list 0 0 1) (list 0 0 7))) 17)
       (check-equal? (mp 4 (list (list 0 0 6) (list 1 2 8) (list 0 3 7) (list 2 2 5) (list 0 1 5) (list 2 3 2) (list 0 2 8) (list 2 3 10) (list 0 3 2))) 16)
       (check-equal? (mp 15 (list (list 5 5 10) (list 2 6 6) (list 8 11 5) (list 7 11 9) (list 2 4 1) (list 3 8 5) (list 0 6 9) (list 0 10 5) (list 5 10 8) (list 4 5 1))) 20)
       (check-equal? (mp 10 (list (list 1 6 1) (list 0 1 10) (list 3 6 2) (list 0 5 10) (list 0 0 3) (list 0 0 4) (list 1 1 4) (list 0 6 7) (list 4 4 1))) 12)
