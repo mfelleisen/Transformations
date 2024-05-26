@@ -188,7 +188,8 @@
 (define (mp-HIGH n offers)
 
    (define (other-possible this-end possible offers)
-    (define-values (low high) (split-at offers (quotient (length offers) 2)))
+    (define-values (low high)
+      (split-at offers (quotient (length offers) 2)))
     (match high
       [(list (list p-start _ _))
        (if (< this-end p-start)
@@ -202,12 +203,22 @@
      
          
   (define (dp offers)
-    (match-define (cons (list _ this-end this-profit) other-offers) offers)
-    (match other-offers
-      ['() this-profit]
-      [(app (curry other-possible this-end '()) (list os ..1))
-       (max (dp other-offers) (+ this-profit (dp os)))]
-      [_ (max (dp other-offers) this-profit)]))
+    (define memo-table (make-hash))
+    (define (memoize offer profit)
+      (hash-set! memo-table offer profit)
+      profit)
+    (define (memo-dp offers)
+      (match-define (cons this-offer other-offers) offers)
+      (match-define (list _ this-end this-profit) this-offer)
+      (or (hash-ref memo-table this-offer #f)
+          (match other-offers
+            ['() (memoize this-offer this-profit)]
+            [(app (curry other-possible this-end '()) (list os ..1))
+             (memoize
+              this-offer
+              (max (memo-dp other-offers) (+ this-profit (memo-dp os))))]
+            [_ (memoize this-offer (max (memo-dp other-offers) this-profit))])))
+      (memo-dp offers))
        
        
   (define sorted-offers (sort offers < #:key first))
