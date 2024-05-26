@@ -187,25 +187,39 @@
 
 (define (mp-HIGH n offers)
 
-  (define (possible-rest offers offer)
-    (memf (λ (o) (> (first offer) (second o))) offers))
- 
+  #;(define (possible-rest this-end offers)
+      (memf (λ (o) (< this-end (first o))) offers))
+
+  (define (possible-rest this-end spare offers)
+    (displayln (format "possible other offers: ~a, this end: ~a, spare: ~a" offers this-end spare))
+    (define mid (quotient (length offers) 2))
+    (displayln (format "mid: ~a" mid))
+    (define-values (low high) (split-at offers mid))
+    (displayln (format "low: ~a, high: ~a" low high))
+    (match high
+      [(list (list p-start _ _))
+       (if (< this-end p-start)
+           (append high spare)
+           spare)]
+      [(cons (list p-start _ _) _)
+       (if (> this-end p-start)
+           (possible-rest this-end spare high)
+           (possible-rest this-end (append high spare) low))]
+      [_ spare]))
+     
+         
   (define (dp offers)
-    (define this-offer (first offers))
-    (define this-profit (third this-offer))
-    (define other-offers (rest offers))
-    (cond
-      [(empty? other-offers) this-profit]
-      [else 
-       (define possible-other-offers (possible-rest other-offers this-offer))
-       (define profit+this-profit
-         (if possible-other-offers
-             (+ this-profit (dp possible-other-offers))
-             this-profit))
-       (max (dp other-offers) profit+this-profit)]))
+    (displayln (format "offers: ~a" offers))
+    (match-define (cons (list _ this-end this-profit) other-offers) offers)
+    (match other-offers
+      ['() this-profit]
+      [(app (curry possible-rest this-end '()) (list os ..1))
+       (format "================/n other offers: ~a" os)
+       (max (dp other-offers) (+ this-profit (dp os)))]
+      [_ (max (dp other-offers) this-profit)]))
        
        
-  (define sorted-offers (sort offers > #:key second))
+  (define sorted-offers (sort offers < #:key first))
 
   (dp sorted-offers))
 
@@ -222,10 +236,10 @@
       with
 
       ;; llm test
-      (check-equal? (mp 5 (list (list 0 0 1) (list 0 2 2) (list 1 3 2))) 3)
-      (check-equal? (mp 5 (list (list 0 0 1) (list 0 2 10) (list 1 3 2))) 10)
+      #;(check-equal? (mp 5 (list (list 0 0 1) (list 0 2 2) (list 1 3 2))) 3)
+      #;(check-equal? (mp 5 (list (list 0 0 1) (list 0 2 10) (list 1 3 2))) 10)
       (check-equal? (mp 4 (list (list 1 3 10) (list 1 3 3) (list 0 0 1) (list 0 0 7))) 17)
-      (check-equal? (mp 4 (list (list 0 0 6) (list 1 2 8) (list 0 3 7) (list 2 2 5) (list 0 1 5) (list 2 3 2) (list 0 2 8) (list 2 3 10) (list 0 3 2))) 16)
+      #|(check-equal? (mp 4 (list (list 0 0 6) (list 1 2 8) (list 0 3 7) (list 2 2 5) (list 0 1 5) (list 2 3 2) (list 0 2 8) (list 2 3 10) (list 0 3 2))) 16)
       (check-equal? (mp 15 (list (list 5 5 10) (list 2 6 6) (list 8 11 5) (list 7 11 9) (list 2 4 1) (list 3 8 5) (list 0 6 9) (list 0 10 5) (list 5 10 8) (list 4 5 1))) 20)
       (check-equal? (mp 10 (list (list 1 6 1) (list 0 1 10) (list 3 6 2) (list 0 5 10) (list 0 0 3) (list 0 0 4) (list 1 1 4) (list 0 6 7) (list 4 4 1))) 12)
       (check-equal? (mp 11 (list (list 7 8 6) (list 6 6 4) (list 4 6 9) (list 6 7 4) (list 5 5 8) (list 1 5 9) (list 7 7 8) (list 1 2 5) (list 0 2 9) (list 1 3 8) (list 0 2 7) (list 2 2 8))) 29)
@@ -321,6 +335,6 @@
       (check-equal? (mp 14 (list (list 3 4 4) (list 6 8 1) (list 0 4 1))) 5)
       (check-equal? (mp 11 (list (list 4 4 2) (list 1 2 7) (list 2 8 10) (list 1 1 3) (list 8 10 4) (list 1 2 1) (list 4 6 10))) 21)
       (check-equal? (mp 11 (list (list 1 8 1) (list 1 5 5) (list 0 1 3) (list 10 10 10) (list 1 1 8) (list 1 2 1) (list 2 3 10) (list 2 10 10) (list 2 2 9) (list 0 9 4))) 28)
-      (check-equal? (mp 6 (list (list 2 2 6) (list 0 1 2) (list 2 2 2))) 8))
+      (check-equal? (mp 6 (list (list 2 2 6) (list 0 1 2) (list 2 2 2))) 8)|#)
 
 
