@@ -140,8 +140,16 @@ def main(args):
     client = openai.Client(api_key=get_openai_key())
     dirs = list(Path(args.programs_dir).iterdir())
     for d in tqdm(dirs):
-        if any([str(d).endswith("_refactored") for d in d.iterdir()]):
-            continue  # skip this dir, already refactored some
+        # check if we did this already
+        skip = False
+        for refactored in d.glob("*_refactored"):
+            print(refactored)
+            if len(list(refactored.glob("*.rkt"))) > 0:
+                skip = True
+                break
+        if skip:
+            continue
+
         racket_files = list(d.glob("*.rkt"))
         racket_files = racket_files[:args.max_per_problem]
         for picked in racket_files:
