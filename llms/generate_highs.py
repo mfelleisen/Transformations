@@ -4,6 +4,7 @@ import random
 import openai
 import re
 from typing import Dict, List, Tuple
+from code_exec_server.code_exec_reqs import exec_test_batched, check_executor_alive
 from tqdm import tqdm
 
 SOLN_DELIM = ";; ---------------------------------------------------------------------------------------------------"
@@ -35,17 +36,20 @@ def get_low_to_high_examples(high_dir_str: str) -> List[Tuple[str, str, str]]:
         contents = file.read_text()
         prompt = file.with_suffix(".txt").read_text()
         high_ex = None
-        low_ex = None
+        low_exs = []
         for ex in contents.split(SOLN_DELIM):
+            if "aiHIGH" in ex:
+                continue
             if "\n(test" in ex:
                 continue
             elif "-HIGH" in ex:
                 high_ex = ex
             elif "-ai" in ex:
-                low_ex = ex
+                low_exs.append(ex)
 
         assert high_ex is not None, f"Could not find high example in {file}"
-        assert low_ex is not None, f"Could not find low example in {file}"
+        assert len(low_exs) != 0, f"Could not find low examples in {file}"
+        low_ex = random.choice(low_exs)
         # remove "-HIGH" from the high example
         high_ex = high_ex.replace("-HIGH", "")
         # and -ai{number}  (if there is any number) from the low example
@@ -53,6 +57,7 @@ def get_low_to_high_examples(high_dir_str: str) -> List[Tuple[str, str, str]]:
         low_ex = clean_example(low_ex)
         high_ex = clean_example(high_ex)
         examples.append((prompt, low_ex, high_ex))
+    random.shuffle(examples)
     return examples
 
 
@@ -133,46 +138,58 @@ def get_racket_docstring(code: str) -> str:
 def main(args):
     random.seed(42)
     client = openai.Client(api_key=get_openai_key())
-    examples = get_low_to_high_examples(args.high_dir)
-
     dirs = list(Path(args.programs_dir).iterdir())
     for d in tqdm(dirs):
         racket_files = list(d.glob("*.rkt"))
-        # TODO: if we have the resources, we can rewrite all of them instead of picking one
-        racket_picked = random.choice(racket_files)
-        code = racket_picked.read_text()
-        # separate from tests
-        split = code.split("(require rackunit)")
-        code = split[0]
-        tests = "(require rackunit)\n" + split[1]
-        prompt = prompt_with_examples(examples, code)
-        completion = client.chat.completions.create(
-            model=args.model,
-            messages=prompt,  # type: ignore
-            n=args.attempts,
-            temperature=0.75,
-            top_p=0.95,
-        )
+        racket_files = racket_files[:args.max_per_problem]
+        for picked in racket_files:
+            code = picked.read_text()
+            # separate from tests
+            split = code.split("(require rackunit)")
+            code = split[0]
+            tests = "(require rackunit)\n" + split[1]
+            prompt = prompt_with_examples(
+                get_low_to_high_examples(args.high_dir), code)
+            completion = client.chat.completions.create(
+                model=args.model,
+                messages=prompt,  # type: ignore
+                n=args.attempts,
+                temperature=0.75,
+                top_p=0.95,
+            )
 
-        # create dir for refactors
-        refactored_dir = d / (racket_picked.stem + "_refactored")
-        refactored_dir.mkdir(exist_ok=True)
+            # create dir for refactors
+            refactored_dir = d / (picked.stem + "_refactored")
+            refactored_dir.mkdir(exist_ok=True)
 
-        for i, choice in enumerate(completion.choices):
-            response = choice.message.content
-            if response is None:
-                print("No response from: ", args.model)
-                continue
+            refactors = []
+            for choice in completion.choices:
+                response = choice.message.content
+                if response is None:
+                    print("No response from: ", args.model)
+                    continue
 
-            refactored = markdown_codeblock_extract(response) + "\n" + tests
-            refactored = clean_example(refactored).replace(
-                "#lang racket", "").strip()
-            refactored = get_racket_docstring(code) + refactored
-            refactored = "#lang racket\n\n" + refactored
+                refactored = markdown_codeblock_extract(
+                    response) + "\n" + tests
+                refactored = clean_example(refactored).replace(
+                    "#lang racket", "").strip()
+                refactored = get_racket_docstring(code) + refactored
+                refactored = "#lang racket\n\n" + refactored
+                refactors.append(refactored)
 
-            refactored_file = refactored_dir / f"refactor_{i}.rkt"
-            refactored_file.write_text(refactored)
-            print(f"Refactored program {i} written to {refactored_file}")
+            # execute the refactors
+            assert check_executor_alive(
+                args.executor), "Executor is not alive. Please start it in code_exec_server"
+            results = exec_test_batched(args.executor, refactors, [
+                                        ""] * len(refactors), lang="racket")
+            for i, (refact, result) in enumerate(zip(refactors, results)):
+                if not result[0]:
+                    # didn't pass
+                    continue
+
+                refactored_file = refactored_dir / f"refactor_{i}.rkt"
+                refactored_file.write_text(refact)
+                print(f"Refactored program {i} written to {refactored_file}")
 
 
 if __name__ == "__main__":
@@ -182,5 +199,8 @@ if __name__ == "__main__":
     parser.add_argument("--programs-dir", type=str, default="./v2_processed")
     parser.add_argument("--model", type=str, default="gpt-4o")
     parser.add_argument("--attempts", type=int, default=25)
+    parser.add_argument("--max-per-problem", type=int, default=5)
+    parser.add_argument("--executor", type=str,
+                        default="http://127.0.0.1:8000")
     args = parser.parse_args()
     main(args)
