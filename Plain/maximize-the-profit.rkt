@@ -4,6 +4,7 @@
 
 
 
+;; ---------------------------------------------------------------------------------------------------
 (define (mp-ai3 n offers)
   ;; Sort offers based on their ending time
   (define sorted-offers (sort offers (lambda (x y) (< (second x) (second y)))))
@@ -38,6 +39,7 @@
   ;; The last element in dp array will have the answer to the problem
   (vector-ref dp (- (length sorted-offers) 1)))
 
+;; ---------------------------------------------------------------------------------------------------
 (define (mp-ai2 n offers)
   ;; Sort offers by their ending time
   (define sorted-offers (sort offers < #:key second))
@@ -77,6 +79,7 @@
   (vector-ref dp (- (length sorted-offers) 1)))
 
 
+;; ---------------------------------------------------------------------------------------------------
 
 (define (mp-ai1 n offers)
   ;; Sort offers based on their ending time
@@ -114,6 +117,7 @@
   (vector-ref dp (- (length sorted-offers) 1)))
 
 
+;; ---------------------------------------------------------------------------------------------------
 
 (define (mp-ai0 n offers)
   ;; Sort offers by their ending time to process them in order
@@ -151,6 +155,7 @@
   (vector-ref dp (- (length sorted-offers) 1)))
 
 
+;; ---------------------------------------------------------------------------------------------------
 
 (define (mp-aiHIGH n offers)
   ;; Define a helper function to find the last non-conflicting offer using binary search
@@ -184,15 +189,10 @@
   ;; Start the dynamic programming from the last index
   (dp (sub1 (length sorted-offers))))
 
+;; ---------------------------------------------------------------------------------------------------
 
 (define (mp-HIGH n offers)
-
-
- 
-     
-         
   (define (dp offers)
-
      (define (next-possible end last first)
       (define pivot (+ first (quotient (- last first) 2)))
       (match-define (list next-start _ _) (vector-ref offers pivot))
@@ -229,6 +229,8 @@
 
   (dp sorted-offers))
 
+
+;; ---------------------------------------------------------------------------------------------------
 
 (test mp
       in
