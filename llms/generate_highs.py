@@ -143,11 +143,11 @@ def main(args):
         # check if we did this already
         skip = False
         for refactored in d.glob("*_refactored"):
-            print(refactored)
             if len(list(refactored.glob("*.rkt"))) > 0:
                 skip = True
                 break
         if skip:
+            print(f"Skipping {d} as it has already been refactored")
             continue
 
         racket_files = list(d.glob("*.rkt"))
