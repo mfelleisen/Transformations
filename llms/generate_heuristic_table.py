@@ -24,12 +24,15 @@ def heuristic(code) -> Tuple[int, str]:
     for h in hofs:
         hof += len(re.findall(f"\\({h}", code))
 
-    for_hofs = [f"for/{h}" for h in hofs + ["sum", "list"]]
+    for_hofs = [f"for/{h}" for h in hofs + ["sum", "list", "hash"]]
     for_hof = 0
     for h in for_hofs:
         for_hof += len(re.findall(f"\\({h}", code))
 
     helper = code.count("(define (") - 1
+
+    # TODO: add use of match, define to GOOD
+    # TODO: add to bad use of let and let*
 
     # bad: mutation and indexing
     # good: hof, for_hof, helper
