@@ -62,8 +62,9 @@ def get_low_to_high_examples(high_dir_str: str) -> List[Tuple[str, str, str]]:
     return examples
 
 
-SYSTEM = """You are a Racket expert. You are given a unidiomatic Racket program, and your task is to refactor the program to make it more idiomatic. You can assume that the input program is correct and that it has the same behavior as the refactored program.
+SYSTEM = """You are a Racket expert. You are given a unidiomatic Racket program, and your task is to refactor the program to make it more modern and idiomatic. You can assume that the input program is correct and that it has the same behavior as the refactored program.
 Idiomatic Racket code favors immutability, recursion, accumulators, traversals, and higher-order functions. It is discouraged to use mutable data structures, loops, imperative programming constructs, and direct list indexing (e.g. list-ref).
+Modern idiomatic Racket additionally discourages let and let* in favor of define, and prefers pattern matching over cond if possible.
 Extremely important: do not change the name of the function, the number of arguments, or the behavior of the function. The refactored program should have the same behavior as the input program."""
 
 
@@ -83,8 +84,9 @@ def markdown_codeblock_extract(response: str) -> str:
 
 
 def prompt_with_examples(examples: List[Tuple[str, str, str]], code: str) -> List[Dict[str, str]]:
-    prefix = """Please refactor the following Racket program to make it more idiomatic. You can assume that the input program is correct and that it has the same behavior as the refactored program.
-Idiomatic Racket code favors immutability, recursion, accumulators, and higher-order functions. It is discouraged to use mutable data structures, loops, imperative programming constructs, and direct list indexing (e.g. list-ref).
+    prefix = """Please refactor the following Racket program to make it more modern and idiomatic. You can assume that the input program is correct and that it has the same behavior as the refactored program.
+Idiomatic Racket code favors immutability, recursion, accumulators, traversals, and higher-order functions. It is discouraged to use mutable data structures, loops, imperative programming constructs, and direct list indexing (e.g. list-ref).
+Modern idiomatic Racket additionally discourages let and let* in favor of define, and prefers pattern matching over cond if possible.
 Extremely important: do not change the name of the function, the number of arguments, or the behavior of the function. The refactored program should have the same behavior as the input program."""
     postfix = """Absolutely! Here is the refactored program, rewritten to be more idiomatic:"""
     convo = [
