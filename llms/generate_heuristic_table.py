@@ -31,23 +31,34 @@ def heuristic(code) -> Tuple[int, str]:
 
     helper = code.count("(define (") - 1
 
-    # TODO: add use of match, define to GOOD
-    # TODO: add to bad use of let and let*
+    matches = ["match", "match-define"]
+    match_use = 0
+    for m in matches:
+        match_use += len(re.findall(f"\\({m}", code))
+
+
+    lets = ["let", "let*"]
+    let_use = 0
+    for l in lets:
+        let_use += len(re.findall(f"\\({l}", code))
 
     # bad: mutation and indexing
     # good: hof, for_hof, helper
     h = 0
     h -= mut
     h -= ref
+    h -= let_use
     h += hof
     h += for_hof
     h += helper
+    h += match_use
 
-    return h, f"{mut},{ref},{hof},{for_hof},{helper}"
+
+    return h, f"{mut},{ref},{hof},{for_hof},{helper},{match_use},{let_use}"
 
 
 def main(args):
-    header = "id,heuristic,mutation,indexing,hof,for_hof,helpers\n"
+    header = "id,heuristic,mutation,indexing,hof,for_hof,helpers,match,let\n"
     for problem_dir in Path(args.problems_path).iterdir():
         contents = header
 

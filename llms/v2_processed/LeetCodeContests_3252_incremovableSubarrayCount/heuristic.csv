@@ -1,5 +1,5 @@
-id,heuristic,mutation,indexing,hof,for_hof,helpers
-1_12,2,0,0,0,0,2
-2_2,2,0,0,0,0,2
-2_9,3,0,0,0,0,3
-2_11,2,0,0,0,0,2
+id,heuristic,mutation,indexing,hof,for_hof,helpers,match,let
+1_12,-1,0,0,0,0,2,0,3
+2_2,-1,0,0,0,0,2,0,3
+2_9,-1,0,0,0,0,3,0,4
+2_11,-1,0,0,0,0,2,0,3
