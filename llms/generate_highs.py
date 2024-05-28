@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import random
+import time
 import openai
 import re
 from typing import Dict, List, Tuple
@@ -160,17 +161,24 @@ def main(args):
             tests = "(require rackunit)\n" + split[1]
             prompt = prompt_with_examples(
                 get_low_to_high_examples(args.high_dir), code)
-            completion = client.chat.completions.create(
-                model=args.model,
-                messages=prompt,  # type: ignore
-                n=args.attempts,
-                temperature=0.75,
-                top_p=0.95,
-            )
+
+            while True:
+                try:
+                    completion = client.chat.completions.create(
+                        model=args.model,
+                        messages=prompt,  # type: ignore
+                        n=args.attempts,
+                        temperature=0.75,
+                        top_p=0.95,
+                    )
+                    break
+                except Exception as e:
+                    print("Error:", e)
+                    print("Retrying in 20 seconds")
+                    time.sleep(20)
 
             # create dir for refactors
             refactored_dir = d / (picked.stem + "_refactored")
-            refactored_dir.mkdir(exist_ok=True)
 
             refactors = []
             for choice in completion.choices:
@@ -197,6 +205,7 @@ def main(args):
                     # didn't pass
                     continue
 
+                refactored_dir.mkdir(exist_ok=True)
                 refactored_file = refactored_dir / f"refactor_{i}.rkt"
                 refactored_file.write_text(refact)
                 print(f"Refactored program {i} written to {refactored_file}")
