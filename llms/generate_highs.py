@@ -203,7 +203,7 @@ def main(args):
             results = exec_test_batched(args.executor, refactors, [
                                         ""] * len(refactors), lang="racket")
             for i, (refact, result) in enumerate(zip(refactors, results)):
-                if not result[0] or "FAILURE" in result[1]:
+                if not result[0] or "FAILURE" in result[1] or "ERROR" in result[1]:
                     # didn't pass
                     continue
 

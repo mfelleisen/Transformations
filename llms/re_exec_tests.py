@@ -11,7 +11,10 @@ def main(args):
             contents = [f.read_text() for f in files]
             results = exec_test_batched(args.executor, contents, [
                                         ""] * len(contents), lang="racket")
-            print(results)
+            for f, (p, out) in zip(files, results):
+                if not p or "FAILURE" in out or "ERROR" in out:
+                    print(f"Error in {f} -- deleting")
+                    f.unlink()
 
 
 if __name__ == "__main__":
