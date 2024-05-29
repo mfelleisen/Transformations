@@ -27,25 +27,24 @@
 ;;  * 3 <= nums.length <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
-  ;; Helper function to find the minimum value satisfying the condition
-  (define (find-min lst pred)
-    (for/fold ([min-val +inf.0]) ([x lst])
-      (if (pred x)
-          (min min-val x)
-          min-val)))
-
-  ;; Main logic to find the minimum possible sum of a mountain triplet
-  (let loop-j ([j 1] [min-sum +inf.0] [found #f])
-    (cond
-      [(>= j (- (length nums) 1))
-       (if found min-sum -1)]
-      [else
-       (let* ([current (list-ref nums j)]
-              [left-min (find-min (take nums j) (λ (x) (< x current)))]
-              [right-min (find-min (drop nums (add1 j)) (λ (x) (< x current)))])
-         (if (and (< left-min +inf.0) (< right-min +inf.0))
-             (loop-j (add1 j) (min min-sum (+ left-min current right-min)) #t)
-             (loop-j (add1 j) min-sum found)))])))
+  ;; Helper function to find the minimum values for the left and right conditions.
+  (define (find-minimums nums current)
+    (define left-min (for/fold ([min-val +inf.0]) ([x nums])
+                        (if (< x current) (min min-val x) min-val)))
+    (define right-min (for/fold ([min-val +inf.0]) ([x (reverse nums)])
+                         (if (< x current) (min min-val x) min-val)))
+    (values left-min right-min))
+  
+  ;; Main function to find the minimum sum of a mountain triplet.
+  (for/fold ([min-sum +inf.0] [found #f] #:result (if found min-sum -1))
+            ([j (in-range 1 (- (length nums) 1))])
+    (define current (list-ref nums j))
+    (define left-nums (take nums j))
+    (define right-nums (drop nums (+ j 1)))
+    (define-values (left-min right-min) (find-minimums left-nums current))
+    (if (and (< left-min +inf.0) (< right-min +inf.0))
+        (values (min min-sum (+ left-min current right-min)) #t)
+        (values min-sum found))))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ; Output: 9

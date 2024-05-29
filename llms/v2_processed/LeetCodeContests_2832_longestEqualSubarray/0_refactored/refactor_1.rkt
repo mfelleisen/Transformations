@@ -23,24 +23,43 @@
 ;;  * 1 <= nums[i] <= nums.length
 ;;  * 0 <= k <= nums.length
 (define (longestEqualSubarray nums k)
-  (define (helper nums k left count max-length right)
-    (if (>= right (length nums))
-        max-length
-        (let* ((num (list-ref nums right))
-               (new-count (hash-update count num add1 0))
-               (max-freq (apply max (hash-values new-count)))
-               (window-length (+ 1 (- right left))))
-          (if (> (- window-length max-freq) k)
-              (helper nums k (+ left 1) (hash-update new-count (list-ref nums left) sub1) max-length right)
-              (helper nums k left new-count (max max-length window-length) (+ right 1))))))
-  (helper nums k 0 (make-hash) 0 0))
+  ;; Helper function to update the count hash
+  (define (update-count count key delta)
+    (hash-update! count key (λ (v) (+ v delta)) 0))
 
-;; The refactored function `longestEqualSubarray` maintains the same behavior as the original function. 
-;; It uses a helper function to implement the sliding window approach recursively. 
-;; The helper function takes `nums`, `k`, `left`, `count`, `max-length`, and `right` as arguments and returns the maximum length found. 
-;; The base case of the recursion occurs when `right` exceeds the length of `nums`. 
-;; Otherwise, the function updates the `count` hash table, calculates the maximum frequency of any number in the current window, and checks if the window size minus the max frequency is greater than `k`. 
-;; If it is, the function adjusts the count and moves the `left` pointer. Otherwise, it expands the window by moving the `right` pointer and updates `max-length` if necessary.
+  ;; Sliding window approach with two pointers
+  (define (sliding-window nums k)
+    (define count (make-hash))
+    (define left 0)
+    (define max-length 0)
+
+    (for ([right (in-range (length nums))])
+      ;; Increment the count of the current element
+      (update-count count (list-ref nums right) 1)
+
+      ;; Calculate the maximum frequency of any number in the current window
+      (define max-freq (apply max (hash-values count)))
+
+      ;; Calculate the length of the current window
+      (define window-length (+ 1 (- right left)))
+
+      ;; Adjust the window if the condition is not met
+      (when (> (- window-length max-freq) k)
+        (update-count count (list-ref nums left) -1)
+        (set! left (+ left 1)))
+
+      ;; Update max-length
+      (set! max-length (max max-length (- window-length (- window-length max-freq)))))
+
+    ;; Return the maximum length found
+    max-length)
+
+  ;; Call the sliding window function
+  (sliding-window nums k))
+
+;; Example usage:
+(longestEqualSubarray '(1 3 2 3 1 3) 3) ; Output: 3
+(longestEqualSubarray '(1 1 2 2 1 1) 2) ; Output: 4
 
 (require rackunit)
 

@@ -22,19 +22,22 @@
 ;; 0 <= nums[i] <= 106
 ;; 0 <= k <= 106
 (define (minOperations nums k)
-  ;; Helper function to count the number of 1s in the binary representation of n
-  (define (count-ones n)
-    (define (iter n acc)
-      (if (zero? n)
-          acc
-          (iter (arithmetic-shift n -1) (+ acc (bitwise-and n 1)))))
-    (iter n 0))
+  ;; Calculate the XOR of all elements in nums using `for/fold`
+  (define current-xor 
+    (for/fold ([acc 0]) ([num (in-list nums)])
+      (bitwise-xor num acc)))
   
-  ;; Calculate the XOR of all elements in nums and determine the XOR with k
-  (define current-xor (foldl bitwise-xor 0 nums))
+  ;; Determine the XOR of `current-xor` with `k` to find differing bits
   (define xor-with-k (bitwise-xor current-xor k))
   
-  ;; Return the number of differing bits (number of operations needed)
+  ;; Count the number of 1s in `xor-with-k` using recursion
+  ;; This is the number of differing bits, thus the number of operations needed
+  (define (count-ones n)
+    (if (= n 0)
+        0
+        (+ (bitwise-and n 1) (count-ones (arithmetic-shift n -1)))))
+  
+  ;; Return the number of operations needed to make the XOR of all elements equal to k
   (count-ones xor-with-k))
 
 ;; Example usage:

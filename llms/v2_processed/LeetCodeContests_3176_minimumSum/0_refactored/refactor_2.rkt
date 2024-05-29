@@ -27,28 +27,24 @@
 ;;  * 3 <= nums.length <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
-  ;; Helper function to find the minimum element in a list that satisfies a predicate
-  (define (min-satisfying lst pred)
-    (define filtered (filter pred lst))
-    (if (null? filtered)
-        +inf.0
-        (apply min filtered)))
-
-  ;; Function to find the minimum possible sum of a mountain triplet
-  (define (find-min-mountain lst)
-    (for/fold ([min-sum +inf.0] [found #f]) ([j (in-range 1 (- (length lst) 1))])
-      (define current (list-ref lst j))
-      (define left-min (min-satisfying (take lst j) (λ (x) (< x current))))
-      (define right-min (min-satisfying (drop lst (+ j 1)) (λ (x) (< x current))))
-      (if (and (< left-min +inf.0) (< right-min +inf.0))
-          (values (min min-sum (+ left-min current right-min)) #t)
-          (values min-sum found))))
-
-  ;; Check if the input list has less than 3 elements
-  (if (< (length nums) 3)
+  (define len (length nums))
+  (if (< len 3)
       -1
-      (let-values ([(min-sum found) (find-min-mountain nums)])
-        (if found min-sum -1))))
+      (let loop ([j 1] [min-sum +inf.0] [found #f])
+        (if (>= j (- len 1))
+            (if found min-sum -1)
+            (let* ([current (list-ref nums j)]
+                   [left-min (for/fold ([min-left +inf.0])
+                                     ([i (in-range 0 j)]
+                                      #:when (< (list-ref nums i) current))
+                               (min min-left (list-ref nums i)))]
+                   [right-min (for/fold ([min-right +inf.0])
+                                     ([k (in-range (+ j 1) len)]
+                                      #:when (< (list-ref nums k) current))
+                               (min min-right (list-ref nums k)))])
+              (if (and (< left-min +inf.0) (< right-min +inf.0))
+                  (loop (+ j 1) (min min-sum (+ left-min current right-min)) #t)
+                  (loop (+ j 1) min-sum found)))))))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ; Output: 9

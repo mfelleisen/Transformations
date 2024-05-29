@@ -27,26 +27,17 @@
 (define (minimumCost nums)
   ;; Function to determine the minimum cost of dividing an array into 3 contiguous subarrays.
   (define n (length nums))
-  
-  ;; Generate all possible triples of indices (i, j) such that 0 < i < j < n
-  (define indices-triples
-    (for*/list ([i (in-range 1 (- n 1))]
-                [j (in-range (+ i 1) n)])
-      (list i j)))
-  
-  ;; Calculate the total cost for each valid (i, j) pair and return the minimum
-  (apply min
-         (for/list ([triple indices-triples])
-           (match triple
-             [(list i j)
-              (+ (list-ref nums 0)
-                 (list-ref nums i)
-                 (list-ref nums j))]))))
+  (define (calc-cost i j)
+    (+ (list-ref nums 0)
+       (list-ref nums i)
+       (list-ref nums j)))
+  (if (= n 3)
+      (apply + nums)  ; If there are exactly 3 elements, the cost is the sum of all elements.
+      (for*/fold ([min-cost +inf.0] #:result min-cost)
+                 ([i (in-range 1 (- n 1))]
+                  [j (in-range (+ i 1) n)])
+        (min min-cost (calc-cost i j)))))
 
-;; Example usages
-(minimumCost '(1 2 3 12))  ; Output: 6
-(minimumCost '(5 4 3))     ; Output: 12
-(minimumCost '(10 3 1 1))  ; Output: 12
 
 (require rackunit)
 

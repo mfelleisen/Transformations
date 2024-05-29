@@ -16,19 +16,17 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Generate a sequence of integers, filtering out those that would violate the k-avoiding property
-  (define (valid-seq)
-    (define (valid? used num)
-      (not (set-member? used (- k num))))
-    (let loop ([used (set)] [num 1] [result '()])
-      (cond
-        [(= (length result) n) (reverse result)]
-        [(valid? used num)
-         (loop (set-add used num) (add1 num) (cons num result))]
-        [else (loop used (add1 num) result)])))
+  ;; Helper function to generate numbers avoiding a specific set
+  (define (generate-avoiding acc used current count)
+    (cond
+      [(= count n) (apply + acc)]
+      [(or (not (set-member? used (- k current)))
+           (= current (- k current)))
+       (generate-avoiding (cons current acc) (set-add used current) (add1 current) (add1 count))]
+      [else
+       (generate-avoiding acc used (add1 current) count)]))
 
-  ;; Calculate the sum of the valid sequence
-  (apply + (valid-seq)))
+  (generate-avoiding '() (set) 1 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ; Output: 18

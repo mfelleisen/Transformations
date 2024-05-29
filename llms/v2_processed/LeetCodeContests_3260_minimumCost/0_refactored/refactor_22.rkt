@@ -28,40 +28,27 @@
 ;; k - 2 <= dist <= n - 2
 (define (minimumCost nums k dist)
   (define n (length nums))
-  
-  ;; Base case: if k is 1, return the first element
+
+  (define (calculate-cost start-indices)
+    (apply + (map (lambda (idx) (list-ref nums idx)) start-indices)))
+
+  (define (dfs start-index depth current-indices min-cost)
+    (if (= depth k)
+        (if (<= (- (list-ref current-indices (- k 1))
+                   (list-ref current-indices 1))
+                dist)
+            (min min-cost (calculate-cost current-indices))
+            min-cost)
+        (let ([next-start-limit (- n (- k depth))])
+          (for/fold ([acc min-cost])
+                    ([next-start (in-range (+ start-index 1) (+ next-start-limit 1))])
+            (dfs next-start (+ depth 1) (append current-indices (list next-start)) acc)))))
+
   (if (= k 1)
       (first nums)
-      
-      ;; Recursive case
-      (letrec ([calculate-cost
-                 (lambda (start-indices)
-                   (apply + (map (lambda (idx) (list-ref nums idx)) start-indices)))]
-                
-                [valid-partition?
-                 (lambda (current-indices)
-                   (<= (- (list-ref current-indices (- k 1))
-                          (list-ref current-indices 1))
-                       dist))]
-                
-                [dfs
-                 (lambda (start-index depth current-indices min-cost)
-                   (if (= depth k)
-                       (if (valid-partition? current-indices)
-                           (min min-cost (calculate-cost current-indices))
-                           min-cost)
-                       (let ([next-start-limit (- n (- k depth))])
-                         (for/fold ([min-cost min-cost])
-                                   ([next-start (in-range (+ start-index 1) (+ next-start-limit 1))])
-                           (dfs next-start (+ depth 1) (append current-indices (list next-start)) min-cost)))))]
-                
-                [start-dfs
-                 (lambda ()
-                   (for/fold ([min-cost +inf.0])
-                             ([first-end (in-range 1 (+ (- n k) 2))])
-                     (dfs first-end 2 (list 0 first-end) min-cost)))])
-        
-        (start-dfs))))
+      (for/fold ([min-cost +inf.0])
+                ([first-end (in-range 1 (+ (- n k) 2))])
+        (dfs first-end 2 (list 0 first-end) min-cost))))
 
 ;; Example usage
 (minimumCost '(1 3 2 6 4 2) 3 3)  ; Output: 5

@@ -25,35 +25,24 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Calculate the length of the input list
   (define n (length nums))
   
-  ;; Function to compute the cost of dividing nums into three contiguous subarrays
-  (define (compute-cost i j)
-    (+ (list-ref nums 0)
-       (list-ref nums i)
-       (list-ref nums j)))
+  ;; Function to calculate the sum of the costs for a given partition (i, j)
+  (define (calculate-cost i j)
+    (let ([cost1 (list-ref nums 0)]
+          [cost2 (list-ref nums i)]
+          [cost3 (list-ref nums j)])
+      (+ cost1 cost2 cost3)))
   
-  ;; Generate all possible pairs (i, j) where 0 < i < j < n
-  (define pairs
+  ;; Generate all possible partitions and calculate their costs
+  (define all-costs
     (for*/list ([i (in-range 1 (- n 1))]
                 [j (in-range (+ i 1) n)])
-      (list i j)))
+      (calculate-cost i j)))
   
-  ;; Calculate the minimum cost among all possible pairs
-  (define min-cost
-    (apply min
-           (map (lambda (pair)
-                  (match pair
-                    [(list i j) (compute-cost i j)]))
-                pairs)))
-  
-  min-cost)
+  ;; Find and return the minimum cost from all possible partitions
+  (apply min all-costs))
 
-;; Example usage
-(minimumCost '(1 2 3 12))  ;; => 6
-(minimumCost '(5 4 3))     ;; => 12
-(minimumCost '(10 3 1 1))  ;; => 12
 
 (require rackunit)
 

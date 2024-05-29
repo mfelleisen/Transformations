@@ -23,21 +23,20 @@
 (define (hasTrailingZeros nums)
   ;; This function checks if it's possible to select two or more elements from the list `nums`
   ;; such that their bitwise OR results in at least one trailing zero in binary representation.
+  (define (bitwise-or nums)
+    (foldl bitwise-ior 0 nums))
   
-  ;; Helper function to check for trailing zeros
-  (define (has-trailing-zero? x)
-    (even? x))  ; An even number has at least one trailing zero
-  
-  ;; Generate all pairs of elements from `nums` and check the bitwise OR for trailing zeros
-  (define (check-pairs nums)
-    (for/first ([i (in-list nums)]
-                [j (in-list (rest nums))])
-      (if (has-trailing-zero? (bitwise-ior i j))
-          #t
-          #f)))
-  
-  ;; Check if any combination has at least one trailing zero using `ormap`
-  (ormap (lambda (x) (check-pairs (remove x nums))) nums))
+  ;; Check if any combination of two or more elements has at least one trailing zero.
+  ;; Generate all combinations of two or more elements and check their bitwise OR.
+  (let loop ([remaining nums] [subsets '()])
+    (match remaining
+      [(cons h t)
+       (define new-subsets (append subsets (map (λ (s) (cons h s)) subsets)))
+       (loop t (cons (list h) new-subsets))]
+      [else
+       (ormap (λ (subset) 
+                (and (>= (length subset) 2) (even? (bitwise-or subset))))
+              subsets)])))
 
 ;; Example usage:
 (displayln (hasTrailingZeros '(1 2 3 4 5)))  ; Output: #t

@@ -22,22 +22,41 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  ;; This function finds all the peaks in the given mountain list.
-  ;; A peak is an element that is strictly greater than its neighbors.
-  ;; The first and last elements are never considered as peaks.
-  (define (is-peak? left x right)
-    (and (> x left) (> x right)))
+  ;; Helper function to determine if the element at index i is a peak.
+  (define (is-peak i)
+    (and (> (list-ref mountain i) (list-ref mountain (sub1 i)))
+         (> (list-ref mountain i) (list-ref mountain (add1 i)))))
   
-  ;; Filter indices where the element is a peak.
+  ;; Generate a sequence of indices from 1 to the second last element index and filter peaks.
   (for/list ([i (in-range 1 (sub1 (length mountain)))]
-             #:when (is-peak? (list-ref mountain (sub1 i))
-                              (list-ref mountain i)
-                              (list-ref mountain (add1 i))))
+             #:when (is-peak i))
     i))
 
 ;; Example usage:
 ;; (findPeaks '(1 4 3 8 5))  ; This should return '(1 3)
 ;; (findPeaks '(2 4 4))      ; This should return '()
+
+;; Alternative solution using pattern matching for more idiomatic Racket:
+(define (findPeaks-alt mountain)
+  (define (is-peak? prev curr next)
+    (and (> curr prev) (> curr next)))
+  
+  (define (find-peaks-helper lst index acc)
+    (match lst
+      [(list _ _)
+       (reverse acc)]
+      [(list prev curr next rest ...)
+       (find-peaks-helper (cons curr (cons next rest))
+                          (add1 index)
+                          (if (is-peak? prev curr next)
+                              (cons index acc)
+                              acc))]))
+  
+  (find-peaks-helper mountain 1 '()))
+
+;; Example usage:
+;; (findPeaks-alt '(1 4 3 8 5))  ; This should return '(1 3)
+;; (findPeaks-alt '(2 4 4))      ; This should return '()
 
 (require rackunit)
 

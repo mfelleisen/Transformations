@@ -19,22 +19,17 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  ;; This function simulates a game where Alice and Bob alternately remove the minimum element from the list `nums`.
-  ;; Bob appends his element first to the result list `arr`, followed by Alice. This continues until `nums` is empty.
-  
-  (define sorted-nums (sort nums <))  ; Sort the list to easily pick the minimum elements
-  
-  ;; Helper function to recursively simulate the game
+  ;; A helper function to simulate the game recursively
   (define (play-game nums acc)
-    (if (empty? nums)
-        (reverse acc)  ; Return the accumulated result list reversed to match the order of append operations
-        (let ([alice-choice (first nums)]  ; Alice picks the first minimum
-              [bob-choice (second nums)]  ; Bob picks the next minimum
-              [remaining-nums (drop nums 2)])  ; Remaining elements after Alice's and Bob's pick
-          (play-game remaining-nums (cons alice-choice (cons bob-choice acc))))))  ; Recurse with updated nums and acc
+    (match nums
+      ;; Base case: If nums is empty, return the accumulated result reversed
+      [(list) (reverse acc)]
+      ;; Recursive case: Extract the minimum elements and append them to the result
+      [(list-rest alice-choice (list-rest bob-choice rest-nums))
+       (play-game (sort rest-nums <) (cons alice-choice (cons bob-choice acc)))]))
 
-  ;; Start the game with sorted numbers and an empty accumulator
-  (play-game sorted-nums '()))
+  ;; Sort the initial list and start the game
+  (play-game (sort nums <) '()))
 
 ;; Example usage:
 (numberGame '(5 4 2 3))  ; Output: '(3 2 5 4)

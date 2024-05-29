@@ -18,19 +18,18 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function to generate the sequence of numbers avoiding the k-avoiding property
-  (define (k-avoiding-seq n k)
-    (define (gen-seq current used count acc)
-      (cond
-        [(= count n) (reverse acc)]
-        [(or (set-member? used current) (set-member? used (- k current)))
-         (gen-seq (+ current 1) used count acc)]
-        [else
-         (gen-seq (+ current 1) (set-add used current) (+ count 1) (cons current acc))]))
-    (gen-seq 1 (set) 0 '()))
+  ;; Function to generate a list of k-avoiding numbers
+  (define (k-avoiding-numbers k)
+    (define (avoid? n)
+      (not (= (* 2 n) k)))
+    (filter avoid? (range 1 (add1 (* 2 k)))))
 
-  ;; Calculate the sum of the k-avoiding sequence
-  (apply + (k-avoiding-seq n k)))
+  ;; Find the first n k-avoiding numbers and sum them
+  (define (sum-of-first-n k n)
+    (define nums (k-avoiding-numbers k))
+    (apply + (take nums n)))
+
+  (sum-of-first-n k n))
 
 ;; Example usage (not part of the function definition):
 ;; (minimumSum 5 4)  ;; Should return 18

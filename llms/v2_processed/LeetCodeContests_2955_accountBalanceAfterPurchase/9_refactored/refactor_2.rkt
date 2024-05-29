@@ -18,22 +18,21 @@
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
+  ;; Calculate the rounded amount to the nearest multiple of 10.
+  (define (round-to-nearest-10 n)
+    (define lower-bound (* 10 (quotient n 10)))
+    (define upper-bound (+ lower-bound 10))
+    (if (or (< (- n lower-bound) (- upper-bound n))
+            (= (- n lower-bound) (- upper-bound n)))
+        upper-bound
+        lower-bound))
+  
+  ;; Subtract the rounded amount from the initial balance of 100.
   (define initial-balance 100)
-  (define rounded-amount
-    (let* ([lower-bound (* 10 (quotient purchaseAmount 10))]
-           [upper-bound (+ lower-bound 10)])
-      (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
-          lower-bound
-          upper-bound)))
-  (- initial-balance rounded-amount))
+  (- initial-balance (round-to-nearest-10 purchaseAmount)))
 
-;; Explanation:
-;; - `initial-balance` is defined as 100.
-;; - `rounded-amount` is calculated using a `let*` form to bind `lower-bound` and `upper-bound`.
-;; - The decision to use `lower-bound` or `upper-bound` is made using an `if` expression.
-;; - The final result is computed by subtracting `rounded-amount` from `initial-balance`.
-
-;; This refactor makes use of `let*` for local bindings and avoids direct indexing or mutation.
+;; The function `accountBalanceAfterPurchase` is now more idiomatic
+;; and avoids mutable data structures, loops, and imperative programming constructs.
 
 (require rackunit)
 

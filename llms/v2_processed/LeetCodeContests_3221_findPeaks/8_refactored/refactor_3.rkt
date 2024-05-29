@@ -25,15 +25,21 @@
   ;; This function takes a list of integers representing mountain heights and returns a list of indices
   ;; of all peak elements. A peak is defined as an element that is strictly greater than its neighboring elements.
   ;; The first and last elements are not considered for peaks.
-  (define len (length mountain))
-  (define (peak? i)
-    (and (> i 0)
-         (< i (- len 1))
-         (> (list-ref mountain i) (list-ref mountain (- i 1)))
-         (> (list-ref mountain i) (list-ref mountain (+ i 1)))))
-  (for/list ([i (in-range len)]
-             #:when (peak? i))
+  (define (is-peak? lst)
+    (match lst
+      [(list prev curr next)
+       (and (> curr prev) (> curr next))]
+      [_ #f]))
+  
+  (for/list ([i (in-range 1 (- (length mountain) 1))]
+             #:when (is-peak? (list (list-ref mountain (- i 1))
+                                    (list-ref mountain i)
+                                    (list-ref mountain (+ i 1)))))
     i))
+
+;; Examples to test the function
+(findPeaks '(2 4 4))   ;; Should return '()
+(findPeaks '(1 4 3 8 5)) ;; Should return '(1 3)
 
 (require rackunit)
 

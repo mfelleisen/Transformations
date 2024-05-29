@@ -22,28 +22,27 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
+  (define sorted-nums (sort nums <))
+  
   (define (valid-group? group)
-    (<= (- (apply max group) (apply min group)) k))
+    (<= (- (last group) (first group)) k))
 
-  (define (group-nums nums)
-    (if (empty? nums)
-        '()
-        (let ([group (take nums 3)]
-              [remaining (drop nums 3)])
-          (if (valid-group? group)
-              (cons group (group-nums remaining))
-              '()))))
+  (define (make-groups lst acc)
+    (cond
+      [(empty? lst) (reverse acc)]
+      [else
+       (define group (take lst 3))
+       (if (valid-group? group)
+           (make-groups (drop lst 3) (cons group acc))
+           '())]))
 
-  (define (valid-length? nums)
-    (zero? (remainder (length nums) 3)))
-
-  (if (valid-length? nums)
-      (group-nums (sort nums <))
+  (if (zero? (remainder (length nums) 3))
+      (make-groups sorted-nums '())
       '()))
 
-;; Example Usage
-(divideArray '(1 3 4 8 7 9 3 5 1) 2)
-(divideArray '(1 3 3 2 7 3) 3)
+;; Examples
+(divideArray '(1 3 4 8 7 9 3 5 1) 2) ;; Output: '((1 1 3) (3 4 5) (7 8 9))
+(divideArray '(1 3 3 2 7 3) 3)      ;; Output: '()
 
 (require rackunit)
 

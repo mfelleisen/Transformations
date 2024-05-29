@@ -28,12 +28,11 @@
   ;; Calculate intersection of both sets
   (define intersection (set-intersect set-nums1 set-nums2))
   
-  ;; Function to count elements in a list that are in the intersection
+  ;; Higher-order function to count elements in a list that are in the intersection
   (define (count-in-intersection lst)
-    (for/sum ([x (in-list lst)])
-      (if (set-member? intersection x) 1 0)))
+    (length (filter (lambda (x) (set-member? intersection x)) lst)))
   
-  ;; Count indices in nums1 and nums2 whose elements are in the intersection
+  ;; Calculate the counts
   (list (count-in-intersection nums1) (count-in-intersection nums2)))
 
 ;; Example usage:

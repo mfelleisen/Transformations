@@ -24,11 +24,9 @@
 ;;  * 0 <= hours[i], target <= 105
 (define (numberOfEmployeesWhoMetTarget hours target)
   ;; This function calculates the number of employees who have met or exceeded the target working hours.
-  ;; It uses the `filter` function to keep only those hours that are greater than or equal to the target,
-  ;; and then uses `length` to count these filtered elements.
-
-  ;; Filter hours where the employee met or exceeded the target
-  (length (filter (curry >= target) hours)))
+  ;; It uses a for loop to count the number of hours that are greater than or equal to the target.
+  (for/sum ([hour (in-list hours)] #:when (>= hour target))
+    1))
 
 ;; Example use cases
 (displayln (numberOfEmployeesWhoMetTarget '(0 1 2 3 4) 2))  ; Output: 3

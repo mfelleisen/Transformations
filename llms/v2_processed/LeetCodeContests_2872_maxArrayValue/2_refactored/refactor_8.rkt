@@ -23,20 +23,21 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Helper function to process the list from right to left
-  (define (process-from-right lst)
-    ;; Using a right fold to combine elements when the condition is met
-    (foldr (lambda (current combined)
-             (match combined
-               [(cons first rest)
-                (if (<= current first)
-                    (cons (+ current first) rest)
-                    (cons current combined))]
-               [else (list current)]))
-           '()
-           lst))
-  ;; The largest value in the processed list is the result
-  (apply max (process-from-right nums)))
+  ;; Function to combine elements from right to left
+  (define (combine-elements lst)
+    (let loop ([remaining lst] [acc '()])
+      (match remaining
+        [(list)
+         (apply max acc)]
+        [(list a)
+         (apply max (cons a acc))]
+        [(list a b more ...)
+         (if (<= a b)
+             (loop (cons (+ a b) more) acc)
+             (loop (cons b more) (cons a acc)))])))
+
+  ;; Call the combining function on the input list
+  (combine-elements nums))
 
 ;; Example usage:
 (maxArrayValue '(2 3 7 9 3))  ; Output: 21

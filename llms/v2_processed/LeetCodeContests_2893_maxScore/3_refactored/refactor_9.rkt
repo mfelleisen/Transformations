@@ -23,36 +23,32 @@
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
   (define n (length nums))
-  (define (parity num) (modulo num 2))
   
-  ;; Initialize dp with negative infinity, except the first element set to the first score.
-  (define initial-dp (cons (first nums) (make-list (sub1 n) -inf.0)))
+  ;; A helper function that calculates the score for a jump
+  (define (calculate-score current-score next-val prev-val)
+    (let ([penalty (if (= (modulo prev-val 2) (modulo next-val 2))
+                       0
+                       x)])
+      (- (+ current-score next-val) penalty)))
 
-  ;; Function to update dp list recursively
-  (define (update-dp i dp)
-    (define current-score (list-ref dp i))
-    (define current-parity (parity (list-ref nums i)))
-    
-    (define (helper j dp)
-      (if (>= j n)
-          dp
-          (let* ((next-score (list-ref nums j))
-                 (next-parity (parity next-score))
-                 (penalty (if (not (= current-parity next-parity)) x 0))
-                 (new-score (+ current-score next-score (- penalty)))
-                 (updated-dp (if (> new-score (list-ref dp j))
-                                 (list-set dp j new-score)
-                                 dp)))
-            (helper (add1 j) updated-dp))))
-    
-    (helper (add1 i) dp))
+  ;; Use foldl to iterate through the indices and update the scores.
+  (define (update-scores i scores)
+    (let ([current-score (list-ref scores i)])
+      (for/fold ([updated-scores scores])
+                ([j (in-range (add1 i) n)])
+        (let ([new-score (calculate-score current-score (list-ref nums j) (list-ref nums i))])
+          (if (> new-score (list-ref updated-scores j))
+              (list-set updated-scores j new-score)
+              updated-scores)))))
 
-  ;; Fill the dp list using recursion and the helper function
-  (define final-dp (for/fold ([dp initial-dp]) ([i (in-range n)])
-                     (update-dp i dp)))
+  ;; Initialize the scores list with negative infinity, except the first element set to the first num.
+  (define initial-scores (cons (first nums) (make-list (sub1 n) -inf.0)))
   
-  ;; Return the maximum value from the final dp list as the final answer.
-  (apply max final-dp))
+  ;; Apply the update-scores function over the range of indices.
+  (define final-scores (foldl update-scores initial-scores (range n)))
+
+  ;; Return the maximum score from the final scores list.
+  (apply max final-scores))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ; Output: 13

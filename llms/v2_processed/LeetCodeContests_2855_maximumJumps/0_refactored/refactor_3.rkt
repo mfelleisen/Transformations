@@ -2,31 +2,28 @@
 
 (provide (rename-out [maximumJumps max-jump]))
 
+;; Define the main function to calculate the maximum number of jumps
 (define (maximumJumps nums target)
   (define n (length nums))
-
-  ;; Define a helper function to recursively compute the maximum jumps
-  (define (max-jumps-from i dp)
-    (if (hash-has-key? dp i)
-        (hash-ref dp i)
-        (let loop ([j (add1 i)] [max-jumps -inf.0])
-          (cond
-            [(>= j n)
-             (hash-set! dp i max-jumps)
-             max-jumps]
-            [(<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-             (loop (add1 j) (max max-jumps (add1 (max-jumps-from j dp))))]
-            [else
-             (loop (add1 j) max-jumps)]))))
-
-  ;; Initialize the DP hash table with the base case
-  (define dp (make-hash))
-  (hash-set! dp (sub1 n) 0)  ; The goal is always reachable from itself with 0 jumps
   
-  ;; Compute the maximum jumps from the start
-  (define result (max-jumps-from 0 dp))
-
-  ;; If result is still -inf, return -1, otherwise return result
+  ;; Define a helper function to recursively calculate the maximum jumps
+  (define (dp i memo)
+    (cond
+      [(= i (sub1 n)) 0] ;; Base case: reached the last element
+      [(hash-has-key? memo i) (hash-ref memo i)] ;; Return memoized value if available
+      [else
+       (define max-jumps -inf.0)
+       (for ([j (in-range (add1 i) n)])
+         (when (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
+           (set! max-jumps (max max-jumps (+ 1 (dp j memo))))))
+       (hash-set! memo i max-jumps)
+       max-jumps]))
+  
+  ;; Initialize the memoization hash
+  (define memo (make-hash))
+  (define result (dp 0 memo))
+  
+  ;; Return the result if it's not -inf, otherwise return -1
   (if (= result -inf.0) -1 result))
 
 ;; Examples

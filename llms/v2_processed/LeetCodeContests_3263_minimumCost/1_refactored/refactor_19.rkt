@@ -25,15 +25,18 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  (define n (length nums))
-  (cond
-    [(= n 3) (apply + nums)]
-    [else
-     (define (costs)
-       (for*/list ([i (in-range 1 (- n 1))]
-                   [j (in-range (+ i 1) n)])
-         (+ (first nums) (list-ref nums i) (list-ref nums j))))
-     (apply min (costs))]))
+  ;; Helper function to calculate the costs for different splits
+  (define (calculate-costs nums)
+    (for*/fold ([min-cost +inf.0])
+               ([i (in-range 1 (sub1 (length nums)))]
+                [j (in-range (add1 i) (length nums))])
+      (let ([cost (+ (first nums) (list-ref nums i) (list-ref nums j))])
+        (min min-cost cost))))
+
+  ;; Check for base case where nums has exactly 3 elements
+  (if (= (length nums) 3)
+      (apply + nums)
+      (calculate-costs nums)))
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

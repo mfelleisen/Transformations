@@ -30,27 +30,37 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  ;; Helper function to update dp based on conditions
-  (define (update-dp dp1 dp2 i x y)
-    (if (>= x y)
-        (max (vector-ref dp1 i) (+ (vector-ref dp2 (- i 1)) 1))
-        (vector-ref dp1 i)))
-  
   (define n (length nums1))
-  
-  ;; Initialize dp vectors with 1s
+
+  ;; Helper function to calculate the maximum length of non-decreasing subarray
+  (define (max-lengths prev1 prev2 i dp1 dp2)
+    (if (>= i n)
+        (max (vector-ref dp1 (sub1 n)) (vector-ref dp2 (sub1 n)))
+        (let ([num1 (list-ref nums1 i)]
+              [num2 (list-ref nums2 i)]
+              [dp1-prev (vector-ref dp1 (sub1 i))]
+              [dp2-prev (vector-ref dp2 (sub1 i))])
+          (define new-dp1 (cond [(>= num1 prev1) (max (add1 dp1-prev) 1)]
+                                [(>= num1 prev2) (max (add1 dp2-prev) 1)]
+                                [else 1]))
+          (define new-dp2 (cond [(>= num2 prev1) (max (add1 dp1-prev) 1)]
+                                [(>= num2 prev2) (max (add1 dp2-prev) 1)]
+                                [else 1]))
+          (vector-set! dp1 i new-dp1)
+          (vector-set! dp2 i new-dp2)
+          (max-lengths num1 num2 (add1 i) dp1 dp2))))
+
+  ;; Initialize dp arrays
   (define dp1 (make-vector n 1))
   (define dp2 (make-vector n 1))
-  
-  ;; Iterate over the indices
-  (for ([i (in-range 1 n)])
-    (vector-set! dp1 i (update-dp dp1 dp1 i (list-ref nums1 i) (list-ref nums1 (- i 1))))
-    (vector-set! dp1 i (update-dp dp1 dp2 i (list-ref nums1 i) (list-ref nums2 (- i 1))))
-    (vector-set! dp2 i (update-dp dp2 dp1 i (list-ref nums2 i) (list-ref nums1 (- i 1))))
-    (vector-set! dp2 i (update-dp dp2 dp2 i (list-ref nums2 i) (list-ref nums2 (- i 1)))))
-  
-  ;; Find the maximum length in dp arrays
-  (apply max (append (vector->list dp1) (vector->list dp2))))
+
+  ;; Start the recursion
+  (max-lengths (list-ref nums1 0) (list-ref nums2 0) 1 dp1 dp2))
+
+;; Example usage
+(maxNonDecreasingLength '(2 3 1) '(1 2 1)) ;; Output: 2
+(maxNonDecreasingLength '(1 3 2 1) '(2 2 3 4)) ;; Output: 4
+(maxNonDecreasingLength '(1 1) '(2 2)) ;; Output: 2
 
 (require rackunit)
 

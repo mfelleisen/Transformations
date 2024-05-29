@@ -21,41 +21,34 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  ;; Function to calculate the square of the diagonal length.
+  ;; Define a function to calculate the square of the diagonal length.
   (define (diagonal-squared length width)
     (+ (* length length) (* width width)))
   
-  ;; Function to calculate the area of a rectangle.
+  ;; Define a function to calculate the area of a rectangle.
   (define (area length width)
     (* length width))
   
-  ;; Function to compare two rectangles and determine the one with the maximum diagonal and area.
-  (define (max-rect acc rect)
-    (let* ((length (first rect))
-           (width (second rect))
-           (current-diagonal (diagonal-squared length width))
-           (current-area (area length width))
-           (max-diagonal (first acc))
-           (max-area (second acc)))
+  ;; Use a fold to iterate through the list and find the rectangle with the maximum diagonal or area.
+  (define (max-diagonal-area dims)
+    (for/fold ([max-diag 0] [max-area 0] #:result max-area)
+              ([dim (in-list dims)])
+      (define length (first dim))
+      (define width (second dim))
+      (define current-diagonal (diagonal-squared length width))
+      (define current-area (area length width))
       (cond
         ;; Check if current diagonal is greater than the max diagonal found so far
-        ((> current-diagonal max-diagonal)
-         (list current-diagonal current-area))
+        [(> current-diagonal max-diag)
+         (values current-diagonal current-area)]
         ;; If diagonals are the same, check if the current area is greater than the max area found so far
-        ((and (= current-diagonal max-diagonal) (> current-area max-area))
-         (list max-diagonal current-area))
+        [(and (= current-diagonal max-diag) (> current-area max-area))
+         (values max-diag current-area)]
         ;; Otherwise, keep the previous maximums
-        (else
-         acc))))
-  
-  ;; Use foldl to find the rectangle with the maximum diagonal and area
-  (define result
-    (foldl max-rect
-           (list 0 0)
-           dimensions))
-  
-  ;; Extract the maximum area from the result
-  (second result))
+        [else
+         (values max-diag max-area)])))
+
+  (max-diagonal-area dimensions))
 
 ;; Example usage:
 (areaOfMaxDiagonal '((9 3) (8 6)))  ;; Output: 48

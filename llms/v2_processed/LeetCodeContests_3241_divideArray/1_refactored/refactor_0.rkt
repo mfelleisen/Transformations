@@ -22,22 +22,29 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (let* ((sorted-nums (sort nums <))
-         (groups (partition-list sorted-nums 3)))
-    (if (andmap (lambda (group) (<= (- (last group) (first group)) k)) groups)
-        groups
-        '())))
+  (define (valid-group? group)
+    (<= (- (last group) (first group)) k))
+  
+  (define (partition-list lst n)
+    (if (null? lst)
+        '()
+        (cons (take lst n) (partition-list (drop lst n) n))))
 
-(define (partition-list lst n)
-  (define (partition-acc lst acc)
-    (if (empty? lst)
-        (reverse acc)
-        (partition-acc (drop lst n) (cons (take lst n) acc))))
-  (partition-acc lst '()))
+  (define (last lst)
+    (car (reverse lst)))
+  
+  (cond
+    [(not (zero? (modulo (length nums) 3))) '()]
+    [else
+     (define sorted-nums (sort nums <))
+     (define groups (partition-list sorted-nums 3))
+     (if (andmap valid-group? groups)
+         groups
+         '())]))
 
-(define (last lst)
-  (car (reverse lst)))
-
+;; Example usage:
+(divideArray '(1 3 4 8 7 9 3 5 1) 2)  ;; Output: '((1 1 3) (3 4 5) (7 8 9))
+(divideArray '(1 3 3 2 7 3) 3)       ;; Output: '()
 
 (require rackunit)
 

@@ -16,19 +16,15 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  (define (k-avoiding-seq curr-num count used-numbers sum)
+  (define (k-avoiding-sum n k current-number count total-sum)
     (cond
-      [(= count n) sum]
-      [(or (not (set-member? used-numbers (- k curr-num)))
-           (= curr-num (- k curr-num)))
-       (k-avoiding-seq (+ curr-num 1)
-                       (+ count 1)
-                       (set-add used-numbers curr-num)
-                       (+ sum curr-num))]
+      [(= count n) total-sum]
+      [(or (>= current-number k) (<= current-number (/ k 2)))
+       (k-avoiding-sum n k (add1 current-number) (add1 count) (+ total-sum current-number))]
       [else
-       (k-avoiding-seq (+ curr-num 1) count used-numbers sum)]))
+       (k-avoiding-sum n k (add1 current-number) count total-sum)]))
   
-  (k-avoiding-seq 1 0 (set) 0))
+  (k-avoiding-sum n k 1 0 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

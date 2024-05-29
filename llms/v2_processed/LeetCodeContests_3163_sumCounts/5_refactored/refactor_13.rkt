@@ -28,20 +28,22 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
-  ;; Helper function to calculate the sum of squares of distinct counts for subarrays starting from 'start'
-  (define (subarray-distinct-squares start)
-    (define (process-subarray end seen total-sum)
-      (if (>= end (length nums))
-          total-sum
-          (let* ((element (list-ref nums end))
-                 (updated-seen (hash-update seen element add1 0))
-                 (distinct-count (hash-count updated-seen)))
-            (process-subarray (add1 end) updated-seen (+ total-sum (sqr distinct-count))))))
-    (process-subarray start (make-hash) 0))
-
-  ;; Sum the results of subarray-distinct-squares for each starting point
-  (for/sum ([i (in-range (length nums))])
-    (subarray-distinct-squares i)))
+  ;; Calculates the sum of the squares of distinct counts of all subarrays of nums.
+  (define (subarray-distinct-squares nums)
+    ;; Helper function to calculate the distinct square sum for a given starting index
+    (define (helper nums seen distinct-sum)
+      (match nums
+        [(cons x xs)
+         (define new-seen (hash-update seen x add1 0))
+         (define distinct-count (hash-count new-seen))
+         (helper xs new-seen (+ distinct-sum (expt distinct-count 2)))]
+        [empty distinct-sum]))
+    (helper nums (make-hash) 0))
+  
+  ;; Use for/fold to accumulate the sum of squares for all starting points
+  (for/fold ([total-sum 0])
+            ([i (in-range (length nums))])
+    (+ total-sum (subarray-distinct-squares (drop nums i)))))
 
 ;; Example usage:
 ;; (sumCounts '(1 2 1)) ; Output: 15

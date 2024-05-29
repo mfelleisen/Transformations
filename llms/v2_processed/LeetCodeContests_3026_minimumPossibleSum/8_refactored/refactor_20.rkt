@@ -33,18 +33,18 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))
-  
-  (define (sum-beautiful-array n target current sum used)
-    (cond
-      [(zero? n) (modulo sum MOD)]
-      [(or (set-member? used current)
-           (set-member? used (- target current)))
-       (sum-beautiful-array n target (+ current 1) sum used)]
-      [else
-       (sum-beautiful-array (- n 1) target (+ current 1) (+ sum current)
-                            (set-add used current))]))
 
-  (sum-beautiful-array n target 1 0 (set)))
+  ;; Recursive function to build the beautiful array
+  (define (build-beautiful-array i count sum)
+    (cond
+      [(= count n) sum]
+      [(= (remainder (+ target i) 2) 0) ; If i is not usable, skip it
+       (build-beautiful-array (+ i 1) count sum)]
+      [else
+       (build-beautiful-array (+ i 1) (+ count 1) (+ sum i))]))
+
+  ;; Calculate the sum of the beautiful array and take modulo MOD
+  (modulo (build-beautiful-array 1 0 0) MOD))
 
 ;; Example test cases
 (minimumPossibleSum 2 3)   ; Expected: 4 (nums = [1, 3])

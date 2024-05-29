@@ -28,24 +28,34 @@
 ;;  * The input is generated such that if team a is stronger than team b, team b is not stronger than team a.
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion n edges)
-  ;; Create a list to keep track of the number of incoming edges for each team
-  (define in-degrees (build-vector n (const 0)))
-  
-  ;; Count the in-degrees for each node
-  (for ([u (in-list edges)])
-    (let ([v (second u)])
-      (vector-set! in-degrees v (add1 (vector-ref in-degrees v)))))
-  
+  ;; Count the in-degrees for each node and create a graph representation
+  (define-values (in-degrees graph)
+    (for/fold ([in-degrees (make-vector n 0)]
+               [graph (make-hash)])
+              ([edge edges])
+      (define u (first edge))
+      (define v (second edge))
+      (vector-set! in-degrees v (add1 (vector-ref in-degrees v)))
+      (hash-update! graph u (lambda (vs) (cons v vs)) '())
+      (values in-degrees graph)))
+
   ;; Find the nodes with zero in-degrees
   (define zero-in-degree
     (for/list ([i (in-range n)]
-               #:when (zero? (vector-ref in-degrees i)))
+               #:when (= (vector-ref in-degrees i) 0))
       i))
-  
-  ;; If there is exactly one team with zero in-degrees, that's our champion
+
+  ;; Determine if there's a unique champion
   (if (= (length zero-in-degree) 1)
-      (first zero-in-degree)
-      ;; If there are no teams or more than one with zero in-degrees, return -1
+      (let ([champion (first zero-in-degree)])
+        ;; Verify the champion has no incoming edges
+        (define (has-no-incoming-edges? node)
+          (null? (hash-ref graph node '())))
+        (if (and (has-no-incoming-edges? champion)
+                 (for/and ([v (in-range n)] #:when (not (= v champion)))
+                   (not (has-no-incoming-edges? v))))
+            champion
+            -1))
       -1))
 
 ;; Example usage:

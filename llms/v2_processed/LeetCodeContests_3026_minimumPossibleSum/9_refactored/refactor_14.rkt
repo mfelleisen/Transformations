@@ -33,31 +33,25 @@
 (define (minimumPossibleSum n target)
   (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
 
-  ;; Helper function to filter out invalid candidates
-  (define (valid-candidates candidates used-nums)
-    (filter (lambda (candidate)
-              (not (ormap (lambda (num) (= (+ num candidate) target)) used-nums)))
-            candidates))
+  ;; Helper function to generate the beautiful array
+  (define (build-array count candidate used)
+    (if (= count n)
+        0
+        (let ([next (if (set-member? used (- target candidate))
+                        (add1 candidate)
+                        candidate)])
+          (+ next
+             (build-array (add1 count)
+                          (add1 next)
+                          (set-add used next))))))
 
-  ;; Generate the beautiful array using recursion
-  (define (build-array nums candidate)
-    (if (= (length nums) n)
-        nums
-        (let* ((valid-nums (valid-candidates (range candidate (+ candidate n)) nums))
-               (next-num (first valid-nums)))
-          (build-array (cons next-num nums) (+ next-num 1)))))
-
-  ;; Calculate the sum of the array elements modulo MOD
-  (define (mod-sum nums)
-    (foldl (lambda (num acc) (modulo (+ acc num) MOD)) 0 nums))
-
-  ;; Generate the beautiful array and calculate its minimum possible sum
-  (mod-sum (build-array '() 1)))
+  ;; Calculate the minimum possible sum modulo MOD
+  (modulo (build-array 0 1 (set)) MOD))
 
 ;; Example test cases
-(displayln (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])
-(displayln (minimumPossibleSum 3 3))   ; Expected: 8 (nums = [1, 3, 4])
-(displayln (minimumPossibleSum 1 1))   ; Expected: 1 (nums = [1])
+(displayln (minimumPossibleSum 2 3))  ; Expected: 4 (nums = [1, 3])
+(displayln (minimumPossibleSum 3 3))  ; Expected: 8 (nums = [1, 3, 4])
+(displayln (minimumPossibleSum 1 1))  ; Expected: 1 (nums = [1])
 
 (require rackunit)
 

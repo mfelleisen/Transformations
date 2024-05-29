@@ -23,20 +23,24 @@
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
   (define n (length nums))
+  
   (define sorted-nums (sort nums <))
-
-  (define (right-shifted? start)
+  
+  ;; Check if a given shift is valid
+  (define (is-valid-shift? start)
     (for/and ([i (in-range n)])
       (= (list-ref nums (modulo (+ start i) n))
          (list-ref sorted-nums i))))
-
-  (define (find-shift start)
+  
+  ;; Helper function to find the valid shift
+  (define (find-valid-shift start)
     (cond
-      [(right-shifted? start) (modulo (- n start) n)]
-      [(< start (sub1 n)) (find-shift (add1 start))]
+      [(is-valid-shift? start) (modulo (- n start) n)]
+      [(< start (- n 1)) (find-valid-shift (add1 start))]
       [else -1]))
 
-  (find-shift 0))
+  ;; Special case: if the list has only one element, it's already sorted
+  (if (= n 1) 0 (find-valid-shift 0)))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2

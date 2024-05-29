@@ -38,31 +38,23 @@
 (define (maximumSumOfHeights maxHeights)
   ;; Define a helper function to calculate maximum sum with a given peak index
   (define (calculate-max-sum-with-peak peak)
-    ;; Create a list of heights with peak set
-    (define heights
-      (build-list (length maxHeights) (lambda (i)
-                                        (if (= i peak)
-                                            (list-ref maxHeights i)
-                                            0))))
-    ;; Expand to the left of the peak
-    (foldl
-     (lambda (i heights)
-       (define new-height (min (list-ref maxHeights i) (list-ref heights (add1 i))))
-       (list-set heights i new-height))
-     heights
-     (range (sub1 peak) -1 -1))
-    ;; Expand to the right of the peak
-    (foldl
-     (lambda (i heights)
-       (define new-height (min (list-ref maxHeights i) (list-ref heights (sub1 i))))
-       (list-set heights i new-height))
-     heights
-     (range (add1 peak) (length maxHeights)))
-    ;; Calculate the sum of the heights list
-    (apply + heights))
-  
-  ;; Calculate the maximum sum by iterating over each index as a peak
-  (apply max (map calculate-max-sum-with-peak (range (length maxHeights)))))
+    ;; Use for/fold to build the heights list to the left of the peak
+    (define left-heights
+      (for/fold ([heights (list (list-ref maxHeights peak))])
+                ([i (in-range (sub1 peak) -1 -1)])
+        (cons (min (list-ref maxHeights i) (first heights)) heights)))
+    ;; Use for/fold to build the heights list to the right of the peak
+    (define right-heights
+      (for/fold ([heights '()])
+                ([i (in-range (add1 peak) (length maxHeights))])
+        (cons (min (list-ref maxHeights i) (if (empty? heights) (list-ref maxHeights peak) (first heights))) heights)))
+    ;; Concatenate left, peak, and right heights and calculate the sum
+    (apply + (append (reverse left-heights) right-heights)))
+
+  ;; Iterate over each index to try it as a peak and find the maximum sum
+  (for/fold ([max-sum 0])
+            ([i (in-range (length maxHeights))])
+    (max max-sum (calculate-max-sum-with-peak i))))
 
 ;; Example usage
 (maximumSumOfHeights '(5 3 4 1 1))  ; Output: 13

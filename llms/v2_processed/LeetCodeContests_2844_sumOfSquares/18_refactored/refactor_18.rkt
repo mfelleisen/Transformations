@@ -18,12 +18,22 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
+  
+  ;; Helper function to determine if an index is special
+  (define (special? i)
+    (zero? (remainder n i)))
+  
+  ;; Helper function to square a number
   (define (square x) (* x x))
+  
+  ;; Traverse the list, filter special indices, and sum their squares
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (remainder n i)))
+            #:when (special? i))
     (square (list-ref nums (sub1 i)))))
 
-;; The function sumOfSquares now accepts a list of numbers and returns the sum of the squares of all special elements.
+;; Test cases
+(sumOfSquares '(1 2 3 4)) ; => 21
+(sumOfSquares '(2 7 1 19 18 3)) ; => 63
 
 (require rackunit)
 

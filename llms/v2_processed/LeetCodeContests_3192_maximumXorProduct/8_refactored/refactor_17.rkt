@@ -26,22 +26,18 @@
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
   (define upper-limit (expt 2 n))  ; Calculate the upper limit as 2^n
   
-  ;; Helper function to calculate the product
-  (define (xor-product x)
-    (* (bitwise-xor a x) (bitwise-xor b x)))
-
-  ;; Find the maximum product using for/fold
-  (define max-product
-    (for/fold ([max-prod 0]) ([x (in-range upper-limit)])
-      (max max-prod (xor-product x))))
+  ;; Helper function to calculate the product for a given x
+  (define (product-for-x x)
+    (modulo (* (bitwise-xor a x) (bitwise-xor b x)) MOD))
   
-  ;; Return the maximum product modulo MOD
-  (modulo max-product MOD))
+  ;; Calculate the maximum product for all x in the range [0, upper-limit)
+  (for/fold ([max-product 0]) ([x (in-range upper-limit)])
+    (max max-product (product-for-x x))))
 
-;; Test the function with the given examples
-(maximumXorProduct 12 5 4)  ; Output should be 98
-(maximumXorProduct 6 7 5)   ; Output should be 930
-(maximumXorProduct 1 6 3)   ; Output should be 12
+;; Examples
+(maximumXorProduct 12 5 4)  ; Output: 98
+(maximumXorProduct 6 7 5)   ; Output: 930
+(maximumXorProduct 1 6 3)   ; Output: 12
 
 (require rackunit)
 

@@ -25,17 +25,18 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
+  ;; Function to calculate the minimum cost of dividing the list into 3 contiguous subarrays
   (define n (length nums))
-  
-  (define (cost i j)
-    (+ (list-ref nums 0)
-       (list-ref nums i)
-       (list-ref nums j)))
-  
-  (if (= n 3)
-      (apply + nums)
-      (for*/fold ([min-cost +inf.0]) ([i (in-range 1 (- n 1))] [j (in-range (+ i 1) n)])
-        (min min-cost (cost i j)))))
+  (cond
+    [(= n 3) (apply + nums)]  ; If there are exactly 3 elements, return the sum of all elements
+    [else
+     (for*/fold ([min-cost +inf.0]) 
+                ([i (in-range 1 (- n 1))]
+                 [j (in-range (+ i 1) n)])
+       (define cost (+ (first nums)  ; Cost of the first subarray
+                       (list-ref nums i)  ; Cost of the second subarray
+                       (list-ref nums j)))  ; Cost of the third subarray
+       (min min-cost cost))]))
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

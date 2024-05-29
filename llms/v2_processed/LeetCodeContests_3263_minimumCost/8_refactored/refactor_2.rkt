@@ -25,21 +25,20 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Function to calculate the minimum cost of dividing the list into 3 contiguous subarrays
-  (define n (length nums))
-  
-  (define (costs i j)
+  ;; Helper function to sum the first elements of three subarrays
+  (define (cost i j)
     (+ (first nums)
        (list-ref nums i)
        (list-ref nums j)))
-
-  (if (= n 3)
-      (apply + nums)  ; If there are exactly 3 elements, return the sum of all elements
-      ;; Use for/fold to find the optimal breakpoints i and j
-      (for*/fold ([min-cost +inf.0])
-                 ([i (in-range 1 (- n 1))]
-                  [j (in-range (+ i 1) n)])
-        (min min-cost (costs i j)))))
+  
+  ;; Generate all possible pairs of indices (i, j) to split nums into 3 subarrays
+  (define all-pairs
+    (for*/list ([i (in-range 1 (- (length nums) 1))]
+                [j (in-range (+ i 1) (length nums))])
+      (cost i j)))
+  
+  ;; Return the minimum cost from all possible pairs
+  (apply min all-pairs))
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

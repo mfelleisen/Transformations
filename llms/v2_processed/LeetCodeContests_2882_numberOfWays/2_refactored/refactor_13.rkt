@@ -24,36 +24,24 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus
 
-  ;; Helper function to initialize the dp vector
-  (define (init-dp n)
-    (define dp (make-vector (+ n 1) 0))
-    (vector-set! dp 0 1)
-    dp)
+  ;; Helper function to calculate the number of ways to form a given total
+  ;; using powers of integers starting from a given base.
+  (define (count-ways total base)
+    (cond
+      [(= total 0) 1]  ; If total is zero, there's exactly one way to form it (by using no numbers).
+      [(or (< total 0) (< base 1)) 0]  ; If total is negative or base is less than 1, no valid way.
+      [else
+       (let ((current-power (expt base x)))
+         ;; Add the ways by including and excluding the current base.
+         (modulo (+ (count-ways (- total current-power) (- base 1))
+                    (count-ways total (- base 1)))
+                 MOD))]))
 
-  ;; Helper function to calculate the maximum base
-  (define (max-base n x)
-    (inexact->exact (floor (expt n (/ 1 x)))))
+  ;; Calculate the maximum base such that base^x <= n
+  (define max-base (inexact->exact (floor (expt n (/ 1.0 x)))))
 
-  ;; Main computation using a fold to update dp
-  (define (update-dp dp n x)
-    (foldl
-     (lambda (base dp)
-       (define current-power (expt base x))
-       (for/fold ([dp dp])
-                 ([i (in-range n (- current-power 1) -1)])
-         (vector-set! dp i
-                      (modulo (+ (vector-ref dp i)
-                                 (vector-ref dp (- i current-power)))
-                              MOD))
-         dp))
-     dp
-     (range 1 (+ (max-base n x) 1))))
-
-  ;; Initialize dp and update it
-  (define dp (update-dp (init-dp n) n x))
-
-  ;; Return the number of ways to express n
-  (vector-ref dp n))
+  ;; Start counting the ways from the maximum base
+  (count-ways n max-base))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

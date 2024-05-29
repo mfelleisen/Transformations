@@ -22,20 +22,17 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  ;; Check if the current element is a peak by comparing it with its neighbors.
+  ;; This function takes a list of integers representing mountain heights and returns a list of indices
+  ;; of all peak elements. A peak is defined as an element that is strictly greater than its neighboring elements.
   ;; The first and last elements are not considered for peaks.
-  (define (is-peak? index)
-    (and (> index 0)
-         (< index (sub1 (length mountain)))
-         (> (list-ref mountain index) (list-ref mountain (sub1 index)))
-         (> (list-ref mountain index) (list-ref mountain (add1 index)))))
-  
-  ;; Use `filter` to create a list of indices that are peaks.
-  (filter is-peak? (range (length mountain))))
+  (for/list ([i (in-range 1 (- (length mountain) 1))]
+             #:when (and (> (list-ref mountain i) (list-ref mountain (- i 1)))
+                         (> (list-ref mountain i) (list-ref mountain (+ i 1)))))
+    i))
 
 ;; Example usage:
-(findPeaks '(1 4 3 8 5)) ;; => '(1 3)
-(findPeaks '(2 4 4))     ;; => '()
+(findPeaks '(1 4 3 8 5)) ; => '(1 3)
+(findPeaks '(2 4 4)) ; => '()
 
 (require rackunit)
 

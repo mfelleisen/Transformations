@@ -14,19 +14,15 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Helper function to calculate the number of ways to distribute candies
-  ;; using recursion and higher-order functions.
-  (define (count-ways a b)
-    (let ([c (- n a b)])
-      (if (<= c limit) 1 0)))
-
-  (define (sum-ways a)
-    (for/sum ([b (in-range (min (- n a) (add1 limit)))])
-      (count-ways a b)))
-
-  ;; Main function to count the number of valid distributions
-  (for/sum ([a (in-range (min n (add1 limit)))])
-    (sum-ways a)))
+  ;; Function to check if a distribution is valid
+  (define (valid-distribution? a b c)
+    (and (<= a limit) (<= b limit) (<= c limit)))
+  
+  ;; Generate all possible distributions and count the valid ones
+  (for/sum ([a (in-range 0 (add1 (min n limit)))]
+            [b (in-range 0 (add1 (min n limit)))]
+            #:when (valid-distribution? a b (- n a b)))
+    1))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

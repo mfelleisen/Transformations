@@ -18,14 +18,14 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  (define (special? i) (zero? (remainder n i)))
-  (define (square x) (* x x))
-  (define (index->element i) (list-ref nums (sub1 i)))
-  (define (special-elements) (filter special? (range 1 (add1 n))))
-  
-  (apply +
-         (map (compose square index->element)
-              (special-elements))))
+  (define (special? i)
+    (zero? (remainder n i)))
+  (define (square x)
+    (* x x))
+
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (special? i))
+    (square (list-ref nums (sub1 i)))))
 
 (require rackunit)
 

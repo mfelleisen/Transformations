@@ -28,11 +28,26 @@
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
   (define n (length nums))
-  (define (compute-diff i)
-    (for/fold ([min-diff +inf.0]) ([j (in-range (+ i x) n)])
-      (min min-diff (abs (- (list-ref nums i) (list-ref nums j))))))
-  (for/fold ([min-diff +inf.0]) ([i (in-range (- n x))])
-    (min min-diff (compute-diff i))))
+  
+  (define (abs-diff a b)
+    (abs (- a b)))
+  
+  (define (update-min min-diff i j)
+    (let ([diff (abs-diff (list-ref nums i) (list-ref nums j))])
+      (min min-diff diff)))
+  
+  (define (traverse i min-diff)
+    (if (>= i (- n x))
+        min-diff
+        (let loop ((j (+ i x)) (current-min min-diff))
+          (if (>= j n)
+              (traverse (+ i 1) current-min)
+              (let ([new-min (update-min current-min i j)])
+                (if (zero? new-min)
+                    0
+                    (loop (+ j 1) new-min)))))))
+  
+  (traverse 0 +inf.0))
 
 ;; Example usage:
 (minAbsoluteDifference '(4 3 2 4) 2)  ; Output: 0

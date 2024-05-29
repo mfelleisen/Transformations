@@ -17,22 +17,22 @@
 ;; Hence, your account balance becomes 100 - 20 = 80.
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
-(define (accountBalanceAfterPurchase purchaseAmount)
+(define (accountBalanceAfterPurchase purchase-amount)
+  ;; Define the initial balance.
   (define initial-balance 100)
   
-  (define (round-to-nearest-10 amt)
-    (let* ([lower-bound (* 10 (quotient amt 10))]
-           [upper-bound (+ lower-bound 10)]
-           [rounded-amount (if (<= (- upper-bound amt) (- amt lower-bound))
-                               upper-bound
-                               lower-bound)])
-      rounded-amount))
+  ;; Calculate the rounded amount to the nearest multiple of 10.
+  (define rounded-amount 
+    (match (modulo purchase-amount 10)
+      [n (<= n 5) (* 10 (quotient purchase-amount 10))]
+      [else        (* 10 (+ 1 (quotient purchase-amount 10)))]))
   
-  (- initial-balance (round-to-nearest-10 purchaseAmount)))
+  ;; Calculate and return the new balance after the purchase.
+  (- initial-balance rounded-amount))
 
-;; The `round-to-nearest-10` helper function computes the rounded amount
-;; to the nearest multiple of 10, favoring the larger multiple in case of a tie.
-;; The main function computes the new balance by subtracting the rounded amount from the initial balance.
+;; The function accountBalanceAfterPurchase now uses pattern matching with `match`
+;; to determine the rounded amount. The rest of the function remains simple and idiomatic,
+;; leveraging define for bindings and pure functions for calculations.
 
 (require rackunit)
 

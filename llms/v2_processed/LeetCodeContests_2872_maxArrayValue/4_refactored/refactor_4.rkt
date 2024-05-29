@@ -23,12 +23,15 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Fold the list from the right, combining elements as described.
-  (define-values (max-value _)
-    (for/fold ([max-value 0] [acc 0]) ([num (in-list (reverse nums))])
-      (define new-acc (+ num (if (<= num acc) acc 0)))
-      (values (max max-value new-acc) new-acc)))
-  max-value)
+  ;; Use a fold operation to simulate combining elements from the end of the list to the beginning.
+  (define (combine-nums lst)
+    (foldr (lambda (x acc)
+             (if (and acc (<= x acc))
+                 (+ x acc)
+                 (max x (or acc 0))))
+           0
+           lst))
+  (combine-nums nums))
 
 ;; Example usage:
 (maxArrayValue '(2 3 7 9 3))  ; Output: 21

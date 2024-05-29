@@ -15,15 +15,14 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Function to recursively count valid distributions
-  (define (count-distributions a b remaining)
-    (cond [(and (<= remaining limit) (<= a limit) (<= b limit)) 1]
-          [else 0]))
+  (define (valid-distribution? a b c)
+    (and (<= a limit) (<= b limit) (<= c limit) (= (+ a b c) n)))
 
-  ;; Use a nested loop over a range of possible candies for the first two children
-  (for*/sum ([a (in-range (add1 (min n limit)))]
-             [b (in-range (add1 (min (- n a) limit)))])
-    (count-distributions a b (- n a b))))
+  (for/sum ([a (in-range (add1 limit))]
+            [b (in-range (add1 limit))]
+            [c (in-range (add1 limit))]
+            #:when (valid-distribution? a b c))
+    1))
 
 ;; Example usage:
 (distributeCandies 5 2)  ;; Output: 3

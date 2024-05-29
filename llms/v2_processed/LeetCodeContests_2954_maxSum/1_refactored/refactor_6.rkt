@@ -21,33 +21,32 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  (define (valid-window? window m)
-    (>= (length (remove-duplicates window)) m))
+  ;; Helper function to calculate the sum of a list
+  (define (sum lst)
+    (foldl + 0 lst))
+  
+  ;; Helper function to check if a subarray is almost unique
+  (define (almost-unique? lst m)
+    (>= (length (remove-duplicates lst)) m))
+  
+  ;; Iterate over the list with a sliding window of size k
+  (define (sliding-window lst)
+    (for/list ([i (in-range (- (length lst) (sub1 k)))])
+      (take (drop lst i) k)))
 
-  (define (window-sum window)
-    (apply + window))
-
-  (define (next-window window num)
-    (append (rest window) (list num)))
-
-  (define (max-sum-helper nums m k i max-sum current-window)
-    (cond
-      [(> i (- (length nums) k)) max-sum]
-      [else
-       (let* ([new-max-sum (if (valid-window? current-window m)
-                               (max max-sum (window-sum current-window))
-                               max-sum)]
-              [next-num (if (= i (- (length nums) k))
-                            '()
-                            (list (list-ref nums (+ i k))))]
-              [next-window (if (null? next-num)
-                               '()
-                               (next-window current-window (car next-num)))])
-         (max-sum-helper nums m k (add1 i) new-max-sum next-window))]))
-
+  ;; Find the maximum sum of all almost unique subarrays of length k
+  (define (max-almost-unique-sum subarrays)
+    (foldl (lambda (subarray max-sum)
+             (if (almost-unique? subarray m)
+                 (max max-sum (sum subarray))
+                 max-sum))
+           0
+           subarrays))
+  
+  ;; Main function logic
   (if (< (length nums) k)
       0
-      (max-sum-helper nums m k 0 0 (take nums k))))
+      (max-almost-unique-sum (sliding-window nums))))
 
 ;; Example usage
 (maxSum '(2 6 7 3 1 7) 3 4)  ; Output: 18

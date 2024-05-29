@@ -28,17 +28,22 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
-  ;; This function calculates the sum of the squares of distinct counts of all subarrays of nums.
-  (let ([n (length nums)])
-    (for/sum ([i n]) ; Loop over each possible starting index i
-      (let loop ([j i] [seen (set)]) ; Loop over each possible ending index j starting from i
-        (if (>= j n)
-            0 ; If j exceeds the bounds of nums, stop adding and return 0
-            (let* ([current-element (list-ref nums j)] ; Get the element at index j
-                   [updated-seen (set-add seen current-element)] ; Update the set with the current element
-                   [distinct-count (set-count updated-seen)]) ; Count the number of distinct elements
-              (+ (sqr distinct-count) ; Add the square of the distinct count
-                 (loop (+ j 1) updated-seen)))))))) ; Recursive call for the next element
+  ;; A helper function to calculate distinct counts for each subarray starting from index i
+  (define (distinct-counts-from i)
+    (let loop ([j i] [seen (set)] [sum 0])
+      (if (>= j (length nums))
+          sum
+          (let ([current-element (list-ref nums j)]
+                [new-seen (set-add seen (list-ref nums j))])
+            (loop (+ j 1) new-seen (+ sum (expt (set-count new-seen) 2)))))))
+
+  ;; Calculate the sum of squares of distinct counts for all subarrays
+  (for/fold ([total-sum 0]) ([i (in-range (length nums))])
+    (+ total-sum (distinct-counts-from i))))
+
+;; Example usage:
+(sumCounts '(1 2 1)) ;; Output: 15
+(sumCounts '(1 1)) ;; Output: 3
 
 (require rackunit)
 

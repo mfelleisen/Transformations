@@ -15,16 +15,20 @@
 ;; 1 <= nums.length <= 50
 ;; 1 <= nums[i] <= 50
 (define (missingInteger nums)
-  (define-values (seq-prefix sum)
-    (for/fold ([prefix '()] [sum 0]) ([x nums] [i (in-naturals)])
-      (if (or (empty? prefix) (= x (+ 1 (car prefix))))
-          (values (cons x prefix) (+ sum x))
-          (values prefix sum))))
-  (define seq-sum sum)
-  (let find-missing ((x seq-sum))
-    (if (member x nums)
-        (find-missing (+ x 1))
-        x)))
+  (define (longest-seq-prefix nums)
+    (for/fold ([max-sum (first nums)]
+               [i 0])
+              ([j (in-range 1 (length nums))]
+               #:break (not (= (list-ref nums j) (+ (list-ref nums i) 1))))
+      (values (+ max-sum (list-ref nums j)) j)))
+
+  (define (find-missing nums target-sum)
+    (for/first ([x (in-naturals target-sum)]
+                #:unless (member x nums))
+      x))
+
+  (define-values (target-sum _) (longest-seq-prefix nums))
+  (find-missing nums target-sum))
 
 ;; Example usage
 (missingInteger '(1 2 3 2 5))  ; Output: 6

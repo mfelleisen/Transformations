@@ -39,40 +39,28 @@
 ;;  * 0 <= nums[i] <= 109
 ;;  * 0 <= k <= 109
 (define (minIncrementOperations nums k)
-  ;; Helper function to calculate the increments needed for a given window
-  (define (incr-for-window w)
-    (let ((max-in-window (apply max w)))
-      (if (< max-in-window k)
-          (- k max-in-window)
-          0)))
-  
-  ;; Helper function to update the nums list
-  (define (update-nums nums i increment)
-    (map (lambda (idx n)
-           (if (and (<= i idx) (< idx (+ i 3)))
-               (+ n increment)
-               n))
-         (range (length nums)) nums))
-  
-  ;; Main loop to calculate the total increments needed
-  (define (loop i increments-needed nums)
+  (define (update-nums lst increment)
+    (map (λ (x) (+ x increment)) lst))
+
+  (define (process nums k i increments-needed)
     (if (>= i (- (length nums) 2))
         increments-needed
         (let* ([window (take (drop nums i) 3)]
-               [increment (incr-for-window window)])
-          (loop (+ i 1)
-                (+ increments-needed increment)
-                (if (> increment 0)
-                    (update-nums nums i increment)
-                    nums)))))
-  
-  ;; Start the main loop with initial values
-  (loop 0 0 nums))
+               [max-in-window (apply max window)]
+               [increment (if (< max-in-window k)
+                              (- k max-in-window)
+                              0)])
+          (process
+           (if (> increment 0)
+               (append (take nums i)
+                       (update-nums (take (drop nums i) 3) increment)
+                       (drop nums (+ i 3)))
+               nums)
+           k
+           (+ i 1)
+           (+ increments-needed increment)))))
 
-;; Examples
-(minIncrementOperations '(2 3 0 0 2) 4) ;; Output: 3
-(minIncrementOperations '(0 1 3 3) 5)   ;; Output: 2
-(minIncrementOperations '(1 1 2) 1)     ;; Output: 0
+  (process nums k 0 0))
 
 (require rackunit)
 

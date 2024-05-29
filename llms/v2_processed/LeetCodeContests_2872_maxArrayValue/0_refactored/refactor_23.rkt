@@ -23,15 +23,17 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
+  ;; Helper function to combine the numbers from the right
   (define (combine-nums lst)
     (foldr (lambda (current acc)
              (match acc
-               [(cons first rest)
-                (if (<= current first)
-                    (cons (+ current first) rest)
+               [(cons acc-first acc-rest)
+                (if (<= current acc-first)
+                    (cons (+ current acc-first) acc-rest)
                     (cons current acc))]
-               [else (cons current acc)]))
-           '()  ;; Start with an empty list as the accumulator
+               [empty
+                (list current)]))
+           '()
            lst))
   ;; Return the maximum value from the combined list
   (apply max (combine-nums nums)))

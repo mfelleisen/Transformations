@@ -28,17 +28,13 @@
   ;; Find the intersection of the two sets
   (define intersection (set-intersect set-nums1 set-nums2))
   
-  ;; Helper function to count elements in a list that are in a set
-  (define (count-in-set lst set)
-    (for/fold ([count 0]) ([x (in-list lst)])
-      (if (set-member? set x)
-          (add1 count)
-          count)))
-  
   ;; Count the number of elements in nums1 that are in the intersection
-  (define count1 (count-in-set nums1 intersection))
+  (define count1 (for/sum ([x (in-list nums1)])
+                   (if (set-member? intersection x) 1 0)))
+  
   ;; Count the number of elements in nums2 that are in the intersection
-  (define count2 (count-in-set nums2 intersection))
+  (define count2 (for/sum ([x (in-list nums2)])
+                   (if (set-member? intersection x) 1 0)))
   
   ;; Return the counts as a list
   (list count1 count2))

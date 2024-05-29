@@ -34,26 +34,30 @@
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
   (define n (length nums))
-  
-  (define memo-table (make-hash))
-  
-  (define (max-jumps-from i)
-    (cond
-      [(= i (sub1 n)) 0]
-      [(hash-ref memo-table i #f)]
-      [else
-       (define max-jumps
-         (for/fold ([max-jump -1])
-                   ([j (in-range (add1 i) n)]
-                    #:when (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
-           (define jumps (max-jumps-from j))
-           (if (= jumps -1)
-               max-jump
-               (max max-jump (add1 jumps)))))
-       (hash-set! memo-table i max-jumps)
-       max-jumps]))
-  
-  (max-jumps-from 0))
+
+  ;; Function to update the dp vector based on the current index i
+  (define (update-dp i dp)
+    (for/fold ([dp dp])
+              ([j (in-range (add1 i) n)]
+               #:when (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
+      (define new-jumps (add1 (vector-ref dp i)))
+      (define current-jumps (vector-ref dp j))
+      (vector-set! dp j (max current-jumps new-jumps))
+      dp))
+
+  ;; Initialize dp vector
+  (define dp (build-vector n (λ (i) (if (zero? i) 0 -inf.0))))
+
+  ;; Iterate and update dp for each index
+  (for ([i (in-range n)])
+    (when (not (= (vector-ref dp i) -inf.0))
+      (update-dp i dp)))
+
+  ;; Get the result from the dp vector
+  (let ([result (vector-ref dp (sub1 n))])
+    (if (= result -inf.0)
+        -1
+        result)))
 
 ;; Examples:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

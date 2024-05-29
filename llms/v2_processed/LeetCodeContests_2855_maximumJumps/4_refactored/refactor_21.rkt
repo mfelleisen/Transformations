@@ -35,27 +35,28 @@
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
   (define n (length nums))
-  
-  ;; Recursive helper function with memoization
-  (define memo-table (make-hash))
-  
-  (define (max-jumps-from idx)
-    (cond
-      [(= idx (- n 1)) 0] ; Reached the last index, no more jumps needed
-      [(hash-ref memo-table idx #f)] ; Return cached result if available
-      [else
-       (define max-jumps -inf.0)
-       (for ([j (in-range (add1 idx) n)])
-         (when (<= (abs (- (list-ref nums j) (list-ref nums idx))) target)
-           (set! max-jumps (max max-jumps (add1 (max-jumps-from j))))))
-       (hash-set! memo-table idx max-jumps)
-       max-jumps]))
-  
-  ;; Compute the result starting from index 0
-  (let ([result (max-jumps-from 0)])
-    (if (= result -inf.0)
+
+  ;; Initialize a vector to keep track of the maximum number of jumps to reach each index.
+  (define dp (make-vector n -inf.0))
+  (vector-set! dp 0 0)  ; Start at the first index with 0 jumps.
+
+  ;; Helper function to check if a jump from index i to index j is valid.
+  (define (valid-jump? i j)
+    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
+
+  ;; Traverse the list to update the dp vector.
+  (for ([i (in-range n)])
+    (when (not (= (vector-ref dp i) -inf.0))  ; Only consider reachable positions.
+      (for ([j (in-range (add1 i) n)])
+        (when (valid-jump? i j)
+          ;; Update dp[j] to the maximum of its current value or dp[i] + 1.
+          (vector-set! dp j (max (vector-ref dp j) (add1 (vector-ref dp i))))))))
+
+  ;; Get the value for the last position; return -1 if it's still negative infinity.
+  (let ([last-jump (vector-ref dp (sub1 n))])
+    (if (= last-jump -inf.0)
         -1
-        result)))
+        last-jump)))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

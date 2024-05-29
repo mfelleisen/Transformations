@@ -22,29 +22,23 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  ;; Helper function to calculate the score recursively
-  (define (calculate-score i current-score prev-val memo)
-    (if (= i (length nums))
-        current-score
-        (or (hash-ref memo i #f)
-            (let loop ([j (add1 i)] [max-score current-score])
-              (if (= j (length nums))
-                  (begin
-                    (hash-set! memo i max-score)
-                    max-score)
-                  (let* ([current-num (list-ref nums j)]
-                         [penalty (if (not (= (modulo (list-ref nums i) 2) (modulo current-num 2)))
-                                     x
-                                     0)]
-                         [new-score (- (+ current-score current-num) penalty)]
-                         [new-max (max max-score new-score)])
-                    (loop (add1 j) (calculate-score j new-score current-num memo))))))))
-
-  ;; Initialize memoization hash table
-  (define memo (make-hash))
-
-  ;; Calculate the maximum score starting from the first element
-  (calculate-score 0 (first nums) (first nums) memo))
+  (define nums-list (list->vector nums))
+  (define n (vector-length nums-list))
+  
+  (define dp (make-vector n -inf.0))
+  (vector-set! dp 0 (vector-ref nums-list 0))
+  
+  (define (calc-score i j)
+    (define base-score (+ (vector-ref dp i) (vector-ref nums-list j)))
+    (if (not (= (modulo (vector-ref nums-list i) 2) (modulo (vector-ref nums-list j) 2)))
+        (- base-score x)
+        base-score))
+  
+  (for ([i (in-range n)])
+    (for ([j (in-range (add1 i) n)])
+      (vector-set! dp j (max (vector-ref dp j) (calc-score i j)))))
+  
+  (apply max (vector->list dp)))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

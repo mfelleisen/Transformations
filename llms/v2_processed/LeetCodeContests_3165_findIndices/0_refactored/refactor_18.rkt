@@ -31,28 +31,22 @@
 ;;  * 0 <= indexDifference <= 100
 ;;  * 0 <= valueDifference <= 50
 (define (findIndices nums indexDifference valueDifference)
-  ;; Helper function to check if the pair (i, j) satisfies the conditions
+  ;; Helper function to check if a pair (i, j) satisfies the conditions
   (define (valid-pair? i j)
     (and (>= (abs (- i j)) indexDifference)
          (>= (abs (- (list-ref nums i) (list-ref nums j))) valueDifference)))
 
-  ;; Generate all pairs (i, j) and check if they are valid
-  (for/first ([(i j) (in-indexed (in-list nums))]
-              #:when (ormap (λ (k) (valid-pair? i k)) (range (length nums))))
-    (for/first ([(k _) (in-indexed (in-list nums))]
-                #:when (valid-pair? i k))
-      (list i k)))
-  ;; If no valid pair is found, return [-1, -1]
-  (or (for/first ([(i j) (in-indexed (in-list nums))]
-                  #:when (ormap (λ (k) (valid-pair? i k)) (range (length nums))))
-        (for/first ([(k _) (in-indexed (in-list nums))]
-                    #:when (valid-pair? i k))
-          (list i k)))
-      (list -1 -1)))
+  ;; Find the first valid pair using a nested loop with higher-order functions
+  (for/or ([(i j) (in-indexed (in-list nums))] [(ii jj) (in-indexed (in-list nums))])
+    (when (valid-pair? i ii)
+      (values (list i ii))))
 
-;; The function `findIndices` now iterates over all possible pairs of indices in the array `nums`.
+  ;; If no valid pair is found, return [-1, -1]
+  (list -1 -1))
+
+;; The function `findIndices` iterates over all possible pairs of indices in the array `nums`.
 ;; It checks each pair to see if they satisfy the conditions specified by `indexDifference` and `valueDifference`.
-;; If a valid pair is found, it returns that pair. If no such pair exists, it returns `[-1, -1]`.
+;; If a valid pair is found, it returns that pair. If no such pair exists, it returns `[-1, -1].
 
 (require rackunit)
 

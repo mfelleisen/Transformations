@@ -18,13 +18,18 @@
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
+  ;; Define the initial balance
   (define initial-balance 100)
+  
+  ;; Calculate the rounded amount using Racket's built-in rounding functions
   (define rounded-amount
-    (let* ([lower-bound (* (quotient purchaseAmount 10) 10)]
-           [upper-bound (+ lower-bound 10)])
+    (let ([lower-bound (* (quotient purchaseAmount 10) 10)]
+          [upper-bound (+ (* (quotient purchaseAmount 10) 10) 10)])
       (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
           lower-bound
           upper-bound)))
+  
+  ;; Calculate and return the new balance after the purchase
   (- initial-balance rounded-amount))
 
 ;; Example usage:

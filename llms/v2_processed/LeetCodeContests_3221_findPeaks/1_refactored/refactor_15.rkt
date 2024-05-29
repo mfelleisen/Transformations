@@ -22,21 +22,25 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  ;; Helper function to determine if the element at index `i` is a peak
-  (define (is-peak? i)
-    (and (> (list-ref mountain i) (list-ref mountain (sub1 i)))
-         (> (list-ref mountain i) (list-ref mountain (add1 i)))))
-  
-  ;; Generate a list of indices (1 to length-2) and filter out the peaks
-  (define len (length mountain))
-  (if (< len 3)
-      '()
-      (filter (lambda (i) (is-peak? i))
-              (range 1 (sub1 len)))))
+  ;; Helper function to check if the given element is a peak
+  (define (is-peak? lst idx)
+    (and (> (list-ref lst idx) (list-ref lst (sub1 idx)))
+         (> (list-ref lst idx) (list-ref lst (add1 idx)))))
 
-;; Example usage:
-(findPeaks '(2 4 4))    ;; Output: '()
-(findPeaks '(1 4 3 8 5)) ;; Output: '(1 3)
+  ;; Helper function to accumulate peaks
+  (define (accumulate-peaks lst idx accum)
+    (if (>= idx (sub1 (length lst)))
+        (reverse accum)
+        (accumulate-peaks lst (add1 idx) (if (is-peak? lst idx) (cons idx accum) accum))))
+
+  ;; Main logic, start from index 1 and go to the second last element
+  (if (< (length mountain) 3)
+      '()
+      (accumulate-peaks mountain 1 '())))
+
+;; Examples
+(findPeaks '(2 4 4)) ; => '()
+(findPeaks '(1 4 3 8 5)) ; => '(1 3)
 
 (require rackunit)
 

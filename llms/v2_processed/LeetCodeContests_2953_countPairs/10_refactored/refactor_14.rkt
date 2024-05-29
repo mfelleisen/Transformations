@@ -18,23 +18,25 @@
 ;;  * 0 <= xi, yi <= 106
 ;;  * 0 <= k <= 100
 (define (countPairs coordinates k)
-  ;; Helper function to calculate the XOR distance between two points
+  ;; Calculate the XOR distance between two points
   (define (xor-distance p1 p2)
     (+ (bitwise-xor (first p1) (first p2))
        (bitwise-xor (second p1) (second p2))))
 
-  ;; Fold over all pairs of coordinates and count the valid ones
-  (for/fold ([count 0])
-            ([i (in-naturals)]
-             [p1 (in-list coordinates)]
-             #:break (empty? (rest coordinates)))
-    (+ count
-       (for/sum ([p2 (in-list (rest coordinates))])
-         (if (= (xor-distance p1 p2) k) 1 0)))))
+  ;; Function to count valid pairs with distance equal to k using accumulators and higher-order functions
+  (define (count-valid-pairs lst)
+    (for/fold ([acc 0]) ([i (in-range (length lst))])
+      (for/fold ([inner-acc acc]) ([j (in-range (add1 i) (length lst))])
+        (if (= (xor-distance (list-ref lst i) (list-ref lst j)) k)
+            (add1 inner-acc)
+            inner-acc))))
 
-;; The function countPairs uses higher-order functions like `for/fold` and `for/sum` to accumulate the count of valid pairs.
-;; The `xor-distance` function calculates the XOR distance between two points.
-;; This approach avoids mutable state and loops, making the code more idiomatic in Racket.
+  ;; Calculate the count of valid pairs
+  (count-valid-pairs coordinates))
+
+;; Examples:
+(countPairs '((1 2) (4 2) (1 3) (5 2)) 5) ;; => 2
+(countPairs '((1 3) (1 3) (1 3) (1 3) (1 3)) 0) ;; => 10
 
 (require rackunit)
 

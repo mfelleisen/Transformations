@@ -39,20 +39,20 @@
 ;;  * 0 <= nums[i] <= 109
 ;;  * 0 <= k <= 109
 (define (minIncrementOperations nums k)
-  ;; Define a local helper function to process each window of size 3 or more
-  (define (increment-needed max-val)
-    (max 0 (- k max-val)))
-
-  (define (process-window nums index increments)
-    (if (>= index (- (length nums) 2))
-        increments  ;; If we've reached the end of the list, return the total increments
-        (let* ((current-window (take (drop nums index) 3))  ;; Extract the window of size 3
-               (max-in-window (apply max current-window))
-               (needed (increment-needed max-in-window)))
-          ;; Recursively process the next window, adding needed increments to each element of the current window
-          (process-window (map (λ (x) (+ x needed)) nums) (+ index 1) (+ increments needed)))))
-
-  ;; Start the recursive processing from the first index
+  (define (update nums idx needed)
+    (map (λ (i v) (if (member i idx) (+ v needed) v)) (range (length nums)) nums))
+  
+  (define (process-window nums idx needed)
+    (cond
+      [(>= idx (- (length nums) 2)) needed]
+      [else
+       (let* ([current-window (take (drop nums idx) 3)]
+              [max-in-window (apply max current-window)]
+              [additional-needed (if (< max-in-window k) (- k max-in-window) 0)])
+         (process-window (update nums (range idx (+ idx 3)) additional-needed)
+                         (add1 idx)
+                         (+ needed additional-needed)))]))
+  
   (process-window nums 0 0))
 
 ;; Example usage:

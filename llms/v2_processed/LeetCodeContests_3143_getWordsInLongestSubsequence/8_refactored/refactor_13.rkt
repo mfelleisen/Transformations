@@ -31,24 +31,16 @@
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
 (define (getWordsInLongestSubsequence n words groups)
-  ;; Helper function to accumulate the longest subsequence
-  (define (accumulate-longest-subsequence words groups)
-    (define (helper last-group remaining-words remaining-groups acc)
-      (match remaining-words
-        [(cons word rest-words)
-         (match remaining-groups
-           [(cons group rest-groups)
-            (if (not (= group last-group))
-                (helper group rest-words rest-groups (cons word acc))
-                (helper last-group rest-words rest-groups acc))]
-           [empty acc])]
-        [empty acc]))
-
-    (reverse (helper (first groups) (rest words) (rest groups) (list (first words)))))
-
-  (if (zero? n)
-      '() ; Return an empty list if n is 0
-      (accumulate-longest-subsequence words groups)))
+  (define (longest-subsequence words groups)
+    (define-values (result _)
+      (for/fold ([result '()] [last-group (car groups)])
+                ([word (in-list words)] [group (in-list groups)])
+        (if (or (empty? result) (not (= group last-group)))
+            (values (cons word result) group)
+            (values result last-group))))
+    (reverse result))
+  
+  (longest-subsequence words groups))
 
 ;; Example usage:
 (define n 4)

@@ -33,17 +33,23 @@
 (define (minimumPossibleSum n target)
   (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
 
-  ;; Helper function to build the array and calculate the sum
-  (define (build-array-and-sum n target candidate result sum)
-    (cond
-      [(= (length result) n) (modulo sum MOD)]
-      [(ormap (λ (num) (= (+ num candidate) target)) result)
-       (build-array-and-sum n target (+ candidate 1) result sum)]
-      [else
-       (build-array-and-sum n target (+ candidate 1) (cons candidate result) (+ sum candidate))]))
+  ;; Generate the beautiful array
+  (define (generate-beautiful-array n target)
+    (define (helper acc candidate remaining)
+      (if (= remaining 0)
+          (reverse acc)
+          (if (and (not (member candidate acc))
+                   (not (ormap (lambda (num) (= (+ num candidate) target)) acc)))
+              (helper (cons candidate acc) (add1 candidate) (sub1 remaining))
+              (helper acc (add1 candidate) remaining))))
+    (helper '() 1 n))
 
-  ;; Start building the array with initial candidate 1 and initial sum 0
-  (build-array-and-sum n target 1 '() 0))
+  ;; Calculate the sum of the array elements modulo MOD
+  (define (mod-sum nums)
+    (foldl (lambda (num acc) (modulo (+ acc num) MOD)) 0 nums))
+
+  ;; Generate the beautiful array and calculate its minimum possible sum
+  (mod-sum (generate-beautiful-array n target)))
 
 ;; Example test cases
 (displayln (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

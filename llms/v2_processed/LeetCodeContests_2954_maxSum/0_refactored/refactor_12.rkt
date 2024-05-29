@@ -21,25 +21,24 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  (define (sum-distinct-count lst)
-    (values (apply + lst) (length (remove-duplicates lst))))
+  (define (valid-window? window)
+    (>= (length (remove-duplicates window)) m))
 
-  (define (valid-window? lst)
-    (define-values (current-sum distinct-count) (sum-distinct-count lst))
-    (if (>= distinct-count m) current-sum 0))
+  (define (window-sum window)
+    (apply + window))
 
-  (define (max-sum-helper start max-sum window)
-    (if (< (+ start k) (length nums))
-        (let* ((new-window (append (rest window) (list (list-ref nums (+ start k)))))
-               (current-sum (valid-window? new-window))
-               (new-max-sum (max max-sum current-sum)))
-          (max-sum-helper (add1 start) new-max-sum new-window))
-        max-sum))
+  (define (sliding-windows nums k)
+    (if (< (length nums) k)
+        '()
+        (cons (take nums k) (sliding-windows (rest nums) k))))
 
-  (if (< (length nums) k)
-      0
-      (let ((initial-window (take nums k)))
-        (max-sum-helper 0 (valid-window? initial-window) initial-window))))
+  (define (max-sum-of-valid-windows windows)
+    (for/fold ([max-sum 0]) ([window windows])
+      (if (valid-window? window)
+          (max max-sum (window-sum window))
+          max-sum)))
+
+  (max-sum-of-valid-windows (sliding-windows nums k)))
 
 (require rackunit)
 

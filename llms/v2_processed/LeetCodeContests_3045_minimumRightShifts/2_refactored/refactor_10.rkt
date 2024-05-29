@@ -25,22 +25,20 @@
   (define n (length nums))
   (define sorted-nums (sort nums <))
 
-  ;; Helper function to check if a given shift amount results in a sorted list
-  (define (is-valid-shift? shift)
-    (for/and ([i (in-range n)])
-      (= (list-ref nums (modulo (+ shift i) n))
-         (list-ref sorted-nums i))))
+  (define (check-shift start)
+    (define shifted-nums
+      (append (drop nums start) (take nums start)))
+    (if (equal? shifted-nums sorted-nums)
+        start
+        #f))
 
-  ;; Iterate through possible shift amounts to find a valid shift
-  (define (find-valid-shift shift)
-    (cond
-      [(is-valid-shift? shift) shift]
-      [(< shift (sub1 n)) (find-valid-shift (add1 shift))]
-      [else -1]))
+  (define valid-shift
+    (for/or ([i (in-range n)])
+      (check-shift i)))
 
-  (if (= n 1)
-      0
-      (find-valid-shift 0)))
+  (if valid-shift
+      (modulo (- n valid-shift) n)
+      -1))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2

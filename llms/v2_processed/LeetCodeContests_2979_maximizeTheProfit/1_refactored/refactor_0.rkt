@@ -28,36 +28,43 @@
   (define sorted-offers (sort offers < #:key second))
 
   ;; Helper function to perform binary search and find the last non-conflicting offer
-  (define (findLastNonConflicting sorted-offers i)
+  (define (findLastNonConflicting offers i)
     (let loop ((low 0) (high (- i 1)))
       (if (> low high)
           -1
-          (let ((mid (quotient (+ low high) 2)))
-            (if (< (second (list-ref sorted-offers mid)) (first (list-ref sorted-offers i)))
-                (if (< (second (list-ref sorted-offers (+ mid 1))) (first (list-ref sorted-offers i)))
+          (let* ((mid (quotient (+ low high) 2))
+                 (mid-offer (list-ref offers mid))
+                 (i-offer (list-ref offers i)))
+            (if (< (second mid-offer) (first i-offer))
+                (if (and (< (second (list-ref offers (+ mid 1))) (first i-offer)) (< mid (+ i -1)))
                     (loop (+ mid 1) high)
                     mid)
                 (loop low (- mid 1)))))))
 
-  ;; Memoization hash to store the results
-  (define memo (make-hash))
+  ;; Dynamic programming list to store the maximum profit up to each offer
+  (define dp (make-vector (length sorted-offers) 0))
 
-  ;; Recursive function to calculate the maximum profit
-  (define (max-profit i)
-    (cond
-      [(hash-has-key? memo i) (hash-ref memo i)]
-      [(= i -1) 0]
-      [else
-       (let* ((current-offer (list-ref sorted-offers i))
-              (profit-including-current (third current-offer))
-              (last-index (findLastNonConflicting sorted-offers i))
-              (profit (max (+ profit-including-current (max-profit last-index))
-                           (max-profit (- i 1)))))
-         (hash-set! memo i profit)
-         profit)]))
+  ;; Initialize the base case with the profit of the first offer
+  (define (initialize-dp)
+    (vector-set! dp 0 (third (first sorted-offers))))
 
-  ;; Calculate the maximum profit starting from the last offer
-  (max-profit (- (length sorted-offers) 1)))
+  ;; Fill the dp vector
+  (define (fill-dp)
+    (for ([i (in-range 1 (length sorted-offers))])
+      (define current-offer (list-ref sorted-offers i))
+      (define profit-including-current (third current-offer))
+      (define last-index (findLastNonConflicting sorted-offers i))
+      (when (>= last-index 0)
+        (set! profit-including-current (+ profit-including-current (vector-ref dp last-index))))
+      ;; Calculate maximum profit by either including or excluding the current offer
+      (vector-set! dp i (max (vector-ref dp (- i 1)) profit-including-current))))
+
+  ;; Execute the initialization and filling functions
+  (initialize-dp)
+  (fill-dp)
+
+  ;; The last element in dp vector contains the maximum profit achievable
+  (vector-ref dp (- (length sorted-offers) 1)))
 
 ;; Example usage:
 (maximizeTheProfit 5 (list (list 0 0 1) (list 0 2 2) (list 1 3 2)))  ;; Output: 3

@@ -23,35 +23,35 @@
 ;;  * 1 <= nums[i] <= nums.length
 ;;  * 0 <= k <= nums.length
 (define (longestEqualSubarray nums k)
-  ;; Helper function to update the count hash
-  (define (update-count count num delta)
-    (hash-update! count num (λ (val) (+ val delta)) 0))
+  (define (update-counter counter key delta)
+    (hash-update! counter key (lambda (v) (+ v delta)) 0))
 
-  ;; Main recursive function to process the sliding window
-  (define (process-window left right count max-freq max-length)
-    (if (>= right (length nums))
-        max-length
-        (let* ([num (list-ref nums right)]
-               [count (update-count count num 1)]
-               [max-freq (max max-freq (hash-ref count num 0))]
-               [window-length (+ 1 (- right left))]
-               [new-max-length (if (<= (- window-length max-freq) k)
-                                   (max max-length window-length)
-                                   max-length)]
-               [new-left (if (> (- window-length max-freq) k)
-                             (+ left 1)
-                             left)]
-               [new-count (if (> (- window-length max-freq) k)
-                              (update-count count (list-ref nums left) -1)
-                              count)])
-          (process-window new-left (+ right 1) new-count max-freq new-max-length))))
+  (define (max-hash-value hash)
+    (apply max (hash-values hash)))
 
-  ;; Initialize the recursive process
-  (process-window 0 0 (make-hash) 0 0))
+  (define-values (max-length _)
+    (for/fold ([max-length 0]
+               [left 0]
+               [count (make-hash)])
+              ([right (in-range (length nums))])
+      (define num (list-ref nums right))
+      (update-counter count num 1)
+      (define max-freq (max-hash-value count))
+      (define window-length (+ 1 (- right left)))
+      (define excess (- window-length max-freq))
+      (define new-left (if (> excess k)
+                           (begin
+                             (update-counter count (list-ref nums left) -1)
+                             (+ left 1))
+                           left))
+      (define new-max-length (max max-length (- window-length excess)))
+      (values new-max-length new-left count)))
+  max-length)
 
-;; The function uses a helper function to update the hash table and a main
-;; recursive function to implement the sliding window approach, maintaining
-;; immutability and avoiding direct indexing of the list.
+;; The function uses a sliding window approach with two pointers, `left` and `right`. 
+;; A hash table `count` is used to keep track of the frequency of each element in the current window. 
+;; The window is expanded by moving the `right` pointer and adjusted by moving the `left` pointer when necessary. 
+;; The goal is to find the maximum length of a subarray that can be made equal by deleting at most `k` elements.
 
 (require rackunit)
 

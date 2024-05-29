@@ -25,21 +25,15 @@
   ;; This function takes a list of integers representing mountain heights and returns a list of indices
   ;; of all peak elements. A peak is defined as an element that is strictly greater than its neighboring elements.
   ;; The first and last elements are not considered for peaks.
-
-  (define (is-peak? prev cur next)
-    ;; Helper function to check if current element is a peak
-    (and (> cur prev) (> cur next)))
-
-  ;; Use `for/list` to iterate through the indices and elements, checking for peaks
+  
+  (define (is-peak? left middle right)
+    (> middle (max left right)))
+  
   (for/list ([i (in-range 1 (- (length mountain) 1))]
              #:when (is-peak? (list-ref mountain (- i 1))
                               (list-ref mountain i)
                               (list-ref mountain (+ i 1))))
     i))
-
-;; Example usage:
-(findPeaks '(1 4 3 8 5)) ;; Output: '(1 3)
-(findPeaks '(2 4 4)) ;; Output: '()
 
 (require rackunit)
 

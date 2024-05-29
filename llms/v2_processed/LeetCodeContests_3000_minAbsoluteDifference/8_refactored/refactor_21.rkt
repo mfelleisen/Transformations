@@ -27,32 +27,22 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  ;; Helper function to calculate the minimum absolute difference
-  ;; between two elements that are at least x indices apart
-  (define (calculate-min-diff nums x)
-    (define (update-min-diff min-diff val1 val2)
-      (min min-diff (abs (- val1 val2))))
-    
-    ;; Recursive function to iterate through the list
-    (define (iter i min-diff)
-      (if (>= i (- (length nums) x))
-          min-diff
-          (let* ((current (list-ref nums i))
-                 (sublist (drop nums (+ i x))))
-            ;; Inner recursion to iterate through the sublist
-            (define (inner-iter sublist min-diff)
-              (if (null? sublist)
-                  min-diff
-                  (let* ((next (car sublist))
-                         (new-diff (update-min-diff min-diff current next)))
-                    (if (zero? new-diff)
-                        0
-                        (inner-iter (cdr sublist) new-diff)))))
-            (iter (+ i 1) (inner-iter sublist min-diff)))))
-    
-    (iter 0 +inf.0))
+  (define len (length nums))
 
-  (calculate-min-diff nums x))
+  ;; Helper function to find the minimum absolute difference between two elements
+  (define (find-min-diff min-diff i)
+    (define (abs-diff a b) (abs (- a b)))
+
+    (define (update-min-diff j min-diff)
+      (define diff (abs-diff (list-ref nums i) (list-ref nums j)))
+      (min min-diff diff))
+
+    (for/fold ([min-diff min-diff]) ([j (in-range (+ i x) len)])
+      (update-min-diff j min-diff)))
+
+  ;; Main fold to iterate over the indices and find the minimum difference
+  (for/fold ([min-diff +inf.0]) ([i (in-range (- len x))])
+    (find-min-diff min-diff i)))
 
 ;; Example usage:
 (minAbsoluteDifference '(4 3 2 4) 2)  ; Output: 0

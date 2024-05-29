@@ -24,8 +24,7 @@
 ;;  * 0 <= starti <= endi <= n - 1
 ;;  * 1 <= goldi <= 103
 (define (maximizeTheProfit n offers)
-  ;; Sort offers based on their ending time
-  (define sorted-offers (sort offers (lambda (x y) (< (second x) (second y)))))
+  (define sorted-offers (sort offers < #:key second))
   
   ;; Helper function to find the last non-conflicting offer using binary search
   (define (find-last-non-conflicting offers i)
@@ -33,33 +32,34 @@
       (if (> low high)
           -1
           (let* ((mid (quotient (+ low high) 2))
-                 (mid-offer (list-ref offers mid))
-                 (next-mid-offer (list-ref offers (+ mid 1))))
+                 (mid-offer (list-ref offers mid)))
             (if (< (second mid-offer) (first (list-ref offers i)))
-                (if (< (second next-mid-offer) (first (list-ref offers i)))
+                (if (< (second (list-ref offers (+ mid 1))) (first (list-ref offers i)))
                     (loop (+ mid 1) high)
                     mid)
                 (loop low (- mid 1)))))))
   
-  ;; Recursive function to calculate maximum profit using memoization
-  (define (dp i memo)
-    (cond
-      [(= i 0) (third (list-ref sorted-offers 0))]
-      [(hash-has-key? memo i) (hash-ref memo i)]
-      [else
-       (let* ((current-offer (list-ref sorted-offers i))
-              (profit-including-current (third current-offer))
-              (l (find-last-non-conflicting sorted-offers i))
-              (profit (if (>= l 0)
-                          (+ profit-including-current (dp l memo))
-                          profit-including-current))
-              (max-profit (max (dp (- i 1) memo) profit)))
-         (hash-set! memo i max-profit)
-         max-profit)]))
+  ;; Memoization table for dynamic programming
+  (define dp (make-vector (length sorted-offers) 0))
+
+  ;; Function to calculate maximum profit
+  (define (calculate-max-profit i)
+    (if (zero? i)
+        (vector-ref dp 0)
+        (let* ((current-offer (list-ref sorted-offers i))
+               (current-profit (third current-offer))
+               (l (find-last-non-conflicting sorted-offers i)))
+          (when (>= l 0)
+            (set! current-profit (+ current-profit (vector-ref dp l))))
+          (vector-set! dp i (max (vector-ref dp (- i 1)) current-profit))
+          (vector-ref dp i))))
   
-  ;; Initialize memo hash and start the dp function
-  (define memo (make-hash))
-  (dp (- (length sorted-offers) 1) memo))
+  ;; Fill the dp vector
+  (for ([i (in-range (length sorted-offers))])
+    (calculate-max-profit i))
+  
+  ;; Return the maximum profit
+  (vector-ref dp (- (length sorted-offers) 1)))
 
 ;; Example usage:
 (maximizeTheProfit 5 (list (list 0 0 1) (list 0 2 2) (list 1 3 2)))  ;; Output: 3

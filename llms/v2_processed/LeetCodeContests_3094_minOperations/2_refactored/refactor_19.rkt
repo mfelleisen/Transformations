@@ -22,10 +22,8 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (minOperations nums)
-  (define freqs
-    (for/fold ([table (hash)])
-              ([num (in-list nums)])
-      (hash-update table num add1 0)))
+  (define freqs (for/fold ([table (hash)]) ([num (in-list nums)])
+                  (hash-update table num add1 0)))
 
   (define (calc-ops freq)
     (match (remainder freq 3)
@@ -36,10 +34,8 @@
       [2 (if (>= freq 2)
              (+ 1 (quotient (- freq 2) 3))
              -1)]))
-
-  (define ops
-    (map calc-ops (hash-values freqs)))
-
+  
+  (define ops (map calc-ops (hash-values freqs)))
   (if (member -1 ops)
       -1
       (apply + ops)))

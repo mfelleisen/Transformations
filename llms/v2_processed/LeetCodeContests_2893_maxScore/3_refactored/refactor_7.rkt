@@ -22,39 +22,34 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  ;; Calculate the length of the input list nums.
   (define n (length nums))
+  (define initial-score (first nums))
+
+  ;; Define a helper function to compute the maximum score recursively.
+  ;; `dp` is a memoization table to store the maximum score up to each index.
+  ;; `i` is the current index being processed.
+  (define (helper dp i)
+    (if (>= i n)
+        (apply max dp)
+        (let* ((current-value (list-ref nums i))
+               (parity (modulo current-value 2))
+               (update-fn (lambda (j dp-acc)
+                            (let* ((next-value (list-ref nums j))
+                                   (next-parity (modulo next-value 2))
+                                   (penalty (if (= parity next-parity) 0 x))
+                                   (new-score (+ (list-ref dp-acc i) next-value (- penalty))))
+                              (if (> new-score (list-ref dp-acc j))
+                                  (list-set dp-acc j new-score)
+                                  dp-acc)))))
+          (helper (for/fold ([dp-acc dp]) ([j (in-range (add1 i) n)])
+                            (update-fn j dp-acc))
+                  (add1 i)))))
   
-  ;; Recursive helper function to compute the maximum score
-  (define (max-score-helper i dp)
-    (if (= i n)
-        dp
-        (let ((current-num (list-ref nums i)))
-          ;; Update dp for all j > i
-          (define updated-dp
-            (for/fold ([dp dp])
-                      ([j (in-range (add1 i) n)])
-              (let* ((next-num (list-ref nums j))
-                     (current-score (+ (list-ref dp i) next-num))
-                     (penalty (if (not (= (modulo current-num 2)
-                                          (modulo next-num 2)))
-                                  x
-                                  0))
-                     (new-score (- current-score penalty)))
-                (if (> new-score (list-ref dp j))
-                    (list-set dp j new-score)
-                    dp))))
-          ;; Continue the recursion with the next index
-          (max-score-helper (add1 i) updated-dp))))
-  
-  ;; Initialize a list of negative infinities for dynamic programming, setting the first element to nums[0].
-  (define dp (cons (first nums) (make-list (sub1 n) -inf.0)))
-  
-  ;; Start the recursion from index 0
-  (define final-dp (max-score-helper 0 dp))
-  
-  ;; Return the maximum value from the final dp list as the final answer.
-  (apply max final-dp))
+  ;; Initialize the DP table with the initial score at index 0 and negative infinity for other indices.
+  (define dp-initial (cons initial-score (make-list (sub1 n) -inf.0)))
+
+  ;; Start the recursive computation from index 0.
+  (helper dp-initial 0))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ; Output: 13

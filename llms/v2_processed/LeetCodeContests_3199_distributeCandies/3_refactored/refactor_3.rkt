@@ -15,15 +15,12 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Helper function to calculate the number of ways recursively
-  (define (count-ways a b)
-    (for*/sum ([a (in-range (add1 (min n limit)))]
-               [b (in-range (add1 (min (- n a) limit)))]
-               #:when (<= (- n a b) limit))
-      1))
-
-  ;; Calculate the total number of ways
-  (count-ways n limit))
+  ;; Accumulate the count of valid distributions using a fold over all possible combinations
+  (for*/fold ([count 0])  ;; Accumulate count using fold
+             ([a (in-range (add1 (min n limit)))]  ;; Loop for child A's candies
+              [b (in-range (add1 (min (- n a) limit)))]  ;; Loop for child B's candies
+              #:when (<= (- n a b) limit))  ;; Condition for child C's candies
+    (add1 count)))  ;; Increment count if the condition is met
 
 ;; Example usage:
 (distributeCandies 5 2)  ;; Output: 3

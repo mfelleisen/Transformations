@@ -33,35 +33,36 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  (define n (length nums))
+  ;; Helper function to determine if a jump between indices i and j is valid
+  (define (valid-jump? i j)
+    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
 
-  ;; Memoization using a hash table to store the maximum jumps
-  (define memo (make-hash))
-
-  ;; Define a recursive helper function to compute the maximum jumps from a given index
-  (define (max-jumps-from i)
+  ;; Recursive function with memoization to compute the maximum jumps from a given index
+  (define (max-jumps-from i memo)
     (cond
-      ;; If already computed, return the stored result
+      ;; If already computed, return the memoized value
       [(hash-has-key? memo i) (hash-ref memo i)]
-      ;; If we reach the last index, no more jumps needed
-      [(= i (sub1 n)) 0]
+      ;; Base case: if at the last index, no more jumps needed
+      [(= i (sub1 (length nums))) 0]
       [else
-       (define max-jumps -inf.0)
-       ;; Iterate over potential jumps from index i to j
-       (for ([j (in-range (add1 i) n)])
-         (when (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-           (set! max-jumps (max max-jumps (add1 (max-jumps-from j))))))
-       ;; Store the computed result in the memoization table
-       (hash-set! memo i max-jumps)
-       max-jumps]))
+       (let loop ([j (add1 i)] [max-jumps -1])
+         (cond
+           ;; If end of list reached, memoize and return max-jumps
+           [(= j (length nums))
+            (hash-set! memo i max-jumps)
+            max-jumps]
+           ;; If valid jump, compute jumps from j, and take the maximum
+           [(valid-jump? i j)
+            (loop (add1 j) (max max-jumps (add1 (max-jumps-from j memo))))]
+           ;; Otherwise, continue with next index
+           [else (loop (add1 j) max-jumps)]))]))
 
-  ;; Compute the result starting from index 0
-  (define result (max-jumps-from 0))
-  
-  ;; If the result is negative infinity, return -1 indicating no valid jumps
-  (if (= result -inf.0)
-      -1
-      result))
+  ;; Create a memoization table
+  (define memo (make-hash))
+  ;; Compute the maximum jumps from the first index
+  (define result (max-jumps-from 0 memo))
+  ;; If result is still -1, return -1, else return the result
+  (if (= result -1) -1 result))
 
 ;; Examples:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

@@ -30,26 +30,21 @@
 ;;  * 0 <= groups[i] < 2
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
-(define (getWordsInLongestSubsequence n words groups)
-  (define (helper i last-group subsequence)
-    (if (= i n)
-        (reverse subsequence)
-        (let ([current-group (list-ref groups i)]
-              [current-word (list-ref words i)])
-          (if (not (= current-group last-group))
-              (helper (add1 i) current-group (cons current-word subsequence))
-              (helper (add1 i) last-group subsequence)))))
-  
-  (if (= n 0)
-      '()
-      (helper 1 (first groups) (list (first words)))))
+(define (getWordsInLongestSubsequence _ words groups)
+  (define (next-diff-group lst)
+    (cond
+      [(or (empty? lst) (empty? (rest lst))) lst]
+      [(= (first (first lst)) (first (second lst))) (next-diff-group (rest lst))]
+      [else (cons (first lst) (next-diff-group (rest lst)))]))
+
+  (map second
+       (next-diff-group (map list groups words))))
 
 ;; Example usage:
 (define n 4)
 (define words '("a" "b" "c" "d"))
 (define groups '(1 0 1 1))
 (getWordsInLongestSubsequence n words groups) ; Output: '("a" "b" "c")
-
 
 (require rackunit)
 

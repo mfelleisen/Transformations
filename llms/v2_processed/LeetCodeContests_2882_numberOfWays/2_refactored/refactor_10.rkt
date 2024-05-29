@@ -23,21 +23,22 @@
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus
-  
-  ;; Helper function to calculate the number of ways recursively
-  (define (num-ways-helper target base)
+
+  ;; Helper function to calculate the number of ways using recursion and memoization
+  (define (count-ways remaining base)
+    (define current-power (expt base x))
     (cond
-      [(= target 0) 1]  ; If target is 0, there's one way to achieve it (using no numbers)
-      [(or (< target 0) (> base n)) 0]  ; If target is negative or base exceeds n, no ways
-      [else
-       (let ((current-power (expt base x)))
-         (modulo
-          (+ (num-ways-helper (- target current-power) (add1 base))  ; Include current base
-             (num-ways-helper target (add1 base)))  ; Exclude current base
-          MOD))]))
-  
-  ;; Call the helper function starting with the full target and base 1
-  (num-ways-helper n 1))
+      [(= remaining 0) 1]  ;; If remaining is 0, there's exactly one way (using no numbers)
+      [(or (< remaining 0) (<= base 0)) 0]  ;; If remaining is negative or base is non-positive, no way
+      [else (modulo (+ (count-ways (- remaining current-power) (- base 1))
+                       (count-ways remaining (- base 1)))
+                    MOD)]))
+
+  ;; Calculate the maximum base such that base^x <= n
+  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
+
+  ;; Start the recursive computation
+  (count-ways n max-base))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

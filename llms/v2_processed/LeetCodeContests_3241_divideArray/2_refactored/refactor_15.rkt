@@ -22,22 +22,25 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (define (process-sorted-nums sorted-nums)
-    (define (loop remaining sublists)
-      (match remaining
-        [(list) (reverse sublists)]
-        [(list-rest a b c rest)
-         (if (<= (- c a) k)
-             (loop rest (cons (list a b c) sublists))
-             '())]
-        [_ '()]))
-
-    (loop sorted-nums '()))
-
-  (if (zero? (modulo (length nums) 3))
-      (process-sorted-nums (sort nums <))
+  (define sorted-nums (sort nums <))
+  
+  (define (helper nums acc)
+    (match nums
+      [(list) (reverse acc)]
+      [(list-rest _ _ _)  ; Ensure there are at least three elements left to consider
+       (let ([triplet (take nums 3)])
+         (if (<= (- (third triplet) (first triplet)) k)
+             (helper (drop nums 3) (cons triplet acc))
+             '()))]
+      [_ '()]))  ; If there are less than three elements left, return empty list
+  
+  (if (= (remainder (length nums) 3) 0)
+      (helper sorted-nums '())
       '()))
 
+;; Examples
+(divideArray '(1 3 4 8 7 9 3 5 1) 2)   ; => '((1 1 3) (3 4 5) (7 8 9))
+(divideArray '(1 3 3 2 7 3) 3)         ; => '()
 
 (require rackunit)
 

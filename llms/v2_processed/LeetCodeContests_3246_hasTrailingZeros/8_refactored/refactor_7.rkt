@@ -21,16 +21,18 @@
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (hasTrailingZeros nums)
-  ;; Check if there is any pair (or more) of elements in `nums` such that their bitwise OR has at least one trailing zero.
+  ;; Helper function to check if a number has at least one trailing zero
   (define (has-trailing-zero? x)
-    (zero? (bitwise-and x 1)))
-    
-  ;; Iterate over all pairs of elements in the list using `for/or`.
-  (for/or ([i (in-naturals)]
-           #:break (> i (sub1 (length nums)))
-           [j (in-range (+ i 1) (length nums))])
-    (let ([bitwise-or (bitwise-ior (list-ref nums i) (list-ref nums j))])
-      (has-trailing-zero? bitwise-or))))
+    (= (bitwise-and x 1) 0))
+
+  ;; Helper function to check pairs for trailing zero in bitwise OR
+  (define (check-pairs lst)
+    (for/first ([x (in-list lst)]
+                [y (in-list (cdr lst))])
+      (when (has-trailing-zero? (bitwise-ior x y))
+        #true)))
+
+  (check-pairs nums))
 
 ;; Example usage:
 (hasTrailingZeros '(1 2 3 4 5))  ; Output: #true

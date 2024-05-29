@@ -31,7 +31,7 @@
   (define n (apply max nums))
   
   ;; Create a frequency dictionary of elements in nums
-  (define counts (for/fold ([dict (hash)]) ([num (in-list nums)])
+  (define counts (for/fold ([dict (hash)]) ([num nums])
                    (hash-update dict num add1 0)))
   
   ;; Check for the presence of each element from 1 to n-1 exactly once, and n exactly twice

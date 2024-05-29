@@ -24,38 +24,46 @@
 ;;  * 0 <= starti <= endi <= n - 1
 ;;  * 1 <= goldi <= 103
 (define (maximizeTheProfit n offers)
-  ;; Sort offers based on their ending time
-  (define sorted-offers (sort offers (lambda (x y) (< (second x) (second y)))))
-  
   ;; Helper function to find the last non-conflicting offer using binary search
-  (define (find-last-non-conflicting offers i)
-    (let loop ((low 0) (high (- i 1)))
+  (define (find-last-non-conflicting sorted-offers i)
+    (let loop ([low 0] [high (- i 1)])
       (if (> low high)
           -1
-          (let ((mid (quotient (+ low high) 2)))
-            (if (< (second (list-ref offers mid)) (first (list-ref offers i)))
-                (if (< (second (list-ref offers (+ mid 1))) (first (list-ref offers i)))
+          (let* ([mid (quotient (+ low high) 2)]
+                 [mid-offer (list-ref sorted-offers mid)])
+            (if (< (second mid-offer) (first (list-ref sorted-offers i)))
+                (if (< (second (list-ref sorted-offers (+ mid 1))) (first (list-ref sorted-offers i)))
                     (loop (+ mid 1) high)
                     mid)
                 (loop low (- mid 1)))))))
-  
+
   ;; Initialize DP array where dp[i] will store the maximum profit using the first i offers
-  (define dp (make-vector (length sorted-offers) 0))
-  
-  ;; Base case: the profit of the first offer is just its gold value
-  (vector-set! dp 0 (third (list-ref sorted-offers 0)))
-  
-  ;; Fill the dp array
-  (for ([i (in-range 1 (length sorted-offers))])
-    (let* ((current-offer (list-ref sorted-offers i))
-           (profit-including-current (third current-offer))
-           (l (find-last-non-conflicting sorted-offers i)))
-      (when (>= l 0)
-        (set! profit-including-current (+ profit-including-current (vector-ref dp l))))
-      (vector-set! dp i (max (vector-ref dp (- i 1)) profit-including-current))))
-  
-  ;; The last element in dp array will have the answer to the problem
-  (vector-ref dp (- (length sorted-offers) 1)))
+  (define (dp sorted-offers)
+    (define memo-table (make-vector (length sorted-offers) -1))
+    (define (memoize i val)
+      (vector-set! memo-table i val)
+      val)
+
+    (define (calculate-max-profit i)
+      (if (= i -1)
+          0
+          (let ([memoized (vector-ref memo-table i)])
+            (if (not (= memoized -1))
+                memoized
+                (let* ([current-offer (list-ref sorted-offers i)]
+                       [profit-including-current (third current-offer)]
+                       [l (find-last-non-conflicting sorted-offers i)]
+                       [profit-including-current (if (>= l 0)
+                                                     (+ profit-including-current (calculate-max-profit l))
+                                                     profit-including-current)]
+                       [max-profit (max (calculate-max-profit (- i 1)) profit-including-current)])
+                  (memoize i max-profit))))))
+
+    (calculate-max-profit (- (length sorted-offers) 1)))
+
+  ;; Sort offers based on their ending time
+  (define sorted-offers (sort offers (lambda (x y) (< (second x) (second y)))))
+  (dp sorted-offers))
 
 ;; Example usage:
 (maximizeTheProfit 5 (list (list 0 0 1) (list 0 2 2) (list 1 3 2)))  ;; Output: 3

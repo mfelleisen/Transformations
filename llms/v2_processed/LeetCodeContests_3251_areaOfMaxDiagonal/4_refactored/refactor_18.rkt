@@ -29,27 +29,30 @@
   (define (area length width)
     (* length width))
   
-  ;; Use foldl to iterate through the list and find the rectangle with the maximum diagonal or area.
-  (define (update-max-rectangle dim acc)
-    (let* ((length (first dim))
-           (width (second dim))
-           (current-diagonal (diagonal-squared length width))
-           (current-area (area length width))
-           (max-diagonal (first acc))
-           (max-area (second acc)))
-      (cond
-        ;; Check if current diagonal is greater than the max diagonal found so far
-        ((> current-diagonal max-diagonal)
-         (list current-diagonal current-area))
-        ;; If diagonals are the same, check if the current area is greater than the max area found so far
-        ((and (= current-diagonal max-diagonal) (> current-area max-area))
-         (list max-diagonal current-area))
-        ;; Otherwise, keep the previous maximums
-        (else
-         acc))))
-  
+  ;; Use foldr to iterate through the list and find the rectangle with the maximum diagonal or area.
+  (define (max-by-diagonal acc dim)
+    (define length (first dim))
+    (define width (second dim))
+    (define current-diagonal (diagonal-squared length width))
+    (define current-area (area length width))
+    (define max-diagonal (first acc))
+    (define max-area (second acc))
+    (cond
+      ;; Check if current diagonal is greater than the max diagonal found so far
+      [(> current-diagonal max-diagonal)
+       (list current-diagonal current-area)]
+      ;; If diagonals are the same, check if the current area is greater than the max area found so far
+      [(and (= current-diagonal max-diagonal) (> current-area max-area))
+       (list max-diagonal current-area)]
+      ;; Otherwise, keep the previous maximums
+      [else acc]))
+
   ;; Initial accumulator with 0 for diagonal and 0 for area
-  (second (foldl update-max-rectangle (list 0 0) dimensions)))
+  (define initial-acc (list 0 0))
+  ;; Fold through the dimensions to find the max area by diagonal
+  (define max-dimensions (foldr max-by-diagonal initial-acc dimensions))
+  ;; Extract the maximum area from the result
+  (second max-dimensions))
 
 ;; Example usage:
 (areaOfMaxDiagonal '((9 3) (8 6)))  ;; Output: 48

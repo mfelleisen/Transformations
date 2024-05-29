@@ -25,28 +25,21 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Helper function to get the nth element of a list or a default value.
-  (define (nth lst n default)
-    (if (and (>= n 0) (< n (length lst)))
-        (list-ref lst n)
-        default))
-
-  ;; Recursive helper function to calculate the minimum cost.
-  ;; `i` is the current index, `partitions` is the number of partitions left, `current-cost` is the accumulated cost.
-  (define (min-cost-helper i partitions current-cost)
-    (cond
-      ;; If no partitions left and at the end of the list, return the accumulated cost.
-      [(and (= partitions 0) (= i (length nums))) current-cost]
-      ;; If no partitions left or at the end of the list, return a large number (invalid).
-      [(or (= partitions 0) (= i (length nums))) +inf.0]
-      ;; Otherwise, consider two cases:
-      ;; 1. Start a new partition at the current index.
-      ;; 2. Continue the current partition.
-      [else (min (min-cost-helper (add1 i) (sub1 partitions) (+ current-cost (nth nums i +inf.0)))
-                 (min-cost-helper (add1 i) partitions current-cost))]))
-
-  ;; Start with the first element and 3 partitions.
-  (min-cost-helper 1 2 (nth nums 0 +inf.0)))
+  (define n (length nums))
+  
+  ;; Helper function to calculate the minimum cost by examining possible splits
+  (define (find-min-cost nums)
+    (for*/fold ([min-cost +inf.0]) 
+               ([i (in-range 1 (- n 1))] 
+                [j (in-range (+ i 1) n)])
+      (let ([cost (+ (first nums) (list-ref nums i) (list-ref nums j))])
+        (min cost min-cost))))
+  
+  (if (= n 3)
+      ;; If there are exactly 3 elements, each element forms its own subarray
+      (apply + nums)
+      ;; Otherwise, find the minimum cost by examining possible splits
+      (find-min-cost nums)))
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

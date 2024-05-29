@@ -3,34 +3,28 @@
 ;; Function to check if a number is prime
 (define (is-prime? num)
   ;; Check for non-prime conditions
-  (cond
-    [(<= num 1) #f]
-    [(<= num 3) #t]
-    [(zero? (remainder num 2)) #f]
-    [(zero? (remainder num 3)) #f]
-    [else
-     ;; Check divisibility from 5 onwards, skipping even numbers
-     (let loop ([i 5])
-       (cond
-         [(> (* i i) num) #t]
-         [(zero? (remainder num i)) #f]
-         [(zero? (remainder num (+ i 2))) #f]
-         [else (loop (+ i 6))]))]))
+  (cond [(<= num 1) #f]
+        [(<= num 3) #t]
+        [(zero? (remainder num 2)) #f]
+        [(zero? (remainder num 3)) #f]
+        [else
+         ;; Check divisibility from 5 onwards, skipping even numbers
+         (let loop ([i 5])
+           (cond [(> (* i i) num) #t]
+                 [(zero? (remainder num i)) #f]
+                 [(zero? (remainder num (+ i 2))) #f]
+                 [else (loop (+ i 6))]))]))
 
 ;; Function to find prime pairs that add up to n
 (define (findPrimePairs n)
   ;; Generate list of primes up to n
   (define primes (filter is-prime? (range 1 (add1 n))))
-  
-  ;; Helper function to find pairs
-  (define (find-pairs primes)
-    (for*/list ([x (in-list primes)]
-                [y (in-list primes)]
-                #:when (and (<= x y) (= (+ x y) n)))
-      (list x y)))
-  
-  ;; Return the list of pairs
-  (find-pairs primes))
+  ;; Use a set for faster lookup
+  (define primes-set (set primes))
+  ;; Generate pairs and filter them
+  (for/list ([x primes]
+             #:when (and (<= x (- n x)) (set-member? primes-set (- n x))))
+    (list x (- n x))))
 
 ;; Example usage
 (findPrimePairs 10)  ; Output: '((3 7) (5 5))

@@ -27,38 +27,40 @@
 ;;  * 3 <= nums.length <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
-  (define len (length nums))
+  (define (left-mins lst)
+    (reverse (foldl (λ (x acc)
+                     (cons (if (null? acc) +inf.0 (min (car acc) x)) acc))
+                   '()
+                   lst)))
 
-  (define (find-left-min nums current-index)
-    (for/fold ([min-left +inf.0])
-              ([i (in-range 0 current-index)])
-      (let ([current (list-ref nums i)])
-        (if (< current (list-ref nums current-index))
-            (min min-left current)
-            min-left))))
+  (define (right-mins lst)
+    (foldr (λ (x acc)
+             (cons (if (null? acc) +inf.0 (min (car acc) x)) acc))
+           '()
+           lst))
 
-  (define (find-right-min nums current-index)
-    (for/fold ([min-right +inf.0])
-              ([i (in-range (+ current-index 1) len)])
-      (let ([current (list-ref nums i)])
-        (if (< current (list-ref nums current-index))
-            (min min-right current)
-            min-right))))
+  (define left-vals (left-mins nums))
+  (define right-vals (right-mins nums))
 
-  (define (find-minimum-sum nums)
-    (for/fold ([min-sum +inf.0] [found #f])
-              ([j (in-range 1 (- len 1))])
-      (let* ([current (list-ref nums j)]
-             [left-min (find-left-min nums j)]
-             [right-min (find-right-min nums j)])
-        (if (and (< left-min +inf.0) (< right-min +inf.0))
-            (values (min min-sum (+ left-min current right-min)) #t)
-            (values min-sum found)))))
+  (define (valid-triplet? i)
+    (let ((left (list-ref left-vals i))
+          (current (list-ref nums i))
+          (right (list-ref right-vals (add1 i))))
+      (and (< left current) (< right current))))
 
-  (if (< len 3)
-      -1
-      (let-values ([(min-sum found) (find-minimum-sum nums)])
-        (if found min-sum -1))))
+  (define (triplet-sum i)
+    (let ((left (list-ref left-vals i))
+          (current (list-ref nums i))
+          (right (list-ref right-vals (add1 i))))
+      (+ left current right)))
+
+  (define min-sum
+    (for/fold ([min-sum +inf.0])
+              ([i (in-range 1 (sub1 (length nums)))]
+               #:when (valid-triplet? i))
+      (min min-sum (triplet-sum i))))
+
+  (if (eq? min-sum +inf.0) -1 min-sum))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ; Output: 9

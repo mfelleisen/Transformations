@@ -21,23 +21,14 @@
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (hasTrailingZeros nums)
-  ;; Helper function to check if a number has trailing zeros in its binary representation.
-  (define (has-trailing-zero? num)
-    (even? num))
-
-  ;; Recursive function to check combinations of elements.
-  (define (check-combinations nums)
-    (cond
-      [(< (length nums) 2) #f]  ;; Base case: if there are fewer than 2 elements, return false.
-      [else
-       (let loop ((lst nums) (acc (first nums)))
-         (cond
-           [(null? (rest lst)) #f] ;; If there are no more elements, return false.
-           [(has-trailing-zero? (bitwise-ior acc (first (rest lst)))) #t] ;; If the combination has trailing zero, return true.
-           [else (loop (rest lst) (bitwise-ior acc (first (rest lst))))]))]))
-
-  ;; Check combinations of the elements in the list.
-  (check-combinations nums))
+  ;; Check if any pair in nums has a bitwise OR with at least one trailing zero
+  (define (has-trailing-zero? x) (even? x))
+  
+  ;; Generate all combinations of two or more elements' bitwise ORs and check for trailing zeros
+  (ormap has-trailing-zero?
+         (for*/list ([i (in-range (length nums))]
+                     [j (in-range (+ i 1) (length nums))])
+           (bitwise-ior (list-ref nums i) (list-ref nums j)))))
 
 ;; Example usage:
 (displayln (hasTrailingZeros '(1 2 3 4 5)))  ; Output: #t

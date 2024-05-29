@@ -18,23 +18,21 @@
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
-  ;; Define the initial balance as a constant
   (define initial-balance 100)
   
-  ;; Function to round to the nearest multiple of 10
-  (define (nearest-multiple-of-10 n)
-    (let* ([lower-bound (* (quotient n 10) 10)]
-           [upper-bound (+ lower-bound 10)])
-      (if (<= (- upper-bound n) (- n lower-bound))
-          upper-bound
-          lower-bound)))
+  (define (round-to-nearest-10 amount)
+    (let ([lower (* (quotient amount 10) 10)]
+          [upper (+ (* (quotient amount 10) 10) 10)])
+      (if (< (- amount lower) (- upper amount))
+          lower
+          upper)))
   
-  ;; Calculate the rounded amount and subtract from initial balance
-  (- initial-balance (nearest-multiple-of-10 purchaseAmount)))
+  (define rounded-amount (round-to-nearest-10 purchaseAmount))
+  
+  (- initial-balance rounded-amount))
 
-;; Examples
-(accountBalanceAfterPurchase 9)  ;; Output: 90
-(accountBalanceAfterPurchase 15) ;; Output: 80
+;; The function is now defined and can be used to calculate the account balance after a purchase
+;; with the amount rounded to the nearest (or largest in case of a tie) multiple of 10.
 
 (require rackunit)
 

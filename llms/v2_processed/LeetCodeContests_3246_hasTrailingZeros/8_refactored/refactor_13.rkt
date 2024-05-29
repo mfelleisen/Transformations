@@ -20,19 +20,19 @@
 ;; Constraints:
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
-(define (hasTrailingZeros nums)
+(define (hasTrailingZeros nums) ;; contract  htz/c
   ;; Helper function to check if a number has at least one trailing zero
   (define (has-trailing-zero? x)
-    (= (bitwise-and x 1) 0))  ; Check if the least significant bit is 0
+    (= (bitwise-and x 1) 0))
 
-  ;; Generate all unique pairs of elements from the list
+  ;; Collect all pairs of elements from the list nums
   (define pairs
     (for*/list ([i (in-list nums)]
                 [j (in-list nums)]
-                #:when (< (index-of nums i) (index-of nums j)))  ; Ensure unique pairs
+                #:when (< (index-of nums i) (index-of nums j)))
       (bitwise-ior i j)))
 
-  ;; Check if any pair has at least one trailing zero
+  ;; Check if any pair has a trailing zero
   (ormap has-trailing-zero? pairs))
 
 ;; Example usage:

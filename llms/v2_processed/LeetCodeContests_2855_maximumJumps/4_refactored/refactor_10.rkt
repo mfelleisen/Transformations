@@ -34,32 +34,24 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  ;; Helper function to determine if a jump is valid
-  (define (valid-jump? i j)
-    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
+  (define n (length nums))
 
-  ;; Recursive helper function with memoization
-  (define (max-jumps-from i)
-    (define cached-result (hash-ref memo i #f))
-    (if cached-result
-        cached-result
-        (let ([result (for/fold ([max-jumps -1]) ([j (in-range (add1 i) (length nums))])
-                        (if (valid-jump? i j)
-                            (max max-jumps (+ 1 (max-jumps-from j)))
-                            max-jumps))])
-          (hash-set! memo i result)
-          result)))
+  (define (okay? a b)
+    (<= (abs (- a b)) target))
 
-  ;; Initialize memoization hash table
-  (define memo (make-hash))
+  (define dp
+    (for/fold ([dp (list 0)])
+              ([i (in-range 1 n)])
+      (define max-jumps
+        (for/fold ([max-jumps -1])
+                  ([j (in-range i)])
+          (if (and (okay? (list-ref nums i) (list-ref nums j))
+                   (not (= (list-ref dp j) -1)))
+              (max max-jumps (add1 (list-ref dp j)))
+              max-jumps)))
+      (append dp (list max-jumps))))
 
-  ;; Start the recursion from index 0
-  (define result (max-jumps-from 0))
-
-  ;; If the result at the last index is still -1, it means it's unreachable
-  (if (= (hash-ref memo (sub1 (length nums)) -1) -1)
-      -1
-      result))
+  (list-ref dp (sub1 n)))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

@@ -31,13 +31,16 @@
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
 (define (getWordsInLongestSubsequence n words groups)
-  (define (process-sequence ws gs)
-    (for/fold ([result '()] [last-group (car gs)] #:result (reverse (cons (car ws) result)))
-              ([current-word (cdr ws)] [current-group (cdr gs)])
-      (if (not (= current-group last-group))
-          (values (cons current-word result) current-group)
-          (values result last-group))))
-  (process-sequence words groups))
+  (define (valid-sequence last-group seq word group)
+    (if (not (= group last-group))
+        (values group (append seq (list word)))
+        (values last-group seq)))
+
+  (for/fold ([last-group (first groups)]
+             [current-sequence (list (first words))])
+            ([word (in-list (rest words))]
+             [group (in-list (rest groups))])
+    (valid-sequence last-group current-sequence word group)))
 
 ;; Example usage:
 (define n 4)

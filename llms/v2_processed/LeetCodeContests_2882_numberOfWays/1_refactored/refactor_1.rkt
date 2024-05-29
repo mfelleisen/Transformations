@@ -21,28 +21,20 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
 
-  ;; Recursive helper function with memoization
-  (define (ways-to-sum target max-base)
-    (define memo (make-hash))
-    (define (helper target max-base)
-      (cond
-        [(= target 0) 1]  ; Base case: one way to sum up to zero
-        [(<= target 0) 0]  ; No way to sum up to a negative or zero target
-        [else
-         (hash-ref memo (list target max-base)
-                   (lambda ()
-                     (define result
-                       (for/sum ([base (in-range 1 (add1 max-base))])
-                         (let ([current-power (expt base x)])
-                           (if (<= current-power target)
-                               (helper (- target current-power) (- base 1))
-                               0))))
-                     (hash-set! memo (list target max-base) (modulo result MOD))
-                     result))]))
-    (helper target max-base))
+  ;; Helper function to compute the number of ways recursively
+  (define (compute-ways target base)
+    (cond
+      [(zero? target) 1]  ; If the target is zero, there is one way (using no numbers)
+      [(or (< target 0) (> base n)) 0]  ; If target is negative or base exceeds n, no ways
+      [else
+       (define current-power (expt base x))
+       ;; Sum the ways: either include the current base or exclude it
+       (modulo (+ (compute-ways (- target current-power) (add1 base))
+                  (compute-ways target (add1 base)))
+               MOD)]))
 
-  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))  ; Calculate the maximum base
-  (ways-to-sum n max-base))  ; Return the number of ways to express n
+  ;; Start the recursive computation
+  (compute-ways n 1))
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

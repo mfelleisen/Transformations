@@ -22,17 +22,22 @@
 ;;  * 3 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 106
 (define (maximumTripletValue nums)
-  ;; Define a helper function to calculate the triplet value.
+  ;; Get the length of the list.
+  (define n (length nums))
+
+  ;; Function to calculate the value of a triplet (i, j, k).
   (define (triplet-value i j k)
     (* (- (list-ref nums i) (list-ref nums j)) (list-ref nums k)))
-  
-  ;; Use a fold to accumulate the maximum triplet value.
-  (define n (length nums))
-  (for*/fold ([max-val 0])
-             ([i (in-range 0 (- n 2))]
-              [j (in-range (+ i 1) (- n 1))]
-              [k (in-range (+ j 1) n)])
-    (max max-val (triplet-value i j k))))
+
+  ;; Find the maximum triplet value.
+  (define max-triplet-value
+    (for*/fold ([max-value 0])
+               ([i (in-range 0 (- n 2))]
+                [j (in-range (+ i 1) (- n 1))]
+                [k (in-range (+ j 1) n)])
+      (max max-value (triplet-value i j k))))
+
+  max-triplet-value)
 
 ;; Example usage:
 (maximumTripletValue '(12 6 1 2 7))  ;; Output: 77

@@ -18,21 +18,22 @@
 ;;  * 0 <= xi, yi <= 106
 ;;  * 0 <= k <= 100
 (define (countPairs coordinates k)
-  ;; Calculate the XOR distance between two points
   (define (xor-distance p1 p2)
     (+ (bitwise-xor (first p1) (first p2))
        (bitwise-xor (second p1) (second p2))))
 
-  ;; Generate all unique pairs (i, j) where i < j using list comprehensions
-  (define pairs
-    (for*/list ([i (in-range (length coordinates))]
-                [j (in-range (add1 i) (length coordinates))])
-      (list (list-ref coordinates i) (list-ref coordinates j))))
+  (define (pairwise-combinations lst)
+    (for*/list ([i (in-range (length lst))]
+                [j (in-range (+ i 1) (length lst))])
+      (list (list-ref lst i) (list-ref lst j))))
 
-  ;; Count pairs that satisfy the distance condition using filter and length
-  (length (filter (lambda (pair)
-                    (= (xor-distance (first pair) (second pair)) k))
-                  pairs)))
+  (define (count-valid-pairs pairs)
+    (for/fold ([count 0] #:result count) ([pair pairs])
+      (if (= (xor-distance (first pair) (second pair)) k)
+          (+ count 1)
+          count)))
+
+  (count-valid-pairs (pairwise-combinations coordinates)))
 
 ;; Example usage:
 (countPairs '((1 2) (4 2) (1 3) (5 2)) 5)  ; Output: 2

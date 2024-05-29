@@ -21,33 +21,20 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  ;; Helper function to calculate the sum of a list
-  (define (sum lst)
-    (foldl + 0 lst))
-  
-  ;; Helper function to get all subarrays of length k
-  (define (subarrays-of-length-k lst k)
-    (define (subarrays-helper lst acc)
-      (if (< (length lst) k)
-          (reverse acc)
-          (subarrays-helper (rest lst) (cons (take lst k) acc))))
-    (subarrays-helper lst '()))
-  
-  ;; Helper function to check if a subarray is almost unique
-  (define (almost-unique? subarray m)
-    (>= (length (remove-duplicates subarray)) m))
+  (define len (length nums))
 
-  ;; Get all subarrays of length k
-  (define subarrays (subarrays-of-length-k nums k))
+  (define (subarray-sum-and-distincts start)
+    (define subarray (take (drop nums start) k))
+    (values (apply + subarray) (length (remove-duplicates subarray))))
   
-  ;; Filter subarrays to get only those that are almost unique
-  (define almost-unique-subarrays
-    (filter (lambda (subarray) (almost-unique? subarray m)) subarrays))
+  (define (valid-subarray? sum distincts)
+    (>= distincts m))
   
-  ;; Get the maximum sum of the almost unique subarrays
-  (if (null? almost-unique-subarrays)
-      0
-      (apply max (map sum almost-unique-subarrays))))
+  (for/fold ([max-sum 0]) ([i (in-range (add1 (- len k)))])
+    (define-values (sum distincts) (subarray-sum-and-distincts i))
+    (if (valid-subarray? sum distincts)
+        (max max-sum sum)
+        max-sum)))
 
 ;; Example usage
 (maxSum '(2 6 7 3 1 7) 3 4)  ; Output: 18

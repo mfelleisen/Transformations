@@ -17,14 +17,19 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
+  ;; Calculate the length of the input list
   (define n (length nums))
-  (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (remainder n i)))
-    (sqr (list-ref nums (sub1 i)))))
 
-;; The `for/sum` form iterates over the range from 1 to n, and we use the `#:when` clause 
-;; to filter out only those indices `i` which are divisors of `n` before squaring the 
-;; corresponding element in `nums` and summing them.
+  ;; Calculate the sum of the squares of special elements using for/fold
+  (for/fold ([total 0]) ([i (in-range 1 (add1 n))])
+    (if (zero? (remainder n i))
+        (+ total (sqr (list-ref nums (sub1 i))))
+        total)))
+
+;; The function uses `for/fold` to iterate over the indices from 1 to n and accumulate the sum of squares of special elements.
+;; `list-ref` is used to access elements of the list using 0-based indexing.
+;; `sqr` is a function that computes the square of a number.
+;; `remainder` is used to check divisibility.
 
 (require rackunit)
 

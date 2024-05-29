@@ -23,18 +23,19 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Helper function to perform the combination operation
-  (define (combine-nums nums)
-    (define-values (result _)
-      (for/fold ([acc '()] [max-val 0]) ([num (in-list (reverse nums))])
-        (if (and (not (null? acc)) (<= num (car acc)))
-            (let ([combined (+ num (car acc))])
-              (values (cons combined (cdr acc)) (max combined max-val)))
-            (values (cons num acc) (max num max-val)))))
-    result)
-  
-  ;; Return the maximum value from the combined list
-  (apply max (combine-nums nums)))
+  ;; Combine elements from right to left to maximize the largest possible value.
+  (define (combine lst)
+    (foldr (lambda (current acc)
+             (match acc
+               [(cons first rest)
+                (if (<= current first)
+                    (cons (+ current first) rest)
+                    (cons current acc))]
+               [_ (cons current acc)]))
+           '()
+           lst))
+  ;; Return the maximum value from the combined list.
+  (apply max (combine nums)))
 
 ;; Example usage:
 (displayln (maxArrayValue '(2 3 7 9 3)))  ;; Output: 21

@@ -34,21 +34,27 @@
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus as 10^9 + 7.
   
-  ;; Helper function to generate the beautiful array.
-  (define (generate-beautiful-nums n target)
-    (define (gen nums candidate)
-      (cond
-        [(= (length nums) n) nums]
-        [(for/and ([num (in-list nums)]) (not (= (+ num candidate) target)))
-         (gen (cons candidate nums) (+ candidate 1))]
-        [else (gen nums (+ candidate 1))]))
-    (gen '() 1))
+  ;; Helper function to calculate the sum of the first k integers.
+  (define (sum-first-k k)
+    (/ (* k (+ k 1)) 2))
   
-  ;; Generate the beautiful array.
-  (define beautiful-nums (generate-beautiful-nums n target))
+  ;; Calculate the maximum k such that k < target / 2.
+  (define k (quotient (sub1 target) 2))
   
-  ;; Calculate the sum of the beautiful array modulo MOD.
-  (modulo (for/sum ([num (in-list beautiful-nums)]) num) MOD))
+  ;; If n <= k, the sum is simply the sum of the first n integers.
+  ;; Otherwise, we need to exclude numbers that sum to target.
+  (define sum
+    (if (<= n k)
+        (sum-first-k n)
+        (let* ((sum-k (sum-first-k k))
+               (remaining (- n k))
+               (start (+ target 1))
+               (end (+ start remaining -1))
+               (sum-remaining (sum-first-k end)))
+          (+ sum-k (- sum-remaining (sum-first-k (sub1 start)))))))
+  
+  ;; Return the result modulo MOD.
+  (modulo sum MOD))
 
 ;; Example test cases
 (displayln (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

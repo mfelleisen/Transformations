@@ -30,28 +30,26 @@
   (define len (length nums))
   (define inf +inf.0)
 
-  ;; Helper function to find the minimum in a list that is less than a given value
-  (define (find-min-less lst threshold)
-    (define valid-values (filter (lambda (x) (< x threshold)) lst))
-    (if (null? valid-values) inf (apply min valid-values)))
+  ;; Helper function to find the minimum value in a list that satisfies a given condition
+  (define (min-filter lst pred)
+    (apply min (cons inf (filter pred lst))))
 
-  ;; Recursive function to find the minimum mountain triplet sum
+  ;; Main logic to find the minimum mountain sum
   (define (find-min-sum j min-sum found)
     (cond
-      [(>= j (- len 1))
-       (if found min-sum -1)]
+      [(>= j (- len 1)) (if found min-sum -1)]
       [else
        (define current (list-ref nums j))
        (define left-nums (take nums j))
        (define right-nums (drop nums (+ j 1)))
-       (define left-min (find-min-less left-nums current))
-       (define right-min (find-min-less right-nums current))
+       (define left-min (min-filter left-nums (λ (x) (< x current))))
+       (define right-min (min-filter right-nums (λ (x) (< x current))))
 
        (if (and (< left-min inf) (< right-min inf))
            (find-min-sum (+ j 1) (min min-sum (+ left-min current right-min)) #t)
            (find-min-sum (+ j 1) min-sum found))]))
 
-  ;; Start the search from index 1
+  ;; Initial call to the helper function
   (find-min-sum 1 inf #f))
 
 ;; Example usages

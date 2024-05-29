@@ -21,29 +21,20 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  (define len (length nums))
-
-  ;; A helper function to check if a subarray is almost unique
-  (define (almost-unique? subarray)
-    (>= (length (remove-duplicates subarray)) m))
-
-  ;; A helper function to calculate the sum of a subarray
-  (define (subarray-sum subarray)
-    (apply + subarray))
-
-  ;; Function to find all subarrays of length k
-  (define (subarrays-of-length-k nums k)
-    (for/list ([i (in-range (- (length nums) (sub1 k)))])
-      (take (drop nums i) k)))
-
-  ;; Finding maximum sum of almost unique subarrays
-  (define max-sum
-    (for/fold ([max-sum 0]) ([subarray (in-list (subarrays-of-length-k nums k))])
-      (if (almost-unique? subarray)
-          (max max-sum (subarray-sum subarray))
-          max-sum)))
-
-  max-sum)
+  (define n (length nums))
+  (if (< n k)
+      0
+      (let loop ([i 0] [max-sum 0] [current-window (take nums k)])
+        (define (distinct-count lst)
+          (length (remove-duplicates lst)))
+        (define window-sum (apply + current-window))
+        (define valid? (>= (distinct-count current-window) m))
+        (define new-max-sum (if valid? (max max-sum window-sum) max-sum))
+        (if (> i (- n k 1))
+            new-max-sum
+            (loop (+ i 1)
+                  new-max-sum
+                  (append (drop current-window 1) (list (list-ref nums (+ i k)))))))))
 
 ;; Example usage:
 (maxSum '(2 6 7 3 1 7) 3 4)  ; Output: 18

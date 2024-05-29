@@ -36,23 +36,22 @@
 (define (maximumJumps nums target)
   (define n (length nums))
 
-  ;; Helper function to update dp list based on current index
-  (define (update-dp i dp)
-    (if (negative? (list-ref dp i))
+  (define (jumpable? i j)
+    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
+
+  (define (next-dp i dp)
+    (if (= (list-ref dp i) -inf.0)
         dp
         (for/fold ([dp dp]) ([j (in-range (+ i 1) n)])
-          (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
+          (if (jumpable? i j)
               (list-set dp j (max (list-ref dp j) (+ 1 (list-ref dp i))))
               dp))))
 
-  ;; Fold over the range from 0 to n to update dp for each index
-  (define final-dp 
-    (for/fold ([dp (cons 0 (make-list (- n 1) -1))])
-              ([i (in-range n)])
-      (update-dp i dp)))
+  (define final-dp (for/fold ([dp (cons 0 (make-list (- n 1) -inf.0))]) 
+                              ([i (in-range n)])
+                      (next-dp i dp)))
 
-  ;; Check the last element of dp; if it's still -1, return -1, otherwise return the value
-  (if (negative? (last final-dp))
+  (if (= (last final-dp) -inf.0)
       -1
       (last final-dp)))
 

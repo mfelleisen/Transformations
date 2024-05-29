@@ -20,7 +20,9 @@
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
 (define (theMaximumAchievableX num t)
-  ;; The maximum achievable number x is found by adding 2 * t to num.
+  ;; Given two integers, num and t, this function calculates the maximum achievable number x.
+  ;; The maximum x is achieved by increasing x by t and simultaneously decreasing num by t.
+  ;; This results in x = num + 2 * t.
   (+ num (* 2 t)))
 
 (require rackunit)

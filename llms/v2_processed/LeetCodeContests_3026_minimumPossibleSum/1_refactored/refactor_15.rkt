@@ -32,18 +32,22 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
+
+  ;; Recursive function to construct the nums list and calculate the sum
+  (define (construct-nums acc candidate count)
+    (if (= count n)
+        (modulo acc MOD)
+        (if (can-use? candidate count)
+            (construct-nums (+ acc candidate) (+ candidate 1) (+ count 1))
+            (construct-nums acc (+ candidate 1) count))))
   
-  ;; Recursive helper function to construct the nums list and calculate the sum
-  (define (construct-nums remaining-n candidate nums-sum used)
-    (if (zero? remaining-n)
-        nums-sum
-        (if (or (set-member? used (- target candidate))
-                (set-member? used candidate))
-            (construct-nums remaining-n (+ candidate 1) nums-sum used)
-            (construct-nums (sub1 remaining-n) (+ candidate 1) (+ nums-sum candidate) (set-add used candidate)))))
-  
-  ;; Start the construction with an empty set of used numbers and a sum of 0
-  (modulo (construct-nums n 1 0 (set)) MOD))
+  ;; Helper function to check if adding a candidate to nums would maintain the beautiful array condition
+  (define (can-use? candidate count)
+    (or (< candidate target)
+        (> candidate (- (* 2 target) count))))
+    
+  ;; Start the recursive construction with initial values
+  (construct-nums 0 1 0))
 
 ;; Example test cases
 (display (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

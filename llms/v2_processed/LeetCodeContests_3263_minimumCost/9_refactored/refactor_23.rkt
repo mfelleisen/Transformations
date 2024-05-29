@@ -25,22 +25,28 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Function to determine the minimum cost of dividing an array into 3 contiguous subarrays.
-  (define n (length nums))
-  (if (= n 3)
-      (apply + nums)  ; If there are exactly 3 elements, the cost is the sum of all elements.
-      (let loop ([i 1] [min-cost +inf.0])
-        (if (>= i (- n 1))
-            min-cost
-            (loop (+ i 1)
-                  (for/fold ([min-cost min-cost])
-                            ([j (in-range (+ i 1) n)]
-                             #:when (< (list-ref nums 0) min-cost))
-                    (let* ((cost1 (list-ref nums 0))  ; Cost of the first subarray starting from the first element.
-                           (cost2 (list-ref nums i))  ; Cost of the second subarray starting at index i.
-                           (cost3 (list-ref nums j))  ; Cost of the third subarray starting at index j.
-                           (total-cost (+ cost1 cost2 cost3)))  ; Calculate total cost for this partition.
-                      (min min-cost total-cost))))))))
+  ;; Helper function to calculate the cost of splitting the array at given indices.
+  (define (cost-at indices)
+    (apply + (map (lambda (idx) (list-ref nums idx)) indices)))
+
+  ;; Generate all possible pairs of (i, j) where 0 < i < j < (length nums).
+  (define split-pairs
+    (for*/list ([i (in-range 1 (sub1 (length nums)))]
+                [j (in-range (add1 i) (length nums))])
+      (list i j)))
+
+  ;; Calculate the cost for each split and find the minimum cost.
+  (apply min
+         (map (lambda (pair)
+                (match pair
+                  [(list i j)
+                   (cost-at (list 0 i j))]))
+              split-pairs)))
+
+;; Example usage:
+(minimumCost '(1 2 3 12))  ; Output: 6
+(minimumCost '(5 4 3))     ; Output: 12
+(minimumCost '(10 3 1 1))  ; Output: 12
 
 (require rackunit)
 

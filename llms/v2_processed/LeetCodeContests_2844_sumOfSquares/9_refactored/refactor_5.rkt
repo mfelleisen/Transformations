@@ -18,20 +18,15 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  
-  (define (is-special? i)
-    (zero? (modulo n i)))
-  
-  (define (square x)
-    (* x x))
-  
-  (define (special-sum acc i)
-    (if (is-special? i)
-        (+ acc (square (list-ref nums (sub1 i))))
+  (define (special? i) (zero? (modulo n i)))
+
+  (define (sum-square-acc acc i)
+    (if (special? i)
+        (+ acc (sqr (list-ref nums (sub1 i))))
         acc))
-  
-  (for/fold ([sum 0]) ([i (in-range 1 (add1 n))])
-    (special-sum sum i)))
+
+  (for/fold ([sum 0] #:result sum) ([i (in-range 1 (add1 n))])
+    (sum-square-acc sum i)))
 
 ;; Example usage:
 (sumOfSquares '(1 2 3 4)) ; Output: 21

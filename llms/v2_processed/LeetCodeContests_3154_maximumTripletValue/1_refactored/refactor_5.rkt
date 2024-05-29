@@ -21,12 +21,14 @@
 ;;  * 3 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 106
 (define (maximumTripletValue nums)
-  ;; Helper function to compute the value of a triplet (i, j, k)
+  ;; Function to compute the value of a triplet (i, j, k)
   (define (triplet-value i j k)
     (* (- i j) k))
-  
-  ;; Fold over all triplets and compute the maximum value
-  (for/fold ([max-value 0]) ([i (in-list nums)] [j (in-list (rest nums))] [k (in-list (rest (rest nums)))])
+
+  ;; Generate all possible triplets (i, j, k) where i < j < k and find the maximum value
+  (for/fold ([max-value 0])
+            ([i (in-list nums)] [j (in-list (cdr nums))] [k (in-list (cddr nums))]
+             #:when (< i j) #:when (< j k))
     (max max-value (triplet-value i j k))))
 
 ;; Example usage

@@ -27,11 +27,11 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * -50 <= nums[i], target <= 50
 (define (countPairs nums target)
-  ;; This function calculates the number of valid index pairs (i, j) such that nums[i] + nums[j] < target
-  (for*/sum ([i (in-range (length nums))]
-             [j (in-range (add1 i) (length nums))]
-             #:when (< (+ (list-ref nums i) (list-ref nums j)) target))
-    1))
+  ;; Function to count pairs with the given condition using higher-order functions and traversals
+  (for/sum ([i (in-range (length nums))])
+    (for/sum ([j (in-range (add1 i) (length nums))]
+              #:when (< (+ (list-ref nums i) (list-ref nums j)) target))
+      1)))
 
 ;; Example usage:
 (countPairs '[-1 1 2 3 1] 2) ; Output: 3

@@ -13,16 +13,17 @@
 ;; Constraints:
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
-(define (distributeCandies n limit)
-  ;; Helper function to count valid combinations for given a
-  (define (count-for-a a)
-    (for/sum ([b (in-range (add1 (min (- n a) limit)))])
-      (let ([c (- n a b)])
-        (if (<= c limit) 1 0))))
+(define (distributeCandies n limit) ;; contract distributeCandies/c
+  (define (valid-combo? a b c)
+    (and (<= a limit) (<= b limit) (<= c limit)))
 
-  ;; Main function to sum counts for all valid values of a
+  (define (count-ways a)
+    (for/sum ([b (in-range (add1 (min limit (- n a))))])
+      (let ([c (- n a b)])
+        (if (valid-combo? a b c) 1 0))))
+
   (for/sum ([a (in-range (add1 (min n limit)))])
-    (count-for-a a)))
+    (count-ways a)))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

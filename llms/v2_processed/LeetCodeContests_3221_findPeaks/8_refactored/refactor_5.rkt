@@ -26,21 +26,19 @@
   ;; of all peak elements. A peak is defined as an element that is strictly greater than its neighboring elements.
   ;; The first and last elements are not considered for peaks.
   
-  ;; Helper function to determine if an element at index `i` is a peak
-  (define (is-peak i)
-    (and (> i 0)
-         (< i (- (length mountain) 1))
-         (> (list-ref mountain i) (list-ref mountain (- i 1)))
-         (> (list-ref mountain i) (list-ref mountain (+ i 1)))))
-  
-  ;; Use `for/list` to iterate over indices and collect peaks
-  (for/list ([i (in-range 1 (sub1 (length mountain)))]
-             #:when (is-peak i))
+  ;; Helper function to determine if an element at index i is a peak
+  (define (is-peak? i)
+    (and (> i 0) (< i (sub1 (length mountain)))  ; Ensure index is not the first or last
+         (> (list-ref mountain i) (list-ref mountain (sub1 i)))  ; Current element > Previous element
+         (> (list-ref mountain i) (list-ref mountain (add1 i)))))  ; Current element > Next element
+
+  ;; Use `for/list` to filter out indices that are peaks
+  (for/list ([i (in-range 1 (sub1 (length mountain)))]  ; Indices from 1 to length-2
+             #:when (is-peak? i))
     i))
 
-;; Example usages:
-(findPeaks '(2 4 4))    ; Output: '()
-(findPeaks '(1 4 3 8 5)); Output: '(1 3)
+;; Example usage:
+(findPeaks '(1 4 3 8 5))  ; Output: '(1 3)
 
 (require rackunit)
 

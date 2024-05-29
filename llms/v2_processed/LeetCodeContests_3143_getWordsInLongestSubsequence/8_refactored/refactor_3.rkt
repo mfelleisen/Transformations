@@ -30,16 +30,25 @@
 ;;  * 0 <= groups[i] < 2
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
-(define (getWordsInLongestSubsequence n words groups)
-  (define (rec current-group current-words rest-groups rest-words)
-    (if (empty? rest-groups)
-        (reverse current-words)
-        (let ([new-group (first rest-groups)]
-              [new-word (first rest-words)])
-          (if (not (= current-group new-group))
-              (rec new-group (cons new-word current-words) (rest rest-groups) (rest rest-words))
-              (rec current-group current-words (rest rest-groups) (rest rest-words))))))
-  (rec (first groups) (list (first words)) (rest groups) (rest words)))
+(define (getWordsInLongestSubsequence _ words groups)
+  (define (valid-subsequence? seq)
+    (for/and ([i (in-range (sub1 (length seq)))])
+      (not (= (list-ref groups (list-ref seq i))
+              (list-ref groups (list-ref seq (add1 i)))))))
+
+  (define (subsequences lst)
+    (if (empty? lst)
+        '(())
+        (let ([rest-subs (subsequences (rest lst))])
+          (append rest-subs (map (lambda (sub) (cons (first lst) sub)) rest-subs)))))
+
+  (define valid-subs (filter valid-subsequence? (subsequences (range (length words)))))
+  (define max-length (apply max (map length valid-subs)))
+
+  (define longest-subs (filter (lambda (sub) (= (length sub) max-length)) valid-subs))
+  (define result (first longest-subs))
+
+  (map (lambda (i) (list-ref words i)) result))
 
 ;; Example usage:
 (define n 4)

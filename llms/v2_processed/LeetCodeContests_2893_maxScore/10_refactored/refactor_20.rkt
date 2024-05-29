@@ -26,35 +26,25 @@
   (define (parity n)
     (modulo n 2))
 
-  ;; Define a function to update the dp list based on current and target index
-  (define (update-dp current-index dp)
-    (define current-num (list-ref nums current-index))
-    (define current-parity (parity current-num))
-    (define current-score (list-ref dp current-index))
-    
-    ;; Process each index j from current-index + 1 to length of nums
-    (for/fold ([dp dp]) ([j (in-range (add1 current-index) (length nums))])
-      (define next-num (list-ref nums j))
-      (define next-parity (parity next-num))
-      (define new-score (+ current-score next-num))
-      
-      ;; Apply penalty if the parities of current and next numbers differ
-      (define adjusted-score (if (not (= current-parity next-parity))
-                                 (- new-score x)
-                                 new-score))
-      
-      ;; Update dp[j] if the new computed score is higher
-      (list-set dp j (max (list-ref dp j) adjusted-score))))
+  ;; Initialize the dp list where dp[i] will store the maximum score till index i
+  (define dp (make-vector (length nums) -inf.0))
+  (vector-set! dp 0 (first nums))
 
-  ;; Initialize the list of dp values with negative infinity, except the first element which is nums[0]
-  (define dp (cons (first nums) (make-list (sub1 (length nums)) -inf.0)))
+  ;; Function to update dp for all j > i
+  (define (update-dp i)
+    (for ([j (in-range (add1 i) (length nums))])
+      (let* ([current-score (+ (vector-ref dp i) (list-ref nums j))]
+             [adjusted-score (if (not (= (parity (list-ref nums i)) (parity (list-ref nums j))))
+                                 (- current-score x)
+                                 current-score)])
+        (vector-set! dp j (max (vector-ref dp j) adjusted-score)))))
 
-  ;; Update dp for each index from 0 to length of nums
-  (define final-dp (for/fold ([dp dp]) ([i (in-range (length nums))])
-                     (update-dp i dp)))
+  ;; Iterate over each index to update dp
+  (for ([i (in-range (length nums))])
+    (update-dp i))
 
-  ;; The final answer is the maximum value in the dp list
-  (apply max final-dp))
+  ;; The final answer is the maximum value in the dp vector
+  (apply max (vector->list dp)))
 
 ;; Example cases
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

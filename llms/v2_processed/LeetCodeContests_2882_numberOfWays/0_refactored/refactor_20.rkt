@@ -21,27 +21,26 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))
   
-  ;; Initialize a memo table with 1 way to sum up to 0.
-  (define memo (make-vector (+ n 1) 0))
-  (vector-set! memo 0 1)
+  (define (mod-add a b)
+    (modulo (+ a b) MOD))
   
-  ;; Define the maximum base such that base^x <= n
-  (define max-base (inexact->exact (floor (expt n (/ 1.0 x)))))
+  (define (dp-iter dp base max-n)
+    (define current-power (expt base x))
+    (for/fold ([dp dp])
+              ([i (in-range max-n (sub1 current-power) -1)])
+      (vector-set! dp i (mod-add (vector-ref dp i) (vector-ref dp (- i current-power))))
+      dp))
+
+  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
+  (define dp (make-vector (add1 n) 0))
+  (vector-set! dp 0 1)
   
-  ;; Helper function to update memo table
-  (define (update-memo base power)
-    (for ([i (in-range n (sub1 power) -1)])
-      (vector-set! memo i
-                   (modulo (+ (vector-ref memo i)
-                              (vector-ref memo (- i power)))
-                           MOD))))
+  (define final-dp
+    (for/fold ([dp dp])
+              ([base (in-range 1 (add1 max-base))])
+      (dp-iter dp base n)))
   
-  ;; Iterate over each possible base and update the memo table
-  (for ([base (in-range 1 (add1 max-base))])
-    (update-memo base (expt base x)))
-  
-  ;; Return the number of ways to express n
-  (vector-ref memo n))
+  (vector-ref final-dp n))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

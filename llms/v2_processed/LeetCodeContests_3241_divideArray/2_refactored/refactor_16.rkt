@@ -26,15 +26,19 @@
   (if (not (= (remainder (length nums) 3) 0))
       '()  ; Return an empty list if nums length is not a multiple of 3
       (let ([sorted-nums (sort nums <)])  ; Sort the list in ascending order
-        (define-values (result success?)
-          (for/fold ([sublists '()] [remaining sorted-nums] [success? #t])
-                    ([i (in-naturals 3 (length sorted-nums) 3)])
-            (let ([triplet (take remaining 3)])
-              (if (> (- (third triplet) (first triplet)) k)
-                  (values '() #f)  ; Return empty list if the condition is not met
-                  (values (cons triplet sublists) (drop remaining 3) #t)))))
-        (if success? (reverse result) '()))))  ; Return the collected sublists or empty list if not successful
+        (define (process nums acc)
+          (match nums
+            [(list) (reverse acc)]  ; Return the collected sublists
+            [(list-rest triplet (list a b c) rest)
+             #:when (<= (- c a) k)
+             (process rest (cons (list a b c) acc))]
+            [_ '()]))  ; Return empty list if the condition is not met
+        (process sorted-nums '()))))
 
+;; Examples
+(display (divideArray '(1 3 4 8 7 9 3 5 1) 2))  ; => '((1 1 3) (3 4 5) (7 8 9))
+(newline)
+(display (divideArray '(1 3 3 2 7 3) 3))  ; => '()
 
 (require rackunit)
 

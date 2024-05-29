@@ -28,22 +28,21 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
-  ;; Calculates the sum of the squares of distinct counts of all subarrays of nums.
-  (define (subarray-distinct-squares start)
-    ;; Calculates the sum of squares of distinct counts for subarrays starting at 'start'
-    (define (helper end seen total-sum)
-      ;; Recursive helper function to process subarrays from 'start' to 'end'
-      (if (= end (length nums))
-          total-sum
-          (let* ((num (list-ref nums end))
-                 (new-seen (hash-update seen num add1 0))
-                 (distinct-count (hash-count new-seen)))
-            (helper (add1 end) new-seen (+ total-sum (expt distinct-count 2))))))
-    (helper start (make-hash) 0))
-  
-  ;; Sum the results of subarray-distinct-squares for each starting point
-  (for/fold ([total 0]) ([i (in-range (length nums))])
-    (+ total (subarray-distinct-squares i))))
+  ;; Helper function to calculate the sum of squares of distinct counts for subarrays starting at each index
+  (define (distinct-squares-sum starting-index)
+    (define (loop i seen-counts distinct-counts)
+      (if (>= i (length nums))
+          0
+          (let* ((num (list-ref nums i))
+                 (new-seen-counts (hash-update seen-counts num add1 0))
+                 (new-distinct-counts (hash-count new-seen-counts)))
+            (+ (sqr new-distinct-counts)
+               (loop (add1 i) new-seen-counts distinct-counts)))))
+    (loop starting-index (make-hash) 0))
+
+  ;; Sum the results for each starting index
+  (for/sum ([i (in-range (length nums))])
+    (distinct-squares-sum i)))
 
 ;; Example usage:
 ;; (sumCounts '(1 2 1)) ; Output: 15

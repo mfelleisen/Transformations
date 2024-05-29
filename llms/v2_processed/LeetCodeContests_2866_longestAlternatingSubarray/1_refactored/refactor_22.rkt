@@ -28,34 +28,37 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
-  (define (alternating? a b)
-    (not (= (modulo a 2) (modulo b 2))))
-  
-  (define (valid-subarray l r)
-    (and (even? (list-ref nums l))
-         (<= (list-ref nums l) threshold)
-         (for/and ([i (in-range l (add1 r))])
-           (<= (list-ref nums i) threshold))
-         (for/and ([i (in-range l r)])
-           (alternating? (list-ref nums i) (list-ref nums (add1 i))))))
+  (define (valid-start? i)
+    (and (= (modulo (list-ref nums i) 2) 0) 
+         (<= (list-ref nums i) threshold)))
 
-  (define (max-length-from l)
-    (define (loop r current-length)
-      (if (or (>= r (length nums))
-              (not (valid-subarray l r)))
-          current-length
-          (loop (add1 r) (add1 current-length))))
-    (loop (add1 l) 1))
+  (define (valid-extension? prev curr)
+    (and (<= (list-ref nums curr) threshold)
+         (not (= (modulo (list-ref nums prev) 2)
+                 (modulo (list-ref nums curr) 2)))))
+
+  (define (extend-subarray start)
+    (define (helper end)
+      (if (and (< end (length nums))
+               (valid-extension? (sub1 end) end))
+          (helper (add1 end))
+          end))
+    (helper (add1 start)))
+
+  (define (process-start i max-len)
+    (if (valid-start? i)
+        (let* ([end (extend-subarray i)]
+               [current-len (- end i)])
+          (max max-len current-len))
+        max-len))
 
   (for/fold ([max-length 0])
-            ([l (in-range (length nums))]
-             #:when (and (even? (list-ref nums l))
-                         (<= (list-ref nums l) threshold)))
-    (max max-length (max-length-from l))))
+            ([i (in-range (length nums))])
+    (process-start i max-length)))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3
-(longestAlternatingSubarray '(1 2) 2)       ; Output: 1
+(longestAlternatingSubarray '(1 2) 2)      ; Output: 1
 (longestAlternatingSubarray '(2 3 4 5) 4)  ; Output: 3
 
 (require rackunit)

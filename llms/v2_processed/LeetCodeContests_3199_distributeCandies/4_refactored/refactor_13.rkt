@@ -14,15 +14,16 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Generate all valid distributions using a list comprehension approach
-  (define valid-candy-distributions
-    (for*/list ([a (in-range (add1 (min n limit)))]       ; Iterate from 0 to min(n, limit)
-                [b (in-range (add1 (min (- n a) limit)))] ; Iterate from 0 to min(n - a, limit)
-                #:when (<= (- n a b) limit))              ; Ensure the third child's candies do not exceed limit
-      (list a b (- n a b))))                              ; Return the distribution as a list
-
-  ;; Return the count of valid distributions
-  (length valid-candy-distributions))
+  ;; Use comprehensions to iterate over possible candy distributions for two children
+  ;; and compute the candies for the third child directly.
+  (define (valid-candy-distributions)
+    (for*/list ([a (in-range (add1 (min n limit)))]  ; Iterates from 0 to min(n, limit)
+                [b (in-range (add1 (min (- n a) limit)))]  ; Iterates from 0 to min(n-a, limit)
+                #:when (<= (- n a b) limit))  ; Ensure the third child's candies do not exceed limit
+      (list a b (- n a b))))  ; Return the distribution as a list
+  
+  ;; Count the number of valid distributions
+  (length (valid-candy-distributions)))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

@@ -22,6 +22,12 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
+  ;; Helper function to partition a list into sublists of size n
+  (define (partition-list lst n)
+    (cond
+      [(empty? lst) '()]
+      [else (cons (take lst n) (partition-list (drop lst n) n))]))
+
   ;; Check if the length of nums is a multiple of 3
   (if (not (zero? (modulo (length nums) 3)))
       '()  ; Return an empty list if not divisible by 3
@@ -30,22 +36,12 @@
         ;; Check each group to ensure the difference between max and min is <= k
         (if (andmap (lambda (group) (<= (- (last group) (first group)) k)) groups)
             groups  ; Return the groups if all groups satisfy the condition
-            '())))  ; Otherwise, return an empty list
-)
+            '()))))  ; Otherwise, return an empty list
 
-(define (partition-list lst n)
-  ;; Helper function to partition a list into sublists of size n
-  (if (null? lst)
-      '()
-      (cons (take lst n) (partition-list (drop lst n) n)))
-)
-
+;; Helper function to get the last element of a list
 (define (last lst)
-  ;; Helper function to get the last element of a list
-  (if (null? (cdr lst))
-      (car lst)
-      (last (cdr lst)))
-)
+  (car (reverse lst)))
+
 
 (require rackunit)
 

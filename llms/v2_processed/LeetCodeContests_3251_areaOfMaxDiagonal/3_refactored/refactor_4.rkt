@@ -18,32 +18,30 @@
 ;; 1 <= dimensions.length <= 100
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
-(define (areaOfMaxDiagonal dimensions)
-  ;; Define a helper function to calculate the square of the diagonal length
-  (define (diagonal-squared length width)
-    (+ (* length length) (* width width)))
+(define (areaOfMaxDiagonal dimensions) ;; contract  areaOfMaxDiagonal/c
+  (define (diagonal-squared dim)
+    (+ (sqr (first dim)) (sqr (second dim))))
   
-  ;; Use foldl to find the rectangle with the maximum diagonal length
-  ;; and in case of tie, the maximum area
-  (define (max-rectangle-by-diagonal acc dimension)
-    (define length (first dimension))
-    (define width (second dimension))
-    (define diag-sq (diagonal-squared length width))
-    (define area (* length width))
-    (match acc
-      [(list max-diag max-area)
-       (cond
-         [(> diag-sq max-diag) (list diag-sq area)]
-         [(and (= diag-sq max-diag) (> area max-area)) (list diag-sq area)]
-         [else acc])]))
+  (define (area dim)
+    (* (first dim) (second dim)))
   
-  ;; Use foldl to find the maximum values
-  (second
-   (foldl max-rectangle-by-diagonal (list 0 0) dimensions)))
+  (define (better-dimension best current)
+    (define best-diag (diagonal-squared best))
+    (define current-diag (diagonal-squared current))
+    (define best-area (area best))
+    (define current-area (area current))
+    (cond
+      [(> current-diag best-diag) current]
+      [(and (= current-diag best-diag) (> current-area best-area)) current]
+      [else best]))
+  
+  (area (foldl better-dimension (first dimensions) (rest dimensions))))
 
-;; Test cases
-(displayln (areaOfMaxDiagonal '((9 3) (8 6)))) ; Output: 48
-(displayln (areaOfMaxDiagonal '((3 4) (4 3)))) ; Output: 12
+;; Example usage:
+(define dimensions1 '((9 3) (8 6)))
+(define dimensions2 '((3 4) (4 3)))
+(displayln (areaOfMaxDiagonal dimensions1)) ;; Output: 48
+(displayln (areaOfMaxDiagonal dimensions2)) ;; Output: 12
 
 (require rackunit)
 

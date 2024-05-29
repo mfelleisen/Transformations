@@ -22,22 +22,21 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (define sorted-nums (sort nums <))
-  (define (group-nums lst)
-    (if (null? lst)
+  (define (partition-list lst n)
+    ;; Helper function to partition a list into sublists of size n
+    (if (empty? lst)
         '()
-        (let ([group (take lst 3)]
-              [remaining (drop lst 3)])
-          (if (<= (- (last group) (first group)) k)
-              (cons group (group-nums remaining))
-              '()))))
-
-  (if (not (zero? (modulo (length nums) 3)))
-      '()
-      (group-nums sorted-nums)))
-
-(define (last lst)
-  (car (reverse lst)))
+        (cons (take lst n) (partition-list (drop lst n) n))))
+  
+  ;; Check if the length of nums is a multiple of 3
+  (if (not (zero? (remainder (length nums) 3)))
+      '()  ; Return an empty list if not divisible by 3
+      (let* ((sorted-nums (sort nums <))  ; Sort the list in ascending order
+             (groups (partition-list sorted-nums 3)))  ; Partition the list into groups of 3
+        ;; Check each group to ensure the difference between max and min is <= k
+        (if (andmap (lambda (group) (<= (- (apply max group) (apply min group)) k)) groups)
+            groups  ; Return the groups if all groups satisfy the condition
+            '()))))  ; Otherwise, return an empty list
 
 (require rackunit)
 

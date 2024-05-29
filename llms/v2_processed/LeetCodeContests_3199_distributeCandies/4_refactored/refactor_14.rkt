@@ -18,11 +18,11 @@
   ;; and compute the candies for the third child directly.
   (define (valid-candy-distributions)
     (for*/sum ([a (in-range (add1 (min n limit)))]  ; Iterates from 0 to min(n, limit)
-               [b (in-range (add1 (min (- n a) limit)))]  ; Iterates from 0 to min(n-a, limit)
-               #:when (<= (- n a b) limit))  ; Ensure the third child's candies do not exceed limit
-      1))  ; Return 1 for each valid distribution
+              [b (in-range (add1 (min (- n a) limit)))]  ; Iterates from 0 to min(n-a, limit)
+              #:when (<= (- n a b) limit))  ; Ensure the third child's candies do not exceed limit
+      1))  ; Return the count for each valid distribution
   
-  ;; Count the number of valid distributions
+  ;; Return the total number of valid distributions
   (valid-candy-distributions))
 
 ;; Example usage:

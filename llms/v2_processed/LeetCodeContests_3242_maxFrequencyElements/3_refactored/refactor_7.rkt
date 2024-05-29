@@ -17,15 +17,16 @@
 ;; 1 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (maxFrequencyElements nums)
-  (define freqs (for/fold ([freqs (make-hash)]) ([num nums])
-                  (hash-update! freqs num add1 0)
-                  freqs))
+  (define freqs (for/fold ([ht (hash)]) ([num nums])
+                  (hash-update ht num add1 0)))
   
   (define max-freq (apply max (hash-values freqs)))
-
-  (for/sum ([val (in-list (hash-values freqs))]
-            #:when (= val max-freq))
-    val))
+  
+  (define count-max-freq-elements
+    (for/sum ([(k v) (in-hash freqs)] #:when (= v max-freq))
+      v))
+  
+  count-max-freq-elements)
 
 ;; Example usage:
 ;; (maxFrequencyElements '(1 2 2 3 1 4)) ; Output: 4

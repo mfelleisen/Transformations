@@ -26,27 +26,31 @@
 ;;  * 0 <= nums[i] < 231
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
+  ;; Define the maximum number of bits we are going to check.
   (define max-bits 31)
-  (define bit-shifts (range 0 max-bits))
-
+  
   ;; Function to check if a specific bit is set in a number.
   (define (bit-set? num bit)
     (not (zero? (bitwise-and num (arithmetic-shift 1 bit)))))
-
+  
   ;; Count how many numbers have the bit set at each position.
   (define (count-bit-set bit)
-    (for/sum ([num nums]) (if (bit-set? num bit) 1 0)))
-
+    (for/sum ([num (in-list nums)])
+      (if (bit-set? num bit) 1 0)))
+  
   ;; Determine if the bit should be set in the result based on the count.
   (define (result-bit bit)
     (if (>= (count-bit-set bit) k)
         (arithmetic-shift 1 bit)
         0))
-
+  
   ;; Calculate the K-or by iterating over each bit position and combining the results.
-  (define k-or (for/sum ([bit bit-shifts]) (result-bit bit)))
-
-  k-or)
+  (define (calculate-k-or bits)
+    (for/fold ([result 0]) ([bit (in-list bits)])
+      (bitwise-ior result (result-bit bit))))
+  
+  ;; Generate a list of bit positions from 0 to max-bits-1 and compute the K-or.
+  (calculate-k-or (range max-bits)))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)   ; Output: 9

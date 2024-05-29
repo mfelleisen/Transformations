@@ -27,35 +27,31 @@
 ;;  * 3 <= nums.length <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
-  (define n (length nums))
-  
-  (if (< n 3)
+  ;; Helper function to find the minimum on the left side of the peak
+  (define (min-left nums j)
+    (for/fold ([left-min +inf.0]) ([i (in-range 0 j)])
+      (if (< (list-ref nums i) (list-ref nums j))
+          (min left-min (list-ref nums i))
+          left-min)))
+
+  ;; Helper function to find the minimum on the right side of the peak
+  (define (min-right nums j n)
+    (for/fold ([right-min +inf.0]) ([k (in-range (+ j 1) n)])
+      (if (< (list-ref nums k) (list-ref nums j))
+          (min right-min (list-ref nums k))
+          right-min)))
+
+  (if (< (length nums) 3)
       -1
-      (let* ([infinite +inf.0]
-             [left-mins (for/list ([j (in-range n)])
-                          (for/fold ([left-min infinite])
-                                    ([i (in-range j)])
-                            (if (< (list-ref nums i) (list-ref nums j))
-                                (min left-min (list-ref nums i))
-                                left-min)))]
-             [right-mins (for/list ([j (in-range n)])
-                           (for/fold ([right-min infinite])
-                                     ([k (in-range (+ j 1) n)])
-                             (if (< (list-ref nums k) (list-ref nums j))
-                                 (min right-min (list-ref nums k))
-                                 right-min)))])
-        (define min-sum
-          (for/fold ([min-sum infinite])
-                    ([j (in-range 1 (- n 1))])
-            (let ([left-min (list-ref left-mins j)]
-                  [right-min (list-ref right-mins j)]
-                  [current (list-ref nums j)])
-              (if (and (not (= left-min infinite))
-                       (not (= right-min infinite)))
-                  (min min-sum (+ left-min current right-min))
-                  min-sum))))
-        
-        (if (= min-sum infinite)
+      (let ([n (length nums)])
+        (define min-sum +inf.0)
+        (for ([j (in-range 1 (- n 1))])
+          (define left-min (min-left nums j))
+          (define right-min (min-right nums j n))
+          (when (and (not (= left-min +inf.0))
+                     (not (= right-min +inf.0)))
+            (set! min-sum (min min-sum (+ left-min (list-ref nums j) right-min)))))
+        (if (= min-sum +inf.0)
             -1
             min-sum))))
 

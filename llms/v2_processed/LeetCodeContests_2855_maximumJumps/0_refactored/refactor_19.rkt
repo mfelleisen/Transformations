@@ -2,35 +2,37 @@
 
 (provide (rename-out [maximumJumps max-jump]))
 
+;; You are given a 0-indexed array nums of n integers and an integer target.
+;; You are initially positioned at index 0. In one step, you can jump from index i to any index j such that:
+;;  * 0 <= i < j < n
+;;  * -target <= nums[j] - nums[i] <= target
+;; Return the maximum number of jumps you can make to reach index n - 1.
+;; If there is no way to reach index n - 1, return -1.
+
 (define (maximumJumps nums target)
   (define n (length nums))
 
-  ;; Recursive helper function to calculate the maximum jumps
-  (define (max-jumps-from idx)
-    (define cache (make-hash))
-    (define (memoize idx result)
-      (hash-set! cache idx result)
-      result)
-    (define (max-jumps-from-helper idx)
-      (if (hash-has-key? cache idx)
-          (hash-ref cache idx)
-          (let loop ([j (+ idx 1)] [max-jumps 0])
-            (cond
-              [(>= j n) (memoize idx max-jumps)]
-              [(<= (abs (- (list-ref nums j) (list-ref nums idx))) target)
-               (loop (+ j 1) (max max-jumps (+ 1 (max-jumps-from-helper j))))]
-              [else (loop (+ j 1) max-jumps)]))))
-    (max-jumps-from-helper idx))
+  (define (jump? num@j num@i)
+    (<= (abs (- num@j num@i)) target))
 
-  (let ((result (max-jumps-from 0)))
-    (if (= result 0)
-        -1
-        result)))
+  (define (max-jumps i dp)
+    (for/fold ([dp dp]) ([j (in-range (add1 i) n)])
+      (if (jump? (list-ref nums j) (list-ref nums i))
+          (list-set dp j (max (list-ref dp j) (add1 (list-ref dp i))))
+          dp)))
+
+  (define result-dp
+    (for/fold ([dp (cons 0 (make-list (sub1 n) -inf.0))]) ([i (in-range n)])
+      (max-jumps i dp)))
+
+  (if (= (last result-dp) -inf.0)
+      -1
+      (last result-dp)))
 
 ;; Examples
-(maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3
-(maximumJumps '(1 3 6 4 1 2) 3)  ;; Output: 5
-(maximumJumps '(1 3 6 4 1 2) 0)  ;; Output: -1
+(displayln (maximumJumps '(1 3 6 4 1 2) 2))  ;; Output: 3
+(displayln (maximumJumps '(1 3 6 4 1 2) 3))  ;; Output: 5
+(displayln (maximumJumps '(1 3 6 4 1 2) 0))  ;; Output: -1
 
 (require rackunit)
 

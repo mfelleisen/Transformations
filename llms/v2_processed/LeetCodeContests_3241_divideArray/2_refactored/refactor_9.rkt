@@ -22,27 +22,33 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (define (valid-triplet? triplet k)
+  ;; Helper function to check if the difference within a triplet is less than or equal to k
+  (define (valid-triplet? triplet)
     (<= (- (third triplet) (first triplet)) k))
 
-  (define (group-into-triplets nums k)
-    (let loop ([remaining nums]
-               [result '()])
-      (if (empty? remaining)
-          (reverse result)
-          (let ([triplet (take remaining 3)]
-                [rest (drop remaining 3)])
-            (if (valid-triplet? triplet k)
-                (loop rest (cons triplet result))
-                '())))))
+  ;; Ensure the length of nums is a multiple of 3
+  (unless (zero? (remainder (length nums) 3))
+    '())
 
-  (if (not (= (remainder (length nums) 3) 0))
-      '()  ;; Return an empty list if nums length is not a multiple of 3
-      (group-into-triplets (sort nums <) k)))
+  ;; Sort the nums list
+  (define sorted-nums (sort nums <))
 
-;; Examples:
-(divideArray '(1 3 4 8 7 9 3 5 1) 2)  ;; [[1,1,3],[3,4,5],[7,8,9]]
-(divideArray '(1 3 3 2 7 3) 3)        ;; []
+  ;; Fold over the sorted list to create triplets and validate them
+  (define (process-triplets lst acc)
+    (cond
+      [(empty? lst) (reverse acc)]
+      [else
+       (define triplet (take lst 3))
+       (if (valid-triplet? triplet)
+           (process-triplets (drop lst 3) (cons triplet acc))
+           '())]))
+
+  ;; Start the process with the sorted list and an empty accumulator
+  (process-triplets sorted-nums '()))
+
+;; Example usage:
+(divideArray '(1 3 4 8 7 9 3 5 1) 2)  ;; Should output '((1 1 3) (3 4 5) (7 8 9))
+(divideArray '(1 3 3 2 7 3) 3)        ;; Should output '()
 
 (require rackunit)
 

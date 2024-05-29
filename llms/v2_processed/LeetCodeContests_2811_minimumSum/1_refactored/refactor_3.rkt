@@ -18,19 +18,19 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function to generate the list of k-avoiding numbers
-  (define (generate-k-avoiding current used remaining)
-    (cond
-      [(zero? remaining) '()]
-      [(or (set-member? used current)
-           (and (set-member? used (- k current))
-                (not (= current (- k current))))) 
-       (generate-k-avoiding (+ current 1) used remaining)]
-      [else
-       (cons current (generate-k-avoiding (+ current 1) (set-add used current) (sub1 remaining)))]))
+  ;; Helper function to generate a k-avoiding sequence.
+  (define (generate-sequence n k)
+    (define (loop count current used)
+      (cond
+        [(= count n) '()]
+        [(or (set-member? used current) (set-member? used (- k current)) (and (= current (- k current))))]
+        (loop count (+ current 1) used)
+        [else
+         (cons current (loop (+ count 1) (+ current 1) (set-add used current)))]))
+    (loop 0 1 (set)))
 
-  ;; Calculate the sum of the first n k-avoiding numbers starting from 1
-  (apply + (generate-k-avoiding 1 (set) n)))
+  ;; Calculate the sum of the generated sequence.
+  (apply + (generate-sequence n k)))
 
 ;; Example usage (not part of the function definition):
 ;; (minimumSum 5 4)  ;; Should return 18

@@ -19,19 +19,12 @@
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
   (define initial-balance 100)
-  
-  ;; Helper function to round to the nearest multiple of 10
-  (define (round-to-nearest-10 amount)
-    (let* ([lower-bound (* (quotient amount 10) 10)]
-           [upper-bound (+ lower-bound 10)])
-      (if (< (- amount lower-bound) (- upper-bound amount))
-          lower-bound
-          upper-bound)))
-  
-  ;; Calculate the rounded amount
-  (define rounded-amount (round-to-nearest-10 purchaseAmount))
-  
-  ;; Return the new balance
+  (define rounded-amount
+    (match (remainder purchaseAmount 10)
+      [residue
+       (if (<= residue 5)
+           (* 10 (quotient purchaseAmount 10))
+           (* 10 (add1 (quotient purchaseAmount 10))))]))
   (- initial-balance rounded-amount))
 
 ;; Example usage:

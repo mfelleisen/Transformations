@@ -2,22 +2,29 @@
 
 ;; Check if a number is prime
 (define (is-prime? num)
-  (and (> num 1)
-       (not (for/or ([i (in-range 2 (add1 (integer-sqrt num)))]
-                 #:when (zero? (remainder num i)))
-              #t))))
+  ;; Return #f for numbers less than or equal to 1 and handle small primes
+  (cond [(<= num 1) #f]
+        [(<= num 3) #t]
+        [(or (zero? (remainder num 2)) (zero? (remainder num 3))) #f]
+        [else
+         ;; Check divisibility from 5 onwards, skipping even numbers
+         (let loop ([i 5])
+           (cond [(> (* i i) num) #t]
+                 [(or (zero? (remainder num i)) (zero? (remainder num (+ i 2)))) #f]
+                 [else (loop (+ i 6))]))]))
 
 ;; Find all prime pairs that sum to n
 (define (findPrimePairs n)
   ;; Generate a list of prime numbers up to n
-  (define primes (for/list ([x (in-range 2 (add1 n))]
-                           #:when (is-prime? x))
-                  x))
+  (define primes (filter is-prime? (range 1 (add1 n))))
   ;; Use a nested loop to find all pairs (x, y) such that x + y = n and x <= y
-  (for*/list ([x primes]
-              [y (drop primes (index-of primes x))]
-              #:when (= (+ x y) n))
-    (list x y)))
+  (define (find-pairs primes)
+    (for*/list ([x primes]
+                [y (drop primes (index-of primes x))]
+                #:when (= (+ x y) n))
+      (list x y)))
+  ;; Find pairs and return the result
+  (find-pairs primes))
 
 ;; Example usage:
 (findPrimePairs 10)  ; Output: '([3 7] [5 5])

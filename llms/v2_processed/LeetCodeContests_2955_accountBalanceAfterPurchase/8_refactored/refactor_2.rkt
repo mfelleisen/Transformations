@@ -18,15 +18,17 @@
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
+  ;; Define the initial balance
   (define initial-balance 100)
   
-  ;; Using `let` for immutability and clarity
-  (let* ([lower-bound (* 10 (quotient purchaseAmount 10))]
-         [upper-bound (+ lower-bound 10)]
-         [rounded-amount (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
-                             lower-bound
-                             upper-bound)])
-    (- initial-balance rounded-amount)))
+  ;; Calculate the nearest multiple of 10, preferring the larger one in case of a tie
+  (define rounded-amount
+    (match (modulo purchaseAmount 10)
+      [0 0]
+      [v (if (<= v 5) (- 10 v) (- 10 (- 10 v)))]))
+  
+  ;; Calculate the new balance by subtracting the rounded amount from the initial balance
+  (- initial-balance (+ purchaseAmount rounded-amount)))
 
 ;; The function can be tested with:
 ;; (accountBalanceAfterPurchase 9)  ; should return 90

@@ -28,13 +28,14 @@
 ;;  * -50 <= nums[i], target <= 50
 (define (countPairs nums target)
   ;; Function to count pairs (i, j) where nums[i] + nums[j] < target and i < j
-  (define (valid-pair? x y)
-    ;; Helper function to check if the sum of nums[i] and nums[j] is less than target
-    (< (+ x y) target))
+  (define n (length nums))  ; Get the length of the list nums
   
-  ;; Use for/fold to accumulate the count of valid pairs
-  (for/fold ([count 0]) ([i (in-naturals)] [x (in-list nums)])
-    (+ count (for/sum ([y (in-list (drop nums (add1 i)))] #:when (valid-pair? x y)) 1))))
+  ;; Using a nested for/fold to count valid pairs
+  (for/fold ([count 0]) ([i (in-range n)])
+    (for/fold ([inner-count count]) ([j (in-range (add1 i) n)])
+      (if (< (+ (list-ref nums i) (list-ref nums j)) target)
+          (add1 inner-count)
+          inner-count))))
 
 ;; Example usage:
 (countPairs '(-1 1 2 3 1) 2)  ; Output: 3

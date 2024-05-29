@@ -20,6 +20,8 @@
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
 (define (theMaximumAchievableX num t)
+  ;; Using pattern matching for better readability
+  (match-define (list num t) (list num t))
   (+ num (* 2 t)))
 
 (require rackunit)

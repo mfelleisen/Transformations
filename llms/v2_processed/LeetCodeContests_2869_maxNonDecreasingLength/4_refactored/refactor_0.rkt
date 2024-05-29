@@ -30,35 +30,37 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
+  ;; Helper function to calculate the longest non-decreasing subarray length.
+  (define (update-dp dp1 dp2 i)
+    (define current1 (list-ref nums1 i))
+    (define current2 (list-ref nums2 i))
+    (define prev1 (list-ref nums1 (sub1 i)))
+    (define prev2 (list-ref nums2 (sub1 i)))
+
+    (define new-dp1 
+      (max (vector-ref dp1 i)
+           (if (>= current1 prev1) (+ (vector-ref dp1 (sub1 i)) 1) 1)
+           (if (>= current1 prev2) (+ (vector-ref dp2 (sub1 i)) 1) 1)))
+    (define new-dp2 
+      (max (vector-ref dp2 i)
+           (if (>= current2 prev1) (+ (vector-ref dp1 (sub1 i)) 1) 1)
+           (if (>= current2 prev2) (+ (vector-ref dp2 (sub1 i)) 1) 1)))
+    
+    (vector-set! dp1 i new-dp1)
+    (vector-set! dp2 i new-dp2)
+    
+    (max new-dp1 new-dp2))
+
   ;; Get the length of the input lists
   (define n (length nums1))
-  ;; Initialize the maximum length found so far
-  (define max-len 1)
-
-  ;; Helper function to update lengths
-  (define (update-lengths prev1 prev2 current1 current2 len1 len2)
-    (values
-     (max len1
-          (if (>= current1 prev1) (+ len1 1) 1)
-          (if (>= current1 prev2) (+ len2 1) 1))
-     (max len2
-          (if (>= current2 prev1) (+ len1 1) 1)
-          (if (>= current2 prev2) (+ len2 1) 1))))
-
-  (define (maxNonDecreasingLength-helper nums1 nums2)
-    (for/fold ([len1 1] [len2 1] #:result max-len)
-              ([i (in-range 1 n)])
-      (define current1 (list-ref nums1 i))
-      (define prev1 (list-ref nums1 (sub1 i)))
-      (define current2 (list-ref nums2 i))
-      (define prev2 (list-ref nums2 (sub1 i)))
-      (define-values (new-len1 new-len2)
-        (update-lengths prev1 prev2 current1 current2 len1 len2))
-      (set! max-len (max max-len new-len1 new-len2))
-      (values new-len1 new-len2)))
+  ;; Initialize dp arrays with 1s (each element is a subarray of length 1 by itself)
+  (define dp1 (make-vector n 1))
+  (define dp2 (make-vector n 1))
   
-  ;; Start the helper function
-  (maxNonDecreasingLength-helper nums1 nums2)
+  ;; Iterate over each element starting from the second one
+  (define max-len 
+    (for/fold ([max-len 1]) ([i (in-range 1 n)])
+      (max max-len (update-dp dp1 dp2 i))))
   
   ;; Return the maximum length of non-decreasing subarray found
   max-len)

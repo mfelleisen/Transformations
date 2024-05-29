@@ -25,23 +25,26 @@
 (define (maximumXorProduct a b n)
   ;; Define the modulus constant
   (define MOD (+ (expt 10 9) 7))
-
+  
   ;; Define the upper limit 2^n
   (define upper-limit (expt 2 n))
 
-  ;; Helper function to compute the product for a given x, and return it modulo MOD
-  (define (compute-product x)
+  ;; Define a helper function to calculate the product (a XOR x) * (b XOR x) % MOD
+  (define (calc-product x)
     (modulo (* (bitwise-xor a x) (bitwise-xor b x)) MOD))
 
-  ;; Use a fold to find the maximum product
-  (for/fold ([max-product 0])
-            ([x (in-range upper-limit)])
-    (max max-product (compute-product x))))
+  ;; Use a recursive function to find the maximum product
+  (define (find-max-product x max-pdt)
+    (if (= x upper-limit)
+        max-pdt
+        (let ((product (calc-product x)))
+          (find-max-product (+ x 1) (max max-pdt product)))))
 
-;; Examples to test the function
-(maximumXorProduct 12 5 4)  ;; Expected: 98
-(maximumXorProduct 6 7 5)   ;; Expected: 930
-(maximumXorProduct 1 6 3)   ;; Expected: 12
+  ;; Start the recursive search from 0 with initial max-product as 0
+  (find-max-product 0 0))
+
+;; The function uses a recursive helper function `find-max-product` to find the maximum product,
+;; which avoids explicit mutation and leverages Racket's functional programming capabilities.
 
 (require rackunit)
 

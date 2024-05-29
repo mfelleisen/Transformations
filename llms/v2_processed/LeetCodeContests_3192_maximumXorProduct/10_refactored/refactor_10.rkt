@@ -23,22 +23,18 @@
 ;; 0 <= a, b < 250
 ;; 0 <= n <= 50
 (define (maximumXorProduct a b n)
-  ;; Define the modulus constant
   (define MOD (+ (expt 10 9) 7))
-  
-  ;; Define the upper limit 2^n
   (define upper-limit (expt 2 n))
   
-  ;; Use a fold operation to iterate over the range [0, upper-limit) and find the maximum product
-  (for/fold ([max-product 0] #:result (modulo max-product MOD))
-            ([x (in-range upper-limit)])
-    (define product (modulo (* (bitwise-xor a x) (bitwise-xor b x)) MOD))
-    (max product max-product)))
+  (define (xor-product x)
+    (modulo (* (bitwise-xor a x) (bitwise-xor b x)) MOD))
 
-;; Example usage:
-;; (maximumXorProduct 12 5 4) should return 98
-;; (maximumXorProduct 6 7 5) should return 930
-;; (maximumXorProduct 1 6 3) should return 12
+  (for/fold ([max-product 0])
+            ([x (in-range upper-limit)])
+    (max max-product (xor-product x))))
+
+;; This version uses for/fold to iterate over the range and find the maximum product,
+;; avoiding explicit mutation and leveraging Racket's functional programming capabilities.
 
 (require rackunit)
 

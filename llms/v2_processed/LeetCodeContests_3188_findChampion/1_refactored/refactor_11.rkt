@@ -27,29 +27,27 @@
 (define (findChampion grid)
   ;; Determine the potential champion by iterating through teams
   (define (find-potential-champion n)
-    (foldl (lambda (i potential-champion)
-             (if (= (vector-ref (vector-ref grid potential-champion) i) 1)
-                 potential-champion
-                 i))
-           0
-           (range 1 n)))
-  
+    (for/fold ([potential-champion 0])
+              ([i (in-range 1 n)])
+      (if (= (vector-ref (vector-ref grid potential-champion) i) 1)
+          potential-champion
+          i)))
+
   ;; Verify that the potential champion is indeed the champion
   (define (verify-champion potential-champion n)
     (for/or ([j (in-range n)])
       (and (not (= j potential-champion))
-           (= (vector-ref (vector-ref grid j) potential-champion) 1))))
-  
+           (= (vector-ref (vector-ref grid j) potential-champion) 1)))
+    potential-champion)
+
   ;; Main function body
-  (let* ((n (vector-length grid))
-         (potential-champion (find-potential-champion n)))
-    (if (verify-champion potential-champion n)
-        -1
-        potential-champion)))
+  (let* ([n (vector-length grid)]
+         [potential-champion (find-potential-champion n)])
+    (verify-champion potential-champion n)))
 
 ;; Example Usage
-(displayln (findChampion #(#[0 1] #[0 0])))  ; Output: 0
-(displayln (findChampion #(#[0 0 1] #[1 0 1] #[0 0 0])))  ; Output: 1
+(displayln (findChampion (vector (vector 0 1) (vector 0 0))))  ; Output: 0
+(displayln (findChampion (vector (vector 0 0 1) (vector 1 0 1) (vector 0 0 0))))  ; Output: 1
 
 (require rackunit)
 

@@ -19,25 +19,13 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  ;; Helper function to remove the first occurrence of an element from a list
-  (define (remove-first occurrence lst)
-    (cond
-      [(empty? lst) '()]
-      [(= (first lst) occurrence) (rest lst)]
-      [else (cons (first lst) (remove-first occurrence (rest lst)))]))
-
-  ;; Helper function to process the game rounds
-  (define (play-round nums arr)
-    (if (empty? nums)
-        (reverse arr)
-        (let* ([sorted-nums (sort nums <)]
-               [alice-min (first sorted-nums)]
-               [bob-min (second sorted-nums)]
-               [remaining-nums (drop sorted-nums 2)])
-          (play-round remaining-nums (cons alice-min (cons bob-min arr))))))
-
-  ;; Start the game with an empty result array
-  (play-round nums '()))
+  (define sorted-nums (sort nums <))
+  (define (game alice bob sorted-nums)
+    (match sorted-nums
+      [(list) (reverse (append bob alice))]
+      [(cons a (cons b rest))
+       (game (cons a alice) (cons b bob) rest)]))
+  (game '() '() sorted-nums))
 
 ;; Example usage:
 (numberGame '(5 4 2 3))  ; Output: '(3 2 5 4)

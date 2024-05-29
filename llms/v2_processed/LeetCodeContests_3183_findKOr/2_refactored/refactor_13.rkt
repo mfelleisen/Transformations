@@ -27,18 +27,20 @@
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
   (define (bit-set? num bit)
-    (not (zero? (bitwise-and num bit))))
-  
-  (define (bit-count bit)
-    (count (lambda (num) (bit-set? num bit)) nums))
-  
-  (define (bit-or-if k result bit)
-    (if (>= (bit-count bit) k)
-        (bitwise-ior result bit)
+    (not (zero? (bitwise-and num (arithmetic-shift 1 bit)))))
+
+  (define (count-set-bits bit)
+    (for/sum ([num (in-list nums)])
+      (if (bit-set? num bit) 1 0)))
+
+  (define (k-or-accum bit result)
+    (if (>= (count-set-bits bit) k)
+        (bitwise-ior result (arithmetic-shift 1 bit))
         result))
-  
-  (for/fold ([result 0]) ([i (in-range 31)])
-    (bit-or-if k result (arithmetic-shift 1 i))))
+
+  (for/fold ([result 0])
+            ([bit (in-range 31)])
+    (k-or-accum bit result)))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)  ; Output: 9

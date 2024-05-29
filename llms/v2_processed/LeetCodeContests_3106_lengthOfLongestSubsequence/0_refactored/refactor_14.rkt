@@ -20,37 +20,28 @@
 ;;  * 1 <= nums[i] <= 1000
 ;;  * 1 <= target <= 1000
 (define (lengthOfLongestSubsequence nums target)
-  ;; Helper function to update the hash table with new sums and lengths
-  (define (update-dp dp num)
-    (define temp-dp (make-hash))
-    (for-each (lambda (kv)
-                (define s (car kv))
-                (define length (cdr kv))
-                (define new-sum (+ s num))
-                (when (<= new-sum target)
-                  (hash-update! temp-dp new-sum
-                                (lambda (old-length)
-                                  (max old-length (+ length 1)))
-                                (+ length 1))))
-              (hash->list dp))
-    (for-each (lambda (kv)
-                (hash-update! dp (car kv)
-                              (lambda (old)
-                                (max old (cdr kv)))
-                              (cdr kv)))
-              (hash->list temp-dp))
-    dp)
+  (define (memoize key val table)
+    (hash-set! table key val)
+    val)
 
-  ;; Initialize the hash table with base case: sum 0 with length 0
-  (define dp (make-hash '((0 . 0))))
+  (define (max-subseq-length nums target table)
+    (cond
+      [(= target 0) 0]
+      [(empty? nums) -1]
+      [else
+       (or (hash-ref table (list nums target) #f)
+           (let* ([current (first nums)]
+                  [remaining (rest nums)]
+                  [with-current (max-subseq-length remaining (- target current) table)]
+                  [without-current (max-subseq-length remaining target table)]
+                  [best-with (if (and with-current (>= with-current 0))
+                                 (+ 1 with-current)
+                                 -1)]
+                  [best (max best-with without-current)])
+             (memoize (list nums target) best table)))]))
 
-  ;; Update the hash table for each number in the list
-  (for/fold ([dp dp]) ([num nums])
-    (update-dp dp num))
-
-  ;; Check if the target sum is achieved and return the corresponding length
-  (let ((result (hash-ref dp target #f)))
-    (if result result -1)))
+  (let ([table (make-hash)])
+    (max-subseq-length nums target table)))
 
 ;; Example usage
 (lengthOfLongestSubsequence '(1 2 3 4 5) 9)  ; Output: 3

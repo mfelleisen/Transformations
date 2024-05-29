@@ -34,29 +34,22 @@
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus as 10^9 + 7.
 
-  ;; Helper function to check if adding `candidate` to the list would still keep it beautiful.
-  (define (can-use? candidate nums)
-    (not (ormap (λ (num) (= (+ num candidate) target)) nums)))
-
-  ;; Recursive function to build the beautiful array.
-  (define (build-beautiful-nums nums candidate count)
+  (define (helper i sum count)
     (cond
-      [(= count n) nums]
-      [(can-use? candidate nums)
-       (build-beautiful-nums (cons candidate nums) (add1 candidate) (add1 count))]
+      [(= count n) sum]
+      [(or (and (> i target) (< (- i target) n))
+           (and (< i target) (< (- target i) n))) 
+       (helper (add1 i) sum count)]
       [else
-       (build-beautiful-nums nums (add1 candidate) count)]))
+       (helper (add1 i) (modulo (+ sum i) MOD) (add1 count))]))
 
-  ;; Generate the beautiful array starting with an empty list, candidate 1, and count 0.
-  (define beautiful-nums (build-beautiful-nums '() 1 0))
-
-  ;; Calculate the sum of the beautiful array modulo MOD.
-  (modulo (apply + beautiful-nums) MOD))
+  (helper 1 0 0))
 
 ;; Example test cases
 (displayln (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])
 (displayln (minimumPossibleSum 3 3))   ; Expected: 8 (nums = [1, 3, 4])
 (displayln (minimumPossibleSum 1 1))   ; Expected: 1 (nums = [1])
+
 
 (require rackunit)
 

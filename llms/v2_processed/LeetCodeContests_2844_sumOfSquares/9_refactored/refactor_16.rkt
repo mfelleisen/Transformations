@@ -17,19 +17,16 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
-  (define n (length nums)) ;; Calculate the length of the list nums
-
-  ;; Helper function to determine if an index divides n
-  (define (divides-n? i)
+  (define n (length nums))
+  
+  (define (special-index? i)
     (zero? (modulo n i)))
-    
-  ;; Helper function to square an element
+  
   (define (square x)
     (* x x))
-
-  ;; Generate the indices from 1 to n, filter out the ones that divide n, map to their squared values, and sum them
+  
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (divides-n? i))
+            #:when (special-index? i))
     (square (list-ref nums (sub1 i)))))
 
 ;; Example usage:

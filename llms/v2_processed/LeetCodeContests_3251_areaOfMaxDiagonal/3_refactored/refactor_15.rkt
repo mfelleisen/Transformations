@@ -19,24 +19,26 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  (define (diagonal-squared length width)
-    (+ (* length length) (* width width)))
-  
-  (define (update-max acc dimension)
-    (define-values (length width) (apply values dimension))
-    (define diag-sq (diagonal-squared length width))
-    (define area (* length width))
-    (define-values (max-diag max-area) acc)
-    (if (or (> diag-sq max-diag)
-            (and (= diag-sq max-diag) (> area max-area)))
-        (values diag-sq area)
-        acc))
-  
-  (define-values (max-diagonal max-area)
-    (for/fold ([acc (values 0 0)]) ([dimension (in-list dimensions)])
-      (update-max acc dimension)))
-  
-  max-area)
+  ;; Define a helper function to calculate the diagonal squared and area for a given dimension
+  (define (diagonal-squared-and-area dimension)
+    (match-define (list length width) dimension)
+    (list (+ (* length length) (* width width)) (* length width)))
+
+  ;; Use `foldl` to iterate over the list and determine the maximum diagonal and area
+  (define (max-diagonal-area acc dimension)
+    (define-values (max-diagonal max-area) acc)
+    (define-values (current-diagonal current-area) (diagonal-squared-and-area dimension))
+    (if (or (> current-diagonal max-diagonal)
+            (and (= current-diagonal max-diagonal) (> current-area max-area)))
+        (values current-diagonal current-area)
+        (values max-diagonal max-area)))
+
+  ;; Fold over the dimensions to get the maximum diagonal and area
+  (define-values (final-diagonal final-area)
+    (foldl max-diagonal-area (values 0 0) dimensions))
+
+  ;; Return the maximum area found
+  final-area)
 
 (require rackunit)
 

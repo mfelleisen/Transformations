@@ -21,13 +21,14 @@
   ;; Define the initial balance
   (define initial-balance 100)
   
-  ;; Calculate the rounded purchase amount
+  ;; Calculate the nearest multiple of 10, choosing the larger one in case of a tie
   (define rounded-amount
-    (let* ([lower-bound (* 10 (quotient purchaseAmount 10))]
+    (let* ([remainder (remainder purchaseAmount 10)]
+           [lower-bound (* 10 (quotient purchaseAmount 10))]
            [upper-bound (+ lower-bound 10)])
-      (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
-          lower-bound
-          upper-bound)))
+      (if (<= remainder 5)
+          upper-bound
+          lower-bound)))
   
   ;; Calculate the new balance by subtracting the rounded amount from the initial balance
   (- initial-balance rounded-amount))

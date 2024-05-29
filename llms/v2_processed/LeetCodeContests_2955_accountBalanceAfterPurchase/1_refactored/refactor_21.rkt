@@ -17,14 +17,16 @@
 ;; Hence, your account balance becomes 100 - 20 = 80.
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
+(define (round-to-nearest-10 amount)
+  (define lower-bound (* (quotient amount 10) 10))
+  (define upper-bound (+ lower-bound 10))
+  (if (< (- amount lower-bound) (- upper-bound amount))
+      lower-bound
+      upper-bound))
+
 (define (accountBalanceAfterPurchase purchaseAmount)
   (define initial-balance 100)
-  (define rounded-amount
-    (let ([lower-bound (* (quotient purchaseAmount 10) 10)]
-          [upper-bound (+ (* (quotient purchaseAmount 10) 10) 10)])
-      (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
-          lower-bound
-          upper-bound)))
+  (define rounded-amount (round-to-nearest-10 purchaseAmount))
   (- initial-balance rounded-amount))
 
 ;; The function is now defined and can be used to calculate the account balance after a purchase

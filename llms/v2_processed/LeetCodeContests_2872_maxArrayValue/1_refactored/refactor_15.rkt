@@ -23,13 +23,15 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Helper function to combine elements starting from the end of the list
+  ;; Traverse the list from right to left, combining elements when the current element
+  ;; is less than or equal to the next.
   (define (combine-reverse lst)
-    (for/fold ([acc '()]) ([current (in-list (reverse lst))])
-      (if (and (not (null? acc)) (<= current (car acc)))
-          (cons (+ current (car acc)) (cdr acc))
-          (cons current acc))))
-  ;; The largest element after all possible combinations is found.
+    (for/fold ([acc '()]) ([x (in-list (reverse lst))])
+      (if (and (pair? acc) (<= x (car acc)))
+          (cons (+ x (car acc)) (cdr acc))
+          (cons x acc))))
+  
+  ;; Find the largest element after all possible combinations.
   (apply max (combine-reverse nums)))
 
 ;; Example usage:

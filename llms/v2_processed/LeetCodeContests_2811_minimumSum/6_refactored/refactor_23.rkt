@@ -17,23 +17,27 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Define a function to generate the next valid number
-  (define (next-valid-number current-number used-numbers)
-    (if (or (not (set-member? used-numbers (- k current-number)))
-            (= current-number (- k current-number)))
-        current-number
-        (next-valid-number (add1 current-number) used-numbers)))
+  ;; Define a helper function to determine if a number can be added without violating the k-avoiding property
+  (define (can-add? used-numbers current-number)
+    (not (set-member? used-numbers (- k current-number))))
 
-  ;; Define a function to accumulate the sum
-  (define (accumulate-sum current-number used-numbers count total-sum)
-    (if (= count n)
-        total-sum
-        (let* ([next-number (next-valid-number current-number used-numbers)]
-               [new-used-numbers (set-add used-numbers next-number)])
-          (accumulate-sum (add1 next-number) new-used-numbers (add1 count) (+ total-sum next-number)))))
+  ;; Inner loop to build the k-avoiding array and calculate its sum
+  (define (build-sum used-numbers current-number count total-sum)
+    (cond
+      [(= count n) total-sum] ; Base case: if we have added n numbers, return the total sum
+      [(can-add? used-numbers current-number)
+       (build-sum (set-add used-numbers current-number)
+                  (+ current-number 1)
+                  (+ count 1)
+                  (+ total-sum current-number))] ; Add current number and recurse
+      [else
+       (build-sum used-numbers
+                  (+ current-number 1)
+                  count
+                  total-sum)])) ; Skip current number and recurse
 
-  ;; Start accumulating the sum from number 1 with an empty set of used numbers
-  (accumulate-sum 1 (set) 0 0))
+  ;; Start the recursion with an empty set for used numbers, starting number 1, count 0, and total sum 0
+  (build-sum (set) 1 0 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

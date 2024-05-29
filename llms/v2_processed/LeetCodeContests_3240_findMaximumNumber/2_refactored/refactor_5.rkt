@@ -28,24 +28,24 @@
 ;; Constraints:
 ;; 1 <= k <= 1015
 ;; 1 <= x <= 8
+(define (price-of-num num x)
+  (define bin-rep (number->string num 2))  ; Convert number to binary string
+  (define len (string-length bin-rep))     ; Length of the binary string
+
+  ;; Calculate price by folding over the indices and summing up the prices
+  (for/fold ([price 0]) ([i (in-range len)])
+    (if (and (= (modulo (+ i 1) x) 0)       ; Check if index (1-based) is multiple of x
+             (char=? (string-ref bin-rep (- len 1 i)) #\1))  ; Check if the bit at this index is 1
+        (+ price 1)
+        price)))
+
+;; Main function to find the greatest integer num such that the sum of prices of all numbers from 1 to num is <= k
 (define (findMaximumNumber k x)
-  ;; Helper function to calculate the price of a number based on its binary representation.
-  (define (price-of-num num)
-    (define bin-rep (number->string num 2))  ; Convert number to binary string
-    (for/fold ([acc 0]) ([i (in-range 1 (add1 (string-length bin-rep)))])
-      (if (and (= (modulo i x) 0)    ; Check if index is multiple of x
-               (char=? (string-ref bin-rep (- (string-length bin-rep) i)) #\1))  ; Check if the bit at this index is 1
-          (+ acc 1)
-          acc)))
-
-  ;; Main loop to find the maximum number using a tail-recursive helper function.
   (define (loop num current-sum)
-    (define new-price (price-of-num num))
-    (if (> (+ current-sum new-price) k)  ; Check if adding this number's price exceeds k
-        (sub1 num)                        ; Return the previous number
-        (loop (add1 num) (+ current-sum new-price))))  ; Otherwise, continue with the next number
-
-  ;; Start the loop with num = 1 and current-sum = 0
+    (define new-price (price-of-num num x))
+    (if (> (+ current-sum new-price) k)
+        (- num 1)
+        (loop (+ num 1) (+ current-sum new-price))))
   (loop 1 0))
 
 ;; Example usage

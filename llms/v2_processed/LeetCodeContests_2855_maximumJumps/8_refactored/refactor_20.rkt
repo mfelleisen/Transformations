@@ -36,22 +36,29 @@
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
   (define n (length nums))
+  
+  ;; Helper function to determine if a jump from i to j is valid
+  (define (valid-jump? i j)
+    (and (<= i j)
+         (<= (abs (- (list-ref nums j) (list-ref nums i))) target)))
 
-  ;; Helper function to update dp values based on the current index i
-  (define (update-dp i dp)
-    (if (equal? (list-ref dp i) -inf.0)
-        dp
-        (for/fold ([dp dp]) ([j (in-range (add1 i) n)])
-          (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-              (list-set dp j (max (list-ref dp j) (add1 (list-ref dp i))))
-              dp))))
+  ;; Recursive helper with memoization
+  (define memo (make-hash))
+  (define (max-jumps i)
+    (hash-ref! memo i
+               (lambda ()
+                 (if (= i (sub1 n))
+                     0
+                     (let loop ([j (add1 i)] [max-jump -inf.0])
+                       (if (>= j n)
+                           (if (= max-jump -inf.0) -1 max-jump)
+                           (loop (add1 j)
+                                 (if (valid-jump? i j)
+                                     (max max-jump (+ 1 (max-jumps j)))
+                                     max-jump))))))))
 
-  ;; Process each index to update dp values
-  (define dp (foldl (lambda (i dp) (update-dp i dp)) (cons 0 (make-list (sub1 n) -inf.0)) (range n)))
-
-  ;; Check the value at the last index to determine if the end is reachable
-  (define final-value (list-ref dp (sub1 n)))
-  (if (equal? final-value -inf.0) -1 final-value))
+  ;; Start from the first index
+  (max-jumps 0))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

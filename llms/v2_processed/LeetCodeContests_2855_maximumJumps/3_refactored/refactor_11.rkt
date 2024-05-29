@@ -35,30 +35,23 @@
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
   (define n (length nums))
+  
+  ;; Helper function to recursively calculate maximum jumps
+  (define (max-jumps idx dp)
+    (if (= idx (sub1 n))
+        (if (= (vector-ref dp idx) -inf.0) -1 (vector-ref dp idx))
+        (begin
+          (for ([j (in-range (add1 idx) n)])
+            (when (<= (abs (- (list-ref nums j) (list-ref nums idx))) target)
+              (vector-set! dp j (max (vector-ref dp j) (+ 1 (vector-ref dp idx))))))
+          (max-jumps (add1 idx) dp))))
 
-  ;; Helper function to determine if a jump is valid based on target
-  (define (valid-jump? i j)
-    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
-
-  ;; Recursive function to calculate maximum jumps
-  (define (max-jumps idx cache)
-    (cond
-      [(= idx (sub1 n)) 0]  ; Base case: if we reach the last index, no more jumps needed
-      [(hash-has-key? cache idx) (hash-ref cache idx)]  ; Return cached value if available
-      [else
-       (define max-jump (for/fold ([max-jump -1]) ([j (in-range (add1 idx) n)])
-                          (if (valid-jump? idx j)
-                              (max max-jump (+ 1 (max-jumps j cache)))
-                              max-jump)))
-       (hash-set! cache idx max-jump)
-       max-jump]))
-
-  ;; Start the recursive calculation with an empty cache
-  (define cache (make-hash))
-  (let ([result (max-jumps 0 cache)])
-    (if (= result -1)
-        -1
-        result)))
+  ;; Initialize dp vector
+  (define dp (make-vector n -inf.0))
+  (vector-set! dp 0 0)
+  
+  ;; Start the recursive computation
+  (max-jumps 0 dp))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

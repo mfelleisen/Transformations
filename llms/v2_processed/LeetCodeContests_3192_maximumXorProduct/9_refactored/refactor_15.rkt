@@ -26,18 +26,15 @@
 (define (maximumXorProduct a b n)
   (define MOD (+ (expt 10 9) 7))
   (define upper-limit (expt 2 n))
-
+  
   (define (product-for-x x)
     (* (bitwise-xor a x) (bitwise-xor b x)))
-
+  
   (define max-product
     (for/fold ([max-so-far 0]) ([x (in-range upper-limit)])
       (max max-so-far (product-for-x x))))
-
+  
   (remainder max-product MOD))
-
-;; The function is now defined in an idiomatic Racket style using higher-order functions
-;; like for/fold and in-range, avoiding explicit mutation and loops.
 
 (require rackunit)
 

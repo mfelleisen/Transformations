@@ -31,26 +31,24 @@
   ;; Function to determine the champion of a tournament represented as a DAG.
   ;; n: number of teams
   ;; edges: list of directed edges where each edge [u, v] indicates team u is stronger than team v
+  
+  ;; Create a vector to keep track of the number of incoming edges for each team
+  (define in-degrees (make-vector n 0))
 
-  ;; Create a hash table to track the number of incoming edges for each team
-  (define in-degrees (make-hash))
-
-  ;; Populate the in-degrees hash by iterating over each edge
-  (for-each (lambda (edge)
-              (define v (second edge))
-              (hash-update! in-degrees v add1 0))
-            edges)
+  ;; Populate the in-degrees vector by iterating over each edge
+  (for ([edge edges])
+    (vector-set! in-degrees (second edge) (add1 (vector-ref in-degrees (second edge)))))
 
   ;; Find the teams with zero in-degrees
   (define zero-in-degree-teams
     (for/list ([team (in-range n)]
-               #:when (zero? (hash-ref in-degrees team 0)))
+               #:when (= (vector-ref in-degrees team) 0))
       team))
 
   ;; Determine the result based on the number of teams with zero in-degrees
   (match zero-in-degree-teams
-    [(list only-one) only-one] ;; If exactly one team with zero in-degrees, return it
-    [_ -1]))                   ;; Otherwise, return -1 indicating no unique champion or no champion at all
+    [(list unique-team) unique-team] ;; If exactly one, return it
+    [_ -1])) ;; Otherwise, return -1 indicating no unique champion or no champion at all
 
 ;; Example usage:
 (findChampion 3 '((0 1) (1 2)))  ;; Output: 0

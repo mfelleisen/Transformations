@@ -23,23 +23,23 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; This function simulates the described operations by folding from the right,
+  ;; This function simulates the described operations in a right-to-left folding manner,
   ;; combining elements from right to left if they meet the condition.
-  (define (fold-nums lst)
-    (foldr (lambda (current combined)
-             ;; If the current element is less than or equal to the first element of the combined list,
-             ;; combine them by adding the current element to the first element of the combined list.
-             ;; Otherwise, prepend the current element to the combined list.
-             (match combined
+  (define (process-nums lst)
+    (foldr (lambda (current acc)
+             (match acc
+               ;; If the accumulator is empty, start with the current element.
+               [(list) (list current)]
+               ;; If the current element is less than or equal to the first element of the accumulator,
+               ;; combine them by adding the current element to the first element of the accumulator.
                [(cons first rest)
                 (if (<= current first)
                     (cons (+ current first) rest)
-                    (cons current combined))]
-               [else (cons current combined)]))
+                    (cons current acc))]))
            '()
            lst))
-  ;; The largest value in the folded list is the result.
-  (apply max (fold-nums nums)))
+  ;; The largest value in the processed list is the result.
+  (apply max (process-nums nums)))
 
 ;; Example usage:
 (maxArrayValue '(2 3 7 9 3))  ; Output: 21

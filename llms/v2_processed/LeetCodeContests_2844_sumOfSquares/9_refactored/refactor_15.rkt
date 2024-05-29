@@ -18,18 +18,18 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  
+
+  ;; Helper function to check if an index is special
+  (define (special-index? i)
+    (zero? (modulo n i)))
+
+  ;; Helper function to square a number
   (define (square x) (* x x))
-  
-  (define (special? i) (zero? (modulo n i)))
-  
-  (define (special-squares i)
-    (if (special? i)
-        (square (list-ref nums (sub1 i)))
-        0))
-  
-  (for/sum ([i (in-range 1 (add1 n))])
-    (special-squares i)))
+
+  ;; Calculate the sum of squares of special elements
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (special-index? i))
+    (square (list-ref nums (sub1 i)))))
 
 ;; Example usage:
 (sumOfSquares '(1 2 3 4)) ; Output: 21

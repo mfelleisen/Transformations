@@ -24,23 +24,24 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= num[i] <= 200
 (define (isGood nums)
-  ;; Calculate the maximum element which will act as 'n'
+  ;; Determine if the list nums is a "good" array.
+  ;; A "good" array is a permutation of [1, 2, ..., n - 1, n, n] where n is the maximum element in nums.
+  
   (define n (apply max nums))
-  ;; Generate the expected frequency distribution for a "good" array
-  (define expected-counts
-    (for/fold ([counts (hash)])
-              ([i (in-range 1 (add1 n))])
-      (hash-set counts i (if (= i n) 2 1))))
-
-  ;; Create the actual frequency distribution from nums
-  (define actual-counts
-    (for/fold ([counts (hash)])
-              ([num nums])
-      (hash-update counts num add1 0)))
-
-  ;; Check if the frequency distributions match and the length is correct
+  
+  ;; Create a frequency dictionary of elements in nums
+  (define counts (for/fold ([dict (hash)]) ([num (in-list nums)])
+                   (hash-update dict num add1 0)))
+  
+  ;; Check for the presence of each element from 1 to n-1 exactly once, and n exactly twice
+  (define (check-goodness dict n)
+    (for/and ([i (in-range 1 n)])
+      (= (hash-ref dict i 0) 1))
+    (and (= (hash-ref dict n 0) 2)))
+  
+  ;; Ensure the list length is exactly n+1
   (and (= (length nums) (+ n 1))
-       (equal? actual-counts expected-counts)))
+       (check-goodness counts n)))
 
 ;; Example usage:
 (isGood '(2 1 3))  ; Output: #f

@@ -27,23 +27,15 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  ;; Helper function to calculate the minimum absolute difference
-  (define (min-diff-helper nums x min-diff)
-    (define len (length nums))
-    ;; Base case: if there are fewer than x + 1 elements, return the current minimum difference
-    (if (< len x)
-        min-diff
-        ;; Recursive case: check the head of the list against the rest
-        (let* ((head (first nums))
-               (tail (rest nums))
-               (new-diff (for/fold ([current-min min-diff])
-                                  ([j (in-range x len)])
-                            (let ((diff (abs (- head (list-ref nums j)))))
-                              (min current-min diff)))))
-          (min-diff-helper tail x new-diff))))
+  ;; Helper function to find the minimum absolute difference for each starting index i.
+  (define (compute-min-diff i min-diff)
+    (for/fold ([current-min min-diff]) ([j (in-range (+ i x) (length nums))])
+      (let ((diff (abs (- (list-ref nums i) (list-ref nums j)))))
+        (min current-min diff))))
   
-  ;; Start the recursive process with the initial values
-  (min-diff-helper nums x +inf.0))
+  ;; Iterate over each starting index i and compute the minimum difference.
+  (for/fold ([min-diff +inf.0]) ([i (in-range (- (length nums) x))])
+    (compute-min-diff i min-diff)))
 
 ;; Example usage:
 (minAbsoluteDifference '(4 3 2 4) 2)  ; Output: 0

@@ -25,25 +25,32 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (define (group-3 lst)
-    (if (or (null? lst) (< (length lst) 3))
-        '()
-        (cons (take lst 3) (group-3 (drop lst 3)))))
-  
-  (define (valid-group? group)
-    (let ([sorted-group (sort group <)])
-      (<= (- (last sorted-group) (first sorted-group)) k)))
-  
-  (define (all-valid-groups? groups)
-    (andmap valid-group? groups))
-  
-  (let ([sorted-nums (sort nums <)])
-    (let ([groups (group-3 sorted-nums)])
-      (if (all-valid-groups? groups)
-          groups
-          '()))))
+  (define (can-group? group k)
+    (<= (- (last group) (first group)) k))
 
-;; Helper functions to access elements of a list by index are no longer needed
+  (define (group-nums sorted-nums)
+    (match sorted-nums
+      [(list)
+       '()]
+      [(list _ _)
+       '()]
+      [(list-rest a b c rest)
+       (define group (list a b c))
+       (if (can-group? group k)
+           (cons group (group-nums rest))
+           '())]))
+
+  (define sorted-nums (sort nums <))
+  (group-nums sorted-nums))
+
+;; Examples to test the function
+(define nums1 '(1 3 4 8 7 9 3 5 1))
+(define k1 2)
+(define nums2 '(1 3 3 2 7 3))
+(define k2 3)
+
+(displayln (divideArray nums1 k1)) ; Output: '((1 1 3) (3 4 5) (7 8 9))
+(displayln (divideArray nums2 k2)) ; Output: '()
 
 (require rackunit)
 

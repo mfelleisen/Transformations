@@ -19,9 +19,6 @@
 ;; It can be proven that there is no achievable number larger than 7.
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
-(provide/contract
- [theMaximumAchievableX (-> integer? integer? integer?)])
-
 (define (theMaximumAchievableX num t)
   ;; The function calculates the maximum achievable number x
   ;; after performing a series of operations on num.

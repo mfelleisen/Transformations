@@ -25,29 +25,29 @@
 ;;  * For all i, j that i != j, grid[i][j] != grid[j][i].
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion grid)
-  ;; Helper function to find the potential champion in the tournament
+  ;; Find the potential champion by comparing each team with the current potential champion.
   (define (find-potential-champion n)
     (for/fold ([current-champion 0]) ([i (in-range 1 n)])
-      (if (= 1 (list-ref (list-ref grid current-champion) i))
+      (if (= (vector-ref (vector-ref grid current-champion) i) 1)
           current-champion
           i)))
-
-  ;; Helper function to verify that the potential champion is indeed the champion
+  
+  ;; Verify the potential champion by ensuring no other team is stronger.
   (define (verify-champion champion n)
     (for/and ([j (in-range n)])
       (or (= j champion)
-          (= 1 (list-ref (list-ref grid champion) j)))))
+          (= (vector-ref (vector-ref grid j) champion) 0))))
 
   ;; Main logic
-  (let* ([n (length grid)]
-         [potential-champion (find-potential-champion n)])
-    (if (verify-champion potential-champion n)
-        potential-champion
-        -1)))
+  (define n (vector-length grid))  ; Get the number of teams
+  (define potential-champion (find-potential-champion n))
+  (if (verify-champion potential-champion n)
+      potential-champion
+      -1))
 
 ;; Example Usage
-(displayln (findChampion '((0 1) (0 0))))  ; Output: 0
-(displayln (findChampion '((0 0 1) (1 0 1) (0 0 0))))  ; Output: 1
+(displayln (findChampion (vector (vector 0 1) (vector 0 0))))  ; Output: 0
+(displayln (findChampion (vector (vector 0 0 1) (vector 1 0 1) (vector 0 0 0))))  ; Output: 1
 
 (require rackunit)
 

@@ -30,25 +30,40 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  ;; Helper function to compute the maximum length of non-decreasing subarray
-  (define (max-length-seq seq1 seq2)
-    (let loop ([i 1] [dp1 1] [dp2 1] [max-len 1])
-      (if (>= i (length seq1))
-          max-len
-          (let* ([num1 (list-ref seq1 i)]
-                 [num2 (list-ref seq2 i)]
-                 [prev-num1 (list-ref seq1 (- i 1))]
-                 [prev-num2 (list-ref seq2 (- i 1))]
-                 [new-dp1 (max (if (>= num1 prev-num1) (+ dp1 1) 1)
-                               (if (>= num1 prev-num2) (+ dp2 1) 1))]
-                 [new-dp2 (max (if (>= num2 prev-num1) (+ dp1 1) 1)
-                               (if (>= num2 prev-num2) (+ dp2 1) 1))]
-                 [new-max-len (max max-len new-dp1 new-dp2)])
-            (loop (add1 i) new-dp1 new-dp2 new-max-len)))))
-
-  ;; Start the computation with the initial values
-  (max-length-seq nums1 nums2))
-
+  (define n (length nums1))
+  
+  ;; Helper function to generate lazy lists of elements and their indices
+  (define (indexed-list lst)
+    (for/list ([i (in-range (length lst))])
+      (cons i (list-ref lst i))))
+  
+  ;; Helper function to update the dp vector and calculate the maximum length
+  (define (update-dp dp prev-val current-val prev-dp)
+    (if (>= current-val prev-val)
+        (max dp (+ prev-dp 1))
+        dp))
+  
+  ;; Initialize dp vectors to store maximum lengths
+  (define dp1 (make-vector n 1))  ;; max length ending with element from nums1
+  (define dp2 (make-vector n 1))  ;; max length ending with element from nums2
+  
+  ;; Variable to track the maximum length found
+  (define max-len 1)
+  
+  ;; Loop through each index from 1 to n-1
+  (for ([i (in-range 1 n)])
+    (define prev-index (sub1 i))
+    ;; Update dp1 and dp2 based on previous elements and choices
+    (vector-set! dp1 i (update-dp (vector-ref dp1 i) (list-ref nums1 prev-index) (list-ref nums1 i) (vector-ref dp1 prev-index)))
+    (vector-set! dp1 i (update-dp (vector-ref dp1 i) (list-ref nums2 prev-index) (list-ref nums1 i) (vector-ref dp2 prev-index)))
+    (vector-set! dp2 i (update-dp (vector-ref dp2 i) (list-ref nums1 prev-index) (list-ref nums2 i) (vector-ref dp1 prev-index)))
+    (vector-set! dp2 i (update-dp (vector-ref dp2 i) (list-ref nums2 prev-index) (list-ref nums2 i) (vector-ref dp2 prev-index)))
+    
+    ;; Update the maximum length found so far
+    (set! max-len (max max-len (vector-ref dp1 i) (vector-ref dp2 i))))
+  
+  ;; Return the maximum length of the non-decreasing subarray
+  max-len)
 
 (require rackunit)
 

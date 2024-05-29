@@ -25,30 +25,18 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Helper function to compute the cost for a given triplet of indices
-  (define (compute-cost indices)
-    (apply + (map (lambda (idx) (list-ref nums idx)) indices)))
-  
-  ;; Generate all possible triplet combinations of indices
-  (define (all-triplets lst)
-    (for*/list ([i (in-list lst)]
-                [j (in-list (remove i lst))]
-                [k (in-list (remove* (list i j) lst))])
-      (list i j k)))
-
-  ;; Ensure the indices are valid for disjoint contiguous subarrays
-  (define (valid-triplet? triplet)
-    (and (< (first triplet) (second triplet)) (< (second triplet) (third triplet))))
-
+  ;; This function calculates the minimum possible sum of the costs of three disjoint contiguous subarrays.
   (define n (length nums))
   (if (= n 3)
       ;; If the list has exactly three elements, each element forms its own subarray.
       (apply + nums)
-      ;; Otherwise, find the minimum cost by checking different breakpoints.
-      (let ([indices (range 0 n)])
-        (apply min
-               (map compute-cost
-                    (filter valid-triplet? (all-triplets indices)))))))
+      ;; Otherwise, we need to find the minimum cost by checking different breakpoints.
+      (let loop-min ([min-cost +inf.0])
+        (for*/fold ([min-cost min-cost])
+                   ([i (in-range 1 (- n 2))]
+                    [j (in-range (+ i 1) (- n 1))])
+          (let ([cost (+ (first nums) (list-ref nums i) (list-ref nums j))])
+            (min cost min-cost))))))
 
 ;; Examples:
 (minimumCost '(1 2 3 12))  ; Output: 6

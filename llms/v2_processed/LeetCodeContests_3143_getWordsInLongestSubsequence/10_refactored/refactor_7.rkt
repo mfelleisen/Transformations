@@ -31,17 +31,17 @@
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
 (define (getWordsInLongestSubsequence n words groups)
-  ;; Helper function to build the longest subsequence
-  (define (build-subsequence words groups)
-    (define-values (result _)
-      (for/fold ([result '()] [last-group #f])
-                ([word words] [group groups])
-        (if (or (null? result) (not (= group last-group)))
-            (values (cons word result) group)
-            (values result last-group))))
-    (reverse result))
-  
-  (build-subsequence words groups))
+  ;; Helper function to process the subsequence
+  (define (process-sequence seq last-group result)
+    (match seq
+      [(list) (reverse result)]  ; When the sequence is empty, return the result (reversed to maintain order)
+      [(cons (list word group) rest) 
+       (if (not (= group last-group))
+           (process-sequence rest group (cons word result))  ; Add word to result if group is different
+           (process-sequence rest last-group result))]))     ; Continue without adding word if group is the same
+
+  ;; Start processing from the second element
+  (process-sequence (map list words groups) (first groups) (list (first words))))
 
 ;; Example usage:
 (define n 4)

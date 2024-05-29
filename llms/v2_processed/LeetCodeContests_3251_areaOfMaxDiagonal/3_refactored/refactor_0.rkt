@@ -19,25 +19,25 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  (define (diagonal-squared l w)
-    (+ (* l l) (* w w)))
+  (define (diagonal-squared length width)
+    (+ (* length length) (* width width)))
   
-  (define (process-dimension best-d best-a dimension)
-    (let* ([length (first dimension)]
-           [width (second dimension)]
-           [diag-sq (diagonal-squared length width)]
-           [area (* length width)])
-      (cond
-        [(> diag-sq best-d) (values diag-sq area)]
-        [(and (= diag-sq best-d) (> area best-a)) (values diag-sq area)]
-        [else (values best-d best-a)])))
+  (define (update-max acc dimension)
+    (match-define (list length width) dimension)
+    (define diag-sq (diagonal-squared length width))
+    (define area (* length width))
+    (match acc
+      [(list max-diag max-area)
+       (if (or (> diag-sq max-diag)
+               (and (= diag-sq max-diag) (> area max-area)))
+           (list diag-sq area)
+           acc)]))
   
-  (define-values (max-diagonal max-area)
-    (for/fold ([best-d 0] [best-a 0])
-              ([dimension (in-list dimensions)])
-      (process-dimension best-d best-a dimension)))
-  
-  max-area)
+  (second (foldl update-max (list 0 0) dimensions)))
+
+;; Example usage
+(areaOfMaxDiagonal '((9 3) (8 6))) ; should output 48
+(areaOfMaxDiagonal '((3 4) (4 3))) ; should output 12
 
 (require rackunit)
 

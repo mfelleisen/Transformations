@@ -21,33 +21,23 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  ;; Helper function to calculate the square of the diagonal of a rectangle
   (define (diagonal-squared length width)
     (+ (* length length) (* width width)))
-  
-  ;; Helper function to calculate the area of a rectangle
-  (define (area length width)
-    (* length width))
-  
-  ;; Use foldl to iterate through the list of dimensions to find the rectangle with the longest diagonal or largest area if diagonals are equal
-  (define (update-max-dimensions dim max-dim)
-    (let* ([length (first dim)]
-           [width (second dim)]
-           [diag-sq (diagonal-squared length width)]
-           [current-area (area length width)]
-           [max-diag-sq (first max-dim)]
-           [max-area (second max-dim)])
-      (if (or (> diag-sq max-diag-sq)
-              (and (= diag-sq max-diag-sq) (> current-area max-area)))
-          (list diag-sq current-area)
-          max-dim)))
-  
-  ;; Fold over the dimensions to find the maximum diagonal or area
-  (second (foldl update-max-dimensions '(0 0) dimensions)))
 
-;; Example Usage
-(areaOfMaxDiagonal '((9 3) (8 6))) ;; Should return 48
-(areaOfMaxDiagonal '((3 4) (4 3))) ;; Should return 12
+  (define (max-rect-by-diagonal acc dim)
+    (match-define (list length width) dim)
+    (define diag-sq (diagonal-squared length width))
+    (define area (* length width))
+    (match-define (list max-diag max-area) acc)
+    (if (or (> diag-sq max-diag)
+            (and (= diag-sq max-diag) (> area max-area)))
+        (list diag-sq area)
+        acc))
+
+  (define-values (max-diagonal max-area)
+    (foldl max-rect-by-diagonal '(0 0) dimensions))
+
+  max-area)
 
 (require rackunit)
 

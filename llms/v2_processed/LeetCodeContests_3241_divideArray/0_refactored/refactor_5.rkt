@@ -25,24 +25,26 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (define (group-valid? group)
+  (define (can-group? group k)
     (<= (- (last group) (first group)) k))
 
-  (define (loop remaining result)
-    (cond
-      [(empty? remaining) (reverse result)]
-      [(< (length remaining) 3) '()]
-      [else
-       (define group (take remaining 3))
-       (if (group-valid? group)
-           (loop (drop remaining 3) (cons group result))
-           '())]))
+  (define (divide-into-groups lst k)
+    (match lst
+      [(list) '()]
+      [(list _ _ _) '()]
+      [(list-rest a b c rest)
+       (define group (list a b c))
+       (if (can-group? group k)
+           (cons group (divide-into-groups rest k))
+           '())]
+      [else '()]))
 
-  (loop (sort nums <) '()))
+  (define sorted-nums (sort nums <))
+  (divide-into-groups sorted-nums k))
 
-;; Test cases
-(divideArray '(1 3 4 8 7 9 3 5 1) 2) ;; => '((1 1 3) (3 4 5) (7 8 9))
-(divideArray '(1 3 3 2 7 3) 3) ;; => '()
+;; Helper function to access the last element of a list
+(define (last lst)
+  (car (reverse lst)))
 
 (require rackunit)
 

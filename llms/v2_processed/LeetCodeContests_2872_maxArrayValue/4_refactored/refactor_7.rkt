@@ -23,15 +23,19 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Fold from the right with accumulators to maintain the current maximum value.
-  (define (combine-nums lst)
-    (foldr (lambda (current acc)
-             (if (<= current (car acc))
-                 (cons (+ current (car acc)) (cdr acc))
-                 (cons current acc)))
-           '(0)  ; Start with an initial accumulator that has a single element 0.
-           lst))
-  (car (combine-nums nums)))  ; Return the first element of the final accumulator.
+  ;; Define a helper function that processes the list from right to left
+  (define (combine-right lst)
+    ;; Use a fold to accumulate the maximum possible value
+    (car (foldr (lambda (x acc)
+                  (let ([current-sum (+ x (car acc))])
+                    (if (<= x (car acc))
+                        (cons current-sum (cdr acc))
+                        (cons x (cdr acc)))))
+                '(0) ;; Start with an accumulator with a single element 0
+                lst)))
+  
+  ;; Call the helper function and get the maximum value
+  (combine-right nums))
 
 ;; Example usage:
 (maxArrayValue '(2 3 7 9 3))  ; Output: 21

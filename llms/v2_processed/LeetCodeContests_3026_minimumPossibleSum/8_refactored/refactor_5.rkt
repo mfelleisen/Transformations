@@ -34,27 +34,17 @@
 (define (minimumPossibleSum n target)
   ;; Define the modulo constant as per the problem statement
   (define MOD (+ (expt 10 9) 7))
-
-  ;; Helper function to build the beautiful array
-  (define (build-beautiful-array n target)
-    (define (loop i count acc)
-      (cond
-        [(= count n) acc]
-        [(and (positive? i) (not (acc-contains-pair-sum? acc i target)))
-         (loop (add1 i) (add1 count) (+ acc i))]
-        [else (loop (add1 i) count acc)]))
-    (loop 1 0 0))
-
-  ;; Helper function to check if adding a new candidate would still keep the array beautiful
-  (define (acc-contains-pair-sum? acc candidate target)
-    (let loop ([i 1])
-      (cond
-        [(>= i candidate) #f]
-        [(= (+ i candidate) target) #t]
-        [else (loop (add1 i))])))
+  
+  ;; Recursive function to build the beautiful array with accumulators
+  (define (build-beautiful-array nums candidate remaining)
+    (if (= remaining 0)
+        nums
+        (if (not (ormap (λ (num) (= (+ num candidate) target)) nums))
+            (build-beautiful-array (cons candidate nums) (+ candidate 1) (- remaining 1))
+            (build-beautiful-array nums (+ candidate 1) remaining))))
 
   ;; Calculate the sum of the beautiful array and take modulo MOD
-  (modulo (build-beautiful-array n target) MOD))
+  (modulo (apply + (build-beautiful-array '() 1 n)) MOD))
 
 ;; Example test cases
 (minimumPossibleSum 2 3)   ; Expected: 4 (nums = [1, 3])

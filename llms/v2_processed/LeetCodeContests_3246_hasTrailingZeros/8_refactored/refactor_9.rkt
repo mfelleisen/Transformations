@@ -24,14 +24,17 @@
   ;; Helper function to check if a number has at least one trailing zero
   (define (has-trailing-zero? x)
     (= (bitwise-and x 1) 0))
+
+  ;; Find all pairs of elements in the list and check their bitwise OR
+  (define (check-pairs lst)
+    (match lst
+      [(cons x xs)
+       (or (ormap (lambda (y) (has-trailing-zero? (bitwise-ior x y))) xs)
+           (check-pairs xs))]
+      [else #f]))
   
-  ;; Use a nested loop with for*/first to find the first pair with a trailing zero in their bitwise OR
-  (for*/first ([(i num1) (in-indexed nums)]
-               [(j num2) (in-indexed (drop nums (add1 i)))]
-               #:when (has-trailing-zero? (bitwise-ior num1 num2)))
-    #true)
-  ;; If no such pair is found, return #false
-  #false)
+  ;; Start the checking process
+  (check-pairs nums))
 
 ;; Example usage:
 (hasTrailingZeros '(1 2 3 4 5))  ; Output: #true

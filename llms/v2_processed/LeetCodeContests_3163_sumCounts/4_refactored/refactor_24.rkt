@@ -30,25 +30,20 @@
 (define (sumCounts nums)
   ;; This function calculates the sum of the squares of distinct counts of all subarrays of nums.
   (define n (length nums))
-  
-  ;; This helper function calculates the sum of squares of distinct counts of subarrays starting from index i.
-  (define (sum-from-index i)
-    (let loop ([j i] [seen (set)] [total 0])
-      (if (= j n)
-          total
-          (let ([current-element (list-ref nums j)]
-                [updated-seen (set-add seen (list-ref nums j))])
-            (loop (add1 j)
-                  updated-seen
-                  (+ total (expt (set-count updated-seen) 2)))))))
-  
-  ;; Sum the results of sum-from-index for each starting index in the array.
-  (for/sum ([i (in-range n)])
-    (sum-from-index i)))
+  (for/sum ([i (in-range n)]) ; Loop over each possible starting index i
+    (define seen (make-hash))
+    (for/fold ([sum 0]) ([j (in-range i n)])
+      ;; Get the element at index j and update the hash table
+      (define current-element (list-ref nums j))
+      (hash-update! seen current-element add1 0)
+      ;; Calculate the number of distinct elements
+      (define distinct-count (hash-count seen))
+      ;; Add the square of the distinct count to the sum
+      (+ sum (* distinct-count distinct-count)))))
 
-;; Example usage
-(sumCounts '(1 2 1)) ; => 15
-(sumCounts '(1 1))   ; => 3
+;; Example usage:
+(sumCounts '(1 2 1)) ;; Output: 15
+(sumCounts '(1 1)) ;; Output: 3
 
 (require rackunit)
 

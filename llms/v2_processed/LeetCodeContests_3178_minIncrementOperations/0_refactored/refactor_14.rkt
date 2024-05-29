@@ -39,30 +39,26 @@
 ;;  * 0 <= nums[i] <= 109
 ;;  * 0 <= k <= 109
 (define (minIncrementOperations nums k)
-  ;; Helper function to determine the required increments for a given window
-  (define (required-increments window)
-    (let ((max-in-window (apply max window)))
-      (max 0 (- k max-in-window))))
+  ;; Helper function to process each window of size 3
+  (define (process-window idx nums increments)
+    (if (>= idx (- (length nums) 2))
+        increments  ;; If we've reached the end of the list, return the total increments
+        (let* ((current-window (take (drop nums idx) 3))  ;; Extract the window of size 3
+               (max-in-window (apply max current-window))
+               (needed (if (< max-in-window k) (- k max-in-window) 0)))
+          ;; Recursively process the next window, adding needed increments to each element of the current window
+          (process-window (+ idx 1) (if (= needed 0)
+                                        nums
+                                        (let ((new-nums (vector->list (vector-copy (list->vector nums)))))
+                                          (for ([i (in-range idx (+ idx 3))])
+                                            (set! new-nums (list-set new-nums i (+ (list-ref new-nums i) needed))))
+                                          new-nums))
+                          (+ increments needed)))))
+  
+  ;; Start the recursive processing from the first index
+  (process-window 0 nums 0))
 
-  ;; Helper function to process the entire list and calculate the total increments
-  (define (process-windows nums)
-    (for/fold ([total-increments 0])
-              ([window (in-slice 3 1 nums)])
-      (let ((increments (required-increments window)))
-        (+ total-increments increments))))
-
-  ;; Process the list to calculate total increments
-  (process-windows nums))
-
-;; Helper function to generate overlapping slices of size 3
-(define (in-slice size step lst)
-  (define (slices lst)
-    (if (< (length lst) size)
-        '()
-        (cons (take lst size) (slices (drop lst step)))))
-  (in-list (slices lst)))
-
-;; Example usage
+;; Example usage:
 (minIncrementOperations '(2 3 0 0 2) 4)  ;; Output: 3
 (minIncrementOperations '(0 1 3 3) 5)    ;; Output: 2
 (minIncrementOperations '(1 1 2) 1)      ;; Output: 0

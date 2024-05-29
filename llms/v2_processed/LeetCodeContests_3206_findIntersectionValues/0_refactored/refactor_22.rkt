@@ -28,9 +28,11 @@
   ;; Calculate intersection of both sets
   (define intersection (set-intersect set-nums1 set-nums2))
   
-  ;; Calculate the counts of elements in the intersection
-  (define count1 (for/sum ([x (in-list nums1)] #:when (set-member? intersection x)) 1))
-  (define count2 (for/sum ([x (in-list nums2)] #:when (set-member? intersection x)) 1))
+  ;; Count indices in nums1 whose elements are in the intersection
+  (define count1 (set-count (set-intersect set-nums1 intersection)))
+  
+  ;; Count indices in nums2 whose elements are in the intersection
+  (define count2 (set-count (set-intersect set-nums2 intersection)))
   
   ;; Return the counts as a list
   (list count1 count2))

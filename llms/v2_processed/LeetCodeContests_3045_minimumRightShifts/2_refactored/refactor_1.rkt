@@ -23,31 +23,29 @@
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
   (define n (length nums))
-  
-  ;; Function to check if a list is sorted
-  (define (is-sorted? lst)
-    (andmap (lambda (i) (<= (list-ref lst i) (list-ref lst (add1 i))))
-            (range 0 (sub1 (length lst)))))
-  
-  ;; Check for all possible right shifts
-  (define (check-shifts k)
-    (let ([shifted (append (drop nums (- n k)) (take nums (- n k)))])
-      (if (is-sorted? shifted) k -1)))
 
-  ;; Try each possible shift from 0 to n-1
-  (let loop ([k 0])
-    (cond
-      [(= k n) -1]
-      [else
-       (let ([result (check-shifts k)])
-         (if (= result -1)
-             (loop (add1 k))
-             result))])))
+  ;; Helper function to check if the list is sorted
+  (define (sorted? lst)
+    (andmap (lambda (i) (<= (list-ref lst i) (list-ref lst (add1 i)))) (range (sub1 (length lst)))))
+
+  ;; Helper function to perform the right shifts and check for sorted order
+  (define (find-valid-shift nums sorted-nums n)
+    (for/or ([i (in-range n)])
+      (define shifted (append (drop nums i) (take nums i)))
+      (if (equal? shifted sorted-nums)
+          (modulo (- n i) n)
+          #f)))
+
+  ;; If the list has only one element, it's already sorted
+  (if (= n 1)
+      0
+      (let ([sorted-nums (sort nums <)])
+        (or (find-valid-shift nums sorted-nums n) -1))))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2
-(minimumRightShifts '(1 3 5))       ;; Output: 0
-(minimumRightShifts '(2 1 4))       ;; Output: -1
+(minimumRightShifts '(1 3 5))      ;; Output: 0
+(minimumRightShifts '(2 1 4))      ;; Output: -1
 
 (require rackunit)
 

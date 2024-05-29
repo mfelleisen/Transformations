@@ -27,26 +27,29 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  ;; Helper function to calculate the absolute difference
-  (define (abs-diff a b)
-    (abs (- a b)))
+  (define len (length nums))
+  
+  (define (update-min-diff min-diff i j)
+    (define diff (abs (- (list-ref nums i) (list-ref nums j))))
+    (min min-diff diff))
+  
+  (define (compute-min-diff min-diff i)
+    (if (>= i (- len x))
+        min-diff
+        (let loop ([j (+ i x)] [current-min-diff min-diff])
+          (if (>= j len)
+              (compute-min-diff current-min-diff (+ i 1))
+              (let ([new-min (update-min-diff current-min-diff i j)])
+                (if (zero? new-min)
+                    0
+                    (loop (+ j 1) new-min)))))))
+  
+  (compute-min-diff +inf.0 0))
 
-  ;; Recursive function to find the minimum absolute difference
-  (define (find-min-diff i current-min)
-    (if (>= i (- (length nums) x))
-        current-min
-        (let loop ([j (+ i x)] [local-min current-min])
-          (if (>= j (length nums))
-              (find-min-diff (+ i 1) local-min)
-              (let ((diff (abs-diff (list-ref nums i) (list-ref nums j))))
-                (loop (+ j 1) (min local-min diff)))))))
-
-  (find-min-diff 0 +inf.0))
-
-;; Example usage:
-(minAbsoluteDifference '(4 3 2 4) 2) ;; Output: 0
-(minAbsoluteDifference '(5 3 2 10 15) 1) ;; Output: 1
-(minAbsoluteDifference '(1 2 3 4) 3) ;; Output: 3
+;; Test cases
+(minAbsoluteDifference '(4 3 2 4) 2)   ;; Expected output: 0
+(minAbsoluteDifference '(5 3 2 10 15) 1) ;; Expected output: 1
+(minAbsoluteDifference '(1 2 3 4) 3)   ;; Expected output: 3
 
 (require rackunit)
 

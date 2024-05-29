@@ -28,27 +28,24 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
-  (define n (length nums))
+  (define (valid? v) (<= v threshold))
 
-  (define (is-valid-start? i)
-    (and (even? (list-ref nums i))
-         (<= (list-ref nums i) threshold)))
+  (define (valid-start? v) (and (even? v) (valid? v)))
 
-  (define (find-max-length i max-len)
-    (if (>= i n)
-        max-len
-        (if (is-valid-start? i)
-            (let loop ([j (add1 i)]
-                       [current-len 1]
-                       [last-val (list-ref nums i)])
-              (if (and (< j n)
-                       (<= (list-ref nums j) threshold)
-                       (not (= (remainder last-val 2) (remainder (list-ref nums j) 2))))
-                  (loop (add1 j) (add1 current-len) (list-ref nums j))
-                  (find-max-length (add1 i) (max max-len current-len))))
-            (find-max-length (add1 i) max-len))))
+  (define (alternate? v1 v2) (not (= (remainder v1 2) (remainder v2 2))))
 
-  (find-max-length 0 0))
+  (define (find-max-alternating-length nums)
+    (let loop ([nums nums] [max-len 0] [cur-len 0] [prev #f])
+      (cond
+        [(empty? nums) max-len]
+        [(valid-start? (first nums))
+         (loop (rest nums) max-len 1 (first nums))]
+        [(and prev (valid? (first nums)) (alternate? prev (first nums)))
+         (loop (rest nums) (max max-len (add1 cur-len)) (add1 cur-len) (first nums))]
+        [else
+         (loop (rest nums) (max max-len cur-len) 0 #f)])))
+
+  (find-max-alternating-length nums))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3

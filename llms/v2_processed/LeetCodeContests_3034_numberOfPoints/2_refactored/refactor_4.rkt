@@ -15,14 +15,15 @@
 ;;  * nums[i].length == 2
 ;;  * 1 <= starti <= endi <= 100
 (define (numberOfPoints nums)
-  ;; Generate a set of all points covered by the cars
+  (define (points-from-range start end)
+    (for/set ([i (in-range start (add1 end))])
+      i))
+  
   (define covered-points
     (for/fold ([acc (set)])
               ([range (in-list nums)])
-      (define-values (start end) (apply values range))
-      (set-union acc (for/set ([i (in-range start (add1 end))]) i))))
+      (set-union acc (apply points-from-range range))))
   
-  ;; Return the size of the set, which represents the number of unique points covered
   (set-count covered-points))
 
 ;; Example usage:

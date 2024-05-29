@@ -19,32 +19,22 @@
 ;;  * 1 <= n <= 300
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
-  (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
+  (define MOD (+ (expt 10 9) 7)) ; Define the modulo constant
+  (define max-base (inexact->exact (floor (expt n (/ 1 x))))) ; Calculate the maximum base
 
-  ;; Helper function to calculate the number of ways
-  (define (count-ways n x)
-    (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
-    (define dp (make-hash))
+  ;; Dynamic programming function
+  (define (dp i remaining)
+    (cond
+      [(= remaining 0) 1]
+      [(or (< remaining 0) (> i max-base)) 0]
+      [else
+       (define current-power (expt i x))
+       (modulo (+ (dp (+ i 1) remaining)
+                  (dp (+ i 1) (- remaining current-power)))
+               MOD)]))
 
-    ;; Inner recursive function with memoization
-    (define (helper target current-base)
-      (cond
-        [(= target 0) 1]
-        [(or (< target 0) (> current-base max-base)) 0]
-        [else
-         (hash-ref dp (list target current-base)
-                   (lambda ()
-                     (let* ([power (expt current-base x)]
-                            [ways (modulo (+ (helper (- target power) (+ current-base 1))
-                                             (helper target (+ current-base 1)))
-                                          MOD)])
-                       (hash-set! dp (list target current-base) ways)
-                       ways)))]))
-
-    (helper n 1))
-
-  ;; Calculate the number of ways
-  (count-ways n x))
+  ;; Start the dynamic programming from base 1 and the target number n
+  (dp 1 n))
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

@@ -36,30 +36,33 @@
 ;;  * 1 <= n == maxHeights <= 103
 ;;  * 1 <= maxHeights[i] <= 109
 (define (maximumSumOfHeights maxHeights)
-  (define n (length maxHeights))
+  (define n (length maxHeights))  ; Get the length of the maxHeights list
 
-  ;; Helper function to calculate the max sum with a fixed peak position
+  ;; Function to calculate the max sum with a fixed peak position
   (define (calculate-max-sum-with-peak peak)
-    ;; Create left and right accumulations
-    (define (accumulate maxHeights start end step)
-      (for/fold ([heights (list (list-ref maxHeights start))])
-                ([i (in-range (+ start step) end step)])
-        (define new-height (min (list-ref maxHeights i) (first heights)))
-        (cons new-height heights)))
-
-    ;; Calculate left and right sides
-    (define left-side (reverse (accumulate maxHeights peak 0 -1)))
-    (define right-side (rest (accumulate maxHeights peak n 1)))
-
-    ;; Combine left and right sides and calculate the sum
-    (apply + (append left-side right-side)))
+    ;; Initialize the heights list with zeros
+    (define heights (make-vector n 0))
+    
+    ;; Set the peak height
+    (vector-set! heights peak (list-ref maxHeights peak))
+    
+    ;; Expand to the left of the peak
+    (for ([i (in-range (sub1 peak) -1 -1)])
+      (vector-set! heights i (min (list-ref maxHeights i) (vector-ref heights (add1 i)))))
+    
+    ;; Expand to the right of the peak
+    (for ([i (in-range (add1 peak) n)])
+      (vector-set! heights i (min (list-ref maxHeights i) (vector-ref heights (sub1 i)))))
+    
+    ;; Calculate the sum of the heights array
+    (apply + (vector->list heights)))
 
   ;; Try every position as a peak and find the maximum sum
   (for/fold ([max-sum 0]) ([i (in-range n)])
     (max max-sum (calculate-max-sum-with-peak i))))
 
 ;; Example usage
-(maximumSumOfHeights '(5 3 4 1 1))    ; Output: 13
+(maximumSumOfHeights '(5 3 4 1 1))  ; Output: 13
 (maximumSumOfHeights '(6 5 3 9 2 7))  ; Output: 22
 (maximumSumOfHeights '(3 2 5 5 2 3))  ; Output: 18
 

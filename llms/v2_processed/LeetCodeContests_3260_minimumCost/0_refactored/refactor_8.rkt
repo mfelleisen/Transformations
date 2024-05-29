@@ -28,25 +28,30 @@
 ;; k - 2 <= dist <= n - 2
 (define (minimumCost nums k dist)
   (define n (length nums))
-
-  ;; Helper function to recursively find the minimum cost
-  (define (find-min-cost start depth current-indices min-cost)
-    (if (= depth k)
-        (let ([ik-1 (list-ref current-indices (- k 1))]
-              [i1 (list-ref current-indices 1)])
-          (if (<= (- ik-1 i1) dist)
-              (let ([cost (apply + (map (lambda (idx) (list-ref nums idx)) current-indices))])
-                (min min-cost cost))
-              min-cost))
-        (let ([next-start-limit (- n (- k depth))])
-          (for/fold ([min-cost min-cost]) ([next-start (in-range (+ start 1) (+ next-start-limit 1))])
-            (find-min-cost next-start (+ depth 1) (append current-indices (list next-start)) min-cost)))))
-
-  ;; Start the recursive process
+  
   (if (= k 1)
       (first nums)
-      (for/fold ([min-cost +inf.0]) ([first-end (in-range 1 (+ (- n k) 2))])
-        (find-min-cost first-end 2 (list 0 first-end) min-cost))))
+      (letrec
+          ;; Function to calculate cost given specific starting indices for subarrays
+          [(calculate-cost (lambda (start-indices)
+                             (apply + (map (curry list-ref nums) start-indices))))
+           
+           ;; Helper function to generate all valid k partitions with the last k-1 starts within dist
+           (dfs (lambda (start-index depth current-indices min-cost)
+                  (if (= depth k)
+                      (if (<= (- (list-ref current-indices (- k 1))
+                                 (list-ref current-indices 1))
+                             dist)
+                          (let ([cost (calculate-cost current-indices)])
+                            (min min-cost cost))
+                          min-cost)
+                      (let ([next-start-limit (- n (- k depth))])
+                        (for/fold ([min-cost min-cost]) ([next-start (in-range (+ start-index 1) (+ next-start-limit 1))])
+                          (dfs next-start (+ depth 1) (append current-indices (list next-start)) min-cost))))))]
+        
+        ;; Start the DFS process for all possible first partitions
+        (for/fold ([min-cost +inf.0]) ([first-end (in-range 1 (+ (- n k) 2))])
+          (dfs first-end 2 (list 0 first-end) min-cost)))))
 
 ;; Example usage
 (minimumCost '(1 3 2 6 4 2) 3 3)  ; Output: 5

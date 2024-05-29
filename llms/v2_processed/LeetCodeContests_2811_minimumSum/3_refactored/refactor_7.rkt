@@ -19,7 +19,7 @@
   (define (valid-add? used-numbers current-number)
     (or (not (set-member? used-numbers (- k current-number)))
         (= current-number (- k current-number))))
-
+  
   (define (construct-k-avoiding used-numbers current-number count total-sum)
     (cond
       [(= count n) total-sum]
@@ -28,11 +28,12 @@
                              (+ current-number 1)
                              (+ count 1)
                              (+ total-sum current-number))]
-      [else (construct-k-avoiding used-numbers
-                                  (+ current-number 1)
-                                  count
-                                  total-sum)]))
-
+      [else
+       (construct-k-avoiding used-numbers
+                             (+ current-number 1)
+                             count
+                             total-sum)]))
+  
   (construct-k-avoiding (set) 1 0 0))
 
 ;; Example usage:

@@ -24,25 +24,24 @@
 ;; 1 <= nums.length <= 50
 ;; 1 <= nums[i] <= 100
 (define (maximumStrongPairXor nums)
-  ;; Determine if the pair (x, y) is a strong pair
+  ;; This function finds the maximum XOR value out of all possible strong pairs in the list nums.
+  ;; A strong pair (x, y) satisfies the condition: |x - y| <= min(x, y).
   (define (strong-pair? x y)
+    ;; Helper function to check if the pair (x, y) is a strong pair.
     (<= (abs (- x y)) (min x y)))
-
-  ;; Compute the XOR of a pair (x, y)
-  (define (pair-xor x y)
-    (bitwise-xor x y))
   
-  ;; Generate all possible strong pairs and compute their XOR values
-  (define strong-pairs-xors
+  ;; Generate all possible pairs from the list, including pairs of the same element,
+  ;; filter out the strong pairs and compute their XOR, then find the maximum XOR value.
+  (define valid-pairs-xor
     (for*/list ([x (in-list nums)]
                 [y (in-list nums)]
                 #:when (strong-pair? x y))
-      (pair-xor x y)))
+      (bitwise-xor x y)))
   
-  ;; Find the maximum XOR value from the list of valid pairs
-  (if (empty? strong-pairs-xors)
+  ;; Find the maximum XOR value from the list of all valid pairs' XOR results.
+  (if (empty? valid-pairs-xor)
       0
-      (apply max strong-pairs-xors)))
+      (apply max valid-pairs-xor)))
 
 ;; Examples
 (maximumStrongPairXor '(1 2 3 4 5))  ; Output: 7

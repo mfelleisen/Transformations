@@ -19,28 +19,26 @@
 ;;  * 1 <= n <= 300
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
-  (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
+  (define MOD (+ (expt 10 9) 7))
 
-  ;; Helper function to update the dp hash table
-  (define (update-dp dp base)
-    (define current-power (expt base x))  ; Calculate the current power of the base
-    ;; Update dp hash entries from n down to current-power
-    (for/fold ([dp dp]) ([i (in-range n (- current-power 1) -1)])
-      (hash-update dp i
-                   (λ (current-value)
-                     (modulo (+ current-value (hash-ref dp (- i current-power) 0)) MOD))
-                   0)))
+  ;; Recursive helper function to count the ways
+  (define (count-ways n x base dp)
+    (cond
+      [(zero? n) 1]
+      [(or (< n 0) (< base 1)) 0]
+      [else
+       (define current-power (expt base x))
+       (define next-result
+         (hash-ref! dp (cons n base)
+                    (lambda ()
+                      (modulo (+ (count-ways (- n current-power) x (- base 1) dp)
+                                 (count-ways n x (- base 1) dp))
+                              MOD))))
+       next-result]))
 
-  ;; Initialize the dp hash table with base case
-  (define dp (hash 0 1))
-  
-  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))  ; Calculate the maximum base
-
-  ;; Iterate over each base and update the dp hash table
-  (for/fold ([dp dp]) ([base (in-range 1 (+ max-base 1))])
-    (update-dp dp base))
-
-  (hash-ref dp n 0))  ; Return the number of ways to express n
+  ;; Initialize memoization hash table and call the helper function
+  (define dp (make-hash))
+  (count-ways n x (inexact->exact (floor (expt n (/ 1 x)))) dp))
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

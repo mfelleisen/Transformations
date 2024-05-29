@@ -19,17 +19,17 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  (define sorted-nums (sort nums <))
-  
-  (define (game-loop nums acc)
-    (if (null? nums)
-        acc
-        (let* ((alice-choice (first nums))
-               (bob-choice (second nums))
-               (remaining-nums (drop nums 2)))
-          (game-loop remaining-nums (cons alice-choice (cons bob-choice acc))))))
-
-  (reverse (game-loop sorted-nums '())))
+  ;; Define a recursive helper function to simulate the game
+  (define (game-loop sorted-nums acc)
+    (match sorted-nums
+      ;; If nums is empty, return the accumulated result
+      [(list) acc]
+      ;; Destructure the sorted list into the first two elements and the rest
+      [(list alice-choice bob-choice rest ...)
+       ;; Recur with the remaining elements and update the accumulator
+       (game-loop rest (append acc (list bob-choice alice-choice)))]))
+  ;; Sort the nums in ascending order and start the recursive game loop with an empty accumulator
+  (game-loop (sort nums <) '()))
 
 ;; Example usage:
 (numberGame '(5 4 2 3))  ; Output: '(3 2 5 4)

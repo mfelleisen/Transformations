@@ -28,11 +28,16 @@
   
   (define (is-valid-shift start)
     (for/and ([i (in-range n)])
-      (equal? (list-ref nums (modulo (+ start i) n)) (list-ref sorted-nums i))))
+      (equal? (list-ref nums (modulo (+ start i) n))
+              (list-ref sorted-nums i))))
   
-  (for/or ([start (in-range n)])
-    (when (is-valid-shift start)
-      (modulo (- n start) n))))
+  (define (find-shift start)
+    (cond
+      [(= start n) -1]
+      [(is-valid-shift start) (modulo (- n start) n)]
+      [else (find-shift (+ start 1))]))
+  
+  (find-shift 0))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2

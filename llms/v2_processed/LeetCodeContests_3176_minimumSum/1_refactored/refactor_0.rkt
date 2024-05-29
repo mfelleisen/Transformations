@@ -27,46 +27,47 @@
 ;;  * 3 <= nums.length <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
-  ;; Helper function to find the minimum elements to the left and right of each element
-  (define (find-left-right-mins nums)
-    (define n (length nums))
-    
-    (define left-mins
-      (for/list ([i (in-range n)])
-        (for/fold ([min-left +inf.0])
-                  ([j (in-range i)])
-          (if (< (list-ref nums j) (list-ref nums i))
-              (min min-left (list-ref nums j))
-              min-left))))
-    
-    (define right-mins
-      (for/list ([i (in-range n)])
-        (for/fold ([min-right +inf.0])
-                  ([j (in-range (+ i 1) n)])
-          (if (< (list-ref nums j) (list-ref nums i))
-              (min min-right (list-ref nums j))
-              min-right))))
-    
-    (values left-mins right-mins))
-  
-  (define (find-minimum-mountain-sum nums left-mins right-mins)
-    (for/fold ([min-sum +inf.0])
-              ([j (in-range 1 (- (length nums) 1))])
-      (define current (list-ref nums j))
-      (define left-min (list-ref left-mins j))
-      (define right-min (list-ref right-mins j))
-      (if (and (< left-min +inf.0) (< right-min +inf.0))
-          (min min-sum (+ left-min current right-min))
-          min-sum)))
-  
   (define n (length nums))
-  (if (< n 3)
+  (define +inf (add1 (apply max nums)))
+  
+  ;; Function to find the minimum value on the left of each index
+  (define (left-mins lst)
+    (define-values (mins _)
+      (for/fold ([mins (make-vector n +inf)]
+                 [current-min +inf])
+                ([i (in-range n)])
+        (define new-min (if (< (vector-ref lst i) current-min) (vector-ref lst i) current-min))
+        (vector-set! mins i current-min)
+        (values mins new-min)))
+    mins)
+  
+  ;; Function to find the minimum value on the right of each index
+  (define (right-mins lst)
+    (define-values (mins _)
+      (for/fold ([mins (make-vector n +inf)]
+                 [current-min +inf])
+                ([i (in-range (sub1 n) -1 -1)])
+        (define new-min (if (< (vector-ref lst i) current-min) (vector-ref lst i) current-min))
+        (vector-set! mins i current-min)
+        (values mins new-min)))
+    mins)
+  
+  (define vec-nums (list->vector nums))
+  (define l-mins (left-mins vec-nums))
+  (define r-mins (right-mins vec-nums))
+  
+  (define min-sum +inf)
+  
+  (for ([j (in-range 1 (sub1 n))])
+    (define left-min (vector-ref l-mins j))
+    (define right-min (vector-ref r-mins j))
+    (define mid (vector-ref vec-nums j))
+    (when (and (< left-min mid) (< right-min mid))
+      (set! min-sum (min min-sum (+ left-min mid right-min)))))
+  
+  (if (= min-sum +inf)
       -1
-      (let-values ([(left-mins right-mins) (find-left-right-mins nums)])
-        (let ([min-sum (find-minimum-mountain-sum nums left-mins right-mins)])
-          (if (= min-sum +inf.0)
-              -1
-              min-sum)))))
+      min-sum))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ;; Output: 9

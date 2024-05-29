@@ -29,41 +29,41 @@
 (define (minimumSum nums)
   (define n (length nums))
   
-  ;; Helper function to find the minimum left value for each peak
-  (define (left-mins nums)
-    (let loop ([left-mins '()] [min-so-far +inf.0] [i 0] [lst nums])
-      (if (null? lst)
-          (reverse left-mins)
-          (let ([current (car lst)])
-            (loop (cons min-so-far left-mins)
-                  (min min-so-far current)
-                  (add1 i)
-                  (cdr lst))))))
+  (define (compute-left-memo nums)
+    (define left-memo (make-vector n +inf.0))
+    (for ([j (in-range 1 n)])
+      (define min-left +inf.0)
+      (for ([i (in-range 0 j)])
+        (when (< (vector-ref nums i) (vector-ref nums j))
+          (set! min-left (min min-left (vector-ref nums i)))))
+      (vector-set! left-memo j min-left))
+    left-memo)
   
-  ;; Helper function to find the minimum right value for each peak
-  (define (right-mins nums)
-    (let loop ([right-mins '()] [min-so-far +inf.0] [i n] [lst (reverse nums)])
-      (if (null? lst)
-          right-mins
-          (let ([current (car lst)])
-            (loop (cons min-so-far right-mins)
-                  (min min-so-far current)
-                  (sub1 i)
-                  (cdr lst))))))
+  (define (compute-right-memo nums)
+    (define right-memo (make-vector n +inf.0))
+    (for ([j (in-range 0 (- n 1))])
+      (define min-right +inf.0)
+      (for ([k (in-range (+ j 1) n)])
+        (when (< (vector-ref nums k) (vector-ref nums j))
+          (set! min-right (min min-right (vector-ref nums k)))))
+      (vector-set! right-memo j min-right))
+    right-memo)
   
   (if (< n 3)
       -1
-      (let ([left-mins (left-mins nums)]
-            [right-mins (right-mins nums)])
-        (for/fold ([min-sum +inf.0])
-                  ([j (in-range 1 (sub1 n))])
-          (let ([num-j (list-ref nums j)])
-            (if (and (< (list-ref left-mins j) num-j)
-                     (< (list-ref right-mins j) num-j))
-                (min min-sum (+ num-j
-                                (list-ref left-mins j)
-                                (list-ref right-mins j)))
-                min-sum))))))
+      (let* ([nums (list->vector nums)]
+             [left-memo (compute-left-memo nums)]
+             [right-memo (compute-right-memo nums)])
+        (define min-sum +inf.0)
+        (for ([j (in-range 1 (- n 1))])
+          (define left-min (vector-ref left-memo j))
+          (define right-min (vector-ref right-memo j))
+          (when (and (not (= left-min +inf.0))
+                     (not (= right-min +inf.0)))
+            (set! min-sum (min min-sum (+ left-min (vector-ref nums j) right-min)))))
+        (if (= min-sum +inf.0)
+            -1
+            min-sum))))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ;; Output: 9

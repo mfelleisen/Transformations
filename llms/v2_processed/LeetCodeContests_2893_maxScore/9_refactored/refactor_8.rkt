@@ -22,30 +22,23 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  (define n (length nums))
-  
-  ;; Initialize a memoization table with -inf.0 values, starting with the first element.
-  (define memo (make-vector n -inf.0))
-  (vector-set! memo 0 (first nums))
-
-  ;; Helper function to determine the maximum score from a given index.
+  ;; Recursive helper function with memoization
+  (define memo (make-hash))
   (define (max-score-from i)
-    (define current-score (vector-ref memo i))
-    (for ([j (in-range (add1 i) n)])
-      (let* ([next-score (+ current-score (list-ref nums j))]
-             [adjusted-score (if (not (= (modulo (list-ref nums i) 2) (modulo (list-ref nums j) 2)))
-                               (- next-score x)
-                               next-score)])
-        (when (> adjusted-score (vector-ref memo j))
-          (vector-set! memo j adjusted-score))))
-    (vector-ref memo i))
+    (if (hash-has-key? memo i)
+        (hash-ref memo i)
+        (let ([current-score (list-ref nums i)])
+          (define max-score 
+            (for/fold ([max-so-far current-score]) ([j (in-range (+ i 1) (length nums))])
+              (let ([next-score (max-score-from j)]
+                    [diff-parity? (not (= (modulo (list-ref nums i) 2) (modulo (list-ref nums j) 2)))])
+                (max max-so-far 
+                     (+ current-score next-score (if diff-parity? (- x) 0))))))
+          (hash-set! memo i max-score)
+          max-score)))
 
-  ;; Process each index in the list using the helper function.
-  (for ([i (in-range n)])
-    (max-score-from i))
-
-  ;; Return the maximum score from the memoization table.
-  (apply max (vector->list memo)))
+  ;; Start from the first element
+  (max-score-from 0))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

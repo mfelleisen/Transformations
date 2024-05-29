@@ -28,8 +28,8 @@
 ;;  * -50 <= nums[i], target <= 50
 (define (countPairs nums target)
   ;; This function calculates the number of valid index pairs (i, j) such that nums[i] + nums[j] < target
-  (for/sum ([i (in-naturals)] [x (in-list nums)])
-    (for/sum ([y (in-list (drop nums (+ i 1)))] [j (in-naturals)])
+  (for/sum ([i (in-naturals)] [x nums])
+    (for/sum ([y (in-list (drop nums (add1 i)))])
       (if (< (+ x y) target)
           1
           0))))

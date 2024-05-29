@@ -45,40 +45,43 @@
 ;;  * 0 <= stock[i] <= 108
 ;;  * 1 <= cost[i] <= 100
 (define (maxNumberOfAlloys n k budget composition stock cost)
-  ;; Helper function to calculate the maximum number of alloys for a given machine.
+
+  ;; Calculate the maximum number of alloys this machine can produce based on available stock and budget
   (define (max-alloys-for-machine machine)
-    ;; Calculate the maximum number of alloys this machine can produce based on available stock and budget.
     (define (max-alloys-by-metal metal-type)
-      (let* ([required-per-alloy (list-ref (list-ref composition machine) metal-type)]
-             [available-stock (list-ref stock metal-type)]
-             [metal-cost (list-ref cost metal-type)])
-        (if (> required-per-alloy 0)
-            (quotient (+ available-stock (quotient budget metal-cost)) required-per-alloy)
-            +inf.0)))
-    
+      (define required-per-alloy (list-ref (list-ref composition machine) metal-type))
+      (if (> required-per-alloy 0)
+          (quotient (+ (list-ref stock metal-type)
+                       (quotient budget (list-ref cost metal-type)))
+                    required-per-alloy)
+          +inf.0))
+
     (define machine-max-possible
       (apply min (map max-alloys-by-metal (range n))))
 
-    ;; Calculate the total cost for the max possible alloys for this machine.
+    ;; Calculate the total cost for the max possible alloys for this machine
     (define (total-cost-for-alloys alloys)
-      (for/fold ([total-cost 0])
-                ([metal-type (in-range n)])
-        (let* ([required-units (* (list-ref (list-ref composition machine) metal-type) alloys)]
-               [needed-units (max 0 (- required-units (list-ref stock metal-type)))]
-               [metal-cost (list-ref cost metal-type)])
-          (+ total-cost (* needed-units metal-cost)))))
+      (for/fold ([total-cost 0]) ([metal-type (in-range n)])
+        (define required-units (* (list-ref (list-ref composition machine) metal-type) alloys))
+        (define needed-units (max 0 (- required-units (list-ref stock metal-type))))
+        (+ total-cost (* needed-units (list-ref cost metal-type)))))
 
-    ;; Find the maximum number of alloys that fit within the budget.
-    (let loop ([current-alloys machine-max-possible])
-      (if (or (<= current-alloys 0)
-              (<= (total-cost-for-alloys current-alloys) budget))
-          current-alloys
-          (loop (- current-alloys 1)))))
+    (define (find-max-alloys fitting-alloys)
+      (for/fold ([current-alloys fitting-alloys]
+                 [current-cost (total-cost-for-alloys fitting-alloys)]
+                 #:result current-alloys)
+                ([i (in-naturals)]
+                 #:break (or (<= current-cost budget) (= current-alloys 0)))
+        (define next-alloys (- current-alloys 1))
+        (values next-alloys (total-cost-for-alloys next-alloys))))
 
-  ;; Iterate over all machines and find the maximum number of alloys that can be produced.
-  (for/fold ([max-alloys 0])
-            ([machine (in-range k)])
-    (max max-alloys (max-alloys-for-machine machine))))
+    (find-max-alloys machine-max-possible))
+
+  ;; Iterate over all machines and find the maximum number of alloys that can be produced
+  (define max-alloys
+    (for/fold ([max-alloys 0]) ([machine (in-range k)])
+      (max max-alloys (max-alloys-for-machine machine))))
+  max-alloys)
 
 ;; Example usage
 (define n 3)

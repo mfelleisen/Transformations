@@ -29,28 +29,34 @@
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
   (define n (length nums1))
-  
-  ;; A helper function to calculate the new maximum length
-  (define (calc-new-max prev curr prev-max)
-    (if (>= curr prev)
-        (+ prev-max 1)
-        1))
-  
-  (define-values (dp1 dp2 max-len)
-    (for/fold ([dp1 1] [dp2 1] [max-len 1])
-              ([i (in-range 1 n)]
-               [prev1 (in-list nums1)]
-               [prev2 (in-list nums2)]
-               [curr1 (rest nums1)]
-               [curr2 (rest nums2)])
-      (define new-dp1
-        (max (calc-new-max prev1 curr1 dp1)
-             (calc-new-max prev2 curr1 dp2)))
-      (define new-dp2
-        (max (calc-new-max prev1 curr2 dp1)
-             (calc-new-max prev2 curr2 dp2)))
-      (values new-dp1 new-dp2 (max max-len new-dp1 new-dp2))))
-  
+
+  ;; Helper function to update the dp values
+  (define (update-dp dp1 dp2 i val1 val2)
+    (define dp1-val (vector-ref dp1 i))
+    (define dp2-val (vector-ref dp2 i))
+    (cond
+      [(>= val1 (vector-ref dp1 (sub1 i)))
+       (vector-set! dp1 i (max dp1-val (+ 1 (vector-ref dp1 (sub1 i)))))]
+      [(>= val1 (vector-ref dp2 (sub1 i)))
+       (vector-set! dp1 i (max dp1-val (+ 1 (vector-ref dp2 (sub1 i)))))]
+      [(>= val2 (vector-ref dp1 (sub1 i)))
+       (vector-set! dp2 i (max dp2-val (+ 1 (vector-ref dp1 (sub1 i)))))]
+      [(>= val2 (vector-ref dp2 (sub1 i)))
+       (vector-set! dp2 i (max dp2-val (+ 1 (vector-ref dp2 (sub1 i)))))]))
+
+  ;; Initialize dp arrays to store the maximum non-decreasing subarray lengths
+  (define dp1 (make-vector n 1))
+  (define dp2 (make-vector n 1))
+
+  ;; Initialize variable to keep track of the maximum length found
+  (define max-len 1)
+
+  ;; Iterate through each element starting from the second one
+  (for ([i (in-range 1 n)])
+    (update-dp dp1 dp2 i (list-ref nums1 i) (list-ref nums2 i))
+    (set! max-len (max max-len (vector-ref dp1 i) (vector-ref dp2 i))))
+
+  ;; Return the maximum length of non-decreasing subarray possible
   max-len)
 
 (require rackunit)

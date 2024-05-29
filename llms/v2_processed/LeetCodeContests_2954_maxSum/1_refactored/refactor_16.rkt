@@ -21,23 +21,30 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  (define (valid-window? window)
-    (>= (length (remove-duplicates window)) m))
+  (define (calculate-sum win)
+    (apply + win))
 
-  (define (window-sum window)
-    (apply + window))
+  (define (has-enough-distinct-elements? win)
+    (>= (length (remove-duplicates win)) m))
 
-  (define (max-sum-accum nums k current-max)
-    (if (< (length nums) k)
-        current-max
-        (let* ((current-window (take nums k))
-               (valid? (valid-window? current-window))
-               (window-sum (window-sum current-window)))
-          (max-sum-accum (rest nums)
-                         k
-                         (if valid? (max current-max window-sum) current-max)))))
+  (define (sliding-window max-sum window rest-nums)
+    (if (empty? rest-nums)
+        max-sum
+        (let* ([new-window (append (rest window) (list (first rest-nums)))]
+               [new-sum (calculate-sum new-window)]
+               [new-max-sum (if (has-enough-distinct-elements? new-window)
+                                (max max-sum new-sum)
+                                max-sum)])
+          (sliding-window new-max-sum new-window (rest rest-nums)))))
 
-  (max-sum-accum nums k 0))
+  (if (< (length nums) k)
+      0
+      (let* ([initial-window (take nums k)]
+             [initial-sum (calculate-sum initial-window)]
+             [initial-max-sum (if (has-enough-distinct-elements? initial-window)
+                                  initial-sum
+                                  0)])
+        (sliding-window initial-max-sum initial-window (drop nums k)))))
 
 ;; Example usage
 (maxSum '(2 6 7 3 1 7) 3 4)  ; Output: 18

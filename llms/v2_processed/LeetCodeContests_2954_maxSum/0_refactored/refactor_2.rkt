@@ -21,24 +21,23 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
+  (define (almost-unique-subarray? subarray)
+    (>= (length (remove-duplicates subarray)) m))
+
   (define (subarray-sum subarray)
     (apply + subarray))
-  
-  (define (valid-window? subarray)
-    (>= (length (remove-duplicates subarray)) m))
-  
-  (define (max-sum-helper nums max-sum window)
-    (cond
-      [(< (length nums) k) max-sum]
-      [else
-       (define current-window (take nums k))
-       (define current-sum (subarray-sum current-window))
-       (define new-max-sum (if (valid-window? current-window) (max max-sum current-sum) max-sum))
-       (max-sum-helper (rest nums) new-max-sum (rest window))]))
-  
-  (if (< (length nums) k)
+
+  (define (sliding-windows lst size)
+    (if (< (length lst) size)
+        '()
+        (cons (take lst size) (sliding-windows (rest lst) size))))
+
+  (define valid-subarrays
+    (filter almost-unique-subarray? (sliding-windows nums k)))
+
+  (if (empty? valid-subarrays)
       0
-      (max-sum-helper nums 0 (take nums k))))
+      (apply max (map subarray-sum valid-subarrays))))
 
 (require rackunit)
 

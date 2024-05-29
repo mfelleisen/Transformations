@@ -24,28 +24,28 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus
 
-  ;; Initialize a hash to store the number of ways to express each number up to n
-  ;; using xth powers. Start with one way to make 0 (use no numbers).
-  (define dp (make-hash))
-  (hash-set! dp 0 1)
+  ;; Helper function to calculate the number of ways using recursion and memoization
+  (define (num-ways k)
+    (define dp (make-hash))
+    (define (num-ways-inner k max-base)
+      (cond
+        [(= k 0) 1]  ; There's one way to sum to 0 (using no numbers)
+        [(or (< k 0) (= max-base 0)) 0]  ; If k is negative or max-base is 0, no ways
+        [else
+         (or (hash-ref dp (cons k max-base) #f)
+             (let* ([current-power (expt max-base x)]
+                    [without-current (num-ways-inner k (sub1 max-base))]
+                    [with-current (if (>= k current-power)
+                                      (num-ways-inner (- k current-power) (sub1 max-base))
+                                      0)]
+                    [result (modulo (+ without-current with-current) MOD)])
+               (hash-set! dp (cons k max-base) result)
+               result))]))
 
-  ;; Calculate the maximum base such that base^x <= n
-  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
-
-  ;; Iterate over each possible base and update dp
-  (for ([base (in-range 1 (+ max-base 1))])
-    (define current-power (expt base x))
-    ;; Create a temporary hash to store updates to avoid mutating while iterating
-    (define temp-dp (make-hash))
-    (for ([(i count) (in-hash dp)])
-      (define new-value (modulo (+ count (hash-ref dp (- i current-power) 0)) MOD))
-      (hash-set! temp-dp i new-value))
-    ;; Merge temporary updates back into dp
-    (for ([(i count) (in-hash temp-dp)])
-      (hash-set! dp i count)))
+    (num-ways-inner n (inexact->exact (floor (expt n (/ 1 x))))))
 
   ;; Return the number of ways to express n
-  (hash-ref dp n 0))
+  (num-ways n))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

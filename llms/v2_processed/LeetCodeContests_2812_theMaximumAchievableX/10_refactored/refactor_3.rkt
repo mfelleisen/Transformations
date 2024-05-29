@@ -20,6 +20,7 @@
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
 (define (theMaximumAchievableX num t)
+  ;; The maximum achievable number x is num + 2 * t.
   (+ num (* 2 t)))
 
 (require rackunit)

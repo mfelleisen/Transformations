@@ -21,22 +21,17 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  (define (subarray-sum-valid? subarray)
-    (let* ((sum (apply + subarray))
-           (distinct-count (length (remove-duplicates subarray))))
-      (if (>= distinct-count m) sum 0)))
-
-  (define (sliding-window max-sum current-window remaining-nums)
-    (if (empty? remaining-nums)
-        max-sum
-        (let* ((new-window (append (rest current-window) (list (first remaining-nums))))
-               (current-sum (subarray-sum-valid? new-window)))
-          (sliding-window (max max-sum current-sum) new-window (rest remaining-nums)))))
-
-  (if (< (length nums) k)
+  (define len (length nums))
+  (if (< len k)
       0
-      (let ((initial-window (take nums k)))
-        (sliding-window (subarray-sum-valid? initial-window) initial-window (drop nums k)))))
+      (for/fold ([max-sum 0]) ([i (in-range 0 (- len k 1))])
+        (define window (take (drop nums i) k))
+        (define current-sum (apply + window))
+        (define distinct-count (length (remove-duplicates window)))
+        (if (>= distinct-count m)
+            (max max-sum current-sum)
+            max-sum))))
+
 
 (require rackunit)
 

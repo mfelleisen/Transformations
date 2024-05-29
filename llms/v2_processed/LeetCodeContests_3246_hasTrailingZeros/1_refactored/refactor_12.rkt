@@ -24,18 +24,22 @@
   ;; This function checks if it's possible to select two or more elements from `nums`
   ;; such that the bitwise OR of these elements has at least one trailing zero.
   
+  ;; Define a helper function to check if a number has at least one trailing zero.
   (define (has-trailing-zero? x)
-    ;; Check if the number has at least one trailing zero
     (even? x))
-
-  ;; Iterate through all pairs of elements and check if their bitwise OR has a trailing zero
+  
+  ;; Use a nested loop to generate all combinations of two different elements from `nums`
+  ;; and check if any combination has at least one trailing zero.
   (define (check-pairs lst)
-    (for/or ([x (in-list lst)]
-             [y (in-list lst)]
-             #:when (not (= x y)))
-      (has-trailing-zero? (bitwise-ior x y))))
-
-  (check-pairs nums))
+    (for/first ([i (in-list lst)]
+                [j (in-list lst)]
+                #:when (and (not (equal? i j)) (has-trailing-zero? (bitwise-ior i j))))
+      #t))
+  
+  ;; Return true if any valid combination is found, otherwise false.
+  (if (check-pairs nums)
+      #t
+      #f))
 
 ;; Example usage:
 (hasTrailingZeros '(1 2 3 4 5))  ; Output: #t

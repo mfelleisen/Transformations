@@ -27,21 +27,22 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  ;; Helper function to compute minimum absolute difference
-  (define (find-min-diff nums x)
-    (let loop ([i 0] [current-min +inf.0])
-      (if (>= i (- (length nums) x))
-          current-min
-          (let inner-loop ([j (+ i x)] [min-diff current-min])
-            (if (>= j (length nums))
-                (loop (add1 i) min-diff)
-                (let* ([diff (abs (- (list-ref nums i) (list-ref nums j)))]
-                       [new-min (min diff min-diff)])
-                  (if (zero? new-min)
-                      0
-                      (inner-loop (add1 j) new-min))))))))
-  ;; Find and return the minimum absolute difference
-  (find-min-diff nums x))
+  (define n (length nums))
+  
+  ;; Recursive helper function to traverse the array and find the minimum difference
+  (define (find-min-diff idx min-diff prev-elems)
+    (if (>= idx n)
+        min-diff
+        (let* ((current (list-ref nums idx))
+               (possible-diffs (map (lambda (e) (abs (- current e))) prev-elems))
+               (new-min-diff (apply min (cons min-diff possible-diffs)))
+               (new-prev-elems (if (< idx (- n x)) (cons current prev-elems) prev-elems)))
+          (if (zero? new-min-diff)
+              0
+              (find-min-diff (add1 idx) new-min-diff new-prev-elems)))))
+  
+  ;; Initialize the recursive process
+  (find-min-diff x +inf.0 (take nums x)))
 
 ;; Example usage:
 (minAbsoluteDifference '(4 3 2 4) 2)  ;; Output: 0

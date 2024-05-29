@@ -21,28 +21,38 @@
 ;; Constraints:
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
+(define (different-parities? a b)
+  (not (= (modulo a 2) (modulo b 2))))
+
 (define (maxScore nums x)
   (define n (length nums))
-  (define (parity v) (modulo v 2))
-  
-  ;; Helper function to update dp values
-  (define (update-dp i j dp)
-    (let* ([current-score (+ (vector-ref dp i) (list-ref nums j))]
-           [penalty (if (not (= (parity (vector-ref dp i)) (parity (list-ref nums j)))) x 0)]
-           [new-score (- current-score penalty)])
-      (vector-set! dp j (max (vector-ref dp j) new-score))))
-  
-  ;; Initialize dp with initial scores and negative infinity
-  (define dp (make-vector n -inf.0))
-  (vector-set! dp 0 (first nums))
-  
-  ;; Iterate over the array to update dp values
-  (for ([i (in-range n)])
-    (for ([j (in-range (+ i 1) n)])
-      (update-dp i j dp)))
-  
-  ;; Return the maximum value from dp as the result
-  (apply max (vector->list dp)))
+  (define initial-score (first nums))
+
+  ;; Recursive function to compute maximum score using dynamic programming
+  (define (dp i j current-scores)
+    (cond
+      [(>= j n) current-scores]
+      [else
+       (define current-score (+ (list-ref current-scores i) (list-ref nums j)))
+       (define penalty (if (different-parities? (list-ref nums i) (list-ref nums j)) x 0))
+       (define new-score (- current-score penalty))
+       (define updated-scores
+         (if (> new-score (list-ref current-scores j))
+             (list-set current-scores j new-score)
+             current-scores))
+       (dp i (+ j 1) updated-scores)]))
+
+  ;; Initialize the dynamic programming table with negative infinities, except the first element
+  (define initial-dp (cons initial-score (make-list (sub1 n) -inf.0)))
+
+  ;; Compute the scores by considering all possible moves
+  (define (compute-scores i current-scores)
+    (if (>= i n)
+        current-scores
+        (compute-scores (+ i 1) (dp i (+ i 1) current-scores))))
+
+  ;; Compute the final scores and return the maximum value
+  (apply max (compute-scores 0 initial-dp)))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ; Output: 13

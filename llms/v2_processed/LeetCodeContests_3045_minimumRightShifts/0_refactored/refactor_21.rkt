@@ -25,16 +25,16 @@
   (define n (length nums))
   (define sorted-nums (sort nums <))
 
-  ;; Check if the list rotated by `shift` aligns with sorted-nums
-  (define (valid-shift? shift)
+  (define (is-valid-shift start)
     (for/and ([i (in-range n)])
-      (eq? (list-ref nums (modulo (+ shift i) n))
-           (list-ref sorted-nums i))))
+      (= (list-ref nums (modulo (+ start i) n))
+         (list-ref sorted-nums i))))
 
-  ;; Find the minimum valid shift or return -1 if no valid shift exists
-  (for/first ([shift (in-range n)] #:break (valid-shift? shift))
-    (modulo (- n shift) n))
-  -1)
+  (define (find-shift start)
+    (for/first ([i (in-range n)] #:when (is-valid-shift i))
+      (modulo (- n i) n)))
+  
+  (or (find-shift 0) -1))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2

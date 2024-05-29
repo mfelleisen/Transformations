@@ -25,18 +25,23 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Helper function to compute the cost of dividing at given indices
-  (define (cost i j)
+  (define n (length nums))
+  
+  (define (calculate-cost i j)
     (+ (list-ref nums 0) (list-ref nums i) (list-ref nums j)))
-
-  ;; Generate all valid pairs of indices (i, j) for splitting into three subarrays
-  (define index-pairs
-    (for*/list ([i (in-range 1 (sub1 (length nums)))]
-                [j (in-range (+ i 1) (length nums))])
-      (list i j)))
-
-  ;; Compute the minimum cost by evaluating all index pairs
-  (apply min (map (λ (idx) (apply cost idx)) index-pairs)))
+  
+  (define (find-min-cost i min-cost)
+    (if (>= i (- n 1))
+        min-cost
+        (find-min-cost
+         (+ i 1)
+         (for/fold ([current-min min-cost])
+                   ([j (in-range (+ i 1) n)])
+           (min current-min (calculate-cost i j))))))
+  
+  (if (= n 3)
+      (apply + nums)
+      (find-min-cost 1 +inf.0)))
 
 
 (require rackunit)

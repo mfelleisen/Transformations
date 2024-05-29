@@ -28,25 +28,26 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
-  ;; Calculate the sum of squares of distinct counts of all subarrays of nums.
-  (define (distinct-counts-squared lst)
-    (define (accumulate-counts seen lst)
-      (if (null? lst)
-          0
-          (let* ((x (car lst))
-                 (updated-seen (set-add seen x))
-                 (distinct-count (set-count updated-seen)))
-            (+ (sqr distinct-count) (accumulate-counts updated-seen (cdr lst))))))
-    (accumulate-counts (set) lst))
+  ;; Contract: [Listof Integer] -> Integer
+  (define n (length nums))
 
-  ;; Calculate the sum for all subarrays starting from each index.
-  (define (sum-from-starts lst)
-    (if (null? lst)
-        0
-        (+ (distinct-counts-squared lst) (sum-from-starts (cdr lst)))))
+  ;; Helper function to calculate the sum of squares of distinct counts for subarrays starting from index i
+  (define (sum-from-start i)
+    (define (loop j seen total)
+      (cond
+        ;; When j reaches the end of the array, return the accumulated total
+        [(>= j n) total]
+        [else
+         ;; Update the set with the current element and calculate the distinct count
+         (define new-seen (set-add seen (list-ref nums j)))
+         (define distinct-count (set-count new-seen))
+         ;; Recursively calculate for the next element in the subarray
+         (loop (add1 j) new-seen (+ total (* distinct-count distinct-count)))]))
+    (loop i (set) 0))
 
-  ;; Sum the results of sum-from-start for each starting index in the array.
-  (sum-from-starts nums))
+  ;; Sum the results of sum-from-start for each starting index in the array
+  (for/fold ([total-sum 0]) ([i (in-range n)])
+    (+ total-sum (sum-from-start i))))
 
 ;; Example usage:
 (sumCounts '(1 2 1))  ; Output: 15

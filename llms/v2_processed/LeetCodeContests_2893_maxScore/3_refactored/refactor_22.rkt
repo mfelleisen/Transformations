@@ -22,30 +22,28 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  ;; Calculate the length of the input list nums.
   (define n (length nums))
-  ;; Initialize a vector for dynamic programming, setting the first element to nums[0].
-  (define dp (make-vector n -inf.0))
-  (vector-set! dp 0 (first nums))
-
-  ;; Function to update dp[j] considering the move from i to j.
-  (define (update-dp i j)
-    (let* ((current-score (+ (vector-ref dp i) (list-ref nums j))) ; Initial score from i to j
-           (penalty (if (not (= (modulo (list-ref nums i) 2)
-                                (modulo (list-ref nums j) 2)))
-                        x
-                        0)) ; Apply penalty if parities differ
-           (new-score (- current-score penalty))) ; Final score after applying penalty
-      (when (> new-score (vector-ref dp j))
-        (vector-set! dp j new-score))))
+  ;; Define a helper function to compute the score dynamically
+  (define (compute-scores idx dp)
+    (if (>= idx n)
+        dp
+        (let* ((current (list-ref nums idx))
+               (new-dp 
+                (for/fold ([dp dp])
+                          ([i (in-range 0 idx)])
+                  (let* ((previous (list-ref nums i))
+                         (current-score (+ (list-ref dp i) current))
+                         (penalty (if (not (= (modulo previous 2) (modulo current 2))) x 0))
+                         (new-score (- current-score penalty)))
+                    (list-set dp idx (max (list-ref dp idx) new-score))))))
+          (compute-scores (+ idx 1) new-dp))))
   
-  ;; Nested loops to fill the dp vector using the update-dp function.
-  (for ([i (in-range n)])
-    (for ([j (in-range (add1 i) n)])
-      (update-dp i j)))
-  
-  ;; Return the maximum value from the dp vector as the final answer.
-  (apply max (vector->list dp)))
+  ;; Initialize dp with negative infinities, except for the first element set to nums[0]
+  (define dp (cons (first nums) (make-list (sub1 n) -inf.0)))
+  ;; Compute the scores starting from index 1
+  (define final-dp (compute-scores 1 dp))
+  ;; Return the maximum score from the dp list
+  (apply max final-dp))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ; Output: 13

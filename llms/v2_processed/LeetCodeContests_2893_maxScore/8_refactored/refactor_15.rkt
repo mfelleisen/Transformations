@@ -22,34 +22,32 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  (define n (length nums))
+  ;; Helper function to calculate the score
+  (define (calc-score dp i j)
+    (let* ((score (+ (hash-ref dp i) (list-ref nums j)))
+           (i-parity (modulo (list-ref nums i) 2))
+           (j-parity (modulo (list-ref nums j) 2)))
+      (if (not (= i-parity j-parity))
+          (- score x)
+          score)))
   
-  ;; Recursive function to calculate the maximum score with memoization
-  (define memo (make-hash))
-
-  (define (max-score-from i)
-    (cond
-      [(= i n) 0]
-      [(hash-ref memo i #f)]
-      [else
-       (define current-score (list-ref nums i))
-       (define next-scores
-         (for/list ([j (in-range (add1 i) n)])
-           (let ([score (max-score-from j)])
-             (if (not (= (modulo (list-ref nums i) 2) (modulo (list-ref nums j) 2)))
-                 (- score x)
-                 score))))
-       (define best-next-score (if (empty? next-scores) 0 (apply max next-scores)))
-       (define final-score (+ current-score best-next-score))
-       (hash-set! memo i final-score)
-       final-score]))
-
-  ;; Initialize the maximum score from the first position
-  (max-score-from 0))
+  ;; Dynamic programming with hash table
+  (define dp (make-hash))
+  (hash-set! dp 0 (first nums))
+  
+  ;; Fill the hash table with maximum scores
+  (for ([i (in-range (length nums))])
+    (for ([j (in-range (add1 i) (length nums))])
+      (hash-update! dp j (lambda (current-score)
+                           (max current-score (calc-score dp i j)))
+                    -inf.0)))
+  
+  ;; Return the maximum value from the hash table
+  (apply max (hash-values dp)))
 
 ;; Example cases
 (displayln (maxScore '(2 3 6 1 9 2) 5))  ;; Output: 13
-(displayln (maxScore '(2 4 6 8) 3))       ;; Output: 20
+(displayln (maxScore '(2 4 6 8) 3))      ;; Output: 20
 
 (require rackunit)
 

@@ -24,30 +24,37 @@
 ;;  * 0 <= k <= nums.length
 (define (longestEqualSubarray nums k)
   ;; Helper function to update the count hash
-  (define (update-count count x delta)
-    (hash-update! count x (λ (v) (+ v delta)) 0))
+  (define (update-count count num delta)
+    (hash-update! count num (λ (old) (+ (or old 0) delta)) 0))
 
   ;; Sliding window approach
-  (define (sliding-window nums k)
-    (let loop ([left 0] [right 0] [max-length 0] [count (make-hash)])
-      (if (>= right (length nums))
-          max-length
-          (let* ([current-num (list-ref nums right)]
-                 [_ (update-count count current-num 1)]
-                 [max-freq (apply max (hash-values count))]
-                 [window-length (+ 1 (- right left))]
-                 [new-max-length (max max-length (if (> (- window-length max-freq) k)
-                                                     (begin
-                                                       (update-count count (list-ref nums left) -1)
-                                                       (loop (+ left 1) right max-length count))
-                                                     window-length))])
-            (loop left (+ right 1) new-max-length count)))))
-  ;; Start the sliding window process
-  (sliding-window nums k))
+  (define (sliding-window left right count max-length max-freq)
+    (cond
+      [(>= right (length nums)) max-length]  ; Return max-length when we reach the end of nums
+      [else
+       (define current-num (list-ref nums right))
+       (update-count count current-num 1)
+       
+       ;; Update max frequency of any number in the current window
+       (define new-max-freq (max max-freq (hash-ref count current-num 0)))
+       
+       ;; Calculate the length of the current window
+       (define window-length (+ 1 (- right left)))
+       
+       (if (> (- window-length new-max-freq) k)
+           ;; Adjust the count and move the left pointer if necessary
+           (let ([left-num (list-ref nums left)])
+             (update-count count left-num -1)
+             (sliding-window (+ left 1) right count max-length new-max-freq))
+           ;; Otherwise, update max-length and move the right pointer
+           (sliding-window left (+ right 1) count (max max-length window-length) new-max-freq))]))
+
+  ;; Initialize the sliding window process
+  (sliding-window 0 0 (make-hash) 0 0))
 
 ;; Example usage
-(longestEqualSubarray '(1 3 2 3 1 3) 3) ; Output: 3
-(longestEqualSubarray '(1 1 2 2 1 1) 2) ; Output: 4
+;; (longestEqualSubarray '(1 3 2 3 1 3) 3)
+;; (longestEqualSubarray '(1 1 2 2 1 1) 2)
 
 (require rackunit)
 

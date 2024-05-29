@@ -33,20 +33,27 @@
 (define (findIndices nums indexDifference valueDifference)
   ;; Define a helper function to check the conditions for indices i and j
   (define (valid-pair? i j)
-    (and (>= (abs (- i j)) indexDifference)  ; Check index difference condition
-         (>= (abs (- (list-ref nums i) (list-ref nums j))) valueDifference))) ; Check value difference condition
+    (and (>= (abs (- i j)) indexDifference)  
+         (>= (abs (- (vector-ref nums i) (vector-ref nums j))) valueDifference))) 
 
-  ;; Generate and filter all pairs of indices (i, j) from 0 to (length nums - 1) in one step
-  (for/or
-   ([i (in-range (length nums))]
-    [j (in-range (length nums))]
-    #:when (valid-pair? i j))
-    (list i j)
-    (list -1 -1)))
+  ;; Generate and filter pairs of indices
+  (for/or ((i (in-range (vector-length nums)))
+           (j (in-range (vector-length nums))))
+    (when (valid-pair? i j)
+      (list i j)))
 
-;; The function `findIndices` iterates over all possible pairs of indices in the array `nums`.
-;; It checks each pair to see if they satisfy the conditions specified by `indexDifference` and `valueDifference`.
-;; If a valid pair is found, it returns that pair. If no such pair exists, it returns `[-1, -1]`.
+  ;; Return `[-1, -1]` if no valid pair is found
+  (or (for/or ((i (in-range (vector-length nums)))
+               (j (in-range (vector-length nums))))
+        (when (valid-pair? i j)
+          (list i j)))
+      (list -1 -1)))
+
+;; Convert input lists to vectors for better performance with `vector-ref`
+;; Example Usage:
+;; (findIndices (vector 5 1 4 1) 2 4)
+;; (findIndices (vector 2 1) 0 0)
+;; (findIndices (vector 1 2 3) 2 4)
 
 (require rackunit)
 

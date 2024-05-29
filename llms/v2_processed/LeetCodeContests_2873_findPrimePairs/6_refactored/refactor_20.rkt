@@ -2,6 +2,7 @@
 
 ;; Check if a number is prime
 (define (is-prime? num)
+  ;; Returns #t if num is prime, otherwise #f
   (cond
     [(<= num 1) #f]
     [(<= num 3) #t]
@@ -21,17 +22,26 @@
 (define (findPrimePairs n)
   ;; Generate a list of all primes less than or equal to n
   (define primes (list-primes n))
-  ;; Use a set for quick lookup
+  ;; Initialize a set for quick prime look-up
   (define prime-set (set primes))
-  ;; Generate all valid prime pairs
-  (for*/list ([x (in-list primes)]
-              [y (in-list primes)]
-              #:when (and (<= x y) (set-member? prime-set (- n x))))
-    (list x (- n x))))
+  
+  ;; Helper function to find valid pairs
+  (define (valid-pair? x y)
+    (and (set-member? prime-set x)
+         (set-member? prime-set y)
+         (= (+ x y) n)
+         (<= x y)))
+  
+  ;; Generate all valid pairs
+  (for*/list ([x primes]
+              [y (range x (add1 n))]
+              #:when (valid-pair? x y))
+    (list x y)))
 
 ;; Example usage
 (findPrimePairs 10)  ; Output: '((3 7) (5 5))
 (findPrimePairs 2)   ; Output: '()
+
 
 (require rackunit)
 

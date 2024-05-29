@@ -20,26 +20,42 @@
 ;;  * 1 <= nums[i] <= 1000
 ;;  * 1 <= target <= 1000
 (define (lengthOfLongestSubsequence nums target)
-  ;; Helper function to update the hash table with new sums and their lengths
-  (define (update-hash dp num)
-    (for/fold ([temp-dp (hash)])
-              ([key (in-hash-keys dp)]
-               [val (in-hash-values dp)])
-      (define new-sum (+ key num))
-      (if (<= new-sum target)
-          (hash-set temp-dp new-sum (max (hash-ref temp-dp new-sum 0) (+ val 1)))
-          temp-dp)))
+  ;; Define a memoization table
+  (define memo-table (make-hash))
 
-  ;; Initialize the hash table with the base case: sum 0 with length 0
-  (define initial-dp (hash 0 0))
+  ;; Define the recursive function with memoization
+  (define (max-length idx sum)
+    (define key (cons idx sum))
+    (cond
+      ;; If the sum is exactly the target, return 0 (base case)
+      [(= sum target) 0]
+      ;; If we've gone through all elements or the sum exceeds the target, return -1
+      [(or (>= idx (length nums)) (> sum target)) -1]
+      ;; Check the memo table for a precomputed result
+      [(hash-has-key? memo-table key) (hash-ref memo-table key)]
+      ;; Otherwise, compute the result
+      [else
+       (define current (list-ref nums idx))
+       ;; Option 1: Include the current element in the subsequence
+       (define include (max-length (+ idx 1) (+ sum current)))
+       ;; Option 2: Skip the current element
+       (define skip (max-length (+ idx 1) sum))
+       ;; Compute the maximum length considering both options
+       (define result
+         (cond
+           [(= include -1) skip]
+           [(= skip -1) (+ 1 include)]
+           [else (max (+ 1 include) skip)]))
+       ;; Memoize the result
+       (hash-set! memo-table key result)
+       result]))
 
-  ;; Fold over the numbers to update the hash table iteratively
-  (define final-dp
-    (for/fold ([dp initial-dp]) ([num (in-list nums)])
-      (update-hash dp num)))
-
-  ;; Check if the target sum is achieved and return the corresponding length
-  (hash-ref final-dp target -1))
+  ;; Get the result starting from index 0 and sum 0
+  (define result (max-length 0 0))
+  ;; If result is -1 (no valid subsequence found), return -1, else return the result
+  (if (= result -1)
+      -1
+      result))
 
 ;; Example usage
 (lengthOfLongestSubsequence '(1 2 3 4 5) 9)  ; Output: 3

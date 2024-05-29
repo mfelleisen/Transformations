@@ -28,15 +28,12 @@
   (define (strong-pair? x y)
     (<= (abs (- x y)) (min x y)))
   
-  ;; Generate all pairs from nums, filter strong pairs, and compute their XOR.
-  (define (strong-pair-xors nums)
-    (for*/list ([i (in-list nums)]
-                [j (in-list nums)]
-                #:when (strong-pair? i j))
-      (bitwise-xor i j)))
-  
-  ;; Find the maximum XOR value among all strong pairs.
-  (apply max 0 (strong-pair-xors nums)))
+  ;; Generates all pairs from nums, checks if they are strong pairs, and computes their XOR.
+  (for/fold ([max-xor 0])  ;; Fold over all pairs with initial max-xor as 0
+            ([i (in-list nums)]
+             [j (in-list nums)]
+             #:when (strong-pair? i j))  ;; Only consider strong pairs
+    (max max-xor (bitwise-xor i j))))  ;; Update max-xor with the XOR of the current pair
 
 ;; Examples
 (maximumStrongPairXor '(1 2 3 4 5))  ;; Output: 7

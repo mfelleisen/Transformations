@@ -14,20 +14,23 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Helper function to count valid distributions
-  (define (count-valid-distributions n limit a)
-    (for/sum ([b (in-range (add1 (min (- n a) limit)))]
-              #:when (<= (- n a b) limit))
-      1))
+  ;; Generate all possible distributions of candies among three children
+  ;; where no child gets more than `limit` candies.
+  (define (valid-distributions)
+    (for*/list ([a (in-range (add1 (min n limit)))]
+                [b (in-range (add1 (min (- n a) limit)))]
+                #:when (<= (- n a b) limit))
+      (list a b (- n a b))))
+  ;; Count the number of valid distributions
+  (length (valid-distributions)))
 
-  ;; Calculate the total number of valid distributions
-  (for/sum ([a (in-range (add1 (min n limit)))])
-    (count-valid-distributions n limit a)))
-
-;; The function `distributeCandies` uses `for/sum` to iterate over all possible
+;; The function `distributeCandies` uses `for*/list` to iterate over all possible
 ;; values of `a` and `b` such that the sum of `a`, `b`, and `c` (where `c` is calculated
 ;; as `n - a - b`) equals `n`. The `#:when` clause ensures that `c` does not exceed `limit`.
 ;; The function returns the count of all such valid distributions.
+
+(distributeCandies 5 2) ; => 3
+(distributeCandies 3 3) ; => 10
 
 (require rackunit)
 

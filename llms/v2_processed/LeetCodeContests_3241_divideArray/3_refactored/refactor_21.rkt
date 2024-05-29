@@ -22,25 +22,28 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  ;; Sort the list of numbers
   (define sorted-nums (sort nums <))
   
-  ;; Helper function to recursively create groups
-  (define (create-groups remaining acc)
-    (cond
-      [(null? remaining) (reverse acc)] ; Return the accumulated result when no remaining elements
-      [(>= (length remaining) 3)
-       (define group (take remaining 3))
-       (if (<= (- (third group) (first group)) k)
-           (create-groups (drop remaining 3) (cons group acc)) ; Add the group to the accumulator
-           '())] ; Return empty list if condition is not met
-      [else '()])) ; Return empty list if remaining elements are less than 3
-  
-  ;; Check if the length of the list is divisible by 3
-  (if (= (remainder (length nums) 3) 0)
-      (create-groups sorted-nums '()) ; Start recursive grouping
-      '())) ; Return empty list if not divisible by 3
+  (define (divide-helper nums)
+    (match nums
+      [(list a b c rest ...)
+       (if (<= (- c a) k)
+           (cons (list a b c) (divide-helper rest))
+           '())]
+      [empty '()]))
 
+  (if (not (= (remainder (length nums) 3) 0))
+      '() 
+      (divide-helper sorted-nums)))
+
+;; Example usages:
+(define nums1 '(1 3 4 8 7 9 3 5 1))
+(define k1 2)
+(divideArray nums1 k1) ;; => '((1 1 3) (3 4 5) (7 8 9))
+
+(define nums2 '(1 3 3 2 7 3))
+(define k2 3)
+(divideArray nums2 k2) ;; => '()
 
 (require rackunit)
 

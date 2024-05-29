@@ -23,16 +23,13 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; This function simulates the operations on the list from end to start,
-  ;; combining elements when the current element is less than or equal to the next.
+  ;; Simulate the operations on the list from end to start, combining elements
+  ;; when the current element is less than or equal to the next.
   (define (combine-reverse lst)
     (foldl (lambda (current acc)
-             (match acc
-               [(cons first rest)
-                (if (<= current first)
-                    (cons (+ current first) rest)
-                    (cons current acc))]
-               [_ (cons current acc)]))
+             (if (and (pair? acc) (<= current (car acc)))
+                 (cons (+ current (car acc)) (cdr acc))
+                 (cons current acc)))
            '()
            lst))
   ;; The largest element after all possible combinations is found.

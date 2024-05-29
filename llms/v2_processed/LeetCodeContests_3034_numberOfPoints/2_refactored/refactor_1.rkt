@@ -15,18 +15,14 @@
 ;;  * nums[i].length == 2
 ;;  * 1 <= starti <= endi <= 100
 (define (numberOfPoints nums)
-  ;; Helper function to generate a set of points from start to end (inclusive)
-  (define (points-from-range start end)
-    (for/set ([i (in-range start (add1 end))])
-      i))
-  
-  ;; Fold over the list of ranges to accumulate the covered points
+  ;; `for*/set` iterates over all ranges and points within those ranges,
+  ;; accumulating all unique points into a set.
   (define covered-points
-    (for/fold ([acc (set)])
-              ([range (in-list nums)])
-      (set-union acc (apply points-from-range range))))
+    (for*/set ([range (in-list nums)]
+               [point (in-range (first range) (add1 (second range)))])
+      point))
   
-  ;; Return the size of the set, representing the number of unique points covered
+  ;; Return the size of the set, which represents the number of unique points covered
   (set-count covered-points))
 
 ;; Example usage:

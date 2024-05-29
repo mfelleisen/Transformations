@@ -19,15 +19,20 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  ;; The main function to simulate the game
+  ;; We sort the numbers first to handle the minimum elements efficiently
   (define sorted-nums (sort nums <))
-  (define (game-loop sorted-nums acc)
-    (if (empty? sorted-nums)
-        (reverse acc)
-        (let* ((alice-choice (first sorted-nums))
-               (bob-choice (second sorted-nums))
-               (remaining-nums (drop sorted-nums 2)))
-          (game-loop remaining-nums (cons alice-choice (cons bob-choice acc))))))
+
+  ;; Helper function to simulate the game
+  (define (game-loop nums acc)
+    (match nums
+      ;; Base case: when nums is empty, return the accumulated result
+      ['() (reverse acc)]
+      
+      ;; Recursive case: extract the first two elements for Alice and Bob, and recur with the remaining elements
+      [(list-rest alice-choice bob-choice rest)
+       (game-loop rest (cons alice-choice (cons bob-choice acc)))]))
+
+  ;; Start the recursive game loop with the sorted numbers and an empty accumulator
   (game-loop sorted-nums '()))
 
 ;; Example usage:

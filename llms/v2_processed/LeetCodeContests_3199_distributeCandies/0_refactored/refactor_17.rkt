@@ -14,22 +14,26 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Helper function to generate valid distributions using recursion and accumulators
-  (define (valid-distributions accum remaining children)
-    (if (zero? children)
-        (if (<= remaining limit)
-            (list (cons remaining accum))
-            '())
-        (apply append
-               (for/list ([i (in-range (add1 (min remaining limit)))])
-                 (valid-distributions (cons i accum) (- remaining i) (- children 1))))))
-  
-  ;; Generate and count valid distributions
-  (length (valid-distributions '() n 2)))
+  ;; Helper function to generate all valid combinations of candies
+  (define (valid-distributions n limit)
+    (for*/list ([a (in-range (add1 (min n limit)))]
+                [b (in-range (add1 (min (- n a) limit)))]
+                #:when (<= (- n a b) limit))
+      (list a b (- n a b))))
 
-;; Example test cases
-(distributeCandies 5 2)  ;; Output: 3
-(distributeCandies 3 3)  ;; Output: 10
+  ;; Calculate the length of the valid distributions
+  (length (valid-distributions n limit)))
+
+;; Example usage:
+;; (distributeCandies 5 2)  ; => 3
+;; (distributeCandies 3 3)  ; => 10
+
+;; The function `distributeCandies` uses `for*/list` to generate all possible
+;; values of `a` and `b` such that the sum of `a`, `b`, and `c` (where `c` is
+;; calculated as `n - a - b`) equals `n`. The `#:when` clause ensures that `c`
+;; does not exceed `limit`. The function returns the count of all such valid
+;; distributions.
+
 
 (require rackunit)
 

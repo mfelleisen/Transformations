@@ -17,14 +17,25 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
+  ;; Calculate the length of the list nums
   (define n (length nums))
-  
-  (define (special-squares)
-    (for/fold ([sum 0]) ([i (in-range 1 (add1 n))] #:when (zero? (remainder n i)))
-      (+ sum (sqr (list-ref nums (sub1 i))))))
-  
-  (special-squares))
 
+  ;; Define a function to check if an index divides n
+  (define (is-special? i)
+    (zero? (remainder n i)))
+
+  ;; Define a function to square a number
+  (define (square x)
+    (* x x))
+
+  ;; Calculate the sum of squares of special elements
+  (define sum-squares
+    (for/sum ([i (in-range 1 (add1 n))]
+              #:when (is-special? i))
+      (square (list-ref nums (sub1 i)))))
+
+  ;; Return the computed sum of squares
+  sum-squares)
 
 (require rackunit)
 

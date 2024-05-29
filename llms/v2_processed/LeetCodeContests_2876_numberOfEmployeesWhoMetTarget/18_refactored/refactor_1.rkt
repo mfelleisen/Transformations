@@ -24,8 +24,8 @@
 ;;  * 1 <= n == hours.length <= 50
 ;;  * 0 <= hours[i], target <= 105
 (define (numberOfEmployeesWhoMetTarget hours target)
-  ;; Use the 'count' function with a predicate to count elements meeting the condition
-  (count (lambda (hour) (>= hour target)) hours))
+  ;; Using 'for/sum' to iterate through hours and count those meeting the target
+  (for/sum ([hour (in-list hours)] #:when (>= hour target)) 1))
 
 ;; Example usage:
 ;; (numberOfEmployeesWhoMetTarget '(0 1 2 3 4) 2) returns 3

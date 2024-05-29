@@ -33,24 +33,30 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  ;; Inner recursive helper function with memoization
-  (define (helper i memo)
-    (if (hash-has-key? memo i)
-        (hash-ref memo i)
-        (let loop ([j (add1 i)] [max-jumps -1])
-          (if (< j (length nums))
-              (let ([diff (abs (- (list-ref nums j) (list-ref nums i)))])
-                (if (<= diff target)
-                    (let ([jumps (helper j memo)])
-                      (loop (add1 j) (max max-jumps (if (= jumps -1) -1 (add1 jumps)))))
-                    (loop (add1 j) max-jumps)))
-              (begin
-                (hash-set! memo i max-jumps)
-                max-jumps)))))
-  
-  ;; Start the helper function from index 0 with an initial memo table
-  (define memo (make-hash))
-  (helper 0 memo))
+  (define (reachable? i j)
+    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
+
+  (define (max-jumps-from i dp)
+    (for/fold ([dp dp])
+              ([j (in-range (add1 i) (length nums))])
+      (if (reachable? i j)
+          (let ([new-jumps (add1 (vector-ref dp i))])
+            (vector-set! dp j (max (vector-ref dp j) new-jumps))
+            dp)
+          dp)))
+
+  (define n (length nums))
+  (define dp (make-vector n -inf.0))
+  (vector-set! dp 0 0)
+
+  (for ([i (in-range n)])
+    (when (not (= (vector-ref dp i) -inf.0))
+      (set! dp (max-jumps-from i dp))))
+
+  (let ([result (vector-ref dp (sub1 n))])
+    (if (= result -inf.0)
+        -1
+        result)))
 
 ;; Examples:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

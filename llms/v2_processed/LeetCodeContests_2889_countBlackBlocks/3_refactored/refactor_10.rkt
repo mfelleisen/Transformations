@@ -29,29 +29,32 @@
 ;;  * 0 <= coordinates[i][1] < n
 ;;  * It is guaranteed that coordinates contains pairwise distinct coordinates.
 (define (countBlackBlocks m n coordinates)
-  ;; Helper function to update the block count for a given coordinate
+  ;; Helper function to update block counts
   (define (update-block-count block-count x y)
-    (define (update x y)
-      (hash-update! block-count (list x y) add1 0))
-    (when (and (> x 0) (> y 0)) (update (- x 1) (- y 1)))
-    (when (and (> x 0) (< y (- n 1))) (update (- x 1) y))
-    (when (and (< x (- m 1)) (> y 0)) (update x (- y 1)))
-    (when (and (< x (- m 1)) (< y (- n 1))) (update x y)))
+    (when (and (<= 0 x (- m 2)) (<= 0 y (- n 2)))
+      (hash-update! block-count (list x y) add1 0)))
 
   ;; Create a hash table to count black cells affecting each potential 2x2 block
   (define block-count (make-hash))
   
   ;; Populate block-count by iterating over each black cell coordinate
-  (for-each (λ (coord)
-              (update-block-count block-count (first coord) (second coord)))
+  (for-each (lambda (coord)
+              (define x (first coord))
+              (define y (second coord))
+              ;; A cell can affect up to 4 potential 2x2 blocks
+              (update-block-count block-count (- x 1) (- y 1))
+              (update-block-count block-count (- x 1) y)
+              (update-block-count block-count x (- y 1))
+              (update-block-count block-count x y))
             coordinates)
 
   ;; Initialize result array for counts of blocks with 0, 1, 2, 3, and 4 black cells
   (define result (make-vector 5 0))
   
   ;; Count how many blocks have specific counts of black cells
-  (for ([count (in-hash-values block-count)])
-    (vector-set! result count (add1 (vector-ref result count))))
+  (for-each (lambda (count)
+              (vector-set! result count (add1 (vector-ref result count))))
+            (hash-values block-count))
   
   ;; Calculate the total number of potential 2x2 blocks
   (define total-blocks (* (- m 1) (- n 1)))
@@ -63,6 +66,7 @@
   (vector->list result))
 
 ;; Example usage
+(countBlackBlocks 3 3 '((0 0)))  ; Output: '(3 1 0 0 0)
 (countBlackBlocks 3 3 '((0 0) (1 1) (0 2)))  ; Output: '(0 2 2 0 0)
 
 (require rackunit)

@@ -29,13 +29,11 @@
   (define xor-with-k (bitwise-xor current-xor k))
   
   ;; Count the number of 1s in xor-with-k, which are the differing bits
-  ;; This is done using a recursive function that counts set bits
   (define (count-ones x)
-    (define (helper x acc)
-      (if (= x 0)
-          acc
-          (helper (arithmetic-shift x -1) (+ acc (bitwise-and x 1)))))
-    (helper x 0))
+    (for/fold ([count 0]) ([i (in-naturals)] #:break (= x 0))
+      (define bit (bitwise-and x 1))
+      (set! x (arithmetic-shift x -1))
+      (+ count bit)))
   
   ;; Return the number of operations required, which is the number of 1s in xor-with-k
   (count-ones xor-with-k))

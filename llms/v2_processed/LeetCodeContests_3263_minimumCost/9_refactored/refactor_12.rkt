@@ -25,22 +25,31 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Helper function to calculate the sum of the costs of three subarrays
-  (define (calculate-cost i j)
-    (+ (first nums)
+  (define n (length nums))
+  
+  ;; Helper function to calculate the cost of dividing the array at indices i and j
+  (define (cost i j)
+    (+ (list-ref nums 0)
        (list-ref nums i)
        (list-ref nums j)))
-
-  (define n (length nums))
-  (define min-cost 
-    (if (= n 3)
-        (apply + nums)  ; If there are exactly 3 elements, the cost is the sum of all elements.
-        (for*/fold ([min-cost +inf.0]) ; Initialize min-cost with infinity to find minimum.
-                   ([i (in-range 1 (- n 1))]
-                    [j (in-range (+ i 1) n)])
-          (min min-cost (calculate-cost i j)))))  ; Calculate and compare costs for all possible partitions
   
-  min-cost)  ; Return the minimum cost found.
+  ;; Generate all possible pairs (i, j) such that 0 < i < j < n
+  (define pairs
+    (for*/list ([i (in-range 1 (- n 1))]
+                [j (in-range (+ i 1) n)])
+      (list i j)))
+  
+  ;; Calculate the minimum cost by evaluating the cost function for all pairs
+  (apply min
+         (map (lambda (pair)
+                (match-define (list i j) pair)
+                (cost i j))
+              pairs)))
+
+;; Examples to test the function
+(minimumCost '(1 2 3 12))  ; Expected output: 6
+(minimumCost '(5 4 3))     ; Expected output: 12
+(minimumCost '(10 3 1 1))  ; Expected output: 12
 
 (require rackunit)
 

@@ -39,25 +39,29 @@
   
   ;; Function to calculate the maximum sum with a fixed peak position
   (define (calculate-max-sum-with-peak peak)
-    ;; Helper function to expand heights from the peak to the left
-    (define (expand-left peak-heights peak)
-      (for/fold ([heights peak-heights]) ([i (in-range (sub1 peak) -1 -1)])
-        (define min-height (min (list-ref maxHeights i) (car heights)))
-        (cons min-height heights)))
+    ;; Create a list of heights starting from the peak and expanding left and right
+    (define heights (make-vector n 0))
+    
+    ;; Set the peak height
+    (define (set-peak idx)
+      (vector-set! heights idx (list-ref maxHeights idx)))
 
-    ;; Helper function to expand heights from the peak to the right
-    (define (expand-right peak-heights peak)
-      (for/fold ([heights peak-heights]) ([i (in-range (add1 peak) n)])
-        (define min-height (min (list-ref maxHeights i) (last heights)))
-        (append heights (list min-height))))
+    ;; Expand to the left of the peak
+    (define (expand-left idx)
+      (for ([i (in-range idx -1 -1)])
+        (vector-set! heights i (min (list-ref maxHeights i) (vector-ref heights (add1 i))))))
+
+    ;; Expand to the right of the peak
+    (define (expand-right idx)
+      (for ([i (in-range (add1 idx) n)])
+        (vector-set! heights i (min (list-ref maxHeights i) (vector-ref heights (sub1 i))))))
+
+    (set-peak peak)
+    (expand-left (sub1 peak))
+    (expand-right (add1 peak))
     
-    ;; Initialize heights with the peak value and expand left and right
-    (define initial-heights (list (list-ref maxHeights peak)))
-    (define left-expanded (expand-left initial-heights peak))
-    (define full-expanded (expand-right left-expanded peak))
-    
-    ;; Calculate the sum of the heights list
-    (apply + full-expanded))
+    ;; Calculate the sum of the heights array
+    (apply + (vector->list heights)))
   
   ;; Try every position as a peak and compute the maximum sum
   (define (find-max-sum)

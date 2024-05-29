@@ -28,26 +28,21 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
-  ;; Helper function to accumulate the sum of squares of distinct counts
-  (define (accumulate-distinct-squares lst)
-    (define (helper seen total lst)
-      (match lst
-        [(cons x xs)
-         (define updated-seen (set-add seen x))
+  (define n (length nums))
+
+  (define (sum-from-start i)
+    (define (loop j seen total)
+      (cond
+        [(>= j n) total]
+        [else
+         (define updated-seen (set-add seen (list-ref nums j)))
          (define distinct-count (set-count updated-seen))
-         (helper updated-seen (+ total (* distinct-count distinct-count)) xs)]
-        [else total]))
-    (helper (set) 0 lst))
-  
-  ;; Generate all suffixes of the list
-  (define (suffixes lst)
-    (if (null? lst)
-        '()
-        (cons lst (suffixes (cdr lst)))))
-  
-  ;; Calculate the sum of squares for all subarrays
-  (for/fold ([total-sum 0]) ([suffix (in-list (suffixes nums))])
-    (+ total-sum (accumulate-distinct-squares suffix))))
+         (loop (add1 j) updated-seen (+ total (sqr distinct-count)))]))
+
+    (loop i (set) 0))
+
+  (for/fold ([total-sum 0]) ([i (in-range n)])
+    (+ total-sum (sum-from-start i))))
 
 ;; Example usage:
 (sumCounts '(1 2 1))  ; Output: 15

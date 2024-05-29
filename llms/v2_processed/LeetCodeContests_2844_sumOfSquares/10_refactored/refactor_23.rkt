@@ -19,16 +19,15 @@
 (define (sumOfSquares nums)
   (define n (length nums))
 
-  (define (is-special-index? i)
+  (define (is-special? i)
     (zero? (remainder n i)))
 
   (define (square x)
     (* x x))
 
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (is-special-index? i))
+            #:when (is-special? i))
     (square (list-ref nums (sub1 i)))))
-
 
 (require rackunit)
 

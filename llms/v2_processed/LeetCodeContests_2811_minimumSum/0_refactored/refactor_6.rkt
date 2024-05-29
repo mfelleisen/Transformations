@@ -16,20 +16,17 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function that generates the k-avoiding array and computes its sum
-  (define (k-avoiding-sum n k)
-    (define (avoid-k current used-numbers)
-      (if (= (length used-numbers) n)
-          used-numbers
-          (if (or (not (member (- k current) used-numbers))
-                  (= current (- k current)))
-              (avoid-k (add1 current) (cons current used-numbers))
-              (avoid-k (add1 current) used-numbers))))
-    
-    (foldl + 0 (avoid-k 1 '())))
-  
-  ;; Call the helper function and return the result
-  (k-avoiding-sum n k))
+  ;; Helper function to generate the k-avoiding numbers
+  (define (k-avoiding-numbers i count used-numbers)
+    (cond
+      [(= count n) '()]
+      [(set-member? used-numbers (- k i))
+       (k-avoiding-numbers (+ i 1) count used-numbers)]
+      [else
+       (cons i (k-avoiding-numbers (+ i 1) (+ count 1) (set-add used-numbers i)))]))
+
+  ;; Sum the k-avoiding numbers
+  (apply + (k-avoiding-numbers 1 0 (set))))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

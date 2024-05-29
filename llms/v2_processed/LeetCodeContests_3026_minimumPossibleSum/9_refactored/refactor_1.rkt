@@ -32,15 +32,22 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
-  
-  ;; Generate the beautiful array and calculate its minimum possible sum
-  (define (helper k i sum)
-    (cond
-      [(= k n) sum]
-      [(= (+ k i) target) (helper k (+ i 1) sum)]
-      [else (helper (+ k 1) (+ i 1) (modulo (+ i sum) MOD))]))
 
-  (helper 0 1 0))
+  ;; Helper function to generate a beautiful array
+  (define (build-array acc candidate count)
+    (cond
+      [(= count n) acc]
+      [(not (ormap (λ (num) (= (+ num candidate) target)) acc))
+       (build-array (cons candidate acc) (add1 candidate) (add1 count))]
+      [else
+       (build-array acc (add1 candidate) count)]))
+
+  ;; Calculate the sum of the array elements modulo MOD
+  (define (mod-sum nums)
+    (foldl (λ (num acc) (modulo (+ acc num) MOD)) 0 nums))
+
+  ;; Generate the beautiful array and calculate its minimum possible sum
+  (mod-sum (build-array '() 1 0)))
 
 ;; Example test cases
 (displayln (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

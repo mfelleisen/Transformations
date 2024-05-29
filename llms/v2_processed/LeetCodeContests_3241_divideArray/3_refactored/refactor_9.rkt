@@ -22,25 +22,33 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
+  ;; Helper function to split the sorted numbers into groups of 3 while checking the condition
+  (define (split-into-groups sorted-nums)
+    (define (valid-group? group)
+      (<= (- (last group) (first group)) k))
+    (for/list ([group (in-slice 3 3 sorted-nums)]
+               #:when (valid-group? group))
+      group))
+  
+  ;; Sort the list of numbers
   (define sorted-nums (sort nums <))
-  (define len (length nums))
-
+  
   ;; Check if the length of the list is divisible by 3
-  (if (not (= (remainder len 3) 0))
+  (if (not (= (remainder (length nums) 3) 0))
       '() ; Return empty list if not divisible by 3
-      (let loop ([remaining sorted-nums] [result '()])
-        (match remaining
-          [(list)
-           (reverse result)] ; Return the accumulated result when there are no remaining elements
-          [(list-rest a b c more)
-           (if (<= (- c a) k)
-               (loop more (cons (list a b c) result))
-               '())] ; Return empty list if condition is not met
-          [_ '()])))) ; Return empty list if the list length is not a multiple of 3
+      (let ([groups (split-into-groups sorted-nums)])
+        (if (= (length groups) (/ (length nums) 3))
+            groups
+            '()))))
 
-;; Example usage:
-(divideArray '(1 3 4 8 7 9 3 5 1) 2) ; Expected: '((1 1 3) (3 4 5) (7 8 9))
-(divideArray '(1 3 3 2 7 3) 3)       ; Expected: '()
+;; Helper function to slice a list into chunks
+(define (in-slice n step lst)
+  (define (slices lst)
+    (if (empty? lst)
+        '()
+        (let ([slice (take lst n)])
+          (cons slice (slices (drop lst step))))))
+  (in-list (slices lst)))
 
 (require rackunit)
 

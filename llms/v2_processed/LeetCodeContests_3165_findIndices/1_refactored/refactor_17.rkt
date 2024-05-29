@@ -45,9 +45,9 @@
   ;; Iterate over all pairs (i, j) using nested loops implemented via for*/first
   ;; This returns the first pair that meets the conditions or #f if none do
   (define result
-    (for*/first ([i (in-range n)]
-                 [j (in-range n)]
-                 #:when (valid-pair? i j))
+    (for/first ([i (in-range n)]
+                [j (in-range n)]
+                #:when (valid-pair? i j))
       (list i j)))
   
   ;; Check if a valid pair was found, if not return [-1, -1]

@@ -15,18 +15,18 @@
 ;;  * nums[i].length == 2
 ;;  * 1 <= starti <= endi <= 100
 (define (numberOfPoints nums)
-  ;; Function to calculate the number of unique integer points covered by cars on a number line.
-  (define (range-set start end)
-    ;; Helper function to generate a set of integers from start to end (inclusive).
-    (for/set ([i (in-range start (add1 end))]) i))
+  ;; Define a helper function to generate a range of numbers from start to end (inclusive).
+  (define (range start end)
+    (for/list ([i (in-range start (add1 end))])
+      i))
   
-  ;; Generate a set of points for each car and combine them into a single set.
+  ;; Generate a set of all points covered by cars.
   (define all-points
     (for/fold ([points (set)])
               ([pair (in-list nums)])
-      (set-union points (range-set (first pair) (second pair)))))
+      (set-union points (set (range (first pair) (second pair))))))
   
-  ;; Count the number of unique points.
+  ;; Return the count of unique points.
   (set-count all-points))
 
 ;; Example usage:

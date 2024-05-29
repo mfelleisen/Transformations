@@ -27,21 +27,38 @@
 ;;  * 3 <= nums.length <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
-  (define n (length nums))
   ;; Check if the length of nums is less than 3, if so return -1
-  (if (< n 3)
+  (if (< (length nums) 3)
       -1
-      (let loop ([j 1] [min-sum +inf.0])
-        (if (>= j (- n 1))
-            (if (= min-sum +inf.0) -1 min-sum)
-            (let* ([lefts (filter (λ (i) (< (list-ref nums i) (list-ref nums j))) (range 0 j))]
-                   [rights (filter (λ (k) (< (list-ref nums k) (list-ref nums j))) (range (+ j 1) n))]
-                   [left-min (if (empty? lefts) +inf.0 (apply min (map (λ (i) (list-ref nums i)) lefts)))]
-                   [right-min (if (empty? rights) +inf.0 (apply min (map (λ (k) (list-ref nums k)) rights)))]
-                   [current-sum (+ left-min (list-ref nums j) right-min)])
-              (if (and (not (= left-min +inf.0)) (not (= right-min +inf.0)))
-                  (loop (+ j 1) (min min-sum current-sum))
-                  (loop (+ j 1) min-sum)))))))
+      ;; Otherwise, proceed to find the mountain triplet with the minimum sum
+      (let ([n (length nums)])
+        ;; Define a helper function to find the minimum value in a range
+        (define (min-in-range start end pred?)
+          (for/fold ([min-val +inf.0]) ([i (in-range start end)])
+            (let ([val (list-ref nums i)])
+              (if (pred? val)
+                  (min min-val val)
+                  min-val))))
+        
+        ;; Initialize min-sum to +inf.0 (Racket's representation of positive infinity)
+        (define min-sum +inf.0)
+        
+        ;; Iterate over each possible 'j' as the peak of the mountain
+        (for ([j (in-range 1 (- n 1))])
+          ;; Find the smallest number on the left of 'j' such that nums[i] < nums[j]
+          (define left-min (min-in-range 0 j (λ (val) (< val (list-ref nums j)))))
+          ;; Find the smallest number on the right of 'j' such that nums[k] < nums[j]
+          (define right-min (min-in-range (+ j 1) n (λ (val) (< val (list-ref nums j)))))
+          
+          ;; If valid 'i' and 'k' are found, update the minimum sum
+          (when (and (not (= left-min +inf.0))
+                     (not (= right-min +inf.0)))
+            (set! min-sum (min min-sum (+ left-min (list-ref nums j) right-min)))))
+        
+        ;; Return the result, if no valid mountain was found return -1
+        (if (= min-sum +inf.0)
+            -1
+            min-sum))))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ;; Output: 9

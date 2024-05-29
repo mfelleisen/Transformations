@@ -30,17 +30,11 @@
 ;; 1 <= n == batteryPercentages.length <= 100 
 ;; 0 <= batteryPercentages[i] <= 100
 (define (countTestedDevices batteryPercentages)
-  (define (count-tested devices tested-count)
-    (match devices
-      ['() tested-count]
-      [(cons first rest)
-       (if (> first 0)
-           (count-tested
-            (map (lambda (x) (max 0 (- x 1))) rest)
-            (+ tested-count 1))
-           (count-tested rest tested-count))]))
-  
-  (count-tested batteryPercentages 0))
+  (for/fold ([count 0] [delta 0] #:result count)
+            ([percentage (in-list batteryPercentages)])
+    (if (> (- percentage delta) 0)
+        (values (add1 count) (add1 delta))
+        (values count        delta))))
 
 ;; Example usage:
 (countTestedDevices '(1 1 2 1 3))  ; Output: 3

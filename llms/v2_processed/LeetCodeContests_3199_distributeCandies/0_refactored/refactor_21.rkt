@@ -14,25 +14,24 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Define a helper function to count valid distributions
-  (define (count-valid-distributions a b sum)
-    (if (> a limit)
-        0
-        (let ([c (- sum a b)])
-          (if (or (< c 0) (> c limit))
-              0
-              (1 + (count-valid-distributions (add1 a) b sum))))))
+  ;; Helper function to check if a given distribution is valid
+  (define (valid-distribution? a b c)
+    (and (<= a limit) (<= b limit) (<= c limit)))
   
-  ;; Iterate over the first child's candy count and accumulate valid distributions
-  (for/sum ([a (in-range (add1 (min n limit)))])
-    (for/sum ([b (in-range (add1 (min (- n a) limit)))])
-      (count-valid-distributions a b n))))
+  ;; Generate all valid distributions of candies among three children
+  (define (valid-distributions total current)
+    (cond
+      [(= current 3) (if (= total 0) 1 0)]
+      [else (for/sum ([i (in-range (add1 (min total limit)))])
+              (valid-distributions (- total i) (+ current 1)))]))
+  
+  ;; Start the recursive generation with 3 children and the total number of candies
+  (valid-distributions n 0))
 
-;; The function `distributeCandies` uses nested `for/sum` loops to iterate over all possible
-;; values of `a` and `b` such that the sum of `a`, `b`, and `c` (where `c` is calculated
-;; as `n - a - b`) equals `n`. The helper function `count-valid-distributions` ensures
-;; that no child gets more than `limit` candies and counts valid distributions accordingly.
-
+;; The function `distributeCandies` now uses a helper function `valid-distributions` that
+;; recursively generates all possible valid distributions of candies among three children.
+;; The `for/sum` loop is used to iterate over all possible values of candies for each child
+;; and sums up the number of valid distributions.
 
 (require rackunit)
 

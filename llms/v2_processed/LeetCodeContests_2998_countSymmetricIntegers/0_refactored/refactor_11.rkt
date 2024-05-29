@@ -13,29 +13,27 @@
 ;; Explanation: There are 4 symmetric integers between 1200 and 1230: 1203, 1212, 1221, and 1230.
 ;; Constraints:
 ;;  * 1 <= low <= high <= 104
-(define (countSymmetricIntegers low high)
-  ;; Helper function to check if a number is symmetric
-  (define (is-symmetric? num)
-    (let* ((s (number->string num))  ; Convert number to string
-           (n (string-length s)))    ; Get the length of the string
-      (and (even? n)                 ; Ensure the number of digits is even
-           (let* ((mid (/ n 2))      ; Calculate the midpoint
-                  (first-half (substring s 0 mid))  ; Get the first half of the digits
-                  (second-half (substring s mid n)))  ; Get the second half of the digits
-             (= (sum-digits first-half) (sum-digits second-half))))))  ; Check if sums are equal
-
-  ;; Helper function to sum the digits of a string representing a number
-  (define (sum-digits str)
-    (for/sum ([char (in-string str)])
-      (- (char->integer char) (char->integer #\0))))  ; Convert char to digit and sum
-
-  ;; Main computation: count symmetric numbers in the given range
-  (for/sum ([num (in-range low (add1 high))] #:when (is-symmetric? num))
-    1))  ; Sum 1 for each symmetric number found
-
-;; Example usage:
-(countSymmetricIntegers 1 100)     ; Output: 9
-(countSymmetricIntegers 1200 1230)  ; Output: 4
+(define (countSymmetricIntegers low high) ;; contract  csi/c
+  (define (sym? s)
+    (define l (string-length s))
+    (define hlf (/ l 2))
+    (define c (string->list s))
+    (define left (take c hlf))
+    (define right (drop c hlf))
+    (and (even? l)
+         (= (apply + (map (compose1 digit-value integer->char) left))
+            (apply + (map (compose1 digit-value integer->char) right)))))
+  
+  (define (digit-value c) (- (char->integer c) 48))
+  
+  (define (range low high)
+    (build-list (+ 1 (- high low))
+                (λ (x) (+ x low))))
+  
+  (length
+   (filter
+    (compose1 sym? number->string)
+    (range low high))))
 
 (require rackunit)
 

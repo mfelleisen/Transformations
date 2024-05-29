@@ -16,24 +16,19 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  (define (valid-add? used-numbers current-number)
-    (or (not (set-member? used-numbers (- k current-number)))
-        (= current-number (- k current-number))))
+  ;; Helper function to generate the sequence of numbers avoiding the sum k
+  (define (generate-sequence n k)
+    (define (gen-seq curr count acc)
+      (cond
+        [(= count n) (reverse acc)]
+        [(or (not (member (- k curr) acc))
+             (= curr (- k curr)))
+         (gen-seq (+ curr 1) (+ count 1) (cons curr acc))]
+        [else (gen-seq (+ curr 1) count acc)]))
+    (gen-seq 1 0 '()))
 
-  (define (construct-k-avoiding used-numbers current-number count total-sum)
-    (if (= count n)
-        total-sum
-        (if (valid-add? used-numbers current-number)
-            (construct-k-avoiding (set-add used-numbers current-number)
-                                  (add1 current-number)
-                                  (add1 count)
-                                  (+ total-sum current-number))
-            (construct-k-avoiding used-numbers
-                                  (add1 current-number)
-                                  count
-                                  total-sum))))
-
-  (construct-k-avoiding (set) 1 0 0))
+  ;; Sum the sequence generated
+  (apply + (generate-sequence n k)))
 
 ;; Example usage:
 (minimumSum 5 4)  ; Output: 18

@@ -18,23 +18,12 @@
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
-  ;; Define the initial balance as a constant
   (define initial-balance 100)
-
-  ;; Determine the rounded amount using nearest multiple of 10 logic
   (define rounded-amount
-    (let* ([lower-bound (* (quotient purchaseAmount 10) 10)]
-           [upper-bound (+ lower-bound 10)])
-      (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
-          lower-bound
-          upper-bound)))
-
-  ;; Calculate the new balance
+    (match (modulo purchaseAmount 10)
+      [(or 0 5 6 7 8 9) (+ (* 10 (quotient purchaseAmount 10)) 10)]
+      [_ (* 10 (quotient purchaseAmount 10))]))
   (- initial-balance rounded-amount))
-
-;; Test cases
-(accountBalanceAfterPurchase 9)  ; => 90
-(accountBalanceAfterPurchase 15) ; => 80
 
 (require rackunit)
 

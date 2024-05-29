@@ -2,29 +2,34 @@
 
 (provide (rename-out [maximumJumps max-jump]))
 
+;; You are given a 0-indexed array nums of n integers and an integer target.
+;; You are initially positioned at index 0. In one step, you can jump from index i to any index j such that:
+;;  * 0 <= i < j < n
+;;  * -target <= nums[j] - nums[i] <= target
+;; Return the maximum number of jumps you can make to reach index n - 1.
+;; If there is no way to reach index n - 1, return -1.
+
 (define (maximumJumps nums target)
-  ;; Helper function to check if a jump is valid
+  (define n (length nums))
+
+  ;; Helper function to determine if a jump is valid
   (define (valid-jump? i j)
     (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
 
-  ;; Recursive function to calculate the maximum jumps
-  (define (max-jumps-from idx memo)
-    (cond
-      [(= idx (sub1 (length nums))) 0]
-      [(hash-has-key? memo idx) (hash-ref memo idx)]
-      [else
-       (define next-jumps
-         (for/list ([j (in-range (add1 idx) (length nums))]
-                    #:when (valid-jump? idx j))
-           (+ 1 (max-jumps-from j memo))))
-       (define result (if (empty? next-jumps) -1 (apply max next-jumps)))
-       (hash-set! memo idx result)
-       result]))
+  ;; DP list to store the maximum jumps, initialize with -inf except the first element
+  (define dp (make-vector n -inf.0))
+  (vector-set! dp 0 0)
 
-  ;; Start the recursion with an empty memoization table
-  (define memo (make-hash))
-  (define result (max-jumps-from 0 memo))
-  (if (= result -1) -1 result))
+  ;; Update dp vector
+  (for ([i (in-range n)])
+    (when (not (= (vector-ref dp i) -inf.0))
+      (for ([j (in-range (add1 i) n)])
+        (when (valid-jump? i j)
+          (vector-set! dp j (max (vector-ref dp j) (+ 1 (vector-ref dp i))))))))
+  
+  ;; Check the last element of dp
+  (let ([result (vector-ref dp (- n 1))])
+    (if (= result -inf.0) -1 result)))
 
 ;; Examples
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

@@ -23,36 +23,29 @@
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus
+
+  ;; Helper function to compute the power
+  (define (power base exp)
+    (expt base exp))
   
-  ;; Helper function to compute the maximum base such that base^x <= n
-  (define (max-base n x)
-    (inexact->exact (floor (expt n (/ 1.0 x)))))
+  ;; Calculate the maximum base such that base^x <= n
+  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
   
-  ;; Recursive function to compute the number of ways
-  (define (count-ways target bases dp)
-    (if (zero? target)
-        1
-        (if (or (negative? target) (null? bases))
-            0
-            (let* ((base (car bases))
-                   (current-power (expt base x))
-                   (remaining-bases (cdr bases))
-                   (using-current (if (>= target current-power)
-                                      (hash-ref! dp (list (- target current-power) remaining-bases)
-                                                 (count-ways (- target current-power) remaining-bases dp))
-                                      0))
-                   (skipping-current (hash-ref! dp (list target remaining-bases)
-                                                (count-ways target remaining-bases dp))))
-              (modulo (+ using-current skipping-current) MOD)))))
+  ;; Initialize a list to store the number of ways to express each number up to n using xth powers
+  (define dp (make-vector (+ n 1) 0))
+  (vector-set! dp 0 1)
   
-  ;; Initialize dp (memoization table) as a hash table
-  (define dp (make-hash))
+  ;; Update dp values
+  (for ([base (in-range 1 (+ max-base 1))])
+    (define current-power (power base x))
+    (for ([i (in-range n current-power -1)])
+      (vector-set! dp i
+                   (modulo (+ (vector-ref dp i)
+                              (vector-ref dp (- i current-power)))
+                           MOD))))
   
-  ;; Generate the list of possible bases
-  (define bases (range 1 (add1 (max-base n x))))
-  
-  ;; Compute and return the result
-  (count-ways n bases dp))
+  ;; Return the number of ways to express n
+  (vector-ref dp n))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

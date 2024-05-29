@@ -19,15 +19,9 @@
 ;; It can be proven that there is no achievable number larger than 7.
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
-(provide theMaximumAchievableX)
-
-;; The function calculates the maximum achievable number x
-;; after performing a series of operations on num.
-;; The operation involves increasing or decreasing x and num in opposite directions.
-;; The maximum achievable x is calculated by increasing x by t and decreasing num by t.
-;; This results in x = num + 2 * t.
 (define (theMaximumAchievableX num t)
-  (+ num (* 2 t)))
+  (define increment (* 2 t))
+  (+ num increment))
 
 (require rackunit)
 

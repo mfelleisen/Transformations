@@ -21,20 +21,19 @@
 (define (numberGame nums)
   ;; Function to simulate the game between Alice and Bob where they alternately pick the minimum element from nums
   ;; and append it to a result list, with Bob's choices first.
-  
-  ;; Helper function to handle each round
-  (define (round nums arr)
-    (if (null? nums)
-        (reverse arr)
-        (let* ([sorted-nums (sort nums <)]
-               [alice-choice (first sorted-nums)]
-               [nums-after-alice (rest sorted-nums)]
-               [bob-choice (first nums-after-alice)]
-               [nums-after-bob (rest nums-after-alice)])
-          (round nums-after-bob (cons alice-choice (cons bob-choice arr))))))
+  (define (play-game nums arr)
+    (match nums
+      ;; Base case: if nums is empty, return the result list
+      ['() (reverse arr)]
+      ;; Recursive case: remove the minimum elements and append to arr accordingly
+      [_
+       (define sorted-nums (sort nums <))
+       (define-values (alice-choice bob-choice) (values (first sorted-nums) (second sorted-nums)))
+       (define nums-after-bob (drop sorted-nums 2))
+       (play-game nums-after-bob (cons alice-choice (cons bob-choice arr)))]))
 
-  ;; Start the rounds with the initial nums and an empty result list
-  (round nums '()))
+  ;; Start the game with the given nums and an empty result list
+  (play-game nums '()))
 
 ;; Example usage:
 (numberGame '(5 4 2 3)) ;; Output: '(3 2 5 4)

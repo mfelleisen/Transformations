@@ -35,9 +35,11 @@
   
   ;; Calculate the number of 1 bits in a number (Hamming weight)
   (define (count-bits n)
-    (if (zero? n)
-        0
-        (+ (bitwise-and n 1) (count-bits (arithmetic-shift n -1)))))
+    (define (count-acc n acc)
+      (if (= n 0)
+          acc
+          (count-acc (arithmetic-shift n -1) (+ acc (bitwise-and n 1)))))
+    (count-acc n 0))
   
   ;; Calculate current XOR of all elements
   (define current-xor (xor-all nums))
@@ -50,7 +52,7 @@
 
 ;; Example usage
 (minOperations '(2 1 3 4) 1)  ; Output: 2
-(minOperations '(2 0 2 0) 0)  ; Output: 0
+(minOperations '(2 0 2 0) 0) ; Output: 0
 
 (require rackunit)
 

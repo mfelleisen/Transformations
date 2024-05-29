@@ -24,22 +24,21 @@
 (define (minimumRightShifts nums)
   (define n (length nums))
 
-  (define (sorted? lst)
-    (or (empty? lst)
-        (empty? (rest lst))
-        (<= (first lst) (second lst) (sorted? (rest lst)))))
+  (define (sorted? nums)
+    (andmap (lambda (i) (<= (list-ref nums i) (list-ref nums (add1 i))))
+            (in-range (sub1 (length nums)))))
 
-  (define (find-shift shifts remaining)
-    (if (sorted? remaining)
-        shifts
-        (let ([shifted (append (rest remaining) (list (first remaining)))])
-          (if (= shifts n)
-              -1
-              (find-shift (add1 shifts) shifted)))))
+  (define (right-shift nums)
+    (append (list (last nums)) (take nums (sub1 (length nums)))))
 
-  (if (sorted? nums)
-      0
-      (find-shift 1 (append (rest nums) (list (first nums))))))
+  (define (find-min-shifts nums count)
+    (if (sorted? nums)
+        count
+        (if (= count n)
+            -1
+            (find-min-shifts (right-shift nums) (add1 count)))))
+
+  (find-min-shifts nums 0))
 
 (require rackunit)
 

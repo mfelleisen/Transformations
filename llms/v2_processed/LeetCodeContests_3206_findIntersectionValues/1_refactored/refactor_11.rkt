@@ -24,13 +24,13 @@
   (define set-nums1 (set (in-list nums1)))
   (define set-nums2 (set (in-list nums2)))
   (define intersection (set-intersect set-nums1 set-nums2))
-
-  (define (count-intersections nums set-intersect)
+  
+  (define (count-intersections nums)
     (for/sum ([x (in-list nums)])
-      (if (set-member? set-intersect x) 1 0)))
-
-  (list (count-intersections nums1 intersection)
-        (count-intersections nums2 intersection)))
+      (if (set-member? intersection x) 1 0)))
+  
+  (list (count-intersections nums1)
+        (count-intersections nums2)))
 
 ;; Example usage:
 (displayln (findIntersectionValues '(4 3 2 3 1) '(2 2 5 2 3 6)))  ; Output: '(3 4)

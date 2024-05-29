@@ -22,24 +22,28 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (define (valid-triplet? triplet k)
+  ;; Helper function to check if a triplet satisfies the condition
+  (define (valid-triplet? triplet)
     (<= (- (third triplet) (first triplet)) k))
-  
-  (define (make-triplets sorted-nums k)
-    (define (loop remaining acc)
-      (match remaining
-        [(list) (reverse acc)]
-        [(list-rest (list t1 t2 t3) rest)
-         (if (valid-triplet? (list t1 t2 t3) k)
-             (loop rest (cons (list t1 t2 t3) acc))
-             '())]
-        [_ '()])) ; Not a multiple of 3, return empty list
-    (loop sorted-nums '()))
-  
-  (if (not (= (remainder (length nums) 3) 0))
-      '() ; Return an empty list if nums length is not a multiple of 3
-      (make-triplets (sort nums <) k)))
 
+  ;; Helper function to group elements into triplets
+  (define (group-triplets sorted-nums)
+    (if (empty? sorted-nums)
+        '()
+        (let ([triplet (take sorted-nums 3)]
+              [remaining (drop sorted-nums 3)])
+          (if (valid-triplet? triplet)
+              (cons triplet (group-triplets remaining))
+              '()))))
+
+  ;; Main function logic
+  (if (not (= (remainder (length nums) 3) 0))
+      '()
+      (group-triplets (sort nums <))))
+
+;; Example usage
+(divideArray '(1 3 4 8 7 9 3 5 1) 2) ;; => '((1 1 3) (3 4 5) (7 8 9))
+(divideArray '(1 3 3 2 7 3) 3)       ;; => '()
 
 (require rackunit)
 

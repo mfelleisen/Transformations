@@ -26,17 +26,26 @@
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
   (define n (length nums))
-  (define (cost i j) (+ (list-ref nums 0) (list-ref nums i) (list-ref nums j)))
   
-  (define (min-cost i min-cost-so-far)
-    (for/fold ([min-cost-so-far min-cost-so-far])
-              ([j (in-range (+ i 1) n)])
-      (min min-cost-so-far (cost i j))))
+  (define (calculate-cost i j)
+    (+ (list-ref nums 0) (list-ref nums i) (list-ref nums j)))
   
-  (for/fold ([min-cost +inf.0])
-            ([i (in-range 1 (- n 1))])
-    (min-cost i min-cost)))
+  (define (find-min-cost i min-cost)
+    (if (>= i (- n 1))
+        min-cost
+        (let ([inner-min (for/fold ([current-min min-cost])
+                             ([j (in-range (+ i 1) n)])
+                           (min current-min (calculate-cost i j)))])
+          (find-min-cost (+ i 1) inner-min))))
+  
+  (if (= n 3)
+      (apply + nums)
+      (find-min-cost 1 +inf.0)))
 
+;; Examples:
+(minimumCost '(1 2 3 12)) ;; Output: 6
+(minimumCost '(5 4 3)) ;; Output: 12
+(minimumCost '(10 3 1 1)) ;; Output: 12
 
 (require rackunit)
 

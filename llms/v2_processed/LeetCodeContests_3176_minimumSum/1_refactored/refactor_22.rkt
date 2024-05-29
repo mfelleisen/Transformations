@@ -28,36 +28,40 @@
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
   (define n (length nums))
-
-  (define (find-left-min j)
-    (for/fold ([left-min +inf.0]) ([i (in-range 0 j)])
-      (define current (list-ref nums i))
-      (if (< current (list-ref nums j))
-          (min left-min current)
-          left-min)))
-
-  (define (find-right-min j)
-    (for/fold ([right-min +inf.0]) ([k (in-range (+ j 1) n)])
-      (define current (list-ref nums k))
-      (if (< current (list-ref nums j))
-          (min right-min current)
-          right-min)))
+  (define inf +inf.0)
   
-  (define (find-min-sum)
-    (for/fold ([min-sum +inf.0]) ([j (in-range 1 (- n 1))])
-      (define left-min (find-left-min j))
-      (define right-min (find-right-min j))
-      (if (and (not (= left-min +inf.0))
-               (not (= right-min +inf.0)))
-          (min min-sum (+ left-min (list-ref nums j) right-min))
-          min-sum)))
+  (define (left-mins nums)
+    (for/fold ([left-mins (vector inf)])
+              ([i (in-range 1 n)])
+      (let ([prev-min (vector-ref left-mins (sub1 i))])
+        (vector-append left-mins
+                       (vector (if (< (list-ref nums i) (list-ref nums (sub1 i)))
+                                   (min prev-min (list-ref nums (sub1 i)))
+                                   prev-min))))))
   
-  (if (< n 3)
-      -1
-      (let ([min-sum (find-min-sum)])
-        (if (= min-sum +inf.0)
-            -1
+  (define (right-mins nums)
+    (for/fold ([right-mins (vector inf)])
+              ([i (in-range (sub1 n) 0 -1)])
+      (let ([prev-min (vector-ref right-mins (sub1 (- n i)))])
+        (vector-append right-mins
+                       (vector (if (< (list-ref nums (sub1 i)) (list-ref nums i))
+                                   (min prev-min (list-ref nums i))
+                                   prev-min))))))
+  
+  (define left-mins-vector (left-mins nums))
+  (define right-mins-vector (right-mins nums))
+  
+  (define min-sum
+    (for/fold ([min-sum inf])
+              ([j (in-range 1 (sub1 n))])
+      (let ([left-min (vector-ref left-mins-vector (sub1 j))]
+            [right-min (vector-ref right-mins-vector (- n j))])
+        (if (and (not (= left-min inf))
+                 (not (= right-min inf)))
+            (min min-sum (+ left-min (list-ref nums j) right-min))
             min-sum))))
+  
+  (if (= min-sum inf) -1 min-sum))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ;; Output: 9

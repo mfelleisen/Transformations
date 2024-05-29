@@ -26,23 +26,25 @@
 ;;  * 0 <= nums[i] < 231
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
-  ;; Helper function to count set bits at a given position across all numbers
-  (define (count-set-bits-at-pos pos)
-    (count (lambda (num) (not (zero? (bitwise-and num (arithmetic-shift 1 pos))))) nums))
-
-  ;; Fold over bit positions from 0 to 30, accumulating the result
-  (foldl (lambda (pos result)
-           (let ([bit (arithmetic-shift 1 pos)])
-             (if (>= (count-set-bits-at-pos pos) k)
-                 (bitwise-ior result bit)
-                 result)))
-         0
-         (range 31)))
+  ;; Function to calculate the count of set bits at a particular position
+  (define (bit-count-at-position nums pos)
+    (for/sum ([num (in-list nums)])
+      (if (bitwise-and num (arithmetic-shift 1 pos)) 1 0)))
+  
+  ;; Function to accumulate the K-or by examining each bit position up to 31
+  (define (accumulate-K-or nums k)
+    (for/fold ([result 0])
+              ([pos (in-range 31)])
+      (if (>= (bit-count-at-position nums pos) k)
+          (bitwise-ior result (arithmetic-shift 1 pos))
+          result)))
+  
+  (accumulate-K-or nums k))
 
 ;; Example usage:
-(findKOr '(7 12 9 8 9 15) 4)  ; Output: 9
-(findKOr '(2 12 1 11 4 5) 6)  ; Output: 0
-(findKOr '(10 8 5 9 11 6 8) 1)  ; Output: 15
+(findKOr '(7 12 9 8 9 15) 4)   ; Output: 9
+(findKOr '(2 12 1 11 4 5) 6)   ; Output: 0
+(findKOr '(10 8 5 9 11 6 8) 1) ; Output: 15
 
 (require rackunit)
 

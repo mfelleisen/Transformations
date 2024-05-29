@@ -18,21 +18,20 @@
 ;;  * 0 <= xi, yi <= 106
 ;;  * 0 <= k <= 100
 (define (countPairs coordinates k)
-  ;; Function to calculate the XOR distance between two points
+  ;; Helper function to calculate the XOR distance between two points
   (define (xor-distance p1 p2)
     (+ (bitwise-xor (first p1) (first p2))
        (bitwise-xor (second p1) (second p2))))
-  
-  ;; Count valid pairs with distance equal to k using higher-order functions
-  (define (count-valid-pairs coords)
-    (for/sum ([i (in-range (length coords))])
-      (for/sum ([j (in-range (add1 i) (length coords))])
-        (if (= (xor-distance (list-ref coords i) (list-ref coords j)) k)
-            1
-            0))))
-  
-  ;; Calculate the count of valid pairs
-  (count-valid-pairs coordinates))
+
+  ;; Calculate the count of valid pairs using a fold
+  (for/fold ([acc 0]) ([i (in-naturals)] [p1 (in-list coordinates)])
+    (for/fold ([inner-acc acc]) ([j (in-range (+ i 1) (length coordinates))]
+                                 [p2 (in-list (drop coordinates (+ i 1)))])
+      (+ inner-acc (if (= (xor-distance p1 p2) k) 1 0)))))
+
+;; Example usage:
+(countPairs '((1 2) (4 2) (1 3) (5 2)) 5) ;; Output: 2
+(countPairs '((1 3) (1 3) (1 3) (1 3) (1 3)) 0) ;; Output: 10
 
 (require rackunit)
 

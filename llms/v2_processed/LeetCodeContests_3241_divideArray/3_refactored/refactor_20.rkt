@@ -22,20 +22,42 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  ;; Sort the list of numbers
-  (define sorted-nums (sort nums <))
+  ;; Helper function to check if a group satisfies the condition
+  (define (valid-group? group)
+    (<= (- (apply max group) (apply min group)) k))
+
+  ;; Main function to divide the array into valid groups
+  (define (divide sorted-nums acc)
+    (match sorted-nums
+      ;; If there are no elements left, return the accumulated groups
+      ['() (reverse acc)]
+      ;; If we can't form a group of 3, return empty list
+      [(list _ _)
+       '()]
+      ;; Try to form a group of 3 and validate it
+      [(list a b c rest ...)
+       (let ([group (list a b c)])
+         (if (valid-group? group)
+             ;; If valid, continue dividing the rest
+             (divide rest (cons group acc))
+             ;; If invalid, return empty list
+             '()))]))
+
   ;; Check if the length of the list is divisible by 3
-  (if (not (= (remainder (length nums) 3) 0))
-      '() ; Return empty list if not divisible by 3
-      (let loop ((remaining sorted-nums)
-                 (result '()))
-        (match remaining
-          [(list) (reverse result)] ; Return the accumulated result when done
-          [(list-rest a b c rest)
-           (if (> (- c a) k)
-               '() ; Return empty list if condition is not met
-               (loop rest (cons (list a b c) result)))] ; Add the group to result
-          [_ '()])))) ; In case there are fewer than 3 elements left
+  (if (zero? (remainder (length nums) 3))
+      (divide (sort nums <) '())
+      '()))
+
+;; Example usage
+(define nums1 '(1 3 4 8 7 9 3 5 1))
+(define k1 2)
+(define nums2 '(1 3 3 2 7 3))
+(define k2 3)
+
+(display (divideArray nums1 k1)) ; Output: '((1 1 3) (3 4 5) (7 8 9))
+(newline)
+(display (divideArray nums2 k2)) ; Output: '()
+(newline)
 
 (require rackunit)
 

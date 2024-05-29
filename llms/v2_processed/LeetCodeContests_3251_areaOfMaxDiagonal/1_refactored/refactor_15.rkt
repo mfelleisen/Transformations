@@ -21,30 +21,24 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  ;; Define a helper function to calculate the square of the diagonal length and the area of a rectangle.
-  (define (calculate-diagonal-squared length width)
-    (+ (* length length) (* width width)))
+  ;; Helper function to calculate the square of the diagonal length and the area of a rectangle.
+  (define (diagonal-squared-and-area length width)
+    (values (+ (* length length) (* width width)) (* length width)))
 
-  ;; Define a helper function to calculate the area of a rectangle.
-  (define (calculate-area length width)
-    (* length width))
+  ;; Fold over the dimensions to find the rectangle with the longest diagonal or maximum area.
+  (define (fold-dimensions dimensions)
+    (for/fold ([max-diagonal 0] [max-area 0])
+              ([dim dimensions])
+      (match-define (list length width) dim)
+      (define-values (diagonal-squared area) (diagonal-squared-and-area length width))
+      (if (or (> diagonal-squared max-diagonal)
+              (and (= diagonal-squared max-diagonal) (> area max-area)))
+          (values diagonal-squared area)
+          (values max-diagonal max-area))))
 
-  ;; Use foldl to traverse the list once and determine the rectangle with the longest diagonal or maximum area.
-  (define (update-accumulator dim acc)
-    ;; Destructure the current dimension and accumulated values.
-    (match-define (list length width) dim)
-    (match-define (list max-diagonal max-area) acc)
-    ;; Calculate diagonal squared and area for the current rectangle.
-    (define diagonal-squared (calculate-diagonal-squared length width))
-    (define area (calculate-area length width))
-    ;; Determine if the current rectangle should replace the accumulated values.
-    (if (or (> diagonal-squared max-diagonal)
-            (and (= diagonal-squared max-diagonal) (> area max-area)))
-        (list diagonal-squared area)  ;; Update the accumulator with new max values.
-        acc))  ;; Keep the old accumulator.
-
-  ;; Extract the area from the result.
-  (second (foldl update-accumulator (list 0 0) dimensions)))
+  ;; Extract the area from the result of the fold.
+  (let-values ([(max-diagonal max-area) (fold-dimensions dimensions)])
+    max-area))
 
 ;; Example usage:
 (define dimensions1 '((9 3) (8 6)))

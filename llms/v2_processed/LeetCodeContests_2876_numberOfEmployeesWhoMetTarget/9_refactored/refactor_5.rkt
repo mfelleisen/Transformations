@@ -28,8 +28,13 @@
 ;;  * 1 <= n == hours.length <= 50
 ;;  * 0 <= hours[i], target <= 105
 (define (numberOfEmployeesWhoMetTarget hours target)
-  ;; Use 'count' to count elements that meet or exceed the target.
-  (count (λ (hour) (>= hour target)) hours))
+  ;; Use 'foldr' to count the number of hours meeting or exceeding the target
+  (foldr (lambda (hour count)
+           (if (>= hour target)
+               (add1 count)
+               count))
+         0
+         hours))
 
 ;; Example usage:
 ;; (numberOfEmployeesWhoMetTarget '(0 1 2 3 4) 2)  ; Output: 3

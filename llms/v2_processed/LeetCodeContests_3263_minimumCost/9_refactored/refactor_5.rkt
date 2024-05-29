@@ -27,20 +27,17 @@
 (define (minimumCost nums)
   ;; Function to determine the minimum cost of dividing an array into 3 contiguous subarrays.
   (define n (length nums))
-  
-  ;; Helper function to calculate the cost of partitioning at given indices
-  (define (partition-cost i j)
-    (+ (list-ref nums 0) (list-ref nums i) (list-ref nums j)))
-  
-  ;; Generate all possible indices for partitioning
-  (define partitions 
-    (for*/list ([i (in-range 1 (- n 1))]
-                [j (in-range (+ i 1) n)])
-      (partition-cost i j)))
-  
-  ;; Find the minimum cost from all possible partitions
-  (apply min partitions))
-
+  (if (= n 3)
+      (apply + nums)  ; If there are exactly 3 elements, the cost is the sum of all elements.
+      (for*/fold ([min-cost +inf.0])  ; Initialize min-cost with infinity to find minimum.
+                ([i (in-range 1 (- n 1))]
+                 [j (in-range (+ i 1) n)]
+                 #:when (< (list-ref nums 0) min-cost))  ; Early termination if the first element is already higher than min-cost.
+        (let* ((cost1 (list-ref nums 0))  ; Cost of the first subarray starting from the first element.
+               (cost2 (list-ref nums i))  ; Cost of the second subarray starting at index i.
+               (cost3 (list-ref nums j))  ; Cost of the third subarray starting at index j.
+               (total-cost (+ cost1 cost2 cost3)))  ; Calculate total cost for this partition.
+          (min min-cost total-cost)))))  ; Return the minimum cost found.
 
 (require rackunit)
 

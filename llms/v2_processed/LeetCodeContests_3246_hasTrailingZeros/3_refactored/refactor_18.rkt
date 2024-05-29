@@ -21,13 +21,11 @@
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (hasTrailingZeros nums)
-  (define (bitwise-or-at-least-two lst)
-    (ormap (lambda (x) (even? x))
-           (for*/list ([x (in-list lst)] 
-                       [y (in-list lst)] 
-                       #:when (< x y))
-             (bitwise-ior x y))))
-  (bitwise-or-at-least-two nums))
+  ;; Filter out odd numbers as they cannot contribute to trailing zeros in bitwise OR
+  (define evens (filter even? nums))
+  
+  ;; If there are two or more even numbers, return true
+  (>= (length evens) 2))
 
 ;; Example usage:
 (displayln (hasTrailingZeros '(1 2 3 4 5)))  ; Output: #t

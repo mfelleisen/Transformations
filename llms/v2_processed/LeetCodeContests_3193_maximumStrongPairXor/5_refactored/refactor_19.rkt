@@ -27,21 +27,12 @@
   ;; Helper function to determine if two numbers form a strong pair.
   (define (strong-pair? x y)
     (<= (abs (- x y)) (min x y)))
-  
-  ;; Calculate the maximum XOR for a given number against all others in the list using fold.
-  (define (max-xor-for-list current-num rest)
-    (foldl (lambda (num max-xor)
-             (if (strong-pair? current-num num)
-                 (max max-xor (bitwise-xor current-num num))
-                 max-xor))
-           0
-           rest))
-  
-  ;; Main loop function that iterates over each number in the list using fold.
-  (foldl (lambda (num max-xor)
-           (max max-xor (max-xor-for-list num nums)))
-         0
-         nums))
+
+  ;; Calculate the maximum XOR value for all strong pairs in the list.
+  (for/fold ([max-xor 0]) ([x (in-list nums)] [y (in-list nums)])
+    (if (strong-pair? x y)
+        (max max-xor (bitwise-xor x y))
+        max-xor)))
 
 ;; Examples
 (maximumStrongPairXor '(1 2 3 4 5))  ; Output: 7

@@ -19,24 +19,18 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  ;; Helper function to simulate one round of the game
-  (define (one-round sorted-nums)
-    (let ([alice-choice (first sorted-nums)]
-          [remaining-nums (rest sorted-nums)])
-      (let ([bob-choice (first remaining-nums)]
-            [new-nums (rest remaining-nums)])
-        (values alice-choice bob-choice new-nums))))
-  
-  ;; Main loop function to accumulate the result array
-  (define (game-loop nums acc)
-    (if (null? nums)
-        (reverse acc)
-        (let-values ([(alice-choice bob-choice new-nums)
-                      (one-round (sort nums <))])
-          (game-loop new-nums (cons alice-choice (cons bob-choice acc))))))
-  
-  ;; Start the game loop with an empty accumulator
-  (game-loop nums '()))
+  ;; Helper function to simulate one round of the game.
+  (define (play-round nums arr)
+    (define-values (sorted-nums remaining-nums)
+      (split-at (sort nums <) 2))
+    (append arr (reverse sorted-nums) remaining-nums))
+
+  ;; Iteratively simulate the game rounds until nums is empty.
+  (let loop ([nums nums] [arr '()])
+    (if (empty? nums)
+        (reverse arr)  ; Return the accumulated result list reversed to match the order of append operations.
+        (let ([new-arr (play-round nums arr)])
+          (loop (drop nums 2) new-arr)))))  ; Recurse with updated nums and arr.
 
 ;; Example usage:
 (numberGame '(5 4 2 3))  ; Output: '(3 2 5 4)

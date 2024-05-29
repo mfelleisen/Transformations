@@ -22,26 +22,30 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (let ([sorted-nums (sort nums <)])
-    (define (valid-triplet? triplet)
-      (<= (- (third triplet) (first triplet)) k))
+  ;; Helper function to check if a triplet meets the condition
+  (define (valid-triplet? triplet)
+    (<= (- (third triplet) (first triplet)) k))
 
-    (define (split-into-triplets lst)
-      (if (empty? lst)
-          '()
-          (let ([triplet (take lst 3)]
-                [rest (drop lst 3)])
-            (if (valid-triplet? triplet)
-                (cons triplet (split-into-triplets rest))
-                '()))))
+  ;; Function to recursively divide the sorted list into valid triplets
+  (define (divide sorted-nums)
+    (cond
+      [(empty? sorted-nums) '()]
+      [(< (length sorted-nums) 3) '()]
+      [else
+       (define triplet (take sorted-nums 3))
+       (if (valid-triplet? triplet)
+           (cons triplet (divide (drop sorted-nums 3)))
+           '())]))
 
-    (if (zero? (remainder (length nums) 3))
-        (split-into-triplets sorted-nums)
-        '())))
+  ;; Main logic
+  (if (not (= (remainder (length nums) 3) 0))
+      '()  ; Return an empty list if nums length is not a multiple of 3
+      (let ([sorted-nums (sort nums <)])  ; Sort the list in ascending order
+        (divide sorted-nums))))
 
-;; Examples to test the function:
-(displayln (divideArray '(1 3 4 8 7 9 3 5 1) 2))  ; Output: '((1 1 3) (3 4 5) (7 8 9))
-(displayln (divideArray '(1 3 3 2 7 3) 3))        ; Output: '()
+;; Example usage:
+(divideArray '(1 3 4 8 7 9 3 5 1) 2)  ; Expected output: '((1 1 3) (3 4 5) (7 8 9))
+(divideArray '(1 3 3 2 7 3) 3)  ; Expected output: '()
 
 (require rackunit)
 

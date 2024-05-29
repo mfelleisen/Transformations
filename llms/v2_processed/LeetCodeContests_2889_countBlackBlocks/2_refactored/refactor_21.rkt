@@ -29,38 +29,40 @@
 ;;  * 0 <= coordinates[i][1] < n
 ;;  * It is guaranteed that coordinates contains pairwise distinct coordinates.
 (define (countBlackBlocks m n coordinates)
-  ;; Helper function to update the block count for a specific position
+  ;; Helper function to update the block count
   (define (update-block-count block-count x y)
-    (for ([dx (in-list '(0 -1))]
-          [dy (in-list '(0 -1))])
-      (let ((nx (+ x dx))
-            (ny (+ y dy)))
-        (when (and (>= nx 0) (< nx (- m 1)) (>= ny 0) (< ny (- n 1)))
-          (hash-update! block-count (cons nx ny) add1 0)))))
+    (define (increment-block x y)
+      (hash-update! block-count (cons x y) add1 0))
+    (when (> x 0) (when (> y 0) (increment-block (- x 1) (- y 1))))
+    (when (> x 0) (when (< y (- n 1)) (increment-block (- x 1) y)))
+    (when (< x (- m 1)) (when (> y 0) (increment-block x (- y 1))))
+    (when (< x (- m 1)) (when (< y (- n 1)) (increment-block x y))))
 
-  ;; Initialize block count hash table
+  ;; Initialize the block count hash table
   (define block-count (make-hash))
 
-  ;; Process each coordinate to update block counts
-  (for ([coord coordinates])
-    (define x (first coord))
-    (define y (second coord))
-    (update-block-count block-count x y))
+  ;; Process each coordinate to update the block count
+  (for-each (lambda (coord)
+              (define x (first coord))
+              (define y (second coord))
+              (update-block-count block-count x y))
+            coordinates)
 
-  ;; Initialize result vector with zeros
+  ;; Create a vector to store the results
   (define result (make-vector 5 0))
 
   ;; Count the blocks based on the number of black cells they contain
-  (for ([count (hash-values block-count)])
-    (vector-set! result count (add1 (vector-ref result count))))
+  (for-each (lambda (count)
+              (vector-set! result count (add1 (vector-ref result count))))
+            (hash-values block-count))
 
-  ;; Calculate total possible blocks
+  ;; Calculate the total number of possible 2x2 blocks
   (define total-blocks (* (- m 1) (- n 1)))
 
   ;; Compute the number of blocks with 0 black cells
   (vector-set! result 0 (- total-blocks (for/sum ([i (in-range 1 5)]) (vector-ref result i))))
 
-  ;; Convert result vector to list before returning
+  ;; Convert the result vector to a list before returning
   (vector->list result))
 
 ;; Example Usage

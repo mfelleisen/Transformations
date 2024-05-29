@@ -16,13 +16,21 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  (define (helper used current count total)
-    (cond
-      [(= count n) total]
-      [(set-member? used (- k current)) (helper used (+ current 1) count total)]
-      [else (helper (set-add used current) (+ current 1) (+ count 1) (+ total current))]))
+  (define (k-avoiding-sum used-numbers current-number count total-sum)
+    (if (= count n)
+        total-sum
+        (if (or (not (set-member? used-numbers (- k current-number)))
+                (= current-number (- k current-number)))
+            (k-avoiding-sum (set-add used-numbers current-number)
+                            (+ current-number 1)
+                            (+ count 1)
+                            (+ total-sum current-number))
+            (k-avoiding-sum used-numbers
+                            (+ current-number 1)
+                            count
+                            total-sum))))
 
-  (helper (set) 1 0 0))
+  (k-avoiding-sum (set) 1 0 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

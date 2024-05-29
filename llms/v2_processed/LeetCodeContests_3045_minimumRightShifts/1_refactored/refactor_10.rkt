@@ -23,29 +23,24 @@
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
   (define n (length nums))
+  (define sorted-nums (sort nums <))
   
-  ;; Check if the list is already sorted
-  (define (sorted? lst)
-    (andmap (lambda (a b) (<= a b)) lst (rest lst)))
+  (define (right-shifted-equals-sorted? shift)
+    (for/and ([i (in-range n)])
+      (= (list-ref nums (modulo (+ i shift) n))
+         (list-ref sorted-nums i))))
   
-  (cond
-    ;; If the list has only one element, it is already sorted
-    [(= n 1) 0]
-    ;; If the list is already sorted, no shifts are needed
-    [(sorted? nums) 0]
-    [else
-     ;; Generate all cyclic permutations of nums
-     (define cyclic-permutations
-       (for/list ([i (in-range n)])
-         (append (drop nums i) (take nums i))))
-     
-     ;; Find the number of right shifts needed to sort the list
-     (define (find-valid-shift perms)
-       (for/or ([perm perms] [i (in-naturals)])
-         (when (sorted? perm) i)))
-     
-     (or (find-valid-shift cyclic-permutations) -1)]))
+  (define (find-shift)
+    (for/first ([shift (in-range n)])
+      (when (right-shifted-equals-sorted? shift)
+        shift)))
+  
+  (or (find-shift) -1))
 
+;; Example usage
+(minimumRightShifts '(3 4 5 1 2)) ;; 2
+(minimumRightShifts '(1 3 5))     ;; 0
+(minimumRightShifts '(2 1 4))     ;; -1
 
 (require rackunit)
 

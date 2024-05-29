@@ -28,26 +28,23 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
-  ;; Calculate the sum of squares of distinct counts of all subarrays
-  (define (subarray-distinct-counts nums)
-    (for/fold ([total-sum 0]) ([i (in-range (length nums))])
-      (define subarray (drop nums i))
-      (+ total-sum (distinct-count-squares subarray))))
+  ;; Helper function to calculate the sum of squares of distinct counts for subarrays starting from index i
+  (define (sum-from-start i)
+    (let loop ([j i] [seen (set)] [total 0])
+      (if (< j (length nums))
+          (let* ([current (list-ref nums j)]
+                 [new-seen (set-add seen current)]
+                 [distinct-count (set-count new-seen)])
+            (loop (add1 j) new-seen (+ total (* distinct-count distinct-count))))
+          total)))
 
-  ;; Calculate the sum of squares of distinct counts of subarrays starting from the first element
-  (define (distinct-count-squares subarray)
-    (define-values (sum _)
-      (for/fold ([total-sum 0] [seen (set)]) ([x subarray])
-        (define new-seen (set-add seen x))
-        (define distinct-count (set-count new-seen))
-        (values (+ total-sum (* distinct-count distinct-count)) new-seen)))
-    sum)
+  ;; Sum the results of sum-from-start for each starting index in the array
+  (for/sum ([i (in-range (length nums))])
+    (sum-from-start i)))
 
-  (subarray-distinct-counts nums))
-
-;; Example usages:
-(sumCounts '(1 2 1))  ; Output: 15
-(sumCounts '(1 1))    ; Output: 3
+;; Example usages
+(sumCounts '(1 2 1)) ;; Output: 15
+(sumCounts '(1 1))   ;; Output: 3
 
 (require rackunit)
 

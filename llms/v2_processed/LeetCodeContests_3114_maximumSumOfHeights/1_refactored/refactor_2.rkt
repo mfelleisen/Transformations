@@ -39,18 +39,24 @@
   
   ;; Function to calculate the maximum sum with a fixed peak position
   (define (calculate-max-sum-with-peak peak)
-    (define heights
-      (for/fold ([heights (make-vector n 0)]) ([i (in-range peak -1 -1)])
-        (vector-set! heights i (min (list-ref maxHeights i) (if (= i peak) (list-ref maxHeights i) (vector-ref heights (add1 i)))))
+    (define (expand left right heights)
+      (for/fold ([heights heights])
+                ([i (in-range left right)])
+        (define new-height (min (vector-ref heights (if (< i peak) (+ i 1) (- i 1)))
+                                (list-ref maxHeights i)))
+        (vector-set! heights i new-height)
         heights))
-    (for/fold ([heights heights]) ([i (in-range (add1 peak) n)])
-      (vector-set! heights i (min (list-ref maxHeights i) (vector-ref heights (sub1 i))))
-      heights))
     
+    (define initial-heights (make-vector n 0))
+    (vector-set! initial-heights peak (list-ref maxHeights peak))
+    (define heights-left (expand (- peak 1) -1 initial-heights))
+    (define heights (expand (+ peak 1) n heights-left))
+    (apply + (vector->list heights)))
+  
   ;; Try every position as a peak and compute the maximum sum
   (define (find-max-sum)
     (apply max (for/list ([i (in-range n)])
-                 (apply + (vector->list (calculate-max-sum-with-peak i))))))
+                 (calculate-max-sum-with-peak i))))
   
   ;; Return the maximum sum of all possible beautiful configurations
   (find-max-sum))

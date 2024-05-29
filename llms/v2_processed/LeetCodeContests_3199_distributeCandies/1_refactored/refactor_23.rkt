@@ -14,21 +14,21 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Use a higher-order function to generate valid distributions and count them
+
+  ;; Predicate to check if a given distribution is valid under the limit constraint.
   (define (valid-distribution? a b c)
-    ;; Check if the distribution (a, b, c) is valid under the limit constraint.
     (and (<= a limit) (<= b limit) (<= c limit)))
 
-  ;; Count all valid distributions using a recursive approach with accumulators
-  (define (count-distributions n limit)
+  ;; Count all valid distributions using nested loops implemented as list comprehensions.
+  (define (count-distributions)
     (for*/sum ([a (in-range (add1 (min n limit)))]
                [b (in-range (add1 (min (- n a) limit)))]
                [c (in-range (add1 (min (- n a b) limit)))]
                #:when (= n (+ a b c)))
       (if (valid-distribution? a b c) 1 0)))
-
-  ;; Return the count of valid distributions
-  (count-distributions n limit))
+  
+  ;; Return the count of valid distributions.
+  (count-distributions))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

@@ -25,37 +25,28 @@
 ;;  * For all i, j that i != j, grid[i][j] != grid[j][i].
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion grid)
-  ;; Determine the potential champion by iterating through teams
+  ;; Find a potential champion by iterating through teams
   (define (find-potential-champion n)
-    (define (loop i potential-champion)
-      (cond
-        [(= i n) potential-champion]
-        [(= (list-ref (list-ref grid potential-champion) i) 1)
-         (loop (add1 i) potential-champion)]
-        [else
-         (loop (add1 i) i)]))
-    (loop 1 0))
+    (for/fold ([potential-champion 0]) ([i (in-range 1 n)])
+      (if (= (vector-ref (vector-ref grid potential-champion) i) 1)
+          potential-champion
+          i)))
   
   ;; Verify that the potential champion is indeed the champion
   (define (verify-champion potential-champion n)
-    (define (loop j)
-      (cond
-        [(= j n) potential-champion]  ; All checks passed, return champion
-        [(and (not (= j potential-champion))
-              (= (list-ref (list-ref grid j) potential-champion) 1))
-         -1]  ; Found a stronger team, no champion
-        [else
-         (loop (add1 j))]))
-    (loop 0))
+    (for/or ([j (in-range n)])
+      (and (not (= j potential-champion))
+           (= (vector-ref (vector-ref grid j) potential-champion) 1)))
+    potential-champion)
 
   ;; Main function body
-  (let* ((n (length grid))
-         (potential-champion (find-potential-champion n)))
+  (let* ([n (vector-length grid)]
+         [potential-champion (find-potential-champion n)])
     (verify-champion potential-champion n)))
 
 ;; Example Usage
-(displayln (findChampion '((0 1) (0 0))))  ; Output: 0
-(displayln (findChampion '((0 0 1) (1 0 1) (0 0 0))))  ; Output: 1
+(displayln (findChampion (vector (vector 0 1) (vector 0 0))))  ; Output: 0
+(displayln (findChampion (vector (vector 0 0 1) (vector 1 0 1) (vector 0 0 0))))  ; Output: 1
 
 (require rackunit)
 

@@ -21,19 +21,19 @@
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (hasTrailingZeros nums)
-  ;; Using `ormap` to check each pair of elements in `nums` for bitwise OR with trailing zeros.
-  (ormap (λ (pair)
-           (even? (apply bitwise-ior pair)))
-         (combinations 2 nums)))
+  ;; Helper function to check if a number has a trailing zero
+  (define (has-trailing-zero? x)
+    (even? x))
 
-;; Helper function to generate combinations of a given length from a list.
-(define (combinations k lst)
-  (if (zero? k)
-      '(())
-      (append-map (λ (x)
-                   (map (λ (c) (cons x c))
-                        (combinations (sub1 k) (cdr (member x lst)))))
-                  lst)))
+  ;; Generate all combinations of two or more elements and check if any combination has a trailing zero
+  (define (combinations-with-trailing-zero? nums)
+    (for/or ([i (in-list nums)]
+             [j (in-list nums)]
+             #:when (not (= i j)))
+      (has-trailing-zero? (bitwise-ior i j))))
+
+  ;; Check if there are any valid combinations
+  (combinations-with-trailing-zero? nums))
 
 ;; Example usage:
 (displayln (hasTrailingZeros '(1 2 3 4 5)))  ; Output: #t

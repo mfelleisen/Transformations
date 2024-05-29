@@ -24,34 +24,33 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  ;; Define a helper function to calculate the square of the diagonal length
+  ;; Helper function to calculate the square of the diagonal length
   (define (diagonal-squared length width)
     (+ (* length length) (* width width)))
 
-  ;; Define a helper function to calculate the area of the rectangle
+  ;; Helper function to calculate the area of the rectangle
   (define (area length width)
     (* length width))
 
-  ;; Use foldl to traverse the list and find the rectangle with the longest diagonal or maximum area
-  (define (max-diagonal-area result dim)
-    (let* ((length (first dim))
-           (width (second dim))
-           (current-diagonal (diagonal-squared length width))
-           (current-area (area length width))
-           (max-diagonal (first result))
-           (max-area (second result)))
+  ;; Use a fold to traverse the list and find the rectangle with the longest diagonal or maximum area
+  (define-values (max-diagonal max-area)
+    (for/fold ([max-diagonal 0] [max-area 0]) ([dim dimensions])
+      (define length (first dim))
+      (define width (second dim))
+      (define current-diagonal (diagonal-squared length width))
+      (define current-area (area length width))
       (cond
-        ;; Check if current diagonal is longer
-        ((> current-diagonal max-diagonal)
-         (list current-diagonal current-area))
-        ;; Check if diagonals are equal but current area is larger
-        ((and (= current-diagonal max-diagonal) (> current-area max-area))
-         (list max-diagonal current-area))
-        ;; Otherwise, keep the previous result
-        (else result))))
-
-  ;; Fold over the dimensions to find the maximum diagonal and area
-  (second (foldl max-diagonal-area '(0 0) dimensions)))
+        ;; If current diagonal is longer
+        [(> current-diagonal max-diagonal)
+         (values current-diagonal current-area)]
+        ;; If diagonals are equal but current area is larger
+        [(and (= current-diagonal max-diagonal) (> current-area max-area))
+         (values max-diagonal current-area)]
+        ;; Otherwise, keep the previous values
+        [else
+         (values max-diagonal max-area)])))
+  
+  max-area)
 
 ;; Example usage:
 (define dimensions1 '((9 3) (8 6)))

@@ -33,26 +33,25 @@
 (define (minimumPossibleSum n target)
   (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
 
-  ;; Helper function to generate the next number to be considered
-  (define (next-num nums candidate)
-    (if (ormap (lambda (num) (= (+ num candidate) target)) nums)
-        (next-num nums (add1 candidate))
-        candidate))
-
-  ;; Recursive function to build the array
-  (define (build-array nums candidate remaining)
-    (if (= remaining 0)
-        nums
-        (let* ([next (next-num nums candidate)]
-               [new-nums (cons next nums)])
-          (build-array new-nums (add1 next) (sub1 remaining)))))
+  ;; Helper function to generate a sequence of valid numbers
+  (define (valid-sequence n target)
+    (define (next-candidate candidate used)
+      (if (ormap (λ (num) (= (+ num candidate) target)) used)
+          (next-candidate (add1 candidate) used)
+          candidate))
+    (define (generate nums candidate)
+      (if (= (length nums) n)
+          nums
+          (let ((next (next-candidate candidate nums)))
+            (generate (cons next nums) (add1 next)))))
+    (generate '() 1))
 
   ;; Calculate the sum of the array elements modulo MOD
   (define (mod-sum nums)
-    (foldl (lambda (num acc) (modulo (+ acc num) MOD)) 0 nums))
+    (foldl (λ (num acc) (modulo (+ acc num) MOD)) 0 nums))
 
   ;; Generate the beautiful array and calculate its minimum possible sum
-  (mod-sum (build-array '() 1 n)))
+  (mod-sum (valid-sequence n target)))
 
 ;; Example test cases
 (displayln (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

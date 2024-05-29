@@ -28,24 +28,15 @@
 ;;  * The input is generated such that if team a is stronger than team b, team b is not stronger than team a.
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion n edges)
-  ;; Create adjacency list and in-degree list
-  (define in-degrees (make-vector n 0))
+  (define in-degrees (for/fold ([in-degs (make-vector n 0)]) ([edge edges])
+                      (let ([dest (second edge)])
+                        (vector-set! in-degs dest (+ 1 (vector-ref in-degs dest)))
+                        in-degs)))
   
-  ;; Update the in-degrees based on the edges
-  (for-each (λ (edge)
-              (vector-set! in-degrees (second edge)
-                           (add1 (vector-ref in-degrees (second edge)))))
-            edges)
+  (define zero-in-degree (for/list ([i (in-range n)] #:when (= (vector-ref in-degrees i) 0)) i))
   
-  ;; Find nodes with zero in-degrees
-  (define zero-in-degree-nodes
-    (for/list ([i (in-range n)]
-               #:when (= (vector-ref in-degrees i) 0))
-      i))
-  
-  ;; Return the champion if there is exactly one node with zero in-degrees
-  (if (= (length zero-in-degree-nodes) 1)
-      (first zero-in-degree-nodes)
+  (if (= (length zero-in-degree) 1)
+      (first zero-in-degree)
       -1))
 
 ;; Example usage:

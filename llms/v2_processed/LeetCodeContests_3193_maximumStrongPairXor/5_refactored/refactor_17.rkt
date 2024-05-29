@@ -28,25 +28,12 @@
   (define (strong-pair? x y)
     (<= (abs (- x y)) (min x y)))
 
-  ;; Generate all pairs (x, y) from nums where x and y can be the same.
-  (define pairs
-    (for*/list ([x nums]
-                [y nums])
-      (list x y)))
-
-  ;; Filter out only the strong pairs.
-  (define strong-pairs
-    (filter (lambda (pair)
-              (strong-pair? (first pair) (second pair)))
-            pairs))
-
-  ;; Compute the maximum XOR value from the strong pairs.
-  (define max-xor
-    (for/fold ([max-xor 0])
-              ([pair strong-pairs])
-      (max max-xor (bitwise-xor (first pair) (second pair)))))
-
-  max-xor)
+  ;; Compute the maximum XOR value for all strong pairs in the list.
+  (for/fold ([max-xor 0] #:result max-xor)
+            ([x nums]
+             [y nums]
+             #:when (strong-pair? x y))
+    (max max-xor (bitwise-xor x y))))
 
 ;; Examples
 (maximumStrongPairXor '(1 2 3 4 5))  ; Output: 7

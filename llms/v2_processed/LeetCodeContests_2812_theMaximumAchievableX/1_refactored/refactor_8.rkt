@@ -20,7 +20,14 @@
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
 (define (theMaximumAchievableX num t)
+  ;; The maximum achievable x is calculated by increasing x by t and decreasing num by t.
   (+ num (* 2 t)))
+
+;; Tests
+(require rackunit)
+(check-equal? (theMaximumAchievableX 4 1) 6)
+(check-equal? (theMaximumAchievableX 3 2) 7)
+(check-equal? (theMaximumAchievableX 1 50) 101)
 
 (require rackunit)
 

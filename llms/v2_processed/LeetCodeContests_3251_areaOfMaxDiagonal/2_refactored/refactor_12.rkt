@@ -21,34 +21,27 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  ;; Function to calculate the squared length of the diagonal of a rectangle
   (define (diagonal-squared length width)
     (+ (* length length) (* width width)))
 
-  ;; Function to calculate the area of a rectangle
-  (define (area length width)
-    (* length width))
+  (define (process-dimension dim acc)
+    (match-define (list length width) dim)
+    (match-define (list max-diagonal max-area) acc)
+    (let* ((diag-sq (diagonal-squared length width))
+           (area (* length width)))
+      (cond
+        [(> diag-sq max-diagonal) (list diag-sq area)]
+        [(and (= diag-sq max-diagonal) (> area max-area)) (list diag-sq area)]
+        [else acc])))
 
-  ;; Fold over the dimensions to find the maximum diagonal and corresponding area
-  (define-values (max-diagonal max-area)
-    (for/fold ([max-diagonal 0]
-               [max-area 0])
-              ([dim (in-list dimensions)])
-      (define length (first dim))
-      (define width (second dim))
-      (define diag-sq (diagonal-squared length width))
-      (define rect-area (area length width))
-      (if (or (> diag-sq max-diagonal)
-              (and (= diag-sq max-diagonal)
-                   (> rect-area max-area)))
-          (values diag-sq rect-area)
-          (values max-diagonal max-area))))
+  (define result
+    (foldl process-dimension '(0 0) dimensions))
 
-  max-area)
+  (second result))
 
 ;; Example usage
-(areaOfMaxDiagonal '((9 3) (8 6)))  ;; Output: 48
-(areaOfMaxDiagonal '((3 4) (4 3)))  ;; Output: 12
+(areaOfMaxDiagonal '((9 3) (8 6))) ;; => 48
+(areaOfMaxDiagonal '((3 4) (4 3))) ;; => 12
 
 (require rackunit)
 

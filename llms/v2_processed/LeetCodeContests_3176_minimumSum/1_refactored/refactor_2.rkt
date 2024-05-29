@@ -28,33 +28,43 @@
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
   (define n (length nums))
-  
-  ;; Helper function to find the minimum element in the range [start, end) that is less than pivot
-  (define (find-min-in-range start end pivot)
-    (for/fold ([min-val +inf.0])
+  (define inf +inf.0)
+
+  ;; Helper function to find the minimum element in a range satisfying a condition
+  (define (find-min start end pred)
+    (for/fold ([min-val inf])
               ([i (in-range start end)])
       (let ([val (list-ref nums i)])
-        (if (< val pivot) 
+        (if (pred val)
             (min min-val val)
             min-val))))
 
-  ;; Iterate over each possible 'j' as the peak of the mountain
-  (define min-sum
-    (for/fold ([min-sum +inf.0])
-              ([j (in-range 1 (- n 1))])
-      (define current (list-ref nums j))
-      (define left-min (find-min-in-range 0 j current))
-      (define right-min (find-min-in-range (+ j 1) n current))
-      (if (and (not (= left-min +inf.0)) (not (= right-min +inf.0)))
-          (min min-sum (+ left-min current right-min))
+  (define (valid-mountain-triplet? i j k)
+    (and (< i j k)
+         (< (list-ref nums i) (list-ref nums j))
+         (< (list-ref nums k) (list-ref nums j))))
+
+  ;; Main function to find the minimum sum of a mountain triplet
+  (define (find-minimum-mountain-sum)
+    (for/fold ([min-sum inf])
+              ([j (in-range 1 (sub1 n))])
+      (define left-min (find-min 0 j (curry < (list-ref nums j))))
+      (define right-min (find-min (+ j 1) n (curry < (list-ref nums j))))
+      (if (and (not (= left-min inf)) (not (= right-min inf)))
+          (min min-sum (+ left-min (list-ref nums j) right-min))
           min-sum)))
 
-  ;; Return the result, if no valid mountain was found return -1
-  (if (= min-sum +inf.0) -1 min-sum))
+  ;; Check if the length of nums is less than 3, if so return -1
+  (if (< n 3)
+      -1
+      (let ([result (find-minimum-mountain-sum)])
+        (if (= result inf)
+            -1
+            result))))
 
 ;; Example usages
-(minimumSum '(8 6 1 5 3))   ;; Output: 9
-(minimumSum '(5 4 8 7 10 2)) ;; Output: 13
+(minimumSum '(8 6 1 5 3))  ;; Output: 9
+(minimumSum '(5 4 8 7 10 2))  ;; Output: 13
 (minimumSum '(6 5 4 3 4 5))  ;; Output: -1
 
 (require rackunit)

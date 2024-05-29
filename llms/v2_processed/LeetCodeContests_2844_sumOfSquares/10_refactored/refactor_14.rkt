@@ -17,13 +17,21 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
-  ;; Calculate the length of the list nums
   (define n (length nums))
-  ;; Use fold to accumulate the sum of squares of special elements
-  (for/fold ([sum-squares 0]) ([i (in-range 1 (add1 n))])
-    (if (zero? (remainder n i))
-        (+ sum-squares (sqr (list-ref nums (sub1 i))))
-        sum-squares)))
+  
+  (define (is-special? i)
+    (zero? (remainder n i)))
+  
+  (define (square x)
+    (* x x))
+  
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (is-special? i))
+    (square (list-ref nums (sub1 i)))))
+
+;; Examples:
+(sumOfSquares '(1 2 3 4))  ;; Output: 21
+(sumOfSquares '(2 7 1 19 18 3))  ;; Output: 63
 
 (require rackunit)
 

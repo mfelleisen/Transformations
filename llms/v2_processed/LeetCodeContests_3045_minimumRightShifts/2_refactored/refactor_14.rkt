@@ -22,33 +22,29 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
-  ;; Calculate the length of the list
   (define n (length nums))
+  
+  (define (sorted? lst)
+    (andmap (lambda (i) (<= (list-ref lst i) (list-ref lst (add1 i))))
+            (range 0 (sub1 (length lst)))))
 
-  ;; If the list has only one element, it's already sorted
-  (if (= n 1)
+  (define (right-shift lst)
+    (cons (last lst) (take lst (sub1 (length lst)))))
+
+  (define (find-shifts lst count)
+    (cond
+      [(sorted? lst) count]
+      [(= count n) -1]
+      [else (find-shifts (right-shift lst) (add1 count))]))
+
+  (if (sorted? nums)
       0
-      (let ([sorted-nums (sort nums <)]) ;; Sort the list in ascending order
-        
-        ;; Define a helper function to determine if a list is a valid shift
-        (define (is-valid-shift? start)
-          (for/and ([i (in-range n)])
-            (= (list-ref nums (modulo (+ start i) n))
-               (list-ref sorted-nums i))))
-
-        ;; Define a function to find the valid shift starting from index 0
-        (define (find-shift start)
-          (for/first ([i (in-range n)])
-            (when (is-valid-shift? i)
-              (modulo (- n i) n))))
-
-        ;; Get the result from find-shift, return -1 if no valid shift is found
-        (or (find-shift 0) -1))))
+      (find-shifts (right-shift nums) 1)))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2
-(minimumRightShifts '(1 3 5))       ;; Output: 0
-(minimumRightShifts '(2 1 4))       ;; Output: -1
+(minimumRightShifts '(1 3 5))      ;; Output: 0
+(minimumRightShifts '(2 1 4))      ;; Output: -1
 
 (require rackunit)
 

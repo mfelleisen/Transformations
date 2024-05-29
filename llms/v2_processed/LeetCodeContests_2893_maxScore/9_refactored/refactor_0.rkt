@@ -22,24 +22,32 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  ;; Recursive helper function with memoization
-  (define memo (make-hash))
+  ;; Define a helper function that computes the maximum score using accumulators
+  (define (compute-max-score nums x)
+    (define len (length nums))
+    ;; Initialize the memoization table with negative infinity values
+    (define dp (make-vector len -inf.0))
+    ;; Base case: starting point
+    (vector-set! dp 0 (first nums))
 
-  (define (max-score-helper i)
-    (hash-ref memo i
-      (lambda ()
-        (define current-score (list-ref nums i))
-        (define best-score current-score)
-        (for ([j (in-range (add1 i) (length nums))])
-          (define next-score (+ current-score (max-score-helper j)))
-          (when (not (= (modulo (list-ref nums i) 2) (modulo (list-ref nums j) 2)))
-            (set! next-score (- next-score x)))
-          (set! best-score (max best-score next-score)))
-        (hash-set! memo i best-score)
-        best-score)))
+    ;; Function to update the scores
+    (define (update-scores i current-score)
+      (for ([j (in-range (add1 i) len)])
+        (define next-score (+ current-score (list-ref nums j)))
+        (when (not (= (modulo (list-ref nums i) 2) (modulo (list-ref nums j) 2)))
+          (set! next-score (- next-score x)))
+        (vector-set! dp j (max (vector-ref dp j) next-score))))
 
-  ;; Start the recursion from the first position
-  (max-score-helper 0))
+    ;; Traverse the list and update scores
+    (for ([i (in-range len)])
+      (when (> (vector-ref dp i) -inf.0)
+        (update-scores i (vector-ref dp i))))
+
+    ;; Return the maximum score from the dp vector
+    (apply max (vector->list dp)))
+
+  ;; Call the helper function with the initial values
+  (compute-max-score nums x))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

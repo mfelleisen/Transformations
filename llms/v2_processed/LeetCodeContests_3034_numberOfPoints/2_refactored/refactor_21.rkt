@@ -19,10 +19,9 @@
   (define (points-from-range start end)
     (range start (add1 end)))
   
-  ;; Use `for/fold` to accumulate all points covered by cars into a set
+  ;; Using `for/fold` to accumulate all points covered by cars into a set
   (define covered-points
-    (for/fold ([acc (set)])
-              ([range (in-list nums)])
+    (for/fold ([acc (set)]) ([range (in-list nums)])
       (set-union acc (set (points-from-range (first range) (second range))))))
   
   ;; Return the size of the set, which represents the number of unique points covered

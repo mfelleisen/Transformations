@@ -18,14 +18,17 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  (define (is-special? i) (zero? (remainder n (add1 i))))
-  (for/sum ([i (in-indexed nums)] #:when (is-special? (car i)))
-    (sqr (cdr i))))
+  (define (special? i) (zero? (remainder n i)))
 
-;; The `for/sum` loop iterates over the indexed elements of `nums`, where `i` is a pair of (index, value).
-;; The `#:when` clause filters only the special elements (those whose 1-based index divides `n`).
-;; `is-special?` is a helper function to check if the 1-based index divides `n`.
-;; `sqr` computes the square of the value.
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (special? i))
+    (define value (list-ref nums (sub1 i)))
+    (* value value)))
+
+;; The refactored function uses `for/sum` to iterate over indices from 1 to n,
+;; and the `#:when` clause to filter out indices that are not divisors of n.
+;; `define` is used inside the loop to create a local binding for the value,
+;; and the square of this value is computed and summed up.
 
 (require rackunit)
 

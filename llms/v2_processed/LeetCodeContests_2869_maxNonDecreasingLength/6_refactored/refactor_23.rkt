@@ -34,41 +34,24 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  (define n (length nums1))
+  ;; Helper function to calculate the maximum length of non-decreasing subarray
+  (define (calc-max-len n1 n2)
+    (for/fold ([max-len 1] [prev1 (first n1)] [prev2 (first n2)] [dp1 1] [dp2 1])
+              ([cur1 (rest n1)] [cur2 (rest n2)])
+      (define new-dp1
+        (max (if (>= cur1 prev1) (+ dp1 1) 1)
+             (if (>= cur1 prev2) (+ dp2 1) 1)))
+      (define new-dp2
+        (max (if (>= cur2 prev1) (+ dp1 1) 1)
+             (if (>= cur2 prev2) (+ dp2 1) 1)))
+      (values (max max-len new-dp1 new-dp2) cur1 cur2 new-dp1 new-dp2)))
   
-  (define (update-max-length i prev-max prev1 prev2)
-    (let* ([num1 (list-ref nums1 i)]
-           [num2 (list-ref nums2 i)]
-           [new-max1 (max (if (<= (list-ref nums1 (sub1 i)) num1)
-                              (+ 1 prev1)
-                              1)
-                          (if (<= (list-ref nums2 (sub1 i)) num1)
-                              (+ 1 prev2)
-                              1))]
-           [new-max2 (max (if (<= (list-ref nums1 (sub1 i)) num2)
-                              (+ 1 prev1)
-                              1)
-                          (if (<= (list-ref nums2 (sub1 i)) num2)
-                              (+ 1 prev2)
-                              1))]
-           [current-max (max new-max1 new-max2 prev-max)])
-      (values current-max new-max1 new-max2)))
-  
-  (let loop ([i 1]
-             [prev-max 1]
-             [prev1 1]
-             [prev2 1])
-    (if (= i n)
-        prev-max
-        (call-with-values
-            (lambda () (update-max-length i prev-max prev1 prev2))
-          (lambda (current-max new-max1 new-max2)
-            (loop (add1 i) current-max new-max1 new-max2))))))
+  (calc-max-len nums1 nums2))
 
-;; Example calls
-(displayln (maxNonDecreasingLength '(2 3 1) '(1 2 1))) ; Output: 2
-(displayln (maxNonDecreasingLength '(1 3 2 1) '(2 2 3 4))) ; Output: 4
-(displayln (maxNonDecreasingLength '(1 1) '(2 2))) ; Output: 2
+;; Example usage:
+;; (maxNonDecreasingLength '(2 3 1) '(1 2 1)) ;; => 2
+;; (maxNonDecreasingLength '(1 3 2 1) '(2 2 3 4)) ;; => 4
+;; (maxNonDecreasingLength '(1 1) '(2 2)) ;; => 2
 
 (require rackunit)
 

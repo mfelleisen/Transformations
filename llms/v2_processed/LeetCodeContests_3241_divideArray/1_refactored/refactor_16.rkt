@@ -28,15 +28,26 @@
       (let* ((sorted-nums (sort nums <))  ; Sort the list in ascending order
              (groups (partition-list sorted-nums 3)))  ; Partition the list into groups of 3
         ;; Check each group to ensure the difference between max and min is <= k
-        (if (andmap (lambda (group) (<= (- (apply max group) (apply min group)) k)) groups)
+        (if (andmap (lambda (group)
+                      (match group
+                        [(list a b c) (<= (- c a) k)]
+                        [_ #f]))
+                    groups)
             groups  ; Return the groups if all groups satisfy the condition
             '()))))  ; Otherwise, return an empty list
 
 (define (partition-list lst n)
   ;; Helper function to partition a list into sublists of size n
-  (if (empty? lst)
-      '()
-      (cons (take lst n) (partition-list (drop lst n) n))))
+  (for/list ([chunk (in-slice lst n)])
+    chunk))
+
+(define (in-slice lst n)
+  ;; Helper function to create slices of size n from a list
+  (define (loop lst)
+    (if (null? lst)
+        '()
+        (cons (take lst n) (loop (drop lst n)))))
+  (in-list (loop lst)))
 
 (require rackunit)
 

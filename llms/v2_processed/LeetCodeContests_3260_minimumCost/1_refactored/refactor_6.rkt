@@ -27,37 +27,26 @@
 ;; 3 <= k <= n
 ;; k - 2 <= dist <= n - 2
 (define (minimumCost nums k dist)
-  (define n (length nums))
-
-  (define (valid-partition? indices)
-    (<= (- (last indices) (second indices)) dist))
+  ;; Helper function to calculate the cost given specific starting indices for subarrays
+  (define (calculate-cost start-indices)
+    (apply + (map (λ (idx) (list-ref nums idx)) start-indices)))
   
-  (define (calculate-cost indices)
-    (apply + (map (curry list-ref nums) indices)))
-  
-  (define (dfs start-index depth current-indices)
+  ;; DFS to generate all valid k partitions
+  (define (dfs start-index depth current-indices min-cost)
     (if (= depth k)
-        (if (valid-partition? current-indices)
-            (calculate-cost current-indices)
-            +inf.0)
-        (let loop ((next-start (+ start-index 1)) 
-                   (limit (- n (- k depth))) 
-                   (min-cost +inf.0))
-          (if (> next-start limit)
-              min-cost
-              (loop (add1 next-start) 
-                    limit 
-                    (min min-cost 
-                         (dfs next-start (add1 depth) (append current-indices (list next-start)))))))))
-  
-  (define (initial-dfs)
-    (for/fold ([min-cost +inf.0]) 
-              ([first-end (in-range 1 (+ (- n k) 2))])
-      (min min-cost (dfs first-end 2 (list 0 first-end)))))
+        (if (<= (- (last current-indices) (second current-indices)) dist)
+            (min min-cost (calculate-cost current-indices))
+            min-cost)
+        (let ([next-start-limit (- (length nums) (- k depth))])
+          (for/fold ([min-cost min-cost])
+                    ([next-start (in-range (+ start-index 1) (+ next-start-limit 1))])
+            (dfs next-start (+ depth 1) (append current-indices (list next-start)) min-cost)))))
   
   (if (= k 1)
       (first nums)
-      (initial-dfs)))
+      (for/fold ([min-cost +inf.0])
+                ([first-end (in-range 1 (+ (- (length nums) k) 2))])
+        (dfs first-end 2 (list 0 first-end) min-cost))))
 
 ;; Example usage
 (minimumCost '(1 3 2 6 4 2) 3 3)  ; Output: 5

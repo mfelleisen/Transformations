@@ -26,26 +26,19 @@
 ;;  * 0 <= nums[i] < 231
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
+  ;; Define the maximum number of bits to consider (up to 31 bits for 32-bit integers)
   (define max-bits 31)
 
-  ;; Helper function to count the occurrences of each bit position
-  (define (count-bits nums)
-    (for/fold ([bit-counts (make-vector max-bits 0)]) ([num (in-list nums)])
-      (for ([i (in-range max-bits)])
-        (when (not (zero? (bitwise-and num (arithmetic-shift 1 i))))
-          (vector-set! bit-counts i (add1 (vector-ref bit-counts i)))))
-      bit-counts))
+  ;; Helper function to count how many numbers have the ith bit set
+  (define (count-set-bits i)
+    (for/sum ([num nums])
+      (if (zero? (bitwise-and num (arithmetic-shift 1 i))) 0 1)))
 
-  ;; Generate the result by setting bits that meet the count condition
-  (define (generate-result bit-counts k)
-    (for/fold ([result 0]) ([i (in-range max-bits)])
-      (if (>= (vector-ref bit-counts i) k)
-          (bitwise-ior result (arithmetic-shift 1 i))
-          result)))
-
-  ;; Perform the bit counting and result generation
-  (define bit-counts (count-bits nums))
-  (generate-result bit-counts k))
+  ;; Construct the result by checking each bit position using a fold
+  (for/fold ([result 0]) ([i (in-range max-bits)])
+    (if (>= (count-set-bits i) k)
+        (bitwise-ior result (arithmetic-shift 1 i))
+        result)))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)  ;; Output: 9

@@ -19,18 +19,24 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  ;; Helper function to perform the game recursively
-  (define (play-game nums acc)
-    (if (empty? nums)
-        ;; If nums is empty, return the accumulated result array
-        (reverse acc)
-        (let* ((sorted-nums (sort nums <))
-               (alice (first sorted-nums))
-               (bob (second sorted-nums))
-               (remaining-nums (drop sorted-nums 2)))
-          (play-game remaining-nums (cons alice (cons bob acc))))))
-  ;; Start the game with the given nums and an empty accumulator
-  (play-game nums '()))
+  ;; Define a helper function to simulate one round of the game
+  (define (play-round nums arr)
+    (match nums
+      ;; If the list is empty, return the accumulated result array
+      [(list) (reverse arr)]
+      ;; Otherwise, process the next pair of elements
+      [nums
+       (define-values (min1 rest1) (extract-min nums))
+       (define-values (min2 rest2) (extract-min rest1))
+       (play-round rest2 (cons min1 (cons min2 arr)))]))
+
+  ;; Helper function to extract the minimum element and return the rest of the list
+  (define (extract-min lst)
+    (define min-val (apply min lst))
+    (values min-val (remove min-val lst)))
+
+  ;; Start the game with the provided nums and an empty arr
+  (play-round nums '()))
 
 ;; Example usage:
 (numberGame '(5 4 2 3))  ; Output: '(3 2 5 4)

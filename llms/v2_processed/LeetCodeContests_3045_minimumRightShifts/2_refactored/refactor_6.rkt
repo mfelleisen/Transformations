@@ -24,22 +24,22 @@
 (define (minimumRightShifts nums)
   (define n (length nums))
 
-  ;; Helper to generate rotations of the list
-  (define (rotations lst)
-    (let loop ([lst lst] [acc '()])
-      (if (empty? lst)
-          (reverse acc)
-          (loop (rest lst) (cons (append (rest lst) (list (first lst))) acc)))))
-
   (define sorted-nums (sort nums <))
-  (define shifts (rotations nums))
 
-  ;; Find the index of the sorted list in the rotations, if it exists
-  (define result (for/first ([shift shifts] [i (in-naturals)])
-                   (when (equal? shift sorted-nums)
-                     i)))
+  (define (valid-shift? start)
+    (for/and ([i (in-range n)])
+      (equal? (list-ref nums (modulo (+ start i) n))
+              (list-ref sorted-nums i))))
 
-  (if result result -1))
+  (define (find-valid-shift start)
+    (cond
+      [(valid-shift? start) (modulo (- n start) n)]
+      [(< start (- n 1)) (find-valid-shift (add1 start))]
+      [else -1]))
+
+  (if (= n 1)
+      0
+      (find-valid-shift 0)))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2

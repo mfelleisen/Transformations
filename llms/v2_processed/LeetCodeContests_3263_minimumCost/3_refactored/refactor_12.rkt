@@ -26,19 +26,26 @@
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
   (define n (length nums))
-  (if (= n 3)
-      (apply + nums)
-      (for/fold ([min-cost +inf.0]) ([i (in-range 1 (- n 1))])
-        (for/fold ([current-min min-cost]) ([j (in-range (+ i 1) n)])
-          (let ([cost (+ (first nums)
-                         (list-ref nums i)
-                         (list-ref nums j))])
-            (min current-min cost))))))
+  
+  ;; Helper function to compute the sum of three elements from three subarrays
+  (define (cost i j)
+    (+ (list-ref nums 0)
+       (list-ref nums i)
+       (list-ref nums j)))
+  
+  ;; Generate all possible combinations of i and j
+  (define indices
+    (for*/list ([i (in-range 1 (- n 1))]
+                [j (in-range (+ i 1) n)])
+      (list i j)))
+  
+  ;; Find the minimum cost from all combinations
+  (apply min (map (λ (pair) (apply cost pair)) indices)))
 
-;; Example usage:
-(minimumCost '(1 2 3 12))  ; Output: 6
-(minimumCost '(5 4 3))     ; Output: 12
-(minimumCost '(10 3 1 1))  ; Output: 12
+;; Example usage
+(minimumCost '(1 2 3 12)) ;; 6
+(minimumCost '(5 4 3)) ;; 12
+(minimumCost '(10 3 1 1)) ;; 12
 
 (require rackunit)
 

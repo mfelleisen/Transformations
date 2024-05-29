@@ -27,30 +27,27 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  ;; Helper function to find the minimum absolute difference for a given list and offset x.
-  (define (min-diff nums x)
-    (define sorted-nums (sort nums <))
-    (define len (length nums))
-    (define (find-min-diff sorted-nums x acc)
-      (if (>= x len)
-          acc
-          (let ([current-min (abs (- (list-ref sorted-nums x) (list-ref sorted-nums (- x 1))))])
-            (find-min-diff sorted-nums (+ x 1) (min acc current-min)))))
-    (find-min-diff sorted-nums x +inf.0))
-
-  ;; Create a list of differences between the elements at least x indices apart.
-  (define diffs
-    (for*/list ([i (in-range 0 (- (length nums) x))]
-                [j (in-range (+ i x) (length nums))])
-      (abs (- (list-ref nums i) (list-ref nums j)))))
-
-  ;; Find and return the minimum difference from the list of differences.
-  (apply min diffs))
+  ;; Compute the minimum absolute difference between elements in `nums`
+  ;; that are at least `x` indices apart.
+  (define len (length nums))
+  (define (safe-ref lst idx)
+    (if (and (>= idx 0) (< idx (length lst)))
+        (list-ref lst idx)
+        +inf.0))
+  (define (min-abs-diff i min-diff)
+    (if (>= i (- len x))
+        min-diff
+        (let* ((num (list-ref nums i))
+               (differences (map (λ (j) (abs (- num (safe-ref nums j))))
+                                 (range (+ i x) len)))
+               (new-min-diff (apply min (cons min-diff differences))))
+          (min-abs-diff (+ i 1) new-min-diff))))
+  (min-abs-diff 0 +inf.0))
 
 ;; Example usage:
-;; (minAbsoluteDifference [4,3,2,4] 2) => 0
-;; (minAbsoluteDifference [5,3,2,10,15] 1) => 1
-;; (minAbsoluteDifference [1,2,3,4] 3) => 3
+(minAbsoluteDifference '(4 3 2 4) 2)  ; Output: 0
+(minAbsoluteDifference '(5 3 2 10 15) 1)  ; Output: 1
+(minAbsoluteDifference '(1 2 3 4) 3)  ; Output: 3
 
 (require rackunit)
 

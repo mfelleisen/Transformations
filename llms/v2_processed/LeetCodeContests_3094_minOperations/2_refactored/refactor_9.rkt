@@ -22,26 +22,26 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (minOperations nums)
-  ;; Helper function to calculate the minimum operations for a given frequency
-  (define (calc-ops freq)
-    (cond [(= (remainder freq 3) 0) (quotient freq 3)]  ; If divisible by 3, just divide by 3
-          [(= (remainder freq 3) 1) (if (>= freq 4)  ; If remainder is 1, check if at least 4
-                                         (+ 2 (quotient (- freq 4) 3))
-                                         -1)]  ; Otherwise impossible
-          [(= (remainder freq 3) 2) (if (>= freq 2)  ; If remainder is 2, check if at least 2
-                                         (+ 1 (quotient (- freq 2) 3))
-                                         -1)]))  ; Otherwise impossible
+  (define freqs
+    (for/fold ([table (hash)])
+              ([num (in-list nums)])
+      (hash-update table num add1 0)))
 
-  ;; Use a hash table to count occurrences of each number in the list
-  (define freqs (for/fold ([table (hash)])
-                         ([num (in-list nums)])
-                  (hash-update table num add1 0)))
-  
-  ;; Calculate total operations or determine impossibility
+  (define (calc-ops freq)
+    (match (remainder freq 3)
+      [0 (quotient freq 3)]
+      [1 (if (>= freq 4)
+             (+ 2 (quotient (- freq 4) 3))
+             -1)]
+      [2 (if (>= freq 2)
+             (+ 1 (quotient (- freq 2) 3))
+             -1)]))
+
   (define ops (map calc-ops (hash-values freqs)))
-  (if (member -1 ops)  ; Check if any frequency resulted in -1
+
+  (if (member -1 ops)
       -1
-      (apply + ops)))  ; Sum up all operations
+      (apply + ops)))
 
 ;; Example usage:
 (minOperations '(2 3 3 2 2 4 2 3 4))  ; Output: 4

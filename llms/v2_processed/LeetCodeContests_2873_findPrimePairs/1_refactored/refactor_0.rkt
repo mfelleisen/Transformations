@@ -2,30 +2,32 @@
 
 ;; Function to check if a number is prime
 (define (is-prime? num)
+  ;; Helper function to check divisibility
+  (define (divisible? n d)
+    (zero? (remainder n d)))
   ;; Check for non-prime conditions
   (cond
-    [(<= num 1) #f]  ;; Numbers <= 1 are not prime
-    [(<= num 3) #t]  ;; 2 and 3 are prime numbers
-    [(zero? (remainder num 2)) #f]  ;; Even numbers > 2 are not prime
-    [(zero? (remainder num 3)) #f]  ;; Multiples of 3 > 3 are not prime
+    [(<= num 1) #f]
+    [(<= num 3) #t]
+    [(or (divisible? num 2) (divisible? num 3)) #f]
     [else
      ;; Check for divisibility from 5 onward, skipping even numbers
      (let loop ([i 5])
        (cond
-         [(> (* i i) num) #t]  ;; No divisors found, num is prime
-         [(zero? (remainder num i)) #f]  ;; Divisible by i, not prime
-         [(zero? (remainder num (+ i 2))) #f]  ;; Divisible by i+2, not prime
-         [else (loop (+ i 6))]))]))  ;; Check next potential prime factors
+         [(> (* i i) num) #t]
+         [(or (divisible? num i) (divisible? num (+ i 2))) #f]
+         [else (loop (+ i 6))]))]))
 
 ;; Function to find prime pairs that add up to n
 (define (findPrimePairs n)
   ;; Generate list of primes up to n
   (define primes (filter is-prime? (range 1 (add1 n))))
-  ;; Use a set to keep track of primes for O(1) lookup
+  ;; Create a set for quick prime lookup
   (define prime-set (set primes))
   ;; Find all pairs (x, y) such that x + y = n and both x and y are prime
-  (for/list ([x primes] #:unless (> (* 2 x) n) #:when (set-member? prime-set (- n x)))
-    (list x (- n x))))
+  (for/list ([x primes] #:when (<= x (/ n 2))
+             [y (list (- n x))] #:when (set-member? prime-set y))
+    (list x y)))
 
 ;; Example usage:
 (findPrimePairs 10)  ;; Output: '((3 7) (5 5))

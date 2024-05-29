@@ -33,18 +33,18 @@
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
 
-  ;; Helper function to generate the beautiful array
-  (define (build-beautiful-nums n target)
-    (define (helper i acc sum)
+  ;; Generate numbers that do not sum to `target` with any previous number
+  (define (generate-beautiful n target)
+    (define (helper acc count)
       (if (= (length acc) n)
-          sum
-          (if (not (ormap (λ (num) (= (+ num i) target)) acc))
-              (helper (+ i 1) (cons i acc) (+ sum i))
-              (helper (+ i 1) acc sum))))
-    (helper 1 '() 0))
+          acc
+          (if (ormap (λ (x) (= (+ x count) target)) acc)
+              (helper acc (add1 count))
+              (helper (cons count acc) (add1 count)))))
+    (reverse (helper '() 1)))
 
   ;; Compute the sum of the beautiful array and take modulo
-  (modulo (build-beautiful-nums n target) MOD))
+  (modulo (apply + (generate-beautiful n target)) MOD))
 
 ;; Example test cases
 (minimumPossibleSum 2 3)   ; Output: 4

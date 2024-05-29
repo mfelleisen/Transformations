@@ -23,41 +23,31 @@
 ;;  * 1 <= nums[i] <= nums.length
 ;;  * 0 <= k <= nums.length
 (define (longestEqualSubarray nums k)
-  ;; Helper function to update frequency counts
+  ;; Helper function to update frequency counts immutably
   (define (update-counts counts num increment)
     (hash-update counts num (λ (v) (+ v increment)) 0))
-  
+
   ;; Helper function to calculate maximum frequency in the current window
-  (define (max-freq counts)
-    (apply max 0 (hash-values counts)))
-  
-  ;; Helper function to calculate window length
-  (define (window-length left right)
-    (+ 1 (- right left)))
-  
-  ;; Recursive function to find the longest equal subarray
-  (define (find-max-length right left count max-length)
+  (define (max-frequency counts)
+    (apply max (hash-values counts)))
+
+  ;; Iterate through nums with sliding window pointers and accumulators
+  (define (sliding-window right left max-length count)
     (if (>= right (length nums))
         max-length
-        (let* ([updated-count (update-counts count (list-ref nums right) 1)]
-               [current-max-freq (max-freq updated-count)]
-               [current-window-length (window-length left right)]
-               [new-left (if (> (- current-window-length current-max-freq) k)
-                             (+ left 1)
-                             left)]
-               [updated-count (if (> (- current-window-length current-max-freq) k)
-                                  (update-counts updated-count (list-ref nums left) -1)
-                                  updated-count)]
-               [new-max-length (max max-length (min current-max-freq (+ current-max-freq k)))]
-               )
-          (find-max-length (+ right 1) new-left updated-count new-max-length))))
-  
-  ;; Start the recursive process with initial values
-  (find-max-length 0 0 (hash) 0))
+        (let* ([new-count (update-counts count (list-ref nums right) 1)]
+               [max-freq (max-frequency new-count)]
+               [window-length (+ 1 (- right left))]
+               [excess (max 0 (- window-length max-freq))])
+          (if (> excess k)
+              ;; Shrink the window from the left
+              (sliding-window right (+ left 1) max-length (update-counts new-count (list-ref nums left) -1))
+              ;; Continue expanding the window to the right
+              (sliding-window (+ right 1) left (max max-length window-length) new-count)))))
 
-;; Example usage:
-(longestEqualSubarray '(1 3 2 3 1 3) 3) ;; should return 3
-(longestEqualSubarray '(1 1 2 2 1 1) 2) ;; should return 4
+  ;; Initialize the sliding window and start the iteration
+  (sliding-window 0 0 0 (hash)))
+
 
 (require rackunit)
 

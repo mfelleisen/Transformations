@@ -28,18 +28,18 @@
 ;; 1 <= k <= 1015
 ;; 1 <= x <= 8
 (define (findMaximumNumber k x)
-  ;; Helper function to calculate the price of a given number
-  (define (price num x)
+  ;; Helper function to calculate the price of a number
+  (define (price num)
     (define bin-rep (number->string num 2))
     (for/sum ([i (in-range (string-length bin-rep))])
-      (if (and (= (modulo (+ i 1) x) 0)
-               (char=? (string-ref bin-rep (- (string-length bin-rep) i 1)) #\1))
+      (if (and (= (modulo (+ i 1) x) 0) ; Check if the position is a multiple of x (1-indexed from the right)
+               (char=? (string-ref bin-rep (- (string-length bin-rep) i 1)) #\1)) ; And if the bit at that position is set
           1
           0)))
 
-  ;; Recursive helper function to find the maximum number
+  ;; Recursive function to find the maximum number
   (define (loop num current-sum)
-    (let ([new-sum (+ current-sum (price num x))])
+    (let ([new-sum (+ current-sum (price num))])
       (if (> new-sum k)
           (sub1 num)
           (loop (add1 num) new-sum))))

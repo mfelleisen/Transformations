@@ -22,24 +22,23 @@
 ;;  * 3 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 106
 (define (maximumTripletValue nums)
-  ;; Define a helper function to calculate the triplet value given elements x, y, z
-  (define (triplet-value x y z)
-    (* (- x y) z))
-
-  ;; Generate all possible triplets (x, y, z) where i < j < k
+  (define (triplet-value i j k)
+    (* (- (list-ref nums i) (list-ref nums j)) (list-ref nums k)))
+  
   (define triplets
-    (for*/list ([i (in-range (length nums))]
-                [j (in-range (+ i 1) (length nums))]
-                [k (in-range (+ j 1) (length nums))])
-      (triplet-value (list-ref nums i) (list-ref nums j) (list-ref nums k))))
-
-  ;; Calculate the maximum value from the list of triplet values or 0 if all are negative
-  (apply max 0 triplets))
+    (for*/list ([i (in-range (sub1 (length nums)))]
+                [j (in-range (add1 i) (length nums))]
+                [k (in-range (add1 j) (length nums))])
+      (triplet-value i j k)))
+  
+  (if (null? triplets)
+      0
+      (apply max 0 triplets)))
 
 ;; Example usage
 (maximumTripletValue '(12 6 1 2 7))  ; Output: 77
-(maximumTripletValue '(1 10 3 4 19))  ; Output: 133
-(maximumTripletValue '(1 2 3))        ; Output: 0
+(maximumTripletValue '(1 10 3 4 19)) ; Output: 133
+(maximumTripletValue '(1 2 3))       ; Output: 0
 
 (require rackunit)
 

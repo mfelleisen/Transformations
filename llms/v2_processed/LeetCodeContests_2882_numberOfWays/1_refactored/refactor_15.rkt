@@ -21,25 +21,33 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
 
-  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))  ; Calculate the maximum base
+  ;; Helper function for exponentiation
+  (define (exp base power)
+    (if (zero? power) 
+        1
+        (* base (exp base (sub1 power)))))
 
-  (define (dp i)
-    (define memo (make-hash))
-    (define (memo-dp i)
-      (cond
-        [(= i 0) 1]  ; Base case: one way to sum up to zero using no numbers
-        [(< i 0) 0]  ; Base case: no way to sum up to a negative number
-        [else
-         (hash-ref memo i
-                   (lambda ()
-                     (define result
-                       (for/sum ([base (in-range 1 (+ max-base 1))])
-                         (modulo (memo-dp (- i (expt base x))) MOD)))
-                     (hash-set! memo i result)
-                     result))]))
-    (memo-dp i))
+  ;; Initialize the dynamic programming table
+  (define dp (make-hasheq))
+  (hash-set! dp 0 1)  ; Base case: one way to sum up to zero using no numbers
 
-  (dp n))
+  ;; Calculate the maximum base
+  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
+
+  ;; Function to update dp table
+  (define (update-dp base)
+    (define current-power (exp base x))  ; Calculate the current power of the base
+    (for ([i (in-range n (- current-power 1) -1)])
+      (hash-update! dp i (lambda (val)
+                           (modulo (+ val (hash-ref dp (- i current-power) 0))
+                                   MOD))
+                    0)))
+
+  ;; Iterate over each base and update the dp table
+  (for ([base (in-range 1 (add1 max-base))])
+    (update-dp base))
+
+  (hash-ref dp n 0))  ; Return the number of ways to express n
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

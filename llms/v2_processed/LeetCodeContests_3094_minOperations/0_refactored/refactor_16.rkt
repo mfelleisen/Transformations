@@ -22,28 +22,30 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (minOperations nums)
-  ;; Helper function to calculate the minimum operations for a given frequency
+  ;; Count the occurrences of each number using a hash table
+  (define counts (for/fold ([h (hash)]) ([num (in-list nums)])
+                   (hash-update h num add1 0)))
+
+  ;; Function to calculate the minimum operations for a given frequency
   (define (calculate-ops freq)
     (cond
-      [(= (modulo freq 3) 0) (/ freq 3)]
-      [(= (modulo freq 3) 1) (if (>= freq 4) (+ (/ (- freq 4) 3) 2) -1)]
-      [(= (modulo freq 3) 2) (if (>= freq 2) (+ (/ (- freq 2) 3) 1) -1)]))
-
-  ;; Count the occurrences of each number using a hash table
-  (define counts
-    (for/fold ([h (hash)])
-              ([num (in-list nums)])
-      (hash-update h num add1 0)))
+      [(= (modulo freq 3) 0) (/ freq 3)] ;; If divisible by 3, use triple removals
+      [(= (modulo freq 3) 1)             ;; If remainder 1, need at least 4 to adjust
+       (if (>= freq 4)
+           (+ (/ (- freq 4) 3) 2) ;; Remove one triplet and one pair, then process the rest
+           -1)]
+      [(= (modulo freq 3) 2)             ;; If remainder 2, need at least 2 to adjust
+       (if (>= freq 2)
+           (+ (/ (- freq 2) 3) 1) ;; Remove one pair, then process the rest
+           -1)]))
 
   ;; Calculate the total operations required, or determine if impossible
-  (define ops
-    (for/fold ([acc 0])
-              ([freq (in-hash-values counts)])
-      (if (= acc -1)
-          -1
-          (let ((op (calculate-ops freq)))
-            (if (= op -1) -1 (+ acc op))))))
-
+  (define ops (for/fold ([acc 0]) ([freq (in-list (hash-values counts))])
+                (if (= acc -1)
+                    -1
+                    (let ([op (calculate-ops freq)])
+                      (if (= op -1) -1 (+ acc op))))))
+  
   ops)
 
 ;; Example usage:

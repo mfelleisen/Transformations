@@ -19,15 +19,12 @@
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
   (define initial-balance 100)
-  (define lower-bound (* 10 (quotient purchaseAmount 10)))
-  (define upper-bound (+ lower-bound 10))
 
-  ;; Choosing the larger multiple of 10 when equidistant
-  (define rounded-amount 
-    (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
-        lower-bound
-        upper-bound))
-  
+  (define rounded-amount
+    (match (modulo purchaseAmount 10)
+      [(or 0 1 2 3 4) (* (quotient purchaseAmount 10) 10)]
+      [_              (* (add1 (quotient purchaseAmount 10)) 10)]))
+
   (- initial-balance rounded-amount))
 
 ;; The function can be tested with:

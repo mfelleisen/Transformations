@@ -26,25 +26,24 @@
 ;;  * 0 <= nums[i] < 231
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
-  ;; Helper function to count the number of elements with a specific bit set
+  ;; Function to count the number of elements in nums that have the ith bit set
   (define (count-bit-set nums bit)
-    (for/fold ([count 0]) ([num (in-list nums)])
-      (if (zero? (bitwise-and num bit))
-          count
-          (add1 count))))
-  
-  ;; Calculate the K-or by examining each bit position up to 31
-  (for/fold ([result 0]) ([i (in-range 31)])
-    (let* ([bit (arithmetic-shift 1 i)]
-           [count (count-bit-set nums bit)])
-      (if (>= count k)
+    (length (filter (lambda (num) (not (zero? (bitwise-and num bit)))) nums)))
+
+  ;; Function to compute the K-or value by examining each bit position up to 31
+  (define (compute-k-or nums k)
+    (for/fold ([result 0]) ([i (in-range 31)])
+      (define bit (arithmetic-shift 1 i))
+      (if (>= (count-bit-set nums bit) k)
           (bitwise-ior result bit)
-          result))))
+          result)))
+
+  (compute-k-or nums k))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)  ; Output: 9
 (findKOr '(2 12 1 11 4 5) 6)  ; Output: 0
-(findKOr '(10 8 5 9 11 6 8) 1)  ; Output: 15
+(findKOr '(10 8 5 9 11 6 8) 1) ; Output: 15
 
 (require rackunit)
 

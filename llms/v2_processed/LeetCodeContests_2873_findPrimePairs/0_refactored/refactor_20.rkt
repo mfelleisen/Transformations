@@ -2,45 +2,32 @@
 
 ;; Check if a number is prime
 (define (is-prime? num)
-  ;; Return #f for numbers less than or equal to 1 and handle small primes
-  (cond [(<= num 1) #f]
-        [(<= num 3) #t]
-        [(or (zero? (remainder num 2)) (zero? (remainder num 3))) #f]
-        [else
-         ;; Check divisibility from 5 onwards, skipping even numbers
-         (let loop ([i 5])
-           (cond [(> (* i i) num) #t]
-                 [(or (zero? (remainder num i)) (zero? (remainder num (+ i 2)))) #f]
-                 [else (loop (+ i 6))]))]))
+  (cond
+    [(<= num 1) #f]
+    [(<= num 3) #t]
+    [(or (zero? (remainder num 2))
+         (zero? (remainder num 3))) #f]
+    [else
+     (define (loop i)
+       (cond
+         [(> (* i i) num) #t]
+         [(or (zero? (remainder num i))
+              (zero? (remainder num (+ i 2)))) #f]
+         [else (loop (+ i 6))]))
+     (loop 5)]))
 
 ;; Find all prime pairs that sum to n
-;; You are given an integer n. We say that two integers x and y form a prime number pair if:
-;; * 1 <= x <= y <= n
-;; * x + y == n
-;; * x and y are prime numbers
-;; Return the 2D sorted list of prime number pairs [xi, yi]. The list should be sorted in increasing order of xi. If there are no prime number pairs at all, return an empty array.
-;; Note: A prime number is a natural number greater than 1 with only two factors, itself and 1.
-;; Example 1:
-;; Input: n = 10
-;; Output: [[3,7],[5,5]]
-;; Explanation: In this example, there are two prime pairs that satisfy the criteria.
-;; These pairs are [3,7] and [5,5], and we return them in the sorted order as described in the problem statement.
-;; Example 2:
-;; Input: n = 2
-;; Output: []
-;; Explanation: We can show that there is no prime number pair that gives a sum of 2, so we return an empty array.
-;; Constraints:
-;; * 1 <= n <= 106
-
 (define (findPrimePairs n)
-  ;; Generate a list of prime numbers up to n
-  (define primes (filter is-prime? (range 1 (add1 n))))
-  ;; Use a set for quick lookup of primes
+  (define primes (for/list ([i (in-range 2 (add1 n))]
+                            #:when (is-prime? i))
+                   i))
   (define prime-set (set primes))
-  ;; Use a higher-order function to find all pairs (x, y) such that x + y = n and x <= y
+
   (for/list ([x primes]
-             #:when (and (<= x (/ n 2)) (set-member? prime-set (- n x))))
-    (list x (- n x))))
+             #:when (<= x (/ n 2))
+             [y (in-list (filter (lambda (y) (set-member? prime-set y)) (range x (add1 n))))]
+             #:when (= (+ x y) n))
+    (list x y)))
 
 ;; Example usage:
 (findPrimePairs 10)  ; Output: '((3 7) (5 5))

@@ -14,13 +14,15 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  (define (count-ways n limit a)
-    (for/sum ([b (in-range 0 (min (- n a) limit 1))])
+  ;; Helper function to count valid distributions for a given `a`
+  (define (count-for-a a)
+    (for/sum ([b (in-range (add1 (min (- n a) limit)))])
       (let ([c (- n a b)])
         (if (<= c limit) 1 0))))
-  
-  (for/sum ([a (in-range 0 (min n limit 1))])
-    (count-ways n limit a)))
+
+  ;; Main function to count all valid distributions
+  (for/sum ([a (in-range (add1 (min n limit)))])
+    (count-for-a a)))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

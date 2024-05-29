@@ -21,32 +21,29 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  ;; Helper function to calculate the sum and distinct count of a subarray
-  (define (subarray-info subarray)
-    (values (apply + subarray) (length (remove-duplicates subarray))))
-
-  ;; Helper function to slide the window over the array
-  (define (slide-window nums k)
-    (let loop ([i 0] [acc '()])
-      (if (> (+ i k) (length nums))
-          (reverse acc)
-          (loop (add1 i) (cons (take (drop nums i) k) acc)))))
+  (define (sum-lst lst)
+    (foldl + 0 lst))
   
-  ;; Generate all possible windows of size k
-  (define windows (slide-window nums k))
+  (define (almost-unique? sublst)
+    (>= (length (remove-duplicates sublst)) m))
   
-  ;; Calculate the max sum of valid windows
-  (for/fold ([max-sum 0])
-            ([window (in-list windows)])
-    (define-values (current-sum distinct-count) (subarray-info window))
-    (if (>= distinct-count m)
-        (max max-sum current-sum)
-        max-sum)))
+  (define (max-almost-unique-sum i max-sum window)
+    (if (= (+ i k) (length nums))
+        max-sum
+        (let* ([current-sum (sum-lst window)]
+               [valid-window? (almost-unique? window)]
+               [new-max-sum (if valid-window? (max max-sum current-sum) max-sum)]
+               [next-window (append (rest window) (list (list-ref nums (+ i k))))])
+          (max-almost-unique-sum (add1 i) new-max-sum next-window))))
+  
+  (if (< (length nums) k)
+      0
+      (max-almost-unique-sum 0 0 (take nums k))))
 
 ;; Example usage
-(maxSum '(2 6 7 3 1 7) 3 4)  ;; => 18
-(maxSum '(5 9 9 2 4 5 4) 1 3)  ;; => 23
-(maxSum '(1 2 1 2 1 2 1) 3 3)  ;; => 0
+(maxSum '(2 6 7 3 1 7) 3 4) ;; Returns 18
+(maxSum '(5 9 9 2 4 5 4) 1 3) ;; Returns 23
+(maxSum '(1 2 1 2 1 2 1) 3 3) ;; Returns 0
 
 (require rackunit)
 

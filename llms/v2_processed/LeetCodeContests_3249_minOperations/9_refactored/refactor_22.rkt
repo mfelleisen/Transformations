@@ -22,20 +22,18 @@
 ;; 0 <= nums[i] <= 106
 ;; 0 <= k <= 106
 (define (minOperations nums k)
-  ;; Calculate the XOR of all elements in nums using `foldl`
-  (define current-xor (foldl bitwise-xor 0 nums))
+
+  (define current-xor
+    (for/fold ([acc 0]) ([num (in-list nums)])
+      (bitwise-xor num acc)))
   
-  ;; Determine the XOR of `current-xor` with `k` to find differing bits
   (define xor-with-k (bitwise-xor current-xor k))
-  
-  ;; Count the number of 1s in `xor-with-k` using a tail-recursive function
+
   (define (count-ones n)
-    (let loop ([n n] [count 0])
-      (if (= n 0)
-          count
-          (loop (arithmetic-shift n -1) (+ count (bitwise-and n 1))))))
-  
-  ;; Return the number of operations needed to make the XOR of all elements equal to k
+    (for/fold ([count 0] #:result count)
+              ([i (in-range (integer-length n))] #:when (bitwise-bit-set? n i))
+      (add1 count)))
+
   (count-ones xor-with-k))
 
 ;; Example usage:

@@ -17,22 +17,27 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function to generate the next valid number
-  (define (next-valid used-numbers current-number)
-    (if (set-member? used-numbers (- k current-number))
-        (next-valid used-numbers (+ current-number 1))
-        current-number))
+  ;; Define a helper function to check if a number can be added to avoid sum k
+  (define (valid? seen x)
+    (not (set-member? seen (- k x))))
 
-  ;; Recursive helper function to build the k-avoiding array and calculate its sum
-  (define (helper used-numbers current-number count total-sum)
-    (if (= count n)
-        total-sum
-        (let* ([valid-number (next-valid used-numbers current-number)]
-               [new-used (set-add used-numbers valid-number)])
-          (helper new-used (+ valid-number 1) (+ count 1) (+ total-sum valid-number)))))
+  ;; Define a recursive function to build the k-avoiding array and calculate its sum
+  (define (build-array seen current-num count total-sum)
+    (cond
+      [(= count n) total-sum]
+      [(valid? seen current-num)
+       (build-array (set-add seen current-num)
+                    (add1 current-num)
+                    (add1 count)
+                    (+ total-sum current-num))]
+      [else
+       (build-array seen
+                    (add1 current-num)
+                    count
+                    total-sum)]))
 
-  ;; Start the recursion with an empty set for used numbers, starting number 1, count 0, and total sum 0
-  (helper (set) 1 0 0))
+  ;; Start recursion with an empty set, starting number 1, count 0, and sum 0
+  (build-array (set) 1 0 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

@@ -25,15 +25,18 @@
 ;;  * 1 <= num[i] <= 200
 (define (isGood nums)
   ;; Determine if the given list nums is a "good" array.
-  (let ([n (apply max nums)])  ; Find the maximum element which acts as 'n'
-    (let ([count (for/fold ([dict (hash)]) ([num (in-list nums)])
-                   (hash-update dict num add1 0))])
-      ;; Check if every integer from 1 to n-1 appears exactly once and n appears exactly twice
-      (and (for/and ([i (in-range 1 n)])
-             (= (hash-ref count i 0) 1))
-           (= (hash-ref count n 0) 2)
-           ;; Ensure the length of nums is exactly n + 1
-           (= (length nums) (+ n 1))))))
+  (define n (apply max nums))  ; Find the maximum element which acts as 'n'
+  (define counts (for/fold ([count (hash)])
+                  ([num (in-list nums)])
+                  (hash-update count num (λ (c) (add1 (or c 0))) 0)))
+
+  (and
+   ;; Ensure the length of nums is exactly n + 1
+   (= (length nums) (+ n 1))
+   ;; Check if every integer from 1 to n-1 appears exactly once
+   (for/and ([i (in-range 1 n)]) (= (hash-ref counts i 0) 1))
+   ;; Check if n appears exactly twice
+   (= (hash-ref counts n 0) 2)))
 
 ;; Example usage:
 (displayln (isGood '(2 1 3)))  ; Output: #f

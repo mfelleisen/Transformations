@@ -22,11 +22,11 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (minOperations nums)
-  ;; Use a hash table to count occurrences of each number in the list
+  ;; Count occurrences of each number in the list using a frequency map
   (define freq (for/fold ([h (hash)]) ([num nums])
                  (hash-update h num add1 0)))
   
-  ;; Define a helper function to calculate the minimum operations for a given frequency
+  ;; Calculate the minimum operations required for a given frequency
   (define (calc-ops freq)
     (match (remainder freq 3)
       [0 (/ freq 3)]  ; If divisible by 3, use triplet removals
@@ -38,15 +38,17 @@
              -1)]))  ; Otherwise, it's impossible
   
   ;; Calculate total operations and handle cases where it's impossible to empty the array
-  (define-values (total-ops impossible)
-    (for/fold ([ops 0] [impossible #f]) ([f (in-hash-values freq)])
+  (define (process-frequencies freq)
+    (for/fold ([ops 0] [possible? #t])
+              ([f (in-hash-values freq)])
       (let ([op (calc-ops f)])
         (if (= op -1)
-            (values ops #t)  ; If any frequency makes it impossible, set flag
-            (values (+ ops op) impossible)))))  ; Otherwise, accumulate operations
+            (values ops #f)  ; If any frequency makes it impossible, set flag
+            (values (+ ops op) possible?)))))  ; Otherwise, accumulate operations
   
-  ;; If any frequency was impossible to deal with, return -1, otherwise return total operations
-  (if impossible -1 total-ops))
+  ;; Process the frequencies and determine the result
+  (define-values (total-ops possible?) (process-frequencies freq))
+  (if possible? total-ops -1))
 
 ;; Example usage:
 (minOperations '(2 3 3 2 2 4 2 3 4))  ; Output: 4

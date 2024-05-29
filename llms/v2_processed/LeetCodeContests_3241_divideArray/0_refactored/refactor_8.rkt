@@ -25,29 +25,33 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
+  (define (valid-group? group)
+    (<= (- (last group) (first group)) k))
+
   (define sorted-nums (sort nums <))
-  
-  ;; Function to partition the list into groups of 3
-  (define (partition-groups lst)
-    (cond
-      [(empty? lst) '()]
-      [(< (length lst) 3) #f]
-      [else
-       (let ([group (take lst 3)])
-         (if (<= (- (last group) (first group)) k)
-             (cons group (partition-groups (drop lst 3)))
-             #f))]))
 
-  ;; Partition and return the result
-  (let ([result (partition-groups sorted-nums)])
-    (if result
-        result
-        '())))
+  (define (divide-helper remaining result)
+    (match remaining
+      [(list) (reverse result)]
+      [(list _ _ _) (if (valid-group? remaining)
+                        (reverse (cons remaining result))
+                        '())]
+      [(list-rest x y z more)
+       (define group (list x y z))
+       (if (valid-group? group)
+           (divide-helper more (cons group result))
+           '())]
+      [_ '()]))
 
-;; Helper functions to access elements of a list by index
-(define (first lst) (car lst))
-(define (second lst) (cadr lst))
-(define (third lst) (caddr lst))
+  (divide-helper sorted-nums '()))
+
+;; Example usage:
+(define example1 (divideArray '(1 3 4 8 7 9 3 5 1) 2))
+(define example2 (divideArray '(1 3 3 2 7 3) 3))
+
+;; Print results
+example1
+example2
 
 (require rackunit)
 

@@ -22,27 +22,23 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  ;; Helper function to check if an element at index `i` is a peak
-  (define (is-peak? lst i)
-    (and (> (list-ref lst i) (list-ref lst (- i 1)))
-         (> (list-ref lst i) (list-ref lst (+ i 1)))))
+  ;; Helper function to determine if an element is a peak
+  (define (peak? left current right)
+    (and (> current left) (> current right)))
 
-  ;; Recursively find peaks
-  (define (find-peaks-helper lst i)
-    (cond
-      [(>= i (- (length lst) 1)) '()] ; Base case: stop at the second last element
-      [(is-peak? lst i) (cons i (find-peaks-helper lst (+ i 1)))] ; If peak, add to result
-      [else (find-peaks-helper lst (+ i 1))])) ; Otherwise, continue
-
-  ;; Ensure the list has at least 3 elements
-  (if (< (length mountain) 3)
-      '()
-      (find-peaks-helper mountain 1)))
+  ;; Check for peaks using for/fold and collecting indices
+  (define len (length mountain))
+  (for/fold ([peaks '()]) ([i (in-range 1 (- len 1))])
+    (define current (list-ref mountain i))
+    (define left (list-ref mountain (- i 1)))
+    (define right (list-ref mountain (+ i 1)))
+    (if (peak? left current right)
+        (cons i peaks)
+        peaks)))
 
 ;; Example usage:
 ;; (findPeaks '(1 4 3 8 5))  ; Output: '(1 3)
 ;; (findPeaks '(2 4 4))      ; Output: '()
-
 
 (require rackunit)
 

@@ -33,18 +33,23 @@
 (define (minimumPossibleSum n target)
   (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
 
-  (define (construct-nums n target)
-    (define (loop acc candidate remaining)
-      (if (= remaining 0)
-          (reverse acc)
-          (if (and (not (memv candidate acc))
-                   (not (memv (- target candidate) acc)))
-              (loop (cons candidate acc) (+ candidate 1) (- remaining 1))
-              (loop acc (+ candidate 1) remaining))))
-    (loop '() 1 n))
+  ;; Helper function to check if a candidate can be used by tracking pairs in a set
+  (define (can-use? used-pairs candidate)
+    (not (set-member? used-pairs (- target candidate))))
+
+  ;; Recursive helper function to construct the beautiful array
+  (define (construct-nums used-pairs candidate num-collected sum)
+    (if (= num-collected n)
+        sum
+        (if (can-use? used-pairs candidate)
+            (construct-nums (set-add used-pairs candidate)
+                            (+ candidate 1)
+                            (+ num-collected 1)
+                            (+ sum candidate))
+            (construct-nums used-pairs (+ candidate 1) num-collected sum))))
 
   ;; Calculate the sum of the beautiful array mod MOD
-  (modulo (apply + (construct-nums n target)) MOD))
+  (modulo (construct-nums (set) 1 0 0) MOD))
 
 ;; Example test cases
 (display (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

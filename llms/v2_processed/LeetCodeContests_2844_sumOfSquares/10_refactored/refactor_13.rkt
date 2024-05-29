@@ -16,26 +16,19 @@
 ;; Constraints:
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
-(define (sumOfSquares nums) ;; contract  sumOfSquares/c
-  ;; Get the length of the list nums
+(define (sumOfSquares nums)
   (define n (length nums))
-
-  ;; Define a function to check if an index divides n
-  (define (is-special? i)
+  (define (special? i)
     (zero? (remainder n i)))
-
-  ;; Define a function to square a number
   (define (square x)
     (* x x))
-
-  ;; Calculate the sum of squares of special elements
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (is-special? i))
+            #:when (special? i))
     (square (list-ref nums (sub1 i)))))
 
-;; Example usage:
-(sumOfSquares '(1 2 3 4)) ;; Output: 21
-(sumOfSquares '(2 7 1 19 18 3)) ;; Output: 63
+;; Example usage
+(sumOfSquares '(1 2 3 4))  ;; Should output 21
+(sumOfSquares '(2 7 1 19 18 3))  ;; Should output 63
 
 (require rackunit)
 

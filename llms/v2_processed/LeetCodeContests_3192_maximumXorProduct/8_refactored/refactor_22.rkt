@@ -23,22 +23,19 @@
 ;; 0 <= a, b < 250
 ;; 0 <= n <= 50
 (define (maximumXorProduct a b n)
-  (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
-  (define upper-limit (expt 2 n))  ; Calculate the upper limit as 2^n
-
-  ;; Recursive function to find the maximum product
-  (define (max-product x max-so-far)
-    (if (= x upper-limit)
-        max-so-far
-        (let* ([product (* (bitwise-xor a x) (bitwise-xor b x))]
-               [new-max (max max-so-far product)])
-          (max-product (+ x 1) new-max))))
-
-  ;; Get the maximum product modulo MOD
-  (modulo (max-product 0 0) MOD))
-
-;; The function uses recursion to calculate the maximum product of (a XOR x) * (b XOR x) for all x in the range [0, 2^n),
-;; then returns this maximum modulo 10^9 + 7.
+  ;; Define the modulo constant
+  (define MOD (+ (expt 10 9) 7))
+  
+  ;; Calculate the upper limit as 2^n
+  (define upper-limit (arithmetic-shift 1 n))
+  
+  ;; Calculate products for each x and find the maximum
+  (define max-product
+    (for/fold ([max-prod 0]) ([x (in-range upper-limit)])
+      (max max-prod (modulo (* (bitwise-xor a x) (bitwise-xor b x)) MOD))))
+  
+  ;; Return the maximum product modulo MOD
+  max-product)
 
 ;; Example usage:
 (maximumXorProduct 12 5 4)  ; Output: 98

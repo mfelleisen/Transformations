@@ -30,31 +30,28 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  ;; Combine both lists into one list of pairs for easier processing.
-  (define pairs (map list nums1 nums2))
-  
-  ;; Use a fold to track the maximum non-decreasing length.
-  (define (update-dp dp1 dp2 pair prev-pair)
-    (define (update dp current other prev-val)
-      (if (and prev-pair (>= current (first prev-val)))
-          (max dp (+ 1 (second prev-val)))
-          dp))
-    (values
-     (update (first dp1) (first pair) (second pair) (first prev-pair))
-     (update (second dp1) (second pair) (first pair) (second prev-pair))))
-
-  ;; Fold over the pairs to calculate dp1 and dp2 values.
-  (define-values (dp1 dp2)
-    (foldl (lambda (pair acc)
-             (define prev-pair (car acc))
-             (define dp (cdr acc))
-             (cons pair (update-dp dp (car dp) pair prev-pair)))
-           '(#f . (1 . 1))
-           pairs))
-  
-  ;; Return the maximum value of dp1 and dp2.
-  (apply max dp1 dp2))
-
+  ;; Helper function to calculate the maximum length of non-decreasing subarray
+  (define (max-length-helper nums1 nums2)
+    (define n (length nums1))
+    (define (update-dp dp prev-i cur-i)
+      (for/fold ([dp dp])
+                ([cur (in-range 1 n)])
+        (let ([cur-val (list-ref nums1 cur)]
+              [prev-val (list-ref nums1 (sub1 cur))])
+          (if (>= cur-val prev-val)
+              (vector-set! dp cur (max (vector-ref dp cur)
+                                       (+ (vector-ref dp prev-i) 1)))
+              dp))))
+    ;; Initialize dp arrays
+    (define dp1 (make-vector n 1))
+    (define dp2 (make-vector n 1))
+    ;; Update dp1 and dp2 arrays
+    (set! dp1 (update-dp dp1 0 1))
+    (set! dp2 (update-dp dp2 0 1))
+    ;; Calculate the maximum length found so far
+    (apply max (append (vector->list dp1) (vector->list dp2))))
+  ;; Return the maximum length of non-decreasing subarray found
+  (max (max-length-helper nums1 nums2) (max-length-helper nums2 nums1)))
 
 (require rackunit)
 

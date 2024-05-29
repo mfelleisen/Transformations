@@ -25,42 +25,45 @@
 ;; 1 <= mat[i][j] <= 25
 ;; 1 <= k <= 50
 (define (areSimilar mat k)
-  ;; Helper function to perform right cyclic shift
-  (define (right-shift row shifts)
-    (let ([len (length row)])
-      (if (= shifts 0)
-          row
-          (let ([shifts (modulo shifts len)])
-            (append (drop-right row shifts)
-                    (take-right row shifts))))))
-
-  ;; Helper function to perform left cyclic shift
-  (define (left-shift row shifts)
-    (let ([len (length row)])
-      (if (= shifts 0)
-          row
-          (let ([shifts (modulo shifts len)])
-            (append (drop row shifts)
-                    (take row shifts))))))
-
+  ;; Helper function to perform cyclic shift
+  (define (cyclic-shift row shifts direction)
+    (define len (length row))
+    (define actual-shifts (modulo shifts len))
+    (define split-at (if (equal? direction 'right)
+                         (- len actual-shifts)
+                         actual-shifts))
+    (append (drop row split-at) (take row split-at)))
+  
   ;; Function to apply appropriate shift depending on the row index
   (define (process-row idx row)
     (if (even? idx)
-        (left-shift row k)
-        (right-shift row k)))
+        (cyclic-shift row k 'left)
+        (cyclic-shift row k 'right)))
 
   ;; Transform the matrix by applying shifts
   (define transformed-mat
     (map-indexed process-row mat))
-
+  
   ;; Compare initial and final matrices
   (equal? mat transformed-mat))
 
 ;; The function `map-indexed` is not built-in in Racket, so we define it using `map` and `in-indexed`
 (define (map-indexed f lst)
-  (map (lambda (idx item) (f idx item))
-       (build-list (length lst) values)
-       lst))
+  (for/list ([idx (in-naturals)] [item (in-list lst)])
+    (f idx item)))
+
+;; Test examples
+(define mat1 '((1 2 1 2) (5 5 5 5) (6 3 6 3)))
+(define k1 2)
+(areSimilar mat1 k1) ;; Should return true
+
+(define mat2 '((2 2) (2 2)))
+(define k2 3)
+(areSimilar mat2 k2) ;; Should return true
+
+(define mat3 '((1 2)))
+(define k3 1)
+(areSimilar mat3 k3) ;; Should return false
 
 (require rackunit)
 

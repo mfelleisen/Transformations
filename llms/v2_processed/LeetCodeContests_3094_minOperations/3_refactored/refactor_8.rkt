@@ -25,30 +25,26 @@
   ;; Use a hash table to count occurrences of each number in the list
   (define freq (for/fold ([h (hash)]) ([num nums])
                  (hash-update h num add1 0)))
-
+  
   ;; Define a helper function to calculate the minimum operations for a given frequency
   (define (calc-ops freq)
     (match (remainder freq 3)
-      [0 (/ freq 3)]                           ; If divisible by 3, use triplet removals
-      [1 (if (>= freq 4)                       ; If remainder is 1 and at least 4, use one triplet and one pair removal
+      [0 (/ freq 3)]  ; If divisible by 3, use triplet removals
+      [1 (if (>= freq 4)  ; If remainder is 1 and at least 4, use one triplet and one pair removal
              (+ (/ (- freq 4) 3) 2)
-             -1)]                              ; Otherwise, it's impossible
-      [2 (if (>= freq 2)                       ; If remainder is 2 and at least 2, use one pair removal
+             -1)]  ; Otherwise, it's impossible
+      [2 (if (>= freq 2)  ; If remainder is 2 and at least 2, use one pair removal
              (+ (/ (- freq 2) 3) 1)
-             -1)]))                            ; Otherwise, it's impossible
-
+             -1)]))  ; Otherwise, it's impossible
+  
   ;; Calculate total operations and handle cases where it's impossible to empty the array
-  (define (helper-ops ops impossible f)
-    (let ([op (calc-ops f)])
-      (if (= op -1)
-          (values ops #t)                      ; If any frequency makes it impossible, set flag
-          (values (+ ops op) impossible))))    ; Otherwise, accumulate operations
-
-  ;; Fold through the frequencies to compute the total operations
   (define-values (total-ops impossible)
     (for/fold ([ops 0] [impossible #f]) ([f (in-hash-values freq)])
-      (helper-ops ops impossible f)))
-
+      (let ([op (calc-ops f)])
+        (if (= op -1)
+            (values ops #t)  ; If any frequency makes it impossible, set flag
+            (values (+ ops op) impossible)))))  ; Otherwise, accumulate operations
+  
   ;; If any frequency was impossible to deal with, return -1, otherwise return total operations
   (if impossible -1 total-ops))
 

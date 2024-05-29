@@ -33,20 +33,17 @@
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
 
-  ;; Helper function to determine if a number can be included in the beautiful array
-  (define (valid? nums candidate)
-    (not (ormap (λ (num) (= (+ num candidate) target)) nums)))
+  ;; Helper function to generate the sequence of numbers for the beautiful array
+  (define (generate-sequence n target current-num current-sum)
+    (cond
+      [(zero? n) current-sum]
+      [(> current-num (/ target 2))
+       (generate-sequence (sub1 n) target (+ current-num 1) (+ current-sum current-num))]
+      [else
+       (generate-sequence n target (+ current-num 1) current-sum)]))
 
-  ;; Recursive function to build the beautiful array and compute the sum
-  (define (build-beautiful-nums remaining target sum candidate)
-    (if (zero? remaining)
-        sum
-        (if (valid? (range 1 candidate) candidate)
-            (build-beautiful-nums (sub1 remaining) target (+ sum candidate) (add1 candidate))
-            (build-beautiful-nums remaining target sum (add1 candidate)))))
-
-  ;; Compute the sum of the beautiful array and take modulo
-  (modulo (build-beautiful-nums n target 0 1) MOD))
+  ;; Start the sequence generation from 1 and initial sum of 0
+  (modulo (generate-sequence n target 1 0) MOD))
 
 ;; Example test cases
 (minimumPossibleSum 2 3)   ; Output: 4

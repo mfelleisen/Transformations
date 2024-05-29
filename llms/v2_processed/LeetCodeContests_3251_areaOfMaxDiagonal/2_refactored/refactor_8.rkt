@@ -24,23 +24,38 @@
   (define (diagonal-squared length width)
     (+ (* length length) (* width width)))
 
-  (define (update-max max-dim current-dim)
-    (let* ([length (first current-dim)]
-           [width (second current-dim)]
-           [diag-sq (diagonal-squared length width)]
-           [area (* length width)]
-           [max-diag-sq (first max-dim)]
-           [max-area (second max-dim)])
-      (if (or (> diag-sq max-diag-sq)
-              (and (= diag-sq max-diag-sq) (> area max-area)))
-          (list diag-sq area)
-          max-dim)))
+  (define (area length width)
+    (* length width))
 
-  (second (foldl update-max '(0 0) dimensions)))
+  ;; Use fold to iterate through the list of dimensions to find the rectangle with the longest diagonal or largest area if diagonals are equal
+  (define (update-max-dimensions dim acc)
+    (match-define (list length width) dim)
+    (define diagonal-sq (diagonal-squared length width))
+    (define rect-area (area length width))
+    (match-define (list max-diagonal-sq max-area) acc)
+    (cond
+      [(or (> diagonal-sq max-diagonal-sq)
+           (and (= diagonal-sq max-diagonal-sq) (> rect-area max-area)))
+       (list diagonal-sq rect-area)]
+      [else
+       acc]))
 
-;; Example usage:
-(areaOfMaxDiagonal '((9 3) (8 6))) ; Output: 48
-(areaOfMaxDiagonal '((3 4) (4 3))) ; Output: 12
+  (define result
+    (foldl update-max-dimensions
+           '(0 0) ;; Initial accumulator with 0 diagonal and 0 area
+           dimensions))
+  
+  (second result))
+
+;; Example 1:
+;; Input: dimensions = [[9,3],[8,6]]
+;; Output: 48
+(areaOfMaxDiagonal '((9 3) (8 6))) ;; => 48
+
+;; Example 2:
+;; Input: dimensions = [[3,4],[4,3]]
+;; Output: 12
+(areaOfMaxDiagonal '((3 4) (4 3))) ;; => 12
 
 (require rackunit)
 

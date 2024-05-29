@@ -29,12 +29,13 @@
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
   (define n (length nums))
-  ;; Helper function to check if a subarray starting at index i is valid
+
+  ;; Check if the starting element of the subarray is valid
   (define (valid-start? i)
     (and (even? (list-ref nums i))
          (<= (list-ref nums i) threshold)))
 
-  ;; Helper function to calculate the maximum alternating subarray length from index i
+  ;; Calculate the maximum alternating length starting from index i
   (define (max-alternating-length i)
     (let loop ([j (+ i 1)]
                [current-length 1]
@@ -45,11 +46,11 @@
           (loop (+ j 1) (+ current-length 1) (list-ref nums j))
           current-length)))
 
-  ;; Iterate through the list to find the maximum length of alternating subarray
-  (for/fold ([max-len 0]) ([i (in-range n)])
+  ;; Fold over the indices to find the maximum valid alternating length
+  (for/fold ([max-length 0]) ([i (in-range n)])
     (if (valid-start? i)
-        (max max-len (max-alternating-length i))
-        max-len)))
+        (max max-length (max-alternating-length i))
+        max-length)))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3

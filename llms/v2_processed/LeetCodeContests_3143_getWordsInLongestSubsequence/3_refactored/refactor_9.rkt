@@ -31,19 +31,22 @@
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
 (define (getWordsInLongestSubsequence n words groups)
-  ;; Helper function to find the longest subsequence
-  (define (longest-subseq words groups)
-    (for/fold ([last-group (first groups)] [subseq (list (first words))])
-              ([current-group (in-list (rest groups))]
-               [current-word (in-list (rest words))])
-      (if (not (= current-group last-group))
-          (values current-group (append subseq (list current-word)))
-          (values last-group subseq))))
-  
-  ;; Handle edge case when n is 0
-  (if (= n 0)
-      '()
-      (longest-subseq words groups)))
+  ;; Helper function to fold over the words and groups
+  (define (process-word word group state)
+    (match-define (cons last-group subseq) state)
+    (if (not (= group last-group))
+        (cons group (cons word subseq))
+        state))
+
+  ;; Fold over the words and groups to find the longest subsequence
+  (define result
+    (for/fold ([state (cons (first groups) (list (first words)))])
+              ([word (in-list (rest words))]
+               [group (in-list (rest groups))])
+      (process-word word group state)))
+
+  ;; Reverse the subsequence to preserve the order
+  (reverse (rest result)))
 
 ;; Example usage:
 (define n 4)

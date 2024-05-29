@@ -17,22 +17,18 @@
 ;; It can be proven that there is no k-avoiding array with a sum less than 3.
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
-(define (minimumSum n k)
-  ;; Function to generate k-avoiding array
-  (define (generate-k-avoiding n k)
-    (define (helper count current used)
-      (cond
-        [(= count n) '()]
-        [(or (set-member? used current)
-             (set-member? used (- k current)))
-         (helper count (+ current 1) used)]
-        [else
-         (cons current (helper (+ count 1) (+ current 1) (set-add used current)))]))
+(define (minimumSum n k) ;; contract  ms/c
+  (define (sum-of-n-numbers-avoiding-k n k)
+    (define (avoid k)
+      (define s (set))
+      (for/list ([i (in-naturals 1)]
+                 [j (in-range n)]
+                 #:unless (set-member? s (- k i)))
+        (set! s (set-add s i))
+        i))
+    (apply + (take (avoid k) n)))
 
-    (helper 0 1 (set)))
-
-  ;; Calculate the sum of the k-avoiding array
-  (apply + (generate-k-avoiding n k)))
+  (sum-of-n-numbers-avoiding-k n k))
 
 ;; Example usage (not part of the function definition):
 ;; (minimumSum 5 4)  ;; Should return 18

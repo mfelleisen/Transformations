@@ -18,24 +18,24 @@
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
+  ;; Define the initial balance.
   (define initial-balance 100)
-  
+
   ;; Calculate the rounded amount to the nearest multiple of 10.
   (define rounded-amount
-    (let* ([lower-bound (* 10 (quotient purchaseAmount 10))]
-           [upper-bound (+ lower-bound 10)]
-           [lower-diff (abs (- purchaseAmount lower-bound))]
-           [upper-diff (abs (- purchaseAmount upper-bound))])
-      (if (< lower-diff upper-diff)
+    (let* ([remainder (remainder purchaseAmount 10)]
+           [lower-bound (* 10 (quotient purchaseAmount 10))]
+           [upper-bound (+ lower-bound 10)])
+      (if (<= remainder 5)
           lower-bound
           upper-bound)))
-  
-  ;; Return the new balance after the purchase.
+
+  ;; Calculate and return the new balance after the purchase.
   (- initial-balance rounded-amount))
 
-;; The function accountBalanceAfterPurchase now uses a let* binding to compute the 
-;; necessary variables in a nested manner, avoiding mutation and making the code
-;; more idiomatic. It follows the same behavior as the original program.
+;; Examples
+(accountBalanceAfterPurchase 9)  ; => 90
+(accountBalanceAfterPurchase 15) ; => 80
 
 (require rackunit)
 

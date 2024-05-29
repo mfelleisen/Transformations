@@ -24,11 +24,10 @@
 ;;  * 1 <= n == hours.length <= 50
 ;;  * 0 <= hours[i], target <= 105
 (define (numberOfEmployeesWhoMetTarget hours target)
-  ;; Define a helper function to check if an employee's hours meet the target
-  (define (meets-target? hour)
-    (>= hour target))
-  ;; Use the 'count' function to count employees who meet the target
-  (count meets-target? hours))
+  ;; Use `for/sum` to count the number of employees meeting the target.
+  ;; This eliminates the need for mutation and direct list indexing.
+  (for/sum ([hour (in-list hours)])
+    (if (>= hour target) 1 0)))
 
 ;; Example use cases:
 ;; (numberOfEmployeesWhoMetTarget '(0 1 2 3 4) 2) returns 3

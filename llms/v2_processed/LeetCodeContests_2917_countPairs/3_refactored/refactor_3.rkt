@@ -27,20 +27,20 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * -50 <= nums[i], target <= 50
 (define (countPairs nums target)
-  ;; Use higher-order functions and accumulators to count the valid pairs
-  (define (count-valid-pairs nums target)
-    (for/sum ([i (in-range (length nums))])
-      (for/sum ([j (in-range (add1 i) (length nums))]
-                #:when (< (+ (list-ref nums i) (list-ref nums j)) target))
-        1)))
+  (define n (length nums))
+  (define (pair-sum-less? i j)
+    (< (+ (list-ref nums i) (list-ref nums j)) target))
+  (define (pair-indices)
+    (for*/list ([i (in-range n)]
+                [j (in-range (add1 i) n)]
+                #:when (pair-sum-less? i j))
+      (list i j)))
+  (length (pair-indices)))
 
-  (count-valid-pairs nums target))
-
-;; The `countPairs` function takes a list `nums` and an integer `target`.
-;; It uses two nested `for/sum` loops to iterate over all pairs (i, j) such that i < j.
-;; The `#:when` clause filters pairs where the sum of `nums[i]` and `nums[j]` is less than `target`.
-;; `for/sum` accumulates the count of valid pairs.
-
+;; The function `countPairs` takes a list `nums` and an integer `target`.
+;; It calculates the length of `nums` once and defines a helper function `pair-sum-less?` to check the sum condition.
+;; It uses `for*/list` to generate pairs of indices (i, j) where i < j and the sum is less than `target`.
+;; Finally, it returns the length of the list of valid pairs.
 
 (require rackunit)
 

@@ -34,7 +34,7 @@
   (define (product-for-x x)
     (* (bitwise-xor a x) (bitwise-xor b x)))
   
-  ;; Use for/fold to iterate over the range [0, upper-limit) and find the maximum product
+  ;; Use a fold to iterate over the range [0, upper-limit) and find the maximum product
   (define max-product
     (for/fold ([max-so-far 0]) ([x (in-range upper-limit)])
       (max max-so-far (product-for-x x))))
@@ -42,8 +42,8 @@
   ;; Return the maximum product modulo MOD
   (remainder max-product MOD))
 
-;; The function is now defined in an idiomatic Racket style using higher-order functions
-;; like for/fold and in-range, avoiding explicit mutation and loops.
+;; The function is now defined in an idiomatic Racket style using for/fold and in-range,
+;; avoiding explicit mutation and loops.
 
 (require rackunit)
 

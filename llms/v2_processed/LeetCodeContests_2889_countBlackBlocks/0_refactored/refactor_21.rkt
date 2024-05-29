@@ -30,30 +30,31 @@
 ;;  * 0 <= coordinates[i][1] < n
 ;;  * It is guaranteed that coordinates contains pairwise distinct coordinates.
 (define (countBlackBlocks m n coordinates)
+  ;; Helper function to update the block counts
+  (define (update-block-count block-count x y)
+    (for ([dx (in-list '(-1 0))]
+          [dy (in-list '(-1 0))])
+      (let ([nx (+ x dx)]
+            [ny (+ y dy)])
+        (when (and (>= nx 0) (< nx (- m 1)) (>= ny 0) (< ny (- n 1)))
+          (hash-update! block-count (cons nx ny) add1 0)))))
+
   ;; Create a hash table to count black cells in each potential 2x2 block's top-left corner.
   (define block-count (make-hash))
 
-  ;; Helper function to update the block count
-  (define (update-block-count x y)
-    (hash-update! block-count (cons x y) add1 0))
-
   ;; Iterate over each coordinate and update the block counts.
-  (for ([coord coordinates])
+  (for ([coord (in-list coordinates)])
     (define x (first coord))
     (define y (second coord))
-    ;; Update all possible 2x2 blocks that the cell (x, y) can be a part of.
-    (when (and (> x 0) (> y 0)) (update-block-count (- x 1) (- y 1)))
-    (when (and (> x 0) (< y (- n 1))) (update-block-count (- x 1) y))
-    (when (and (< x (- m 1)) (> y 0)) (update-block-count x (- y 1)))
-    (when (and (< x (- m 1)) (< y (- n 1))) (update-block-count x y)))
+    (update-block-count block-count x y))
 
   ;; Initialize a list to store counts of blocks with 0, 1, 2, 3, and 4 black cells.
   (define result (make-vector 5 0))
 
-  ;; Count blocks by number of black cells they contain.
-  (for-each (lambda (value)
-              (vector-set! result value (add1 (vector-ref result value))))
-            (hash-values block-count))
+  ;; Count blocks by the number of black cells they contain.
+  (hash-for-each block-count
+                 (lambda (_ value)
+                   (vector-set! result value (add1 (vector-ref result value)))))
 
   ;; Calculate the total number of 2x2 blocks in the grid.
   (define total-blocks (* (- m 1) (- n 1)))

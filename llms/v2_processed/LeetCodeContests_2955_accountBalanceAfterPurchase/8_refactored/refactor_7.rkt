@@ -17,14 +17,22 @@
 ;; Hence, your account balance becomes 100 - 20 = 80.
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
-(define (accountBalanceAfterPurchase purchaseAmount) ;; contract  abap/c
+(define (accountBalanceAfterPurchase purchaseAmount)
+  ;; Define the initial balance
   (define initial-balance 100)
-  (define rounded-amount
-    (let ([lower-bound (* 10 (quotient purchaseAmount 10))])
-      (let ([upper-bound (+ lower-bound 10)])
-        (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
-            lower-bound
-            upper-bound))))
+  
+  ;; Helper function to find the nearest multiple of 10
+  (define (nearest-multiple-of-10 n)
+    (define lower-bound (* 10 (quotient n 10)))
+    (define upper-bound (+ lower-bound 10))
+    (if (< (- n lower-bound) (- upper-bound n))
+        lower-bound
+        upper-bound))
+  
+  ;; Calculate the rounded purchase amount
+  (define rounded-amount (nearest-multiple-of-10 purchaseAmount))
+  
+  ;; Calculate the new balance by subtracting the rounded amount from the initial balance
   (- initial-balance rounded-amount))
 
 ;; The function can be tested with:

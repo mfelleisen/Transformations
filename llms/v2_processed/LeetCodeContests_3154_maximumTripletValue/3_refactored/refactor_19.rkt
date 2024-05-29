@@ -22,22 +22,25 @@
 ;;  * 3 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 106
 (define (maximumTripletValue nums)
-  (define (triplet-value i j k)
-    (* (- (list-ref nums i) (list-ref nums j)) (list-ref nums k)))
-
-  (define (calc-max-triplet i j max-val)
-    (if (>= j (length nums))
-        max-val
-        (let ([new-max (foldl (lambda (k acc) (max acc (triplet-value i j k))) max-val (range (+ j 1) (length nums)))])
-          (calc-max-triplet i (+ j 1) new-max))))
-
-  (define (calc-max-for-i i max-val)
-    (if (>= i (- (length nums) 2))
-        max-val
-        (let ([new-max (calc-max-triplet i (+ i 1) max-val)])
-          (calc-max-for-i (+ i 1) new-max))))
-
-  (max (calc-max-for-i 0 0) 0))
+  (define n (length nums))
+  (define (get-value i j k)
+    (* (- (list-ref nums i) (list-ref nums j))
+       (list-ref nums k)))
+  
+  (define (find-max i j max-value)
+    (if (>= j (- n 1))
+        max-value
+        (let loop ([k (+ j 1)] [local-max max-value])
+          (cond
+            [(>= k n) (find-max i (+ j 1) local-max)]
+            [else (loop (+ k 1) (max local-max (get-value i j k)))]))))
+  
+  (define (find-max-triplet i max-value)
+    (if (>= i (- n 2))
+        max-value
+        (find-max-triplet (+ i 1) (find-max i (+ i 1) max-value))))
+  
+  (max 0 (find-max-triplet 0 -inf.0)))
 
 ;; Example usage
 (maximumTripletValue '(12 6 1 2 7))  ; Output: 77

@@ -23,26 +23,28 @@
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
   (define n (length nums))
+  
   (define sorted-nums (sort nums <))
   
-  (define (rotated-equal? start)
-    (andmap (lambda (i)
-              (= (list-ref nums (modulo (+ start i) n))
-                 (list-ref sorted-nums i)))
-            (range n)))
-
-  (define (find-shift i)
+  (define (is-valid-shift start)
+    (for/and ([i (in-range n)])
+      (= (list-ref nums (modulo (+ start i) n))
+         (list-ref sorted-nums i))))
+  
+  (define (find-valid-shift start)
     (cond
-      [(rotated-equal? i) (modulo (- n i) n)]
-      [(< i (sub1 n)) (find-shift (add1 i))]
+      [(is-valid-shift start) (modulo (- n start) n)]
+      [(< start (sub1 n)) (find-valid-shift (add1 start))]
       [else -1]))
-
-  (if (= n 1) 0 (find-shift 0)))
+  
+  (if (<= n 1)
+      0
+      (find-valid-shift 0)))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2
-(minimumRightShifts '(1 3 5))      ;; Output: 0
-(minimumRightShifts '(2 1 4))      ;; Output: -1
+(minimumRightShifts '(1 3 5))       ;; Output: 0
+(minimumRightShifts '(2 1 4))       ;; Output: -1
 
 (require rackunit)
 

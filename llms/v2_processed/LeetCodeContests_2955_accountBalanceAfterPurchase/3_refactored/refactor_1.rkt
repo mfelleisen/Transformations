@@ -17,19 +17,13 @@
 ;; Hence, your account balance becomes 100 - 20 = 80.
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
-(define (accountBalanceAfterPurchase purchaseAmount)
-  (define initial-balance 100)
-  
-  ;; Calculate the rounded amount based on the purchaseAmount
+(define (accountBalanceAfterPurchase amount) ;; contract  abap/c
+  (define modulus (modulo amount 10))
   (define rounded-amount
-    (let* ((lower-bound (* (quotient purchaseAmount 10) 10))
-           (upper-bound (+ lower-bound 10)))
-      (if (<= (- upper-bound purchaseAmount) (- purchaseAmount lower-bound))
-          upper-bound
-          lower-bound)))
-  
-  ;; Calculate and return the new balance after the purchase
-  (- initial-balance rounded-amount))
+    (if (< modulus 5)
+        (- amount modulus)
+        (+ amount (- 10 modulus))))
+  (- 100 rounded-amount))
 
 ;; Example usage:
 ;; (accountBalanceAfterPurchase 9)  ; Output: 90

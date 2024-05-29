@@ -28,24 +28,24 @@
 ;;  * The input is generated such that if team a is stronger than team b, team b is not stronger than team a.
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion n edges)
-  ;; Create a list to keep track of the number of incoming edges for each team
+  ;; Create adjacency list representation of the graph
   (define in-degrees (make-vector n 0))
-  
-  ;; Update the in-degrees for each team based on edges
-  (for-each (lambda (edge)
-              (vector-set! in-degrees (second edge)
-                           (+ 1 (vector-ref in-degrees (second edge)))))
+
+  ;; Populate in-degrees
+  (for-each (λ (edge)
+              (match edge
+                [(list _ v) (vector-set! in-degrees v (add1 (vector-ref in-degrees v)))]))
             edges)
-  
-  ;; Find the team with zero in-degrees
-  (define zero-in-degree
+
+  ;; Find nodes with zero in-degrees
+  (define zero-in-degree-nodes
     (for/list ([i (in-range n)]
                #:when (= (vector-ref in-degrees i) 0))
       i))
-  
-  ;; Determine if there is exactly one team with zero in-degrees
-  (match zero-in-degree
-    [(list single-team) single-team]
+
+  ;; If there is exactly one node with zero in-degrees, return it
+  (match zero-in-degree-nodes
+    [(list champion) champion]
     [_ -1]))
 
 ;; Example usage:

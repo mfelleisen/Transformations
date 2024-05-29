@@ -28,28 +28,26 @@
 (define (findKOr nums k)
   ;; Define the maximum number of bits to consider (up to 31 bits for 32-bit integers)
   (define max-bits 31)
-  
+
   ;; Helper function to count how many numbers have the ith bit set
   (define (count-set-bits i)
-    (count (lambda (num) (not (zero? (bitwise-and num (arithmetic-shift 1 i)))))
-           nums))
-  
+    (for/sum ([num (in-list nums)])
+      (if (bitwise-bit-set? num i) 1 0)))
+
   ;; Construct the result by checking each bit position
-  (define (construct-result bit-pos acc)
-    (if (= bit-pos max-bits)
-        acc
-        (let ((bit-count (count-set-bits bit-pos)))
-          (if (>= bit-count k)
-              (construct-result (add1 bit-pos) (bitwise-ior acc (arithmetic-shift 1 bit-pos))) ;; Set the ith bit and recurse
-              (construct-result (add1 bit-pos) acc))))) ;; Recurse without setting the bit
-  
-  ;; Start the recursive construction of the result from the 0th bit
-  (construct-result 0 0))
+  (define (construct-result)
+    (for/fold ([result 0]) ([i (in-range max-bits)])
+      (if (>= (count-set-bits i) k)
+          (bitwise-ior result (arithmetic-shift 1 i))
+          result)))
+
+  ;; Start the construction of the result
+  (construct-result))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)  ;; Output: 9
-(findKOr '(2 12 1 11 4 5) 6)  ;; Output: 0
-(findKOr '(10 8 5 9 11 6 8) 1) ;; Output: 15
+(findKOr '(2 12 1 11 4 5) 6)   ;; Output: 0
+(findKOr '(10 8 5 9 11 6 8) 1)  ;; Output: 15
 
 (require rackunit)
 

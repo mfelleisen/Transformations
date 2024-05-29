@@ -15,30 +15,32 @@
 ;; 1 <= nums.length <= 50
 ;; 1 <= nums[i] <= 50
 (define (missingInteger nums)
-  ;; Helper function to find the longest sequential prefix
-  (define (longest-sequential-prefix nums)
-    (define (helper sum i)
-      (if (and (< (add1 i) (length nums))
-               (= (list-ref nums (add1 i)) (add1 (list-ref nums i))))
-          (helper (+ sum (list-ref nums (add1 i))) (add1 i))
-          sum))
-    (helper (first nums) 0))
+  ;; Function to compute the sum of the longest sequential prefix
+  (define (longest-sequential-prefix lst)
+    (define (helper prev sum rest)
+      (match rest
+        [(cons x xs)
+         (if (= x (+ prev 1))
+             (helper x (+ sum x) xs)
+             sum)]
+        [else sum]))
+    (helper (first lst) (first lst) (rest lst)))
 
-  ;; Helper function to find the smallest missing integer
-  (define (smallest-missing x nums)
-    (if (member x nums)
-        (smallest-missing (add1 x) nums)
-        x))
-
-  ;; Calculate the sum of the longest sequential prefix
+  ;; Compute the sum of the longest sequential prefix
   (define sum-prefix (longest-sequential-prefix nums))
 
-  ;; Find the smallest missing integer greater than or equal to sum_prefix
+  ;; Function to find the smallest missing integer greater than or equal to x
+  (define (smallest-missing x lst)
+    (if (member x lst)
+        (smallest-missing (+ x 1) lst)
+        x))
+
+  ;; Find the smallest missing integer greater than or equal to sum-prefix
   (smallest-missing sum-prefix nums))
 
-;; Example usage
-(missingInteger '(1 2 3 2 5))  ;; Output: 6
-(missingInteger '(3 4 5 1 12 14 13))  ;; Output: 15
+;; Test cases
+(missingInteger '(1 2 3 2 5))  ;; Expected output: 6
+(missingInteger '(3 4 5 1 12 14 13))  ;; Expected output: 15
 
 (require rackunit)
 

@@ -16,28 +16,26 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; This function calculates the minimum possible sum of a k-avoiding array of length n.
-  ;; A k-avoiding array does not have any pair of distinct elements that sum to k.
+  ;; Inner function to check if a number violates the k-avoiding property.
+  (define (violates-k-avoiding? used-numbers current-number)
+    (let ([complement (- k current-number)])
+      (and (set-member? used-numbers complement)
+           (not (= current-number complement)))))
 
-  ;; Helper function to generate the next number that does not violate the k-avoiding property
-  (define (next-valid-num used-numbers current-number)
-    (if (or (set-member? used-numbers (- k current-number)) ; Check k-avoiding condition
-            (set-member? used-numbers current-number)) ; Check uniqueness
-        (next-valid-num used-numbers (+ current-number 1)) ; Skip current number
-        current-number)) ; Valid number found, return it
-
-  ;; Recursive helper function to build the k-avoiding array and calculate the sum
+  ;; Tail-recursive function to build the k-avoiding array and calculate the sum.
   (define (build-and-sum used-numbers current-number count total-sum)
-    (if (= count n) ; Base case: if we've added enough numbers, return the sum
-        total-sum
-        (let* ((valid-number (next-valid-num used-numbers current-number))
-               (new-used-numbers (set-add used-numbers valid-number)))
-          (build-and-sum new-used-numbers
-                         (+ valid-number 1)
-                         (+ count 1)
-                         (+ total-sum valid-number))))) ; Add to sum and recurse
+    (cond
+      [(= count n) total-sum]
+      [(or (violates-k-avoiding? used-numbers current-number)
+           (set-member? used-numbers current-number))
+       (build-and-sum used-numbers (+ current-number 1) count total-sum)]
+      [else
+       (build-and-sum (set-add used-numbers current-number)
+                      (+ current-number 1)
+                      (+ count 1)
+                      (+ total-sum current-number))]))
 
-  ;; Start the recursive process with an empty set, starting number 1, count 0, and sum 0
+  ;; Start the recursive process with an empty set, starting number 1, count 0, and sum 0.
   (build-and-sum (set) 1 0 0))
 
 ;; Example usage:

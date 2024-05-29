@@ -26,28 +26,26 @@
 ;;  * 0 <= nums[i] < 231
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
-  ;; Helper function to count the number of elements with the ith bit set
+  (define (bit-set? n bit)
+    (not (zero? (bitwise-and n (arithmetic-shift 1 bit)))))
+
   (define (count-bit-set nums bit)
-    (count (lambda (num) (not (zero? (bitwise-and num bit)))) nums))
-  
-  ;; Recursive function to accumulate the result
-  (define (bitwise-kor i result)
-    (if (< i 31)
-        (let* ([bit (arithmetic-shift 1 i)]
-               [count (count-bit-set nums bit)])
-          ;; If at least k numbers have the ith bit set, include this bit in the result
-          (bitwise-kor (add1 i)
+    (for/sum ([num nums]) (if (bit-set? num bit) 1 0)))
+
+  (define (k-or-helper bit result)
+    (if (< bit 31)
+        (let ([count (count-bit-set nums bit)])
+          (k-or-helper (add1 bit)
                        (if (>= count k)
-                           (bitwise-ior result bit)
+                           (bitwise-ior result (arithmetic-shift 1 bit))
                            result)))
         result))
-  
-  ;; Start the bitwise-Kor calculation from bit position 0 with an initial result of 0
-  (bitwise-kor 0 0))
+
+  (k-or-helper 0 0))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)  ; Output: 9
-(findKOr '(2 12 1 11 4 5) 6)   ; Output: 0
+(findKOr '(2 12 1 11 4 5) 6)  ; Output: 0
 (findKOr '(10 8 5 9 11 6 8) 1)  ; Output: 15
 
 (require rackunit)

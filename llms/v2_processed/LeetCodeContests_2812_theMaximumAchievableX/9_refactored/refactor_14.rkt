@@ -20,11 +20,7 @@
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
 (define (theMaximumAchievableX num t)
-  ;; The function calculates the maximum achievable number x,
-  ;; based on the given number `num` and the maximum number of operations `t`.
-  ;; Each operation allows x to be increased or decreased by 1,
-  ;; while num is simultaneously decreased or increased by 1 respectively.
-  ;; This results in the maximum achievable x being `num + 2 * t`.
+  ;; Calculate the maximum achievable number x based on num and t.
   (define max-x (+ num (* 2 t)))
   max-x)
 

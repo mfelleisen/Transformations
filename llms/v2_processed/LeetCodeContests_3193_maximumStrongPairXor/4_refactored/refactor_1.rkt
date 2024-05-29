@@ -31,16 +31,16 @@
   ;; Helper function to compute the XOR of a pair (x, y).
   (define (pair-xor x y)
     (bitwise-xor x y))
-  
-  ;; Generate all strong pairs and compute their XOR values.
-  (define xors
-    (for*/list ([i (in-list nums)]
-                [j (in-list nums)]
-                #:when (strong-pair? i j))
-      (pair-xor i j)))
-  
-  ;; Return the maximum XOR found, or 0 if no strong pairs exist.
-  (if (empty? xors) 0 (apply max xors)))
+
+  ;; Generate and filter strong pairs, then compute their XOR values.
+  (define max-xor
+    (for/fold ([max-xor 0]) 
+              ([x nums] [y nums])
+      (if (strong-pair? x y)
+          (max max-xor (pair-xor x y))
+          max-xor)))
+
+  max-xor)
 
 ;; Example usage:
 (maximumStrongPairXor '(1 2 3 4 5))   ;; Output: 7

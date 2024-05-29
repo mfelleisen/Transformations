@@ -35,7 +35,8 @@
   
   ;; Count how many numbers have the bit set at each position.
   (define (count-bit-set bit)
-    (count (lambda (num) (bit-set? num bit)) nums))
+    (for/sum ([num (in-list nums)])
+      (if (bit-set? num bit) 1 0)))
   
   ;; Determine if the bit should be set in the result based on the count.
   (define (result-bit bit)

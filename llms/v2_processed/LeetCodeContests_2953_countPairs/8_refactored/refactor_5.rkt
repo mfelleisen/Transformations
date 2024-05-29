@@ -20,17 +20,19 @@
 (define (countPairs coordinates k)
   ;; Function to calculate the bitwise XOR distance between two points
   (define (xor-distance p1 p2)
-    (+ (bitwise-xor (car p1) (car p2))
-       (bitwise-xor (cadr p1) (cadr p2))))
+    (+ (bitwise-xor (first p1) (first p2))
+       (bitwise-xor (second p1) (second p2))))
+  
+  ;; Function to count the number of valid pairs
+  (define (count-valid-pairs coords k)
+    (for/fold ([count 0]) ([i (in-naturals)] [p1 (in-list coords)])
+      (for/fold ([count count]) ([p2 (in-list (drop coords (add1 i)))])
+        (if (= (xor-distance p1 p2) k)
+            (add1 count)
+            count))))
 
   ;; Main computation
-  (for/fold ([count 0])
-            ([i (in-naturals)]
-             [p1 (in-list coordinates)]
-             #:break (>= i (sub1 (length coordinates)))
-             [p2 (in-list (drop coordinates (add1 i)))]
-             #:when (= (xor-distance p1 p2) k))
-    (add1 count)))
+  (count-valid-pairs coordinates k))
 
 ;; Example usage:
 (countPairs '((1 2) (4 2) (1 3) (5 2)) 5)  ; Output: 2

@@ -36,32 +36,28 @@
 ;;  * 1 <= usageLimits.length <= 105
 ;;  * 1 <= usageLimits[i] <= 109
 (define (maxIncreasingGroups usageLimits)
-  ;; Sort the usage limits
+  ;; Sort the usageLimits to facilitate the creation of groups in increasing order of their lengths
   (define sorted-limits (sort usageLimits <))
   
-  ;; Helper function to accumulate the number of groups
-  (define (count-groups limits)
-    (let loop ([limits limits]
-               [current-min-size 1]
-               [total 0]
-               [num-groups 0])
-      (match limits
-        ;; Base case: if there are no more limits, return the number of groups formed
-        [(list) num-groups]
-        ;; Recursive case: process each limit
-        [(cons limit remaining-limits)
-         (let* ((new-total (+ total limit)))
-           (if (>= new-total current-min-size)
-               ;; If a new group can be formed
-               (loop remaining-limits
-                     (+ current-min-size 1) ;; Increment the size for the next group
-                     (- new-total current-min-size) ;; Update total after forming a group
-                     (+ num-groups 1)) ;; Increment the group count
-               ;; If not, just move to the next element without forming a group
-               (loop remaining-limits current-min-size new-total num-groups)))])))
+  ;; This function iterates through the sorted limits to count how many groups can be formed
+  (define (count-groups limits current-min-size total num-groups)
+    (match limits
+      ;; Base case: if there are no more limits, return the number of groups formed
+      [(list) num-groups]
+      ;; Recursive case: process each limit
+      [(cons limit rest)
+       (let ((new-total (+ total limit))) ;; Update total with the current limit
+         (if (>= new-total current-min-size)  ;; Check if a new group can be formed
+             ;; If yes, form a new group
+             (count-groups rest
+                           (+ current-min-size 1) ;; Increment the size for the next group
+                           (- new-total current-min-size) ;; Update total after forming a group
+                           (+ num-groups 1)) ;; Increment the group count
+             ;; If no, just move to the next element without forming a group
+             (count-groups rest current-min-size new-total num-groups)))]))
 
   ;; Start the recursive count with initial values
-  (count-groups sorted-limits))
+  (count-groups sorted-limits 1 0 0))
 
 ;; Example usage:
 (maxIncreasingGroups '(1 2 5))  ;; Output: 3

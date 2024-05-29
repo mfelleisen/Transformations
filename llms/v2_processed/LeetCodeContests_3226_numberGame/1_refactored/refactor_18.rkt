@@ -19,24 +19,16 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  ;; Helper function to perform a single round of moves and updates
-  (define (round nums arr)
-    (let* ([sorted-nums (sort nums <)]
-           [alice-choice (first sorted-nums)]
-           [nums-after-alice (rest sorted-nums)]
-           [bob-choice (first nums-after-alice)]
-           [nums-after-bob (rest nums-after-alice)])
-      (values nums-after-bob (cons bob-choice (cons alice-choice arr)))))
+  (define sorted-nums (sort nums <))
   
-  ;; Tail-recursive helper function to simulate the game
-  (define (game-loop nums arr)
-    (if (null? nums)
-        (reverse arr)
-        (call-with-values (lambda () (round nums arr))
-          game-loop)))
-  
-  ;; Start the game loop with the initial list and an empty result list
-  (game-loop nums '()))
+  (define (split-steps lst)
+    (define (helper lst acc)
+      (if (empty? lst)
+          (reverse acc)
+          (helper (drop lst 2) (cons (list (second lst) (first lst)) acc))))
+    (apply append (helper lst '())))
+
+  (split-steps sorted-nums))
 
 ;; Example usage:
 (numberGame '(5 4 2 3)) ;; Output: '(3 2 5 4)

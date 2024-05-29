@@ -44,22 +44,18 @@
 
   ;; Helper function to iterate over the sorted limits and count groups
   (define (count-groups limits current-min-size total num-groups)
-    (cond
-      ;; Base case: If we have no more limits left, return the number of groups
-      [(null? limits) num-groups]
-      ;; Recursive case: Process the current limit
-      [else
-       (define current-limit (car limits))
+    (match limits
+      ['() num-groups]
+      [(cons current-limit rest-limits)
        (define new-total (+ total current-limit))
-       ;; Check if we can form a group of at least `current-min-size`
        (if (>= new-total current-min-size)
            ;; If yes, form a new group and recurse with updated parameters
-           (count-groups (cdr limits)
+           (count-groups rest-limits
                          (+ current-min-size 1)
                          (- new-total current-min-size)
                          (+ num-groups 1))
            ;; If no, just move to the next limit without forming a group
-           (count-groups (cdr limits) current-min-size new-total num-groups))]))
+           (count-groups rest-limits current-min-size new-total num-groups))]))
 
   ;; Start the recursive counting with initial parameters
   (count-groups sorted-limits 1 0 0))

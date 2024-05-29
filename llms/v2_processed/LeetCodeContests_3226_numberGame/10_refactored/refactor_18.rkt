@@ -19,20 +19,19 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  ;; First, sort the numbers to facilitate easy selection of the minimum elements
-  (define sorted-nums (sort nums <))
-  
-  ;; Define a helper function to simulate the game
-  (define (simulate-game nums acc)
-    (match nums
-      ;; If there are no more numbers, return the accumulated list reversed
-      [(list) (reverse acc)]
-      ;; Alice and Bob's turn to pick and append the minimum elements
-      [(cons alice-choice (cons bob-choice rest))
-       (simulate-game rest (cons alice-choice (cons bob-choice acc)))]))
-  
-  ;; Start the game simulation with the sorted numbers and an empty accumulator
-  (simulate-game sorted-nums '()))
+  ;; Helper function to perform the game operations
+  (define (play-game nums arr)
+    (if (empty? nums)
+        (reverse arr)
+        (let* ([sorted-nums (sort nums <)]
+               [alice-choice (first sorted-nums)]
+               [remaining-nums (rest sorted-nums)]
+               [bob-choice (first remaining-nums)]
+               [new-nums (rest remaining-nums)])
+          (play-game new-nums (cons alice-choice (cons bob-choice arr))))))
+
+  ;; Start the game with the initial nums and an empty arr
+  (play-game nums '()))
 
 ;; Example usage:
 (numberGame '(5 4 2 3))  ; Output: '(3 2 5 4)

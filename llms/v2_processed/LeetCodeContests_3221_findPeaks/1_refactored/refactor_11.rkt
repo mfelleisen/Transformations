@@ -22,22 +22,23 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  (define (is-peak? lst)
-    (and (> (second lst) (first lst))
-         (> (second lst) (third lst))))
-  
-  (define n (length mountain))
-  (if (< n 3)
-      '()
-      (for/list ([i (in-range 1 (- n 1))]
-                 #:when (is-peak? (list (list-ref mountain (- i 1))
-                                        (list-ref mountain i)
-                                        (list-ref mountain (+ i 1)))))
+  ;; Helper function to check if an element at index i is a peak
+  (define (is-peak? lst i)
+    (and (> (list-ref lst i) (list-ref lst (sub1 i)))
+         (> (list-ref lst i) (list-ref lst (add1 i)))))
+
+  (define len (length mountain))
+  (if (< len 3)
+      '() ; If there are less than 3 elements, there can't be any internal peaks.
+      ;; Generate indices from 1 to len-2 and filter out the peaks.
+      (for/list ([i (in-range 1 (sub1 len))]
+                 #:when (is-peak? mountain i))
         i)))
 
 ;; Example usage
 (findPeaks '(1 4 3 8 5)) ; => '(1 3)
 (findPeaks '(2 4 4))     ; => '()
+(findPeaks '(1 4 3 2 5 6 4 3)) ; => '(1 5)
 
 (require rackunit)
 

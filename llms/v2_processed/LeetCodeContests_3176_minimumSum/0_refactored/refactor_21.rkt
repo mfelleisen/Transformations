@@ -27,31 +27,36 @@
 ;;  * 3 <= nums.length <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
-  (define len (length nums))
-  (if (< len 3)
-      -1  ; If less than 3 elements, no mountain triplet can exist
-      (let loop-j ([j 1] [min-sum +inf.0] [found #f])
-        (if (< j (- len 1))
-            ;; For each j, find the minimum elements on the left and right that satisfy the mountain conditions
-            (let* ((current (list-ref nums j))
-                   (left-min (for/fold ([min-l +inf.0])
-                                       ([i (in-range 0 j)])
-                                 (let ((left (list-ref nums i)))
-                                   (if (< left current)
-                                       (min min-l left)
-                                       min-l))))
-                   (right-min (for/fold ([min-r +inf.0])
-                                        ([k (in-range (+ j 1) len)])
-                                  (let ((right (list-ref nums k)))
-                                    (if (< right current)
-                                        (min min-r right)
-                                        min-r)))))
-              ;; Check if valid left and right minimums are found
-              (if (and (< left-min +inf.0) (< right-min +inf.0))
-                  (loop-j (+ j 1) (min min-sum (+ left-min current right-min)) #t)
-                  (loop-j (+ j 1) min-sum found)))
-            ;; After looping through all j, check if a valid mountain was found
-            (if found min-sum -1)))))
+  (define n (length nums))
+  (if (< n 3)
+      -1
+      (let* ([inf +inf.0]
+             [min-sum inf]
+             [found #f]
+             [left-mins (build-list n (λ (_) inf))]
+             [right-mins (build-list n (λ (_) inf))])
+        
+        ;; Compute the minimum elements on the left side for each j
+        (for ([j (in-range 1 n)])
+          (for ([i (in-range 0 j)])
+            (when (< (list-ref nums i) (list-ref nums j))
+              (set! left-mins (list-set left-mins j (min (list-ref left-mins j) (list-ref nums i)))))))
+        
+        ;; Compute the minimum elements on the right side for each j
+        (for ([j (in-range 0 (- n 1))])
+          (for ([k (in-range (+ j 1) n)])
+            (when (< (list-ref nums k) (list-ref nums j))
+              (set! right-mins (list-set right-mins j (min (list-ref right-mins j) (list-ref nums k)))))))
+        
+        ;; Find the minimum sum of any valid mountain triplet
+        (for ([j (in-range 1 (- n 1))])
+          (let ([left-min (list-ref left-mins j)]
+                [right-min (list-ref right-mins j)])
+            (when (and (< left-min inf) (< right-min inf))
+              (set! min-sum (min min-sum (+ left-min (list-ref nums j) right-min)))
+              (set! found #t))))
+        
+        (if found min-sum -1))))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ; Output: 9

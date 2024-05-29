@@ -25,20 +25,16 @@
 (define (maximumXorProduct a b n)
   (define MOD (+ (expt 10 9) 7))
   (define upper-limit (expt 2 n))
+  
+  (for/fold ([max-product 0] #:result (remainder max-product MOD))
+            ([x (in-range upper-limit)])
+    (let ([product (* (bitwise-xor a x) (bitwise-xor b x))])
+      (max max-product product))))
 
-  ;; Find the maximum product using a fold operation
-  (define max-product
-    (for/fold ([max-p 0]) ([x (in-range upper-limit)])
-      (define product (* (bitwise-xor a x) (bitwise-xor b x)))
-      (max max-p product)))
-
-  ;; Return the maximum product modulo MOD
-  (remainder max-product MOD))
-
-;; Examples
-(maximumXorProduct 12 5 4)  ; Output: 98
-(maximumXorProduct 6 7 5)   ; Output: 930
-(maximumXorProduct 1 6 3)   ; Output: 12
+;; Test cases
+(maximumXorProduct 12 5 4)  ;; Output: 98
+(maximumXorProduct 6 7 5)   ;; Output: 930
+(maximumXorProduct 1 6 3)   ;; Output: 12
 
 (require rackunit)
 

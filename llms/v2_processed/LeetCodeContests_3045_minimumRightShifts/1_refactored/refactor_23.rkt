@@ -23,24 +23,25 @@
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
   (define n (length nums))
-  (define sorted-nums (sort nums <))
 
-  (define (is-sorted-from? start)
-    (for/and ([i (in-range n)])
-      (equal? (list-ref nums (modulo (+ start i) n))
-              (list-ref sorted-nums i))))
+  ;; Helper function to check if a list is sorted
+  (define (sorted? lst)
+    (andmap (lambda (pair) (<= (first pair) (second pair)))
+            (map list lst (rest lst))))
 
-  (define (find-valid-shift)
-    (for/first ([start (in-range n)])
-      (when (is-sorted-from? start)
-        (modulo (- n start) n))))
+  ;; Function to perform a right shift
+  (define (right-shift lst)
+    (append (last lst) (take lst (- (length lst) 1))))
 
-  (or (find-valid-shift) -1))
+  ;; Iteratively check for the minimum number of right shifts required
+  (define (find-min-shifts lst count)
+    (cond
+      [(sorted? lst) count]
+      [(>= count n) -1]
+      [else (find-min-shifts (right-shift lst) (add1 count))]))
 
-;; Example usage:
-(minimumRightShifts '(3 4 5 1 2)) ; => 2
-(minimumRightShifts '(1 3 5))     ; => 0
-(minimumRightShifts '(2 1 4))     ; => -1
+  ;; Start with the original list and count 0 shifts
+  (find-min-shifts nums 0))
 
 (require rackunit)
 

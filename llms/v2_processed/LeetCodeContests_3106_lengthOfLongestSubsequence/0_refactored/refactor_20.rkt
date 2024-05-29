@@ -20,27 +20,38 @@
 ;;  * 1 <= nums[i] <= 1000
 ;;  * 1 <= target <= 1000
 (define (lengthOfLongestSubsequence nums target)
-  ;; Define a helper function to handle memoization
-  (define memo (make-hash))
+  ;; Function to update the hash table with the new sum and length
+  (define (update-hash dp temp-dp num)
+    (hash-for-each
+     dp
+     (lambda (s length)
+       (let ((new-sum (+ s num)))
+         ;; Only consider new sums <= target
+         (when (<= new-sum target)
+           ;; Update the temporary hash with the new sum and length
+           (hash-update!
+            temp-dp new-sum
+            (lambda (old-length) (max old-length (+ length 1)))
+            (+ length 1)))))))
   
-  ;; Define the recursive function to find the longest subsequence sum
-  (define (find-longest-subseq idx remaining-target)
-    (cond
-      [(= remaining-target 0) 0]
-      [(or (< remaining-target 0) (>= idx (length nums))) -1]
-      [else
-       (define key (cons idx remaining-target))
-       (hash-ref! memo key
-                  (lambda ()
-                    (let* ((current (list-ref nums idx))
-                           (including-current (find-longest-subseq (+ idx 1) (- remaining-target current)))
-                           (excluding-current (find-longest-subseq (+ idx 1) remaining-target)))
-                      (if (= including-current -1)
-                          excluding-current
-                          (max excluding-current (+ 1 including-current))))))]))
-  
-  ;; Start the recursive process from index 0 and with the target value
-  (find-longest-subseq 0 target))
+  ;; Use a hash table to store the sums and their maximum subsequence lengths
+  (define dp (make-hash '((0 . 0))))  ; Initialize with base case: sum 0 with length 0
+
+  ;; Iterate over each number in the list
+  (for ([num nums])
+    ;; Create a temporary hash to avoid mutation during iteration
+    (define temp-dp (make-hash))
+    ;; Update the hash table
+    (update-hash dp temp-dp num)
+    ;; Merge temporary updates back into dp
+    (hash-for-each
+     temp-dp
+     (lambda (key value)
+       (hash-update! dp key (lambda (old) (max old value)) value))))
+
+  ;; Check if target sum is achieved and return the corresponding length
+  (let ((result (hash-ref dp target #f)))
+    (if result result -1)))
 
 ;; Example usage
 (lengthOfLongestSubsequence '(1 2 3 4 5) 9)  ; Output: 3

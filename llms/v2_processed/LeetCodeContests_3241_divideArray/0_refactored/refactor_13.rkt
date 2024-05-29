@@ -25,25 +25,27 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (define sorted-nums (sort nums <))  ; Sort the list in ascending order
+  ;; Helper function to split the list into groups of 3 and check the condition
+  (define (split-and-check sorted-nums)
+    (define (valid-group? group)
+      (<= (- (last group) (first group)) k))
+    (define (split-into-groups lst)
+      (cond
+        [(null? lst) '()]
+        [(< (length lst) 3) '()]
+        [else
+         (let ([group (take lst 3)])
+           (if (valid-group? group)
+               (cons group (split-into-groups (drop lst 3)))
+               '()))]))
+    (split-into-groups sorted-nums))
 
-  (define (group-of-three lst)
-    (match lst
-      [(list a b c) (if (<= (- c a) k) (list a b c) #f)]
-      [_ #f]))
+  ;; Sort the input list and process
+  (let ([sorted-nums (sort nums <)])
+    (split-and-check sorted-nums)))
 
-  (define (partition lst)
-    (let loop ([remaining lst] [result '()])
-      (match remaining
-        ['() (reverse result)]
-        [(list) '()]  ; If fewer than 3 elements are left, return empty
-        [_ (let ([group (group-of-three (take remaining 3))])
-             (if group
-                 (loop (drop remaining 3) (cons group result))
-                 '()))])))
-
-  (partition sorted-nums))
-
+;; Usage example
+;; (divideArray [1,3,4,8,7,9,3,5,1] 2)
 
 (require rackunit)
 

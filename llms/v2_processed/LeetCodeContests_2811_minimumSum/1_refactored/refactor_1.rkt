@@ -18,24 +18,20 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function to generate the next valid number
-  (define (next-valid num used)
-    (if (or (set-member? used num)
-            (set-member? used (- k num)))
-        (next-valid (+ num 1) used)
-        num))
-  
-  ;; Recursive helper function to build the k-avoiding array and calculate its sum.
-  (define (build-k-avoiding count num used sum)
-    (if (= count n)
-        sum  ;; If we've added enough elements, return the sum.
-        (let* ([valid-num (next-valid num used)]
-               [new-sum (+ sum valid-num)]
-               [new-used (set-add used valid-num)])
-          (build-k-avoiding (+ count 1) (+ valid-num 1) new-used new-sum))))
-  
-  ;; Start the recursive process with count 0, starting number 1, an empty set for used numbers, and sum 0.
-  (build-k-avoiding 0 1 (set) 0))
+  ;; Helper function to generate the sequence of numbers that avoid the sum k.
+  (define (generate-sequence count current used acc)
+    (cond
+      [(= count n) (reverse acc)] ;; If we have enough elements, return the accumulated list.
+      [(or (set-member? used (- k current)) (set-member? used current))
+       (generate-sequence count (+ current 1) used acc)] ;; Skip current if it violates the property or is already used.
+      [else
+       (generate-sequence (+ count 1) 
+                          (+ current 1) 
+                          (set-add used current)
+                          (cons current acc))])) ;; Add current and continue.
+
+  ;; Start the recursive process with count 0, current number 1, an empty set for used numbers, and an empty accumulator.
+  (apply + (generate-sequence 0 1 (set) '())))
 
 ;; Example usage (not part of the function definition):
 ;; (minimumSum 5 4)  ;; Should return 18

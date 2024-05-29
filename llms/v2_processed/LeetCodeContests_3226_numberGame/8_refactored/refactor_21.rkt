@@ -19,20 +19,20 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  ;; Define a helper function to perform the game logic.
-  (define (game-step nums)
-    (cond
-      [(empty? nums) '()]  ; If nums is empty, return an empty list.
-      [else
-       (let* ([sorted-nums (sort nums <)]  ; Sort the nums in ascending order.
-              [alice-pick (first sorted-nums)]  ; Alice picks the minimum element.
-              [bob-pick (second sorted-nums)]   ; Bob picks the second minimum element.
-              [remaining-nums (drop sorted-nums 2)])  ; Remove the first two elements.
-         ;; Recur with the remaining numbers and append picks in the specified order.
-         (append (list bob-pick alice-pick) (game-step remaining-nums)))]))
-  
-  ;; Start the game with the initial nums list.
-  (game-step nums))
+  ;; Define a helper function for the game logic
+  (define (play-game nums arr)
+    (match nums
+      ;; If nums is empty, return the accumulated result array
+      [(list) (reverse arr)]
+      ;; Otherwise, process the next pair of elements
+      [(list-rest min1 min2 rest)
+       (play-game rest (cons min1 (cons min2 arr)))]
+      ;; Handle the case where only one element is left, though this case should not occur
+      ;; since the problem constraints guarantee an even number of elements
+      [_ (error "Unexpected odd number of elements in nums")]))
+
+  ;; Sort the input list and start the game
+  (play-game (sort nums <) '()))
 
 ;; Example usage:
 (numberGame '(5 4 2 3))  ; Output: '(3 2 5 4)

@@ -36,21 +36,20 @@
 ;;  * 1 <= usageLimits.length <= 105
 ;;  * 1 <= usageLimits[i] <= 109
 (define (maxIncreasingGroups usageLimits)
-  ;; Sort the usageLimits to facilitate the creation of groups in increasing order of their lengths
   (define sorted-limits (sort usageLimits <))
 
   (define (count-groups limits current-min-size total num-groups)
-    (if (null? limits)
-        num-groups
-        (let* ((limit (car limits))
-               (new-total (+ total limit))
-               (remaining-limits (cdr limits)))
-          (if (>= new-total current-min-size)
-              (count-groups remaining-limits
-                            (add1 current-min-size)
-                            (- new-total current-min-size)
-                            (add1 num-groups))
-              (count-groups remaining-limits current-min-size new-total num-groups)))))
+    (match limits
+      ['()
+       num-groups]
+      [(cons limit rest)
+       (let ((new-total (+ total limit)))
+         (if (>= new-total current-min-size)
+             (count-groups rest
+                           (add1 current-min-size)
+                           (- new-total current-min-size)
+                           (add1 num-groups))
+             (count-groups rest current-min-size new-total num-groups)))]))
 
   (count-groups sorted-limits 1 0 0))
 

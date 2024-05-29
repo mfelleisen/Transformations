@@ -16,23 +16,15 @@
 ;; Constraints:
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
-(define (sumOfSquares nums)
+(define (sumOfSquares nums) 
   (define n (length nums))
-  
-  (define (special-indices)
-    (for/list ([i (in-range 1 (add1 n))]
-               #:when (zero? (remainder n i)))
-      i))
-
-  (define (square x) (* x x))
-
-  (apply +
-         (map (compose1 square (lambda (i) (list-ref nums (sub1 i))))
-              (special-indices))))
-
-;; Test cases
-(sumOfSquares '(1 2 3 4)) ;; Output: 21
-(sumOfSquares '(2 7 1 19 18 3)) ;; Output: 63
+  (define (is-special? i)
+    (zero? (remainder n i)))
+  (define (square x)
+    (* x x))
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (is-special? i))
+    (square (list-ref nums (- i 1)))))
 
 (require rackunit)
 

@@ -14,28 +14,25 @@
 ;; Constraints:
 ;; 1 <= nums.length <= 50
 ;; 1 <= nums[i] <= 50
-(define (missingInteger nums)
-  ;; Function to find the longest sequential prefix sum and the smallest missing integer
-  (define (longest-sequential-prefix nums)
-    (define (helper prefix rest)
-      (match rest
-        [(cons x xs)
-         (if (= x (+ 1 (last prefix)))
-             (helper (append prefix (list x)) xs)
-             prefix)]
-        [else prefix]))
-    (let ([prefix (helper (list (first nums)) (rest nums))])
-      (apply + prefix)))
+(define (missingInteger nums) ;; contract  mi/c
+  
+  ;; Helper function to find the longest sequential prefix sum
+  (define (longest-sequential-sum lst)
+    (define-values (sum _)
+      (for/fold ([sum (first lst)] [prev (first lst)]) 
+                ([current (in-list (rest lst))] #:break (not (= current (+ prev 1))))
+        (values (+ sum current) current)))
+    sum)
 
-  (define (find-smallest-missing nums target-sum)
-    (define (helper x)
-      (if (member x nums)
-          (helper (+ x 1))
-          x))
-    (helper target-sum))
+  ;; Helper function to find the smallest missing integer greater than or equal to target
+  (define (find-missing target lst)
+    (for/first ([i (in-naturals target)] #:unless (member i lst)) i))
 
-  (let ([prefix-sum (longest-sequential-prefix nums)])
-    (find-smallest-missing nums prefix-sum)))
+  ;; Calculate the longest sequential prefix sum
+  (define target-sum (longest-sequential-sum nums))
+
+  ;; Find and return the smallest missing integer
+  (find-missing target-sum nums))
 
 ;; Example usage
 (missingInteger '(1 2 3 2 5))  ; Output: 6

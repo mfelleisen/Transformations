@@ -25,35 +25,31 @@
 ;;  * For all i, j that i != j, grid[i][j] != grid[j][i].
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion grid)
-  (define n (length grid))
-  
-  ;; Determine the potential champion by comparing teams
-  (define (find-potential-champion)
-    (define (loop i potential-champion)
-      (if (>= i n)
-          potential-champion
-          (loop (add1 i)
-                (if (= (list-ref (list-ref grid potential-champion) i) 1)
-                    potential-champion
-                    i))))
-    (loop 1 0))
+  ;; Helper function to find the potential champion
+  (define (find-potential-champion n)
+    (foldl (lambda (i champion)
+             (if (= (vector-ref (vector-ref grid champion) i) 1)
+                 champion
+                 i))
+           0
+           (range 1 n)))
 
-  ;; Verify if the potential champion is indeed the champion
-  (define (verify-champion potential-champion)
-    (define (loop j)
-      (cond
-        [(>= j n) potential-champion]
-        [(= j potential-champion) (loop (add1 j))]
-        [(= (list-ref (list-ref grid j) potential-champion) 1) -1]
-        [else (loop (add1 j))]))
-    (loop 0))
+  ;; Helper function to verify if the potential champion is indeed the champion
+  (define (verify-champion potential n)
+    (for/or ([j (in-range n)]
+             #:when (not (= j potential)))
+      (= (vector-ref (vector-ref grid j) potential) 1)))
 
-  ;; Execute the verification process
-  (verify-champion (find-potential-champion)))
+  ;; Main logic
+  (define n (vector-length grid))
+  (define potential (find-potential-champion n))
+  (if (verify-champion potential n)
+      -1
+      potential))
 
 ;; Example Usage
-(displayln (findChampion '((0 1) (0 0))))  ; Output: 0
-(displayln (findChampion '((0 0 1) (1 0 1) (0 0 0))))  ; Output: 1
+(displayln (findChampion (vector (vector 0 1) (vector 0 0))))  ; Output: 0
+(displayln (findChampion (vector (vector 0 0 1) (vector 1 0 1) (vector 0 0 0))))  ; Output: 1
 
 (require rackunit)
 

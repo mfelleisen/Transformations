@@ -25,21 +25,23 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Length of the list
   (define n (length nums))
+  (define (costs i j)
+    (+ (list-ref nums 0)
+       (list-ref nums i)
+       (list-ref nums j)))
   
-  ;; Handle the edge case where the length is exactly 3
-  (if (= n 3)
-      (apply + nums)
-      (for*/fold ([min-cost +inf.0])
-                 ([i (in-range 1 (- n 1))]
-                  [j (in-range (+ i 1) n)])
-        (min min-cost (+ (first nums) (list-ref nums i) (list-ref nums j))))))
+  (define (min-costs i)
+    (for/fold ([min-cost +inf.0]) ([j (in-range (+ i 1) n)])
+      (min min-cost (costs i j))))
+  
+  (for/fold ([min-cost +inf.0]) ([i (in-range 1 (- n 1))])
+    (min min-cost (min-costs i))))
 
-;; Examples for testing
-(minimumCost '(1 2 3 12))  ;; => 6
-(minimumCost '(5 4 3))     ;; => 12
-(minimumCost '(10 3 1 1))  ;; => 12
+;; Test cases
+(minimumCost '(1 2 3 12)) ;; Output should be 6
+(minimumCost '(5 4 3))    ;; Output should be 12
+(minimumCost '(10 3 1 1)) ;; Output should be 12
 
 (require rackunit)
 

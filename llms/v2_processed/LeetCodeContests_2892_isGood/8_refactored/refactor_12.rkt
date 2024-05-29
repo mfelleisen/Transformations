@@ -24,12 +24,15 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= num[i] <= 200
 (define (isGood nums)
-  (define n (apply max nums))  ; Find the maximum element in nums, which is 'n'
-  ;; Create a hash table of counts for each number
-  (define counts 
-    (for/fold ([dict (make-immutable-hash)])
+  ;; Find the maximum element in nums, which is `n`
+  (define n (apply max nums))
+  ;; Create a hash table to count occurrences of each number
+  (define counts
+    (for/fold ([count-table (make-hash)])
               ([num (in-list nums)])
-      (dict-set dict num (add1 (dict-ref dict num 0)))))
+      (hash-update! count-table num (λ (v) (add1 (or v 0))) 0)
+      count-table))
+
   ;; Check if all integers from 1 to n-1 are present exactly once, and n is present exactly twice
   (and (for/and ([i (in-range 1 n)]) (= (hash-ref counts i 0) 1))  ; All numbers from 1 to n-1 should appear once
        (= (hash-ref counts n 0) 2)  ; n should appear exactly twice

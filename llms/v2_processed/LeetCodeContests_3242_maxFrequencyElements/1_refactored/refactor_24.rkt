@@ -16,24 +16,17 @@
 ;; Constraints:
 ;; 1 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
-(define (maxFrequencyElements nums)
-  ;; Calculate the frequency of each element using a hash table
-  (define frequencies
-    (for/fold ([acc (hash)])
-              ([num (in-list nums)])
-      (hash-update acc num add1 0)))
+(define (maxFrequencyElements nums) ;; contract  mfe/c
+  (define freqs (frequencies nums))
+  (define max-freq (apply max (map second freqs)))
+  (apply + (map second (filter (λ (pair) (= (second pair) max-freq)) freqs))))
 
-  ;; Find the maximum frequency
-  (define max-freq
-    (apply max (hash-values frequencies)))
-
-  ;; Count the total occurrences of elements that have the maximum frequency
-  (for/fold ([count 0])
-            ([freq (in-hash-values frequencies)])
-    (if (= freq max-freq)
-        (+ count freq)
-        count)))
-
+;; Helper function to compute frequencies
+;; {Listof X -> [Listof (cons X Natural)]}
+(define (frequencies lst)
+  (define freq-map (for/fold ([acc (hash)]) ([item (in-list lst)])
+                     (hash-update acc item add1 0)))
+  (hash->list freq-map))
 
 (require rackunit)
 

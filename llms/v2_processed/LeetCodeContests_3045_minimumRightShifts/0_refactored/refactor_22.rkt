@@ -25,16 +25,17 @@
   (define n (length nums))
   (define sorted-nums (sort nums <))
 
-  (define (is-valid-shift start)
-    (for/and ([i (in-range n)])
-      (equal? (list-ref nums (modulo (+ start i) n))
-              (list-ref sorted-nums i))))
+  (define (valid-shift? start)
+    (andmap (lambda (i)
+              (= (list-ref nums (modulo (+ start i) n))
+                 (list-ref sorted-nums i)))
+            (range n)))
 
   (define (find-shift start)
     (cond
       [(= start n) -1]
-      [(is-valid-shift start) (modulo (- n start) n)]
-      [else (find-shift (+ start 1))]))
+      [(valid-shift? start) (modulo (- n start) n)]
+      [else (find-shift (add1 start))]))
 
   (if (= n 1)
       0

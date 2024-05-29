@@ -34,19 +34,17 @@
 ;;  * 0 <= indexDifference <= 100
 ;;  * 0 <= valueDifference <= 50
 (define (findIndices nums indexDifference valueDifference)
-  ;; Get the length of the list nums
-  (define n (length nums))
-  
-  ;; Define a helper function to check the conditions for a pair of indices
+  ;; A helper function to check the conditions for a pair of indices
   (define (valid-pair? i j)
     (and (>= (abs (- i j)) indexDifference)
          (>= (abs (- (list-ref nums i) (list-ref nums j))) valueDifference)))
   
-  ;; Iterate over all pairs (i, j) using nested loops implemented via for*/first
-  ;; This returns the first pair that meets the conditions or #f if none do
+  ;; Iterate over all pairs (i, j) using a higher-order function
   (define result
-    (for*/first ([i (in-range n)]
-                 [j (in-range n)]
+    (for*/first ([i (in-naturals)]
+                 [j (in-naturals)]
+                 #:break (>= i (length nums))
+                 #:break (>= j (length nums))
                  #:when (valid-pair? i j))
       (list i j)))
   

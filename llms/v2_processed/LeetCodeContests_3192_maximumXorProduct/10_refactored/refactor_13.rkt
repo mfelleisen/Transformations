@@ -24,19 +24,19 @@
 ;; 0 <= n <= 50
 (define (maximumXorProduct a b n)
   (define MOD (+ (expt 10 9) 7))
-  (define upper-limit (expt 2 n))
-  
+  (define upper-limit (arithmetic-shift 1 n))
+
   (define (xor-product x)
     (modulo (* (bitwise-xor a x) (bitwise-xor b x)) MOD))
-  
-  (for/fold ([max-product 0] #:result (modulo max-product MOD))
+
+  (for/fold ([max-product 0] #:result max-product)
             ([x (in-range upper-limit)])
     (max max-product (xor-product x))))
 
 ;; Example usage:
-;; (maximumXorProduct 12 5 4) ; Output: 98
-;; (maximumXorProduct 6 7 5)  ; Output: 930
-;; (maximumXorProduct 1 6 3)  ; Output: 12
+(maximumXorProduct 12 5 4)  ;; Output: 98
+(maximumXorProduct 6 7 5)   ;; Output: 930
+(maximumXorProduct 1 6 3)   ;; Output: 12
 
 (require rackunit)
 

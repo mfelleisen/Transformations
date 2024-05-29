@@ -29,31 +29,34 @@
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
   (define n (length nums1))
-
-  (define (update-dp dp dp-other i current prev)
-    (if (>= current prev)
-        (max (vector-ref dp i) (+ 1 (vector-ref dp (sub1 i))))
-        (vector-ref dp i)))
-
-  (define (max-non-decreasing-length nums1 nums2)
-    (define dp1 (make-vector n 1))
-    (define dp2 (make-vector n 1))
-    
-    (for/fold ([max-len 1]) ([i (in-range 1 n)])
-      (define current1 (list-ref nums1 i))
-      (define prev1 (list-ref nums1 (sub1 i)))
-      (define prev2 (list-ref nums2 (sub1 i)))
-
-      (vector-set! dp1 i (update-dp dp1 dp2 i current1 prev1))
-      (vector-set! dp1 i (update-dp dp1 dp2 i current1 prev2))
-      
-      (define current2 (list-ref nums2 i))
-      (vector-set! dp2 i (update-dp dp2 dp1 i current2 prev1))
-      (vector-set! dp2 i (update-dp dp2 dp1 i current2 prev2))
-      
-      (max max-len (vector-ref dp1 i) (vector-ref dp2 i))))
   
-  (max-non-decreasing-length nums1 nums2))
+  ;; Helper function to update dp array
+  (define (update-dp dp1 dp2 i)
+    (define new-dp1 (max (if (>= (list-ref nums1 i) (list-ref nums1 (sub1 i)))
+                             (+ 1 (vector-ref dp1 (sub1 i)))
+                             1)
+                         (if (>= (list-ref nums1 i) (list-ref nums2 (sub1 i)))
+                             (+ 1 (vector-ref dp2 (sub1 i)))
+                             1)))
+    (define new-dp2 (max (if (>= (list-ref nums2 i) (list-ref nums1 (sub1 i)))
+                             (+ 1 (vector-ref dp1 (sub1 i)))
+                             1)
+                         (if (>= (list-ref nums2 i) (list-ref nums2 (sub1 i)))
+                             (+ 1 (vector-ref dp2 (sub1 i)))
+                             1)))
+    (values new-dp1 new-dp2))
+  
+  (define-values (dp1 dp2)
+    (for/fold ([dp1 (make-vector n 1)]
+               [dp2 (make-vector n 1)])
+              ([i (in-range 1 n)])
+      (define-values (new-dp1 new-dp2) (update-dp dp1 dp2 i))
+      (vector-set! dp1 i new-dp1)
+      (vector-set! dp2 i new-dp2)
+      (values dp1 dp2)))
+  
+  ;; Find the maximum length from both dp arrays
+  (apply max (append (vector->list dp1) (vector->list dp2))))
 
 
 (require rackunit)

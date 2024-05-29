@@ -24,21 +24,17 @@
 ;; 0 <= n <= 50
 (define (maximumXorProduct a b n)
   (define MOD (+ (expt 10 9) 7))
-  
-  (define (max-xor-product-rec x max-product)
-    (if (>= x (expt 2 n))
-        max-product
-        (let* ((xor-a (bitwise-xor a x))
-               (xor-b (bitwise-xor b x))
-               (product (* xor-a xor-b)))
-          (max-xor-product-rec (+ x 1) (max max-product product)))))
-  
-  (remainder (max-xor-product-rec 0 0) MOD))
+  (define upper-limit (expt 2 n))
 
-;; Examples to test the function
-(maximumXorProduct 12 5 4)  ;; Output: 98
-(maximumXorProduct 6 7 5)   ;; Output: 930
-(maximumXorProduct 1 6 3)   ;; Output: 12
+  (define (product x)
+    (* (bitwise-xor a x) (bitwise-xor b x)))
+
+  (define max-product
+    (for/fold ([max-p 0])
+              ([x (in-range upper-limit)])
+      (max max-p (product x))))
+
+  (remainder max-product MOD))
 
 (require rackunit)
 

@@ -21,24 +21,31 @@
 ;; Constraints:
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
-(define (minOperations nums)
-  (define freq
-    (for/fold ([h (hash)]) ([num (in-list nums)])
-      (hash-update h num add1 0)))
+(define (minOperations nums) ;; contract  minop/c
+  ;; Create a frequency hash table for counting occurrences
+  (define freq (for/fold ([h (hash)]) ([num nums])
+                 (hash-update h num add1 0)))
 
+  ;; Function to calculate minimum operations for a given frequency
   (define (calc-ops freq)
     (match (remainder freq 3)
-      [0 (/ freq 3)]
-      [1 (if (>= freq 4) (+ (/ (- freq 4) 3) 2) -1)]
-      [2 (if (>= freq 2) (+ (/ (- freq 2) 3) 1) -1)]))
-
+      [0 (/ freq 3)]  ; If divisible by 3, use triplet removals
+      [1 (if (>= freq 4)  ; If remainder is 1 and at least 4, use one triplet and one pair removal
+             (+ (/ (- freq 4) 3) 2)
+             -1)]  ; Otherwise, it's impossible
+      [2 (if (>= freq 2)  ; If remainder is 2 and at least 2, use one pair removal
+             (+ (/ (- freq 2) 3) 1)
+             -1)]))  ; Otherwise, it's impossible
+  
+  ;; Calculate total operations and handle cases where it's impossible to empty the array
   (define-values (total-ops impossible)
     (for/fold ([ops 0] [impossible #f]) ([f (in-hash-values freq)])
       (let ([op (calc-ops f)])
         (if (= op -1)
-            (values ops #t)
-            (values (+ ops op) impossible)))))
-
+            (values ops #t)  ; If any frequency makes it impossible, set flag
+            (values (+ ops op) impossible)))))  ; Otherwise, accumulate operations
+  
+  ;; If any frequency was impossible to deal with, return -1, otherwise return total operations
   (if impossible -1 total-ops))
 
 ;; Example usage:

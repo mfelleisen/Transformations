@@ -23,36 +23,31 @@
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
   (define n (length nums))
-  
-  (define (parity n)
-    (modulo n 2))
-  
-  ;; Helper function to update scores recursively
-  (define (update-scores idx max-scores current-score)
-    (if (>= idx n)
-        max-scores
-        (let* ((current-val (list-ref nums idx))
-               (new-score (+ current-score current-val))
-               (penalty (if (= (parity (list-ref nums (sub1 idx))) (parity current-val))
-                            0
-                            x))
-               (updated-score (- new-score penalty))
-               (updated-max-scores (cons (max (car max-scores) updated-score) (cdr max-scores))))
-          (update-scores (add1 idx) updated-max-scores updated-score))))
-  
-  ;; Initialize the maximum scores list with the first element
-  (define initial-score (first nums))
-  (define max-scores (cons initial-score (make-list (sub1 n) -inf.0)))
-  
-  ;; Start recursive update from the second element
-  (update-scores 1 max-scores initial-score)
-  
-  ;; Return the maximum score achieved
-  (apply max max-scores))
+
+  ;; Helper function to determine if two numbers have different parities
+  (define (diff-parity? a b)
+    (not (= (modulo a 2) (modulo b 2))))
+
+  ;; Recursive function to calculate maximum score
+  (define (max-score-aux i score)
+    (if (= i n)
+        score
+        (let loop ([j (add1 i)] [best score])
+          (if (= j n)
+              best
+              (let* ([next-score (+ score (list-ref nums j))]
+                     [penalized-score (if (diff-parity? (list-ref nums i) (list-ref nums j))
+                                          (- next-score x)
+                                          next-score)]
+                     [new-best (max best penalized-score)])
+                (loop (add1 j) new-best))))))
+
+  ;; Start the recursion from the first element
+  (max-score-aux 0 (first nums)))
 
 ;; Example cases
 (displayln (maxScore '(2 3 6 1 9 2) 5))  ;; Output: 13
-(displayln (maxScore '(2 4 6 8) 3))       ;; Output: 20
+(displayln (maxScore '(2 4 6 8) 3))      ;; Output: 20
 
 (require rackunit)
 

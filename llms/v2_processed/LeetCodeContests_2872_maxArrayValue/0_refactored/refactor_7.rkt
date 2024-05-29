@@ -23,23 +23,16 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; This function uses a right fold to combine elements from right to left
+  ;; This function simulates the operation of combining elements from right to left
   ;; to maximize the largest possible value.
   (define (combine-nums lst)
-    ;; Fold the list from the right, combining elements as per the given rules
     (foldr (lambda (current acc)
              (match acc
-               [(cons first rest)
-                (if (<= current first)
-                    ;; If current element is less than or equal to the first element of accumulator,
-                    ;; combine them into one element and continue
-                    (cons (+ current first) rest)
-                    ;; Otherwise, just add the current element to the front of accumulator
-                    (cons current acc))]
-               [empty
-                ;; If accumulator is empty, just add the current element
-                (cons current empty)]))
-           '()  ;; Start with an empty list as the accumulator
+               [(cons head tail) (if (<= current head)
+                                     (cons (+ current head) tail)
+                                     (cons current acc))]
+               [else (cons current acc)]))
+           '()
            lst))
   ;; Return the maximum value from the combined list
   (apply max (combine-nums nums)))

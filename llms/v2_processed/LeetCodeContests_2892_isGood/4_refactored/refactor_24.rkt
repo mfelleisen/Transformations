@@ -25,21 +25,13 @@
 ;;  * 1 <= num[i] <= 200
 (define (isGood nums)
   (define n (apply max nums)) ; Find the maximum element in nums which acts as 'n'
-  (define base-length (+ n 1)) ; The length of the base array should be n + 1
-  
-  ;; Build a frequency dictionary
-  (define counts
-    (for/fold ([dict (hash)])
-              ([num (in-list nums)])
-      (hash-update dict num add1 0)))
+  (define counts (for/fold ([dict (hash)]) ([num (in-list nums)])
+                   (hash-update dict num add1 0))) ; Build a frequency dictionary
 
-  ;; Check if the length of nums is n + 1
-  (and (= (length nums) base-length)
-       ;; Check that all numbers from 1 to n-1 appear exactly once
-       (for/and ([i (in-range 1 n)])
+  (and (= (length nums) (+ n 1)) ; Check if the length of nums is n + 1
+       (for/and ([i (in-range 1 n)]) ; Check that all numbers from 1 to n-1 appear exactly once
          (= (hash-ref counts i 0) 1))
-       ;; Check that n appears exactly twice
-       (= (hash-ref counts n 0) 2)))
+       (= (hash-ref counts n 0) 2))) ; Check that n appears exactly twice
 
 ;; Example usage:
 (isGood '(2 1 3))  ; Output: #f

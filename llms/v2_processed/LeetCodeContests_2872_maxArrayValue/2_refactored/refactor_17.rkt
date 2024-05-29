@@ -23,14 +23,28 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Right-to-left fold to combine elements according to the given operation.
-  (define folded-list
-    (for/fold ([acc '()]) ([num (in-list (reverse nums))])
-      (if (and (not (null? acc)) (<= num (car acc)))
-          (cons (+ num (car acc)) (cdr acc))
-          (cons num acc))))
-  ;; The largest value in the folded list is the result.
-  (apply max folded-list))
+  ;; Helper function to combine elements if they meet the condition.
+  (define (combine-elements lst)
+    (define (combine-helper lst acc)
+      (match lst
+        [(list) (reverse acc)]
+        [(list x) (reverse (cons x acc))]
+        [(cons x (cons y rest))
+         (if (<= x y)
+             (combine-helper (cons (+ x y) rest) acc)
+             (combine-helper (cons y rest) (cons x acc)))]))
+    (combine-helper lst '()))
+
+  ;; Start with the initial list and iteratively combine elements until no more combinations are possible.
+  (define (iterative-combine lst)
+    (let loop ([lst lst])
+      (let ([new-lst (combine-elements lst)])
+        (if (equal? new-lst lst)
+            new-lst
+            (loop new-lst)))))
+
+  ;; The largest value in the final list is the result.
+  (apply max (iterative-combine nums)))
 
 ;; Example usage:
 (maxArrayValue '(2 3 7 9 3))  ; Output: 21

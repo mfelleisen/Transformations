@@ -14,20 +14,13 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Helper function to count valid distributions given a current sum and depth
-  (define (count-distributions sum depth)
-    (cond
-      ;; If we have distributed candies to 3 children and the sum is equal to n, it's a valid distribution
-      [(= depth 3) (if (= sum n) 1 0)]
-      ;; If the sum exceeds n or we are at the last depth without reaching the sum, it's invalid
-      [(or (> sum n) (> depth 3)) 0]
-      ;; Otherwise, recursively check the distributions for the next child
-      [else
-       (for/sum ([candies (in-range 0 (add1 (min limit (- n sum))))])
-         (count-distributions (+ sum candies) (add1 depth)))]))
-
-  ;; Start counting distributions from sum 0 and depth 0
-  (count-distributions 0 0))
+  (define (count-ways a)
+    (for/sum ([b (in-range (min (- n a) limit 0) (min (- n a) limit 1))])
+      (define c (- n a b))
+      (if (<= c limit) 1 0)))
+  
+  (for/sum ([a (in-range 0 (min n limit 1))])
+    (count-ways a)))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

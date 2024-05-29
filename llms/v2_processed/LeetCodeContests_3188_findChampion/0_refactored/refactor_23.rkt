@@ -25,29 +25,29 @@
 ;;  * For all i, j that i != j, grid[i][j] != grid[j][i].
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion grid)
-  (define n (vector-length grid))
+  (define n (length grid))
 
-  ;; Determine the potential champion by comparing teams
+  (define (dominates? team1 team2)
+    (= (list-ref (list-ref grid team1) team2) 1))
+
   (define (find-potential-champion)
-    (for/fold ([potential-champion 0])
-              ([i (in-range 1 n)])
-      (if (vector-ref (vector-ref grid potential-champion) i)
+    (for/fold ([potential-champion 0]) ([i (in-range 1 n)])
+      (if (dominates? potential-champion i)
           potential-champion
           i)))
 
-  ;; Verify if the potential champion is indeed the champion
   (define (verify-champion potential-champion)
-    (for/or ([j (in-range n)])
-      (and (not (= j potential-champion))
-           (vector-ref (vector-ref grid j) potential-champion)))
-    potential-champion)
+    (for/and ([j (in-range n)] #:when (not (= j potential-champion)))
+      (dominates? potential-champion j)))
 
-  ;; Execute the verification process
-  (verify-champion (find-potential-champion)))
+  (define potential-champion (find-potential-champion))
+  (if (verify-champion potential-champion)
+      potential-champion
+      -1))
 
 ;; Example Usage
-(displayln (findChampion (vector (vector #f #t) (vector #f #f))))  ; Output: 0
-(displayln (findChampion (vector (vector #f #f #t) (vector #t #f #t) (vector #f #f #f))))  ; Output: 1
+(displayln (findChampion '((0 1) (0 0))))  ; Output: 0
+(displayln (findChampion '((0 0 1) (1 0 1) (0 0 0))))  ; Output: 1
 
 (require rackunit)
 

@@ -28,7 +28,8 @@
 ;; 1 <= k <= 1015
 ;; 1 <= x <= 8
 (define (findMaximumNumber k x)
-  (define (bit-price num)
+  ;; Calculate the price of a given number `num`
+  (define (price num)
     (define bin-rep (number->string num 2))
     (for/sum ([i (in-range (string-length bin-rep))])
       (if (and (= (modulo (+ i 1) x) 0)
@@ -36,12 +37,12 @@
           1
           0)))
 
+  ;; Auxiliary function to find the maximum number with sum of prices <= k
   (define (loop num current-sum)
-    (let ([price (bit-price num)])
-      (let ([new-sum (+ current-sum price)])
-        (if (> new-sum k)
-            (sub1 num)
-            (loop (add1 num) new-sum)))))
+    (let ([new-sum (+ current-sum (price num))])
+      (if (> new-sum k)
+          (sub1 num)
+          (loop (add1 num) new-sum))))
 
   (loop 1 0))
 

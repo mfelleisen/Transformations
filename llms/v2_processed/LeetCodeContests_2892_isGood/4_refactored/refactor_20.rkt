@@ -24,13 +24,14 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= num[i] <= 200
 (define (isGood nums)
-  (let ([n (apply max nums)])  ; Find the maximum element in nums which acts as 'n'
-    (let ([counts (for/fold ([dict (hash)]) ([num (in-list nums)])
-                    (hash-update dict num add1 0))])
-      (and (equal? (length nums) (+ n 1))  ; Check if the length of nums is n + 1
-           (for/and ([i (in-range 1 n)])  ; Check that all numbers from 1 to n-1 appear exactly once
-             (= (hash-ref counts i 0) 1))
-           (= (hash-ref counts n 0) 2)))))  ; Check that n appears exactly twice
+  (define n (apply max nums)) ; Find the maximum element in nums which acts as 'n'
+  (define counts (for/fold ([dict (hash)])
+                           ([num (in-list nums)])
+                   (hash-update dict num add1 0)))
+  (and (= (length nums) (+ n 1)) ; Check if the length of nums is n + 1
+       (for/and ([i (in-range 1 n)]) ; Check that all numbers from 1 to n-1 appear exactly once
+         (= (hash-ref counts i 0) 1))
+       (= (hash-ref counts n 0) 2))) ; Check that n appears exactly twice
 
 ;; Example usage:
 (isGood '(2 1 3))  ; Output: #f

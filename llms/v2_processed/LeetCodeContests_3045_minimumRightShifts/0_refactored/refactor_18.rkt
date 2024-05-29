@@ -25,20 +25,17 @@
   (define n (length nums))
   (define sorted-nums (sort nums <))
 
-  (define (is-valid-shift start)
-    (for/and ([i (in-range n)])
-      (equal? (list-ref nums (modulo (+ start i) n))
-              (list-ref sorted-nums i))))
+  (define (rotated-list nums start)
+    (append (drop nums start) (take nums start)))
 
   (define (find-shift start)
-    (cond
-      [(= start n) -1]
-      [(is-valid-shift start) (modulo (- n start) n)]
-      [else (find-shift (+ start 1))]))
+    (if (>= start n)
+        -1
+        (if (equal? (rotated-list nums start) sorted-nums)
+            (modulo (- n start) n)
+            (find-shift (+ start 1)))))
 
-  (if (= n 1)
-      0
-      (find-shift 0)))
+  (find-shift 0))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2

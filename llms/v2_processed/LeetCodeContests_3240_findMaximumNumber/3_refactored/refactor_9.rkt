@@ -4,10 +4,11 @@
 ;; and the given position x.
 (define (calculate-price num x)
   (define bin-rep (number->string num 2))  ; Convert number to binary string
+  (define len (string-length bin-rep))
   (for/fold ([price 0])  ; Accumulate the price using a fold
-            ([i (in-range 1 (add1 (string-length bin-rep)))]
-             #:when (and (= (modulo i x) 0)  ; Check if the position is a multiple of x
-                        (char=? (string-ref bin-rep (- (string-length bin-rep) i)) #\1)))  ; Check if the bit is set
+            ([i (in-range len)]
+             #:when (and (= (modulo (+ i 1) x) 0)  ; Check if the position is a multiple of x
+                        (char=? (string-ref bin-rep (- len i 1)) #\1)))  ; Check if the bit is set
     (add1 price)))  ; Increment the price if conditions are met
 
 ;; Find the maximum number such that the sum of prices from 1 to that number

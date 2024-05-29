@@ -17,15 +17,11 @@
 
 ;; Function to find prime pairs that add up to n
 (define (findPrimePairs n)
-  (define primes
-    (for/list ([i (in-range 2 (add1 n))]
-               #:when (is-prime? i))
-      i))
-  
-  (for*/list ([x primes]
-              [y primes]
-              #:when (and (<= x y) (= (+ x y) n)))
-    (list x y)))
+  (define primes (filter is-prime? (range 2 (add1 n))))
+  (for/list ([x primes]
+             #:unless (and (<= x (/ n 2))
+                           (is-prime? (- n x))))
+    (list x (- n x))))
 
 ;; Example usage:
 (findPrimePairs 10)  ;; Output: '((3 7) (5 5))

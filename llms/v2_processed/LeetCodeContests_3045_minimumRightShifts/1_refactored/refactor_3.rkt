@@ -22,32 +22,27 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
-  ;; Calculate the length of the list
   (define n (length nums))
   
-  ;; If the list has only one element, it is already sorted
-  (cond
-    [(= n 1) 0]
-    [else
-     (define sorted-nums (sort nums <))  ; Sort the list in ascending order
-     
-     ;; Helper function to determine if a shift aligns nums with sorted-nums
-     (define (valid-shift? start)
-       (for/and ([i (in-range n)])
-         (equal? (list-ref nums (modulo (+ start i) n))
-                 (list-ref sorted-nums i))))
-     
-     ;; Find the minimum valid shift
-     (define (find-shift start)
-       (for/first ([start (in-range n)] #:when (valid-shift? start))
-         (modulo (- n start) n)))
-     
-     (or (find-shift 0) -1)]))
+  (define sorted-nums (sort nums <))
+  (define modulo (lambda (a b) (remainder (+ a b) b)))
+
+  (define (right-shifted-equal? start)
+    (for/and ([i (in-range n)])
+      (= (list-ref nums (modulo (+ start i) n))
+         (list-ref sorted-nums i))))
+  
+  (define (find-valid-shift)
+    (for/first ([start (in-range n)])
+      (when (right-shifted-equal? start)
+        (modulo (- n start) n))))
+  
+  (or (find-valid-shift) -1))
 
 ;; Examples
-(minimumRightShifts '(3 4 5 1 2)) ;; => 2
-(minimumRightShifts '(1 3 5))     ;; => 0
-(minimumRightShifts '(2 1 4))     ;; => -1
+(minimumRightShifts '(3 4 5 1 2))  ; Output: 2
+(minimumRightShifts '(1 3 5))      ; Output: 0
+(minimumRightShifts '(2 1 4))      ; Output: -1
 
 (require rackunit)
 

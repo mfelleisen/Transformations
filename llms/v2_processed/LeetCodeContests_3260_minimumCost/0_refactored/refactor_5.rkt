@@ -29,29 +29,30 @@
 (define (minimumCost nums k dist)
   (define n (length nums))
 
+  (define (calculate-cost start-indices)
+    (apply + (map (λ (idx) (list-ref nums idx)) start-indices)))
+
+  (define (valid-partition? indices)
+    (<= (- (list-ref indices (- k 1)) (list-ref indices 1)) dist))
+
+  (define (dfs start-index depth current-indices min-cost)
+    (if (= depth k)
+        (if (valid-partition? current-indices)
+            (min min-cost (calculate-cost current-indices))
+            min-cost)
+        (let ([next-start-limit (- n (- k depth))])
+          (for/fold ([min-cost min-cost]) 
+                    ([next-start (in-range (+ start-index 1) (+ next-start-limit 1))])
+            (dfs next-start (+ depth 1) (append current-indices (list next-start)) min-cost)))))
+
+  (define (start-dfs)
+    (for/fold ([min-cost +inf.0])
+              ([first-end (in-range 1 (+ (- n k) 2))])
+      (dfs first-end 2 (list 0 first-end) min-cost)))
+
   (if (= k 1)
       (first nums)
-      (letrec ([calculate-cost
-                (lambda (indices)
-                  (apply + (map (curry list-ref nums) indices)))]
-
-               [valid-partition?
-                (lambda (indices)
-                  (<= (- (list-ref indices (- k 1)) (list-ref indices 1)) dist))]
-
-               [dfs
-                (lambda (start-index depth indices min-cost)
-                  (if (= depth k)
-                      (if (valid-partition? indices)
-                          (min min-cost (calculate-cost indices))
-                          min-cost)
-                      (for/fold ([min-cost min-cost])
-                                ([next-start (in-range (+ start-index 1) (+ (- n (- k depth)) 1))])
-                        (dfs next-start (+ depth 1) (append indices (list next-start)) min-cost))))])
-
-        (for/fold ([min-cost +inf.0])
-                  ([first-end (in-range 1 (+ (- n k) 2))])
-          (dfs first-end 2 (list 0 first-end) min-cost)))))
+      (start-dfs)))
 
 ;; Example usage
 (minimumCost '(1 3 2 6 4 2) 3 3)  ; Output: 5

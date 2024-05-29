@@ -23,25 +23,18 @@
 ;; 0 <= a, b < 250
 ;; 0 <= n <= 50
 (define (maximumXorProduct a b n)
-  (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
-  (define upper-limit (expt 2 n))  ; Calculate the upper limit as 2^n
-  
-  ;; Function to calculate the product of (a XOR x) * (b XOR x)
-  (define (xor-product x)
-    (* (bitwise-xor a x) (bitwise-xor b x)))
-  
-  ;; Find the maximum product for all x in the range [0, 2^n)
-  (define max-product
-    (for/fold ([max-product 0]) ([x (in-range upper-limit)])
-      (max max-product (xor-product x))))
-  
-  ;; Return the maximum product modulo MOD
-  (modulo max-product MOD))
+  (define MOD (+ (expt 10 9) 7))  ;; Define the modulo constant
+  (define upper-limit (expt 2 n)) ;; Calculate the upper limit as 2^n
+  ;; Helper function to calculate the product modulo MOD
+  (define (xor-product x) (modulo (* (bitwise-xor a x) (bitwise-xor b x)) MOD))
+  ;; Find the maximum product by traversing all x in the range [0, upper-limit)
+  (for/fold ([max-product 0]) ([x (in-range upper-limit)])
+    (max max-product (xor-product x))))
 
-;; Example usage:
-;; (maximumXorProduct 12 5 4) ; => 98
-;; (maximumXorProduct 6 7 5)  ; => 930
-;; (maximumXorProduct 1 6 3)  ; => 12
+;; Example usage
+(printf "Example 1: ~a\n" (maximumXorProduct 12 5 4))  ;; Output: 98
+(printf "Example 2: ~a\n" (maximumXorProduct 6 7 5))   ;; Output: 930
+(printf "Example 3: ~a\n" (maximumXorProduct 1 6 3))   ;; Output: 12
 
 (require rackunit)
 

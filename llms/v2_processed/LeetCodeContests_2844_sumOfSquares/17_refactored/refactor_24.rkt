@@ -18,17 +18,14 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  (define (is-divisor? index)
-    (zero? (remainder n index)))
-  (define (square x)
-    (* x x))
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (is-divisor? i))
-    (square (list-ref nums (sub1 i)))))
+            #:when (zero? (remainder n i)))
+    (define value (list-ref nums (sub1 i)))
+    (* value value)))
 
-;; Usage
-(sumOfSquares '(1 2 3 4)) ; Expected output: 21
-(sumOfSquares '(2 7 1 19 18 3)) ; Expected output: 63
+;; The function uses `for/sum` to iterate over the indices from 1 to n.
+;; The `#:when` clause filters to only include indices that divide n.
+;; `define` is used within the iteration to bind the value of the current index.
 
 (require rackunit)
 

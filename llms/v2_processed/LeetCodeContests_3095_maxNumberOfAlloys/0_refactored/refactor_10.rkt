@@ -48,11 +48,12 @@
   (define (max-alloys-for-machine machine)
     ;; Calculate the maximum number of alloys this machine can produce based on available stock and budget
     (define (max-alloys-by-metal metal-type)
-      (let ([required-per-alloy (list-ref (list-ref composition machine) metal-type)])
-        (if (> required-per-alloy 0)
-            (quotient (+ (list-ref stock metal-type) (quotient budget (list-ref cost metal-type)))
-                      required-per-alloy)
-            +inf.0)))
+      (define required-per-alloy (list-ref (list-ref composition machine) metal-type))
+      (if (> required-per-alloy 0)
+          (quotient (+ (list-ref stock metal-type) (quotient budget (list-ref cost metal-type)))
+                    required-per-alloy)
+          +inf.0))
+
     (define machine-max-possible
       (apply min (map max-alloys-by-metal (range n))))
 
@@ -60,23 +61,23 @@
     (define (total-cost-for-alloys alloys)
       (for/fold ([total-cost 0])
                 ([metal-type (in-range n)])
-        (let* ([required-units (* (list-ref (list-ref composition machine) metal-type) alloys)]
-               [needed-units (max 0 (- required-units (list-ref stock metal-type)))])
-          (+ total-cost (* needed-units (list-ref cost metal-type))))))
+        (define required-units (* (list-ref (list-ref composition machine) metal-type) alloys))
+        (define needed-units (max 0 (- required-units (list-ref stock metal-type))))
+        (+ total-cost (* needed-units (list-ref cost metal-type)))))
+
     (define (find-max-alloys fitting-alloys)
       (let loop ([current-alloys fitting-alloys]
                  [current-cost (total-cost-for-alloys fitting-alloys)])
         (if (and (> current-cost budget) (> current-alloys 0))
             (loop (- current-alloys 1) (total-cost-for-alloys (- current-alloys 1)))
             current-alloys)))
+    
     (find-max-alloys machine-max-possible))
 
   ;; Iterate over all machines and find the maximum number of alloys that can be produced
-  (define max-alloys
-    (for/fold ([max-alloys 0])
-              ([machine (in-range k)])
-      (max max-alloys (max-alloys-for-machine machine))))
-  max-alloys)
+  (for/fold ([max-alloys 0])
+            ([machine (in-range k)])
+    (max max-alloys (max-alloys-for-machine machine))))
 
 ;; Example usage
 (define n 3)

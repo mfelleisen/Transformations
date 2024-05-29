@@ -25,23 +25,27 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
+  (define sorted-nums (sort nums <))  ; Sort the list in ascending order
+
   (define (valid-group? group)
-    (<= (- (last group) (first group)) k))
-  
-  (define sorted-nums (sort nums <))
-  
-  (define (group-nums nums result)
-    (match nums
-      [(list) (reverse result)]
+    (<= (- (third group) (first group)) k))
+
+  (define (group-elements elems result)
+    (match elems
+      [(list) (reverse result)]  ; If no elements left, return the result
       [(list-rest a b c rest)
        (if (valid-group? (list a b c))
-           (group-nums rest (cons (list a b c) result))
+           (group-elements rest (cons (list a b c) result))
            '())]
-      [_ '()]))
+      [_ '()]))  ; If fewer than 3 elements are left, return empty
 
-  (group-nums sorted-nums '()))
+  (group-elements sorted-nums '()))
 
-;; The helper functions `first`, `second`, and `third` are no longer needed since `match` is used to destructure the list directly.
+;; Helper functions to access elements of a list by index
+(define (first lst) (car lst))
+(define (second lst) (cadr lst))
+(define (third lst) (caddr lst))
+
 
 (require rackunit)
 

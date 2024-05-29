@@ -23,21 +23,19 @@
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
   ;; Helper function to determine if the element at index i is a peak.
-  (define (is-peak? i)
-    (let ([current (list-ref mountain i)]
-          [prev (list-ref mountain (sub1 i))]
-          [next (list-ref mountain (add1 i))])
-      (and (> current prev) (> current next))))
+  (define (is-peak i)
+    (and (> (list-ref mountain i) (list-ref mountain (sub1 i)))
+         (> (list-ref mountain i) (list-ref mountain (add1 i)))))
   
-  ;; Generate a sequence of indices from 1 to the second-to-last element.
-  (define indices (range 1 (sub1 (length mountain))))
-  
-  ;; Filter indices where the element is a peak.
-  (filter (lambda (i) (is-peak? i)) indices))
+  ;; Generate a list of indices from 1 to second last element index and filter peaks.
+  (for/list ([i (in-range 1 (sub1 (length mountain)))]
+            #:when (is-peak i))
+    i))
 
 ;; Example usage:
 ;; (findPeaks '(1 4 3 8 5))  ; This should return '(1 3)
 ;; (findPeaks '(2 4 4))      ; This should return '()
+
 
 (require rackunit)
 

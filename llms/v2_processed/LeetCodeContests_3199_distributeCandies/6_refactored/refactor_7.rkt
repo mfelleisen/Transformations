@@ -16,11 +16,12 @@
 (define (distributeCandies n limit)
   ;; Function to calculate the number of ways to distribute `n` candies among 3 children
   ;; such that no child receives more than `limit` candies.
+
   (define (count-ways a)
     (for/sum ([b (in-range (add1 (min (- n a) limit)))])
       (let ([c (- n a b)])
         (if (<= c limit) 1 0))))
-  
+
   (for/sum ([a (in-range (add1 (min n limit)))])
     (count-ways a)))
 

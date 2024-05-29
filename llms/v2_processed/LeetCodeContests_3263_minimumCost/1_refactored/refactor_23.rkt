@@ -25,19 +25,24 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  (define n (length nums))
-  (define (cost a b c)
-    (+ (first a) (first b) (first c)))
+  ;; Use list indexing to access the first element directly
+  (define (cost lst)
+    (first lst))
   
-  (define subarrays
-    (for*/list ([i (in-range 1 (- n 1))]
-                [j (in-range (+ i 1) n)])
-      (list (take nums i) (take (drop nums i) (- j i)) (drop nums j))))
+  ;; Generate all possible splits of the list into 3 contiguous subarrays
+  (define (all-splits lst)
+    (for*/list ([i (in-range 1 (sub1 (length lst)))]
+                [j (in-range (+ i 1) (length lst))])
+      (list (take lst i) 
+            (take (drop lst i) (- j i)) 
+            (drop lst j))))
   
-  (define min-cost
-    (apply min (map (lambda (sublists) (apply cost sublists)) subarrays)))
+  ;; Calculate the sum of the costs of the splits
+  (define (split-cost splits)
+    (apply + (map cost splits)))
   
-  min-cost)
+  ;; Find the minimum cost among all possible splits
+  (apply min (map split-cost (all-splits nums))))
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

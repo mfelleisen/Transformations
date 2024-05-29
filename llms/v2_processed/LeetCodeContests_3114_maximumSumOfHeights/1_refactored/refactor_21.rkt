@@ -36,35 +36,37 @@
 ;;  * 1 <= maxHeights[i] <= 109
 (define (maximumSumOfHeights maxHeights)
   (define n (length maxHeights))
-  
-  ;; Helper function to accumulate the left and right expansions from the peak
-  (define (expand-from-peak maxHeights peak)
-    (define (left-expansion acc height i)
-      (if (< i 0)
-          acc
-          (left-expansion (cons (min (list-ref maxHeights i) height) acc) 
-                          (min (list-ref maxHeights i) height) 
-                          (sub1 i))))
-    
-    (define (right-expansion acc height i)
-      (if (>= i n)
-          acc
-          (right-expansion (cons (min (list-ref maxHeights i) height) acc) 
-                           (min (list-ref maxHeights i) height) 
-                           (add1 i))))
-    
-    (let* ([peak-height (list-ref maxHeights peak)]
-           [left (left-expansion '() peak-height (sub1 peak))]
-           [right (right-expansion '() peak-height (add1 peak))])
-      (append left (list peak-height) right)))
-  
-  ;; Compute the maximum sum for each peak position
-  (define (calculate-max-sum-with-peak peak)
-    (apply + (expand-from-peak maxHeights peak)))
-  
-  ;; Find the maximum sum across all peak positions
-  (apply max (for/list ([i (in-range n)])
-               (calculate-max-sum-with-peak i))))
+
+  ;; Helper function to create the mountain array with the maximum sum for a given peak
+  (define (create-mountain peak)
+    (define heights (make-vector n 0))
+    (define peak-height (list-ref maxHeights peak))
+
+    ;; Expand to the left of the peak
+    (for/fold ([prev-height peak-height]) ([i (in-range peak -1 -1)])
+      (define new-height (min prev-height (list-ref maxHeights i)))
+      (vector-set! heights i new-height)
+      new-height)
+
+    ;; Expand to the right of the peak
+    (for/fold ([prev-height peak-height]) ([i (in-range peak n)])
+      (define new-height (min prev-height (list-ref maxHeights i)))
+      (vector-set! heights i new-height)
+      new-height)
+
+    heights)
+
+  ;; Calculate the sum of a given vector
+  (define (sum-vector vec)
+    (apply + (vector->list vec)))
+
+  ;; Find the maximum sum by considering each position as a peak
+  (define (find-max-sum)
+    (apply max (for/list ([i (in-range n)])
+                 (sum-vector (create-mountain i)))))
+
+  ;; Return the maximum sum of all possible beautiful configurations
+  (find-max-sum))
 
 ;; Example usage
 (maximumSumOfHeights '(5 3 4 1 1))  ; Output: 13

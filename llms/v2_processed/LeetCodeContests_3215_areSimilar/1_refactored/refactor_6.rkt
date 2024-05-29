@@ -25,20 +25,23 @@
 ;; 1 <= mat[i][j] <= 25
 ;; 1 <= k <= 50
 (define (areSimilar mat k)
-  ;; Helper function to perform cyclic shifts
-  (define (cyclic-shift row shifts direction)
-    (let* ([len (length row)]
-           [shifts (modulo shifts len)]
-           [shifted-row (if (eq? direction 'right)
-                            (append (drop-right row shifts) (take-right row shifts))
-                            (append (drop row shifts) (take row shifts)))])
-      shifted-row))
+  ;; Helper function to perform right cyclic shift
+  (define (right-shift row k)
+    (define len (length row))
+    (define shifts (modulo k len))
+    (append (drop-right row shifts) (take-right row shifts)))
 
-  ;; Function to apply the appropriate shift depending on the row index
-  (define (process-row idx row)
+  ;; Helper function to perform left cyclic shift
+  (define (left-shift row k)
+    (define len (length row))
+    (define shifts (modulo k len))
+    (append (drop row shifts) (take row shifts)))
+
+  ;; Function to apply appropriate shift depending on the row index
+  (define (process-row row idx)
     (if (even? idx)
-        (cyclic-shift row k 'left)
-        (cyclic-shift row k 'right)))
+        (left-shift row k)
+        (right-shift row k)))
 
   ;; Transform the matrix by applying shifts
   (define transformed-mat
@@ -47,16 +50,15 @@
   ;; Compare initial and final matrices
   (equal? mat transformed-mat))
 
-;; The function `map-indexed` is not built-in in Racket, so we define it using `for/list` and `in-indexed`
+;; `map-indexed` is not built-in in Racket, so we define it using `map` and `in-indexed`
 (define (map-indexed f lst)
-  (for/list ([idx (in-naturals)]
-             [item (in-list lst)])
-    (f idx item)))
+  (for/list ([idx (in-naturals)] [item (in-list lst)])
+    (f item idx)))
 
-;; Example usage
-(areSimilar '((1 2 1 2) (5 5 5 5) (6 3 6 3)) 2)  ;=> #t
-(areSimilar '((2 2) (2 2)) 3)                   ;=> #t
-(areSimilar '((1 2)) 1)                         ;=> #f
+;; Test cases
+(areSimilar '((1 2 1 2) (5 5 5 5) (6 3 6 3)) 2)  ;; Expected: #t
+(areSimilar '((2 2) (2 2)) 3)                    ;; Expected: #t
+(areSimilar '((1 2)) 1)                          ;; Expected: #f
 
 (require rackunit)
 

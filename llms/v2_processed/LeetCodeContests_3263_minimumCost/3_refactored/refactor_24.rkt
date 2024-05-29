@@ -25,33 +25,27 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Helper function to calculate the cost of a split at indices i and j
-  (define (split-cost i j)
-    (+ (list-ref nums 0)
-       (list-ref nums i)
-       (list-ref nums j)))
+  (define n (length nums))
 
-  ;; Use higher-order functions and recursion to find the minimum cost
-  (define (find-min-cost i min-cost)
-    (if (< i (- (length nums) 1))
-        (let ((current-min (for/fold ([current-min min-cost])
-                                    ([j (in-range (+ i 1) (length nums))])
-                             (min current-min (split-cost i j)))))
-          (find-min-cost (+ i 1) current-min))
-        min-cost))
+  (define (calculate-cost first second third)
+    (+ (list-ref nums first)
+       (list-ref nums second)
+       (list-ref nums third)))
 
-  ;; Special case for exactly 3 elements
-  (if (= (length nums) 3)
+  (define (find-min-cost)
+    (for*/fold ([min-cost +inf.0])
+               ([i (in-range 1 (- n 1))]
+                [j (in-range (+ i 1) n)])
+      (min min-cost (calculate-cost 0 i j))))
+
+  (if (= n 3)
       (apply + nums)
-      (find-min-cost 1 +inf.0)))
+      (find-min-cost)))
 
-;; Test cases
-(display (minimumCost '(1 2 3 12))) ; Expected output: 6
-(newline)
-(display (minimumCost '(5 4 3)))    ; Expected output: 12
-(newline)
-(display (minimumCost '(10 3 1 1))) ; Expected output: 12
-(newline)
+;; Example usage:
+(minimumCost '(1 2 3 12))  ;; Output: 6
+(minimumCost '(5 4 3))     ;; Output: 12
+(minimumCost '(10 3 1 1))  ;; Output: 12
 
 (require rackunit)
 

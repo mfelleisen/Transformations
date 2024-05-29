@@ -22,17 +22,23 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  ;; Check if the length of the list is divisible by 3
+  (define sorted-nums (sort nums <))
+  (define (valid-group? group) (<= (- (last group) (first group)) k))
+
+  (define (group-elements elems)
+    (if (empty? elems)
+        '()
+        (let ([group (take elems 3)]
+              [rest-elems (drop elems 3)])
+          (if (= (length group) 3)
+              (if (valid-group? group)
+                  (cons group (group-elements rest-elems))
+                  '())
+              '()))))
+
   (if (not (= (remainder (length nums) 3) 0))
-      '() ; Return empty list if not divisible by 3
-      (let loop ([remaining (sort nums <)]
-                 [result '()])
-        (if (empty? remaining)
-            (reverse result) ; Return the accumulated result
-            (let ([group (take remaining 3)])
-              (if (> (- (last group) (first group)) k)
-                  '() ; Return empty list if condition is not met
-                  (loop (drop remaining 3) (cons group result))))))))
+      '()
+      (group-elements sorted-nums)))
 
 (require rackunit)
 

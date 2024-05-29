@@ -14,19 +14,14 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Helper function to generate valid distributions
-  (define (valid-distributions)
-    (for*/list ([a (in-range (add1 (min n limit)))]
-                [b (in-range (add1 (min (- n a) limit)))]
-                #:when (<= (- n a b) limit))
-      (list a b (- n a b))))
-  
-  ;; Count the number of valid distributions
-  (length (valid-distributions)))
-
-;; Examples for testing
-(distributeCandies 5 2) ;; should return 3
-(distributeCandies 3 3) ;; should return 10
+  ;; Generate all valid distributions of candies among three children
+  (define (valid-distributions n limit)
+    (for*/sum ([a (in-range (add1 (min n limit)))]
+               [b (in-range (add1 (min (- n a) limit)))]
+               #:when (<= (- n a b) limit))
+      1))
+  ;; Return the count of valid distributions
+  (valid-distributions n limit))
 
 (require rackunit)
 

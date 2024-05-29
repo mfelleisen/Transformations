@@ -29,31 +29,28 @@
 ;;  * 0 <= coordinates[i][1] < n
 ;;  * It is guaranteed that coordinates contains pairwise distinct coordinates.
 (define (countBlackBlocks m n coordinates)
-  ;; Using hash table to store the count of black cells in potential 2x2 blocks
+  ;; Using a hash table to store the count of black cells in potential 2x2 blocks
   (define block-count (make-hash))
 
-  ;; Helper function to update the block count
-  (define (update-block-count x y)
-    (hash-update! block-count (cons x y) add1 0))
-
   ;; Process each black cell to update its influence on 2x2 blocks
-  (for-each (λ (coord)
+  (for-each (lambda (coord)
               (define x (first coord))
               (define y (second coord))
               ;; Each cell can influence up to 4 blocks if those blocks exist
-              (when (and (> x 0) (> y 0)) (update-block-count (- x 1) (- y 1)))
-              (when (and (> x 0) (< y (- n 1))) (update-block-count (- x 1) y))
-              (when (and (< x (- m 1)) (> y 0)) (update-block-count x (- y 1)))
-              (when (and (< x (- m 1)) (< y (- n 1))) (update-block-count x y)))
+              (for ([dx (in-list '(-1 0))]
+                    [dy (in-list '(-1 0))]
+                    #:when (and (<= 0 (+ x dx) (- m 2))
+                                (<= 0 (+ y dy) (- n 2))))
+                (define block-pos (cons (+ x dx) (+ y dy)))
+                (hash-update! block-count block-pos add1 0)))
             coordinates)
 
   ;; Initialize result vector to store counts of blocks with 0 to 4 black cells
   (define result (make-vector 5 0))
 
   ;; Count the blocks based on the number of black cells they contain
-  (for-each (λ (count)
-              (vector-set! result count (add1 (vector-ref result count))))
-            (hash-values block-count))
+  (for ([count (in-hash-values block-count)])
+    (vector-set! result count (add1 (vector-ref result count))))
 
   ;; Calculate total possible blocks
   (define total-blocks (* (- m 1) (- n 1)))

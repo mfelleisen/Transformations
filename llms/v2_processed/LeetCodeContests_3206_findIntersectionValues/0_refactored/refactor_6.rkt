@@ -22,20 +22,19 @@
 ;; 1 <= nums1[i], nums2[i] <= 100
 (define (findIntersectionValues nums1 nums2)
   ;; Convert lists to sets to find unique elements and intersections
-  (define set-nums1 (set (λ (x y) (equal? x y)) nums1))
-  (define set-nums2 (set (λ (x y) (equal? x y)) nums2))
+  (define set-nums1 (set (in-list nums1)))
+  (define set-nums2 (set (in-list nums2)))
   
   ;; Calculate intersection of both sets
   (define intersection (set-intersect set-nums1 set-nums2))
   
-  ;; Count indices in nums1 whose elements are in the intersection
-  (define count1 (for/sum ([x nums1] #:when (set-member? intersection x)) 1))
-  
-  ;; Count indices in nums2 whose elements are in the intersection
-  (define count2 (for/sum ([x nums2] #:when (set-member? intersection x)) 1))
+  ;; Count indices in nums1 and nums2 whose elements are in the intersection
+  (define (count-in-intersection lst)
+    (for/sum ([x (in-list lst)])
+      (if (set-member? intersection x) 1 0)))
   
   ;; Return the counts as a list
-  (list count1 count2))
+  (list (count-in-intersection nums1) (count-in-intersection nums2)))
 
 ;; Example usage:
 (findIntersectionValues '(4 3 2 3 1) '(2 2 5 2 3 6))  ; Output: '(3 4)

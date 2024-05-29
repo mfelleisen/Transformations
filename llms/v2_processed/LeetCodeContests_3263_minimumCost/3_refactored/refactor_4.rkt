@@ -25,24 +25,24 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Function to calculate the minimum cost of dividing the list into 3 contiguous subarrays.
-  (define n (length nums))  ; Assign the length of nums to n
+  ;; Helper function to compute the minimum cost of dividing nums into 3 contiguous subarrays.
+  (define (compute-min-cost nums)
+    (define n (length nums))
+    (for/fold ([min-cost +inf.0])
+              ([i (in-range 1 (- n 1))])
+      (for/fold ([current-min min-cost])
+                ([j (in-range (+ i 1) n)])
+        (min current-min
+             (+ (first nums) (list-ref nums i) (list-ref nums j))))))
+  
+  (if (= (length nums) 3)
+      (apply + nums)
+      (compute-min-cost nums)))
 
-  ;; Helper function to calculate the minimum cost for a given pair of indices i and j
-  (define (calc-cost i j)
-    (+ (list-ref nums 0)  ; Cost of first subarray
-       (list-ref nums i)  ; Cost of second subarray
-       (list-ref nums j))) ; Cost of third subarray
-
-  ;; Generate all possible pairs of indices (i, j) such that 1 <= i < j < n
-  (define indices
-    (for*/list ([i (in-range 1 (- n 1))]
-                [j (in-range (+ i 1) n)])
-      (list i j)))
-
-  ;; Find the minimum cost among all possible pairs of indices
-  (apply min (map (lambda (pair) (calc-cost (first pair) (second pair))) indices)))
-
+;; Example usage
+(minimumCost '(1 2 3 12))  ;; Output: 6
+(minimumCost '(5 4 3))     ;; Output: 12
+(minimumCost '(10 3 1 1))  ;; Output: 12
 
 (require rackunit)
 

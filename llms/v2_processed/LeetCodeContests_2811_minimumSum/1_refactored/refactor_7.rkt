@@ -18,21 +18,19 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function to check if adding a number would violate the k-avoiding property.
-  (define (violates-k-avoiding? num used)
-    (and (set-member? used (- k num)) (not (= num (- k num)))))
-
-  ;; Tail-recursive helper function to build the k-avoiding array and calculate its sum.
-  (define (build-k-avoiding count current used sum)
-    (cond
-      [(= count n) sum]  ;; If we've added enough elements, return the sum.
-      [(or (violates-k-avoiding? current used) (set-member? used current))
-       (build-k-avoiding count (+ current 1) used sum)]  ;; Skip current if it violates the property or is already used.
-      [else
-       (build-k-avoiding (+ count 1) (+ current 1) (set-add used current) (+ sum current))]))  ;; Add current and continue.
-
-  ;; Start the recursive process with count 0, current number 1, an empty set for used numbers, and sum 0.
-  (build-k-avoiding 0 1 (set) 0))
+  (define (next-valid start invalid-set)
+    (if (set-member? invalid-set start)
+        (next-valid (+ start 1) invalid-set)
+        start))
+  
+  (define (sum-of-valids count current used sum)
+    (if (= count n)
+        sum
+        (let* ([next (next-valid current (set (map (λ (x) (- k x)) used)))]
+               [new-sum (+ sum next)])
+          (sum-of-valids (+ count 1) (+ next 1) (set-add used next) new-sum))))
+  
+  (sum-of-valids 0 1 (set) 0))
 
 ;; Example usage (not part of the function definition):
 ;; (minimumSum 5 4)  ;; Should return 18

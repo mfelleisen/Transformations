@@ -27,14 +27,31 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  ;; Helper function to find the minimum absolute difference
-  (define (min-abs-diff lst)
-    (for/fold ([min-diff +inf.0])
-              ([a (in-list lst)]
-               [b (in-list (drop lst x))])
-      (min min-diff (abs (- a b)))))
-
-  (min-abs-diff nums))
+  ;; The main function to calculate the minimum absolute difference
+  (define n (length nums))
+  (define sorted-indices (build-list n values)) ; List of indices from 0 to n-1
+  
+  ;; Sort indices based on the values in nums
+  (define sorted-nums 
+    (sort sorted-indices 
+          (lambda (i j) 
+            (< (list-ref nums i) (list-ref nums j)))))
+  
+  ;; Helper function to find the minimum absolute difference in a sorted list
+  (define (find-min-diff sorted-list)
+    (let loop ((min-diff +inf.0) (i 0))
+      (if (>= i (- n x))
+          min-diff
+          (let* ((j (+ i x))
+                 (diff (abs (- (list-ref nums (list-ref sorted-list i))
+                               (list-ref nums (list-ref sorted-list j)))))
+                 (new-min (min min-diff diff)))
+            (if (zero? new-min)
+                0
+                (loop new-min (add1 i)))))))
+  
+  ;; Compute the minimum absolute difference
+  (find-min-diff sorted-nums))
 
 ;; Example usage:
 (minAbsoluteDifference '(4 3 2 4) 2)  ;; Output: 0

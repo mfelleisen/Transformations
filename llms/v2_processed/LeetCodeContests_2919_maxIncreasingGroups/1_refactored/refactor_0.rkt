@@ -40,28 +40,21 @@
 ;;  * 1 <= usageLimits[i] <= 109
 (define (maxIncreasingGroups usageLimits)
   (define sorted-limits (sort usageLimits <))
-
-  (define (count-groups limits)
-    (let loop ([current-min-size 1]
-               [total 0]
-               [num-groups 0]
-               [remaining-limits limits])
-      (match remaining-limits
-        [(list)
-         num-groups]
-        [(cons current-limit rest)
-         (define new-total (+ total current-limit))
-         (if (>= new-total current-min-size)
-             (loop (+ current-min-size 1)
-                   (- new-total current-min-size)
-                   (+ num-groups 1)
-                   rest)
-             (loop current-min-size
-                   new-total
-                   num-groups
-                   rest))])))
-
-  (count-groups sorted-limits))
+  
+  (define (count-groups limits current-min-size total num-groups)
+    (match limits
+      [(list)
+       num-groups]
+      [(cons current-limit rest)
+       (define new-total (+ total current-limit))
+       (if (>= new-total current-min-size)
+           (count-groups rest
+                         (add1 current-min-size)
+                         (- new-total current-min-size)
+                         (add1 num-groups))
+           (count-groups rest current-min-size new-total num-groups))]))
+  
+  (count-groups sorted-limits 1 0 0))
 
 ;; Example usage
 (maxIncreasingGroups '(1 2 5))  ; Output: 3

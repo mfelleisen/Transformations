@@ -20,8 +20,30 @@
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
 (define (theMaximumAchievableX num t)
-  ;; Calculate the maximum achievable number x
+  ;; The function calculates the maximum achievable number x
+  ;; starting from a given number `num` with up to `t` operations allowed.
+  ;; Each operation can either increase or decrease `x` by 1 while doing the opposite to `num`.
+  ;; This results in x = num + 2 * t.
   (+ num (* 2 t)))
+
+;; Test cases
+(define test-cases
+  (list
+   (list 4 1 6)  ;; (num, t, expected)
+   (list 3 2 7)))
+
+(define (run-tests test-cases)
+  (for-each
+   (lambda (case)
+     (match-define (list num t expected) case)
+     (let ([result (theMaximumAchievableX num t)])
+       (printf "num: ~a, t: ~a => expected: ~a, got: ~a\n"
+               num t expected result)
+       (unless (= result expected)
+         (error "Test failed."))))
+   test-cases))
+
+(run-tests test-cases)
 
 (require rackunit)
 

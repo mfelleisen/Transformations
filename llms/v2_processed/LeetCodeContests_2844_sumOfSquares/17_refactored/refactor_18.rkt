@@ -18,13 +18,15 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  (define (is-special? i) (zero? (modulo n (add1 i))))
-  (for/sum ([i (in-range n)] #:when (is-special? i))
-    (sqr (list-ref nums i))))
+  
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (zero? (remainder n i)))
+    (define elem (list-ref nums (sub1 i)))
+    (* elem elem)))
 
-;; The function `sumOfSquares` calculates the sum of squares of special elements in the input list `nums`.
-;; We define `n` as the length of `nums`, and `is-special?` as a helper function that checks if an index is special.
-;; We then use `for/sum` to iterate over indices from 0 to n-1, filter the special indices with `#:when`, and sum the squares of the corresponding elements.
+;; Example usage:
+;; (sumOfSquares '(1 2 3 4))  ; Should output 21
+;; (sumOfSquares '(2 7 1 19 18 3))  ; Should output 63
 
 (require rackunit)
 

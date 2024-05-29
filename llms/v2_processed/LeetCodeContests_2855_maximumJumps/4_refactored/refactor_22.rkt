@@ -34,22 +34,26 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  (let ([n (length nums)])
-    ;; Initialize DP table with -1 (indicating unreachable) and 0 for the start position.
-    (define dp (make-vector n -1))
-    (vector-set! dp 0 0)
-    
-    ;; Iterate over each index as the starting point for jumps.
-    (for ([i (in-range n)])
-      (when (>= (vector-ref dp i) 0)  ; Only consider reachable positions.
-        ;; Check possible jumps from index i to index j.
-        (for ([j (in-range (add1 i) n)])
-          (when (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-            ;; Update dp[j] to the maximum of its current value or dp[i] + 1.
-            (vector-set! dp j (max (vector-ref dp j) (add1 (vector-ref dp i))))))))
-    
-    ;; Check the value for the last position; return -1 if it's still -1.
-    (vector-ref dp (sub1 n))))
+  (define n (length nums))
+
+  ;; Initialize DP table with negative infinity for unreachable and 0 for the start position.
+  (define dp (build-vector n (lambda (i) (if (zero? i) 0 -inf.0))))
+
+  ;; Function to check if the jump is valid
+  (define (valid-jump? i j)
+    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
+
+  ;; Traverse all pairs (i, j) to update dp
+  (for* ([i (in-range n)]
+         [j (in-range (add1 i) n)])
+    (when (and (not (= (vector-ref dp i) -inf.0)) (valid-jump? i j))
+      (vector-set! dp j (max (vector-ref dp j) (add1 (vector-ref dp i))))))
+
+  ;; Check the value for the last position; return -1 if it's still negative infinity.
+  (let ([last-jump (vector-ref dp (sub1 n))])
+    (if (= last-jump -inf.0)
+        -1
+        last-jump)))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

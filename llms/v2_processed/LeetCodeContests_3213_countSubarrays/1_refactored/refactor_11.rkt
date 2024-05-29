@@ -16,23 +16,24 @@
 ;; 1 <= nums[i] <= 106
 ;; 1 <= k <= 105
 (define (countSubarrays nums k)
+  ;; Calculate the maximum element in the list
   (define max-element (apply max nums))
 
-  (define (subarray-count start)
-    (let loop ([i start] [freq (hash)] [current-max 0] [count 0])
-      (if (>= i (length nums))
-          count
-          (let* ([num (list-ref nums i)]
-                 [new-freq (hash-update freq num add1 0)]
-                 [new-max (max num current-max)]
-                 [new-count (if (and (= new-max max-element)
-                                     (>= (hash-ref new-freq new-max 0) k))
-                                (+ count 1)
-                                count)])
-            (loop (+ i 1) new-freq new-max new-count)))))
+  ;; Function to count valid subarrays starting from a given index
+  (define (count-from-index start)
+    (let loop ([i start] [freq 0] [count 0] [total 0])
+      (cond
+        [(= i (length nums)) total]
+        [else
+         (define num (list-ref nums i))
+         (define new-freq (if (= num max-element) (+ freq 1) freq))
+         (define new-count (if (>= new-freq k) (+ count 1) count))
+         (loop (add1 i) new-freq new-count (+ total new-count))])))
 
-  (for/sum ([i (in-range (length nums))])
-    (subarray-count i)))
+  ;; Sum up counts for all starting indices
+  (for/fold ([total 0])
+            ([i (in-range (length nums))])
+    (+ total (count-from-index i))))
 
 ;; Example usage:
 (displayln (countSubarrays '(1 3 2 3 3) 2))  ;; Output: 6

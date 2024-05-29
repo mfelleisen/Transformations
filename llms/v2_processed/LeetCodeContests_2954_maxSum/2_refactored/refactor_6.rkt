@@ -21,41 +21,26 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  ;; Helper function to calculate the maximum sum of an almost unique subarray
-  (define (calc-max-sum nums)
-    (for/fold ([max-sum 0]
-               [window '()]
-               [sum 0]
-               [i 0]
-               [distinct-count 0])
-              ([num (in-list nums)])
-      (define new-window (append window (list num)))
-      (define new-sum (+ sum num))
-      (define new-distinct-count (length (remove-duplicates new-window)))
-      (if (> (length new-window) k)
-          (let* ([dropped (first new-window)]
-                 [new-window (rest new-window)]
-                 [new-sum (- new-sum dropped)]
-                 [new-distinct-count (length (remove-duplicates new-window))])
-            (values (if (and (>= new-distinct-count m) (> new-sum max-sum))
-                        new-sum
-                        max-sum)
-                    new-window
-                    new-sum
-                    (+ i 1)
-                    new-distinct-count))
-          (values (if (and (>= new-distinct-count m) (> new-sum max-sum))
-                      new-sum
-                      max-sum)
-                  new-window
-                  new-sum
-                  (+ i 1)
-                  new-distinct-count))))
+  (define (distinct-count lst)
+    (length (remove-duplicates lst)))
 
-  ;; Handle the edge case where the length of nums is less than k
+  (define (valid-window? window)
+    (>= (distinct-count window) m))
+
+  (define (sliding-window lst k)
+    (for/list ([i (in-range 0 (- (length lst) (sub1 k)))])
+      (take (drop lst i) k)))
+
+  (define (max-window-sum lst)
+    (define windows (sliding-window lst k))
+    (define valid-windows (filter valid-window? windows))
+    (if (empty? valid-windows)
+        0
+        (apply max (map (lambda (w) (apply + w)) valid-windows))))
+
   (if (< (length nums) k)
       0
-      (calc-max-sum nums)))
+      (max-window-sum nums)))
 
 ;; Example usage:
 (maxSum '(2 6 7 3 1 7) 3 4)  ; Output: 18

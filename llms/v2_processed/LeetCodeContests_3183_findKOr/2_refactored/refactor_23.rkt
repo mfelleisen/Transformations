@@ -26,17 +26,18 @@
 ;;  * 0 <= nums[i] < 231
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
-  ;; Calculate the K-or by examining each bit position up to 31 (since 2^31 is the max for 32-bit integers)
-  (define (bit-set-count bit)
-    (count (λ (num) (not (zero? (bitwise-and num bit)))) nums))
+  ;; Calculate the K-or by examining each bit position up to 31
+  (define (bit-count bit)
+    (for/sum ([num (in-list nums)])
+      (if (zero? (bitwise-and num bit)) 0 1)))
   
-  (define (bit-to-or i result)
-    (let ([bit (arithmetic-shift 1 i)])
-      (if (>= (bit-set-count bit) k)
-          (bitwise-ior result bit)
-          result)))
+  (define (check-bit i result)
+    (define bit (arithmetic-shift 1 i))
+    (if (>= (bit-count bit) k)
+        (bitwise-ior result bit)
+        result))
   
-  (foldl bit-to-or 0 (range 31)))
+  (foldl (lambda (i result) (check-bit i result)) 0 (range 31)))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)  ; Output: 9

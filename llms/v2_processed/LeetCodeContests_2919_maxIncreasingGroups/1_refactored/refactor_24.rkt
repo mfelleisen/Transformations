@@ -42,26 +42,24 @@
   ;; Sort the usageLimits list to facilitate group creation
   (define sorted-limits (sort usageLimits <))
 
-  ;; Helper function to iterate over the sorted limits and count groups
-  (define (count-groups limits current-min-size total num-groups)
-    (match limits
-      ;; Base case: If we have no more limits left, return the number of groups
-      ['() num-groups]
-      ;; Recursive case: Process the current limit
-      [(cons current-limit rest)
-       (define new-total (+ total current-limit))
-       ;; Check if we can form a group of at least `current-min-size`
-       (if (>= new-total current-min-size)
-           ;; If yes, form a new group and recurse with updated parameters
-           (count-groups rest
-                         (+ current-min-size 1)
-                         (- new-total current-min-size)
-                         (+ num-groups 1))
-           ;; If no, just move to the next limit without forming a group
-           (count-groups rest current-min-size new-total num-groups))]))
+  ;; Function to count the maximum number of groups
+  (define (count-groups limits)
+    (let loop ([limits limits] [current-min-size 1] [total 0] [num-groups 0])
+      (match limits
+        ;; Base case: If we have no more limits left, return the number of groups
+        [(list) num-groups]
+        ;; Recursive case: Process the current limit
+        [(cons current-limit rest-limits)
+         (define new-total (+ total current-limit))
+         ;; Check if we can form a group of at least `current-min-size`
+         (if (>= new-total current-min-size)
+             ;; If yes, form a new group and recurse with updated parameters
+             (loop rest-limits (+ current-min-size 1) (- new-total current-min-size) (+ num-groups 1))
+             ;; If no, just move to the next limit without forming a group
+             (loop rest-limits current-min-size new-total num-groups))])))
 
-  ;; Start the recursive counting with initial parameters
-  (count-groups sorted-limits 1 0 0))
+  ;; Start the counting
+  (count-groups sorted-limits))
 
 ;; Example usage
 (maxIncreasingGroups '(1 2 5))  ; Output: 3

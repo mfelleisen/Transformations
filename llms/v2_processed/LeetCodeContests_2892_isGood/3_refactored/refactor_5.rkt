@@ -24,21 +24,19 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= num[i] <= 200
 (define (isGood nums)
-  ;; Create a frequency map of the numbers in the list
-  (define (frequency-map lst)
-    (for/fold ([freq (hash)])
-              ([num (in-list lst)])
-      (hash-update freq num add1 0)))
+  ;; Helper function to create the base array for a given n
+  (define (base-array n)
+    (append (range 1 (+ n 1)) (list n)))
 
-  ;; Determine if the array is a "good" array, meaning it is a permutation of
-  ;; the base array [1, 2, ..., n - 1, n, n] where n is the maximum element in nums.
-  (let* ((n (apply max nums))  ; Find the maximum element in the list
-         (counts (frequency-map nums))  ; Get the frequency map of nums
-         (expected-length (+ n 1)))  ; Calculate the expected length of nums
-    (and (= (hash-ref counts n 0) 2)  ; Check if 'n' appears exactly twice
-         (for/and ([i (in-range 1 n)])  ; Check if all numbers from 1 to n-1 appear exactly once
-           (= (hash-ref counts i 0) 1))
-         (= (length nums) expected-length))))  ; Ensure the length of nums is exactly n+1
+  ;; Helper function to check if two lists are permutations of each other
+  (define (is-permutation? lst1 lst2)
+    (equal? (sort lst1 <) (sort lst2 <)))
+
+  ;; Main logic
+  (define n (apply max nums))
+  (define base (base-array n))
+  (and (= (length nums) (length base))
+       (is-permutation? nums base)))
 
 ;; Example usage:
 (displayln (isGood '(2 1 3)))  ; Output: #f

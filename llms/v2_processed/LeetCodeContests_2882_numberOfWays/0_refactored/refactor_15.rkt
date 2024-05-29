@@ -20,29 +20,26 @@
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))
-
-  ;; Helper function to compute the power of an integer
-  (define (power base exp)
-    (expt base exp))
-
-  ;; Helper function to update the dp vector
-  (define (update-dp dp base current-power)
-    (for/fold ([dp dp]) ([i (in-range n current-power -1)])
-      (vector-set! dp i (modulo (+ (vector-ref dp i) (vector-ref dp (- i current-power))) MOD))
-      dp))
-
-  ;; Compute the maximum base such that base^x <= n
-  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
-
-  ;; Initialize the dp vector
-  (define dp (build-vector (add1 n) (lambda (i) (if (= i 0) 1 0))))
-
-  ;; Iterate over each possible base and update the dp vector
-  (for/fold ([dp dp]) ([base (in-range 1 (add1 max-base))])
-    (update-dp dp base (power base x)))
-
-  ;; Return the number of ways to express n
-  (vector-ref dp n))
+  
+  ;; Calculate all powers of integers up to `n` using the `x`th power.
+  (define powers
+    (let loop ([i 1] [acc '()])
+      (let ([power (expt i x)])
+        (if (> power n)
+            (reverse acc)
+            (loop (add1 i) (cons power acc))))))
+  
+  ;; Use dynamic programming to calculate the number of ways.
+  (define (dp n)
+    (define (sum-ways n powers)
+      (match powers
+        [(list) (if (= n 0) 1 0)]
+        [(cons p ps) (if (< n p)
+                       (sum-ways n ps)
+                       (modulo (+ (sum-ways n ps) (sum-ways (- n p) ps)) MOD))]))
+    (sum-ways n powers))
+  
+  (dp n))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

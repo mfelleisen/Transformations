@@ -34,30 +34,30 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  (define n (length nums))
+  ;; Helper function to recursively compute the maximum jumps
+  (define (max-jumps-from idx dp)
+    (if (= idx (sub1 (length nums)))
+        0
+        (if (vector-ref dp idx)
+            (vector-ref dp idx)
+            (let ([current (list-ref nums idx)])
+              (define max-jumps
+                (for/fold ([max-jumps -1])
+                          ([next-idx (in-range (add1 idx) (length nums))]
+                           #:when (<= (abs (- (list-ref nums next-idx) current)) target))
+                  (let ([jumps (max-jumps-from next-idx dp)])
+                    (if (= jumps -1)
+                        max-jumps
+                        (max max-jumps (add1 jumps))))))
+              (vector-set! dp idx max-jumps)
+              max-jumps))))
   
-  ;; Helper function to check if a jump is valid
-  (define (valid-jump? i j)
-    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
-  
-  ;; Helper function to compute the maximum number of jumps using recursion and memoization
-  (define (compute-max-jumps i memo)
-    (cond
-      [(= i (sub1 n)) 0]  ;; Base case: if we are at the last index, no more jumps needed
-      [(hash-ref memo i #f) => (lambda (result) result)]  ;; Return memoized result if available
-      [else
-       (define max-jumps -1)
-       (for ([j (in-range (add1 i) n)])
-         (when (valid-jump? i j)
-           (define next-jumps (compute-max-jumps j memo))
-           (when (>= next-jumps 0)
-             (set! max-jumps (max max-jumps (add1 next-jumps))))))
-       (hash-set! memo i max-jumps)
-       max-jumps]))
-  
-  ;; Initialize memoization hash table and start the recursion from index 0
-  (let ([memo (make-hash)])
-    (compute-max-jumps 0 memo)))
+  ;; Initialize the DP vector with #f for memoization
+  (define dp (make-vector (length nums) #f))
+  (let ([result (max-jumps-from 0 dp)])
+    (if (= result -1)
+        -1
+        result)))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

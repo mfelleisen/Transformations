@@ -16,20 +16,19 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function to generate a sequence of valid k-avoiding numbers
-  (define (generate-k-avoiding n k)
-    (let loop ([current-number 1] [used-numbers (set)] [result '()])
-      (if (= (length result) n)
-          (reverse result)  ;; Return the collected numbers once we have `n` of them
-          (if (or (not (set-member? used-numbers (- k current-number)))
-                  (= current-number (- k current-number)))
-              (loop (+ current-number 1)
-                    (set-add used-numbers current-number)
-                    (cons current-number result))
-              (loop (+ current-number 1) used-numbers result)))))
-  
-  ;; Generate the k-avoiding array and calculate its sum
-  (apply + (generate-k-avoiding n k)))
+  (define (valid? seen current)
+    (or (not (set-member? seen (- k current)))
+        (= current (- k current))))
+
+  (define (construct-sequence seen current count total)
+    (cond
+      [(= count n) total]
+      [(valid? seen current)
+       (construct-sequence (set-add seen current) (add1 current) (add1 count) (+ total current))]
+      [else
+       (construct-sequence seen (add1 current) count total)]))
+
+  (construct-sequence (set) 1 0 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ; Output: 18

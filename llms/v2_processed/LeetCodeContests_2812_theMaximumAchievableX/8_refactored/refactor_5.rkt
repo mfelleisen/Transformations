@@ -20,9 +20,9 @@
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
 (define (theMaximumAchievableX num t)
-  ;; Contract: (theMaximumAchievableX Integer Integer) -> Integer
-  ;; Given two integers, num and t, this function calculates the maximum achievable number x.
+  ;; The maximum achievable number x is calculated as num + 2 * t.
   (+ num (* 2 t)))
+
 
 (require rackunit)
 

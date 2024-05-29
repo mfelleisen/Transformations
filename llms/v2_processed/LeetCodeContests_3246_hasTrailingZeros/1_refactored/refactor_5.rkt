@@ -21,21 +21,18 @@
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (hasTrailingZeros nums)
-  ;; Helper function to check if a number has at least one trailing zero
-  (define (has-trailing-zero? x)
-    (even? x))
+  (define (has-trailing-zero? n)
+    (even? n)) ;; A number with at least one trailing zero is even
   
-  ;; Helper function to generate all pairs of elements in the list
-  (define (generate-pairs lst)
-    (if (null? lst)
-        '()
-        (let ([first (car lst)]
-              [rest (cdr lst)])
-          (append (map (lambda (x) (bitwise-ior first x)) rest)
-                  (generate-pairs rest)))))
+  ;; Check if there are any two or more elements whose bitwise OR is even
+  (define (check-combinations lst)
+    (ormap (λ (x)
+             (ormap (λ (y)
+                      (has-trailing-zero? (bitwise-ior x y)))
+                    (cdr (memv x lst))))
+           lst))
   
-  ;; Generate all bitwise OR combinations and check if any has a trailing zero
-  (ormap has-trailing-zero? (generate-pairs nums)))
+  (check-combinations nums))
 
 ;; Example usage:
 (hasTrailingZeros '(1 2 3 4 5))  ; Output: #t

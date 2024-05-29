@@ -16,30 +16,26 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Define a helper function to check if a number can be added without violating the k-avoiding property
-  (define (valid-add? used-numbers current-number)
-    (or (not (set-member? used-numbers (- k current-number)))
-        (= current-number (- k current-number))))
-  
-  ;; Recursive function to construct the k-avoiding array and calculate its sum
-  (define (construct-k-avoiding used-numbers current-number count total-sum)
+  ;; Helper function to generate the k-avoiding array
+  (define (generate-k-avoiding n k current-number used-numbers count total-sum)
     (cond
-      [(= count n) total-sum]  ; Base case: when the count reaches n, return the total sum
-      [(valid-add? used-numbers current-number)
-       (construct-k-avoiding
-        (set-add used-numbers current-number)
-        (add1 current-number)
-        (add1 count)
-        (+ total-sum current-number))]  ; If valid, add the current number and continue
+      [(= count n) total-sum]
+      [(or (not (set-member? used-numbers (- k current-number)))
+           (= current-number (- k current-number)))
+       (generate-k-avoiding n k
+                            (+ current-number 1)
+                            (set-add used-numbers current-number)
+                            (+ count 1)
+                            (+ total-sum current-number))]
       [else
-       (construct-k-avoiding
-        used-numbers
-        (add1 current-number)
-        count
-        total-sum)]))  ; If not valid, skip the current number and continue
-  
-  ;; Start the recursive process with an empty set, starting number 1, count 0, and total sum 0
-  (construct-k-avoiding (set) 1 0 0))
+       (generate-k-avoiding n k
+                            (+ current-number 1)
+                            used-numbers
+                            count
+                            total-sum)]))
+
+  ;; Start the recursive process with current number 1, an empty set, count 0, and total sum 0
+  (generate-k-avoiding n k 1 (set) 0 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ; Output: 18

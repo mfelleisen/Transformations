@@ -15,22 +15,19 @@
 ;;  * nums[i].length == 2
 ;;  * 1 <= starti <= endi <= 100
 (define (numberOfPoints nums)
-  (define (range-list start end)
-    ;; Helper function to generate a list of integers from start to end (inclusive).
-    (for/list ([i (in-range start (+ end 1))]) i))
+  (define (range-set start end)
+    ;; Generate a set of integers from start to end (inclusive).
+    (for/set ([i (in-range start (add1 end))]) i))
   
-  ;; Generate a set of points for each car, then union them all to get unique points covered.
-  (define all-points
-    (for/fold ([points (set)])
-              ([pair (in-list nums)])
-      (set-union points (set (range-list (first pair) (second pair))))))
-
-  ;; Count the number of unique points.
-  (set-count all-points))
+  ;; Use for/fold to accumulate all points into a set and then return its size.
+  (for/fold ([points (set)])
+            ([pair (in-list nums)])
+    (set-union points (range-set (first pair) (second pair)))))
 
 ;; Example usage:
 ;; (numberOfPoints '((3 6) (1 5) (4 7)))  ; Should return 7
 ;; (numberOfPoints '((1 3) (5 8)))        ; Should return 7
+
 
 (require rackunit)
 

@@ -32,26 +32,21 @@
 ;;  * 1 <= n <= 109
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
-  (define MOD (+ (expt 10 9) 7))  ; Define the modulus as 10^9 + 7.
+  (define MOD (+ (expt 10 9) 7))
   
-  ;; Helper function to check if a given number is valid in the beautiful array.
-  (define (is-valid? nums candidate)
-    (for/and ([num (in-list nums)])
-      (not (= (+ num candidate) target))))
-  
-  ;; Recursive function to build the beautiful array.
-  (define (build-beautiful-nums nums candidate count)
-    (if (= count n)
-        nums
-        (if (is-valid? nums candidate)
-            (build-beautiful-nums (cons candidate nums) (+ candidate 1) (+ count 1))
-            (build-beautiful-nums nums (+ candidate 1) count))))
-  
-  ;; Generate the beautiful array starting with an empty list and candidate 1.
-  (define beautiful-nums (build-beautiful-nums '() 1 0))
-  
-  ;; Calculate the sum of the beautiful array modulo MOD.
-  (modulo (foldl + 0 beautiful-nums) MOD))
+  ;; Helper function to build the beautiful array iteratively.
+  (define (build-beautiful-nums n target)
+    (define (loop i acc count)
+      (cond
+        [(= count n) (reverse acc)]
+        [(not (member (+ i target) acc))
+         (loop (+ i 1) (cons i acc) (+ count 1))]
+        [else (loop (+ i 1) acc count)]))
+    (loop 1 '() 0))
+
+  ;; Generate the beautiful array and calculate the sum modulo MOD.
+  (define beautiful-nums (build-beautiful-nums n target))
+  (modulo (apply + beautiful-nums) MOD))
 
 ;; Example test cases
 (displayln (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

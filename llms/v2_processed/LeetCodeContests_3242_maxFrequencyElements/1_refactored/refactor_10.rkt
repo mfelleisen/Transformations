@@ -16,20 +16,24 @@
 ;; Constraints:
 ;; 1 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
-(define (maxFrequencyElements nums) ;; contract maxFrequencyElements/c
+(define (maxFrequencyElements nums)
+
+  ;; Calculate the frequency of each element using a hash
   (define frequencies
-    (for/fold ([freq (hash)]) ([num (in-list nums)])
-      (hash-update freq num add1 0)))
-  
+    (for/fold ([freqs (hash)])
+              ([num (in-list nums)])
+      (hash-update freqs num add1 0)))
+
+  ;; Find the maximum frequency
   (define max-freq
     (apply max (hash-values frequencies)))
-  
-  (define count-max-freq-elements
-    (for/sum ([val (in-list (hash-values frequencies))]
-              #:when (= val max-freq))
-      val))
-  
-  count-max-freq-elements)
+
+  ;; Count the total occurrences of elements that have the maximum frequency
+  (for/fold ([count 0])
+            ([v (in-hash-values frequencies)]
+             #:when (= v max-freq))
+    (+ count v)))
+
 
 (require rackunit)
 

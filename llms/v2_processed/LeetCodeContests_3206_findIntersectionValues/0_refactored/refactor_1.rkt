@@ -25,11 +25,12 @@
   (define set-nums2 (set (in-list nums2)))
   (define intersection (set-intersect set-nums1 set-nums2))
   
-  (define count-common (λ (s l)
-    (for/sum ([x (in-list l)]) (if (set-member? s x) 1 0))))
+  (define (count-in-set s lst)
+    (for/sum ([x (in-list lst)])
+      (if (set-member? s x) 1 0)))
   
-  (list (count-common intersection nums1)
-        (count-common intersection nums2)))
+  (list (count-in-set intersection nums1)
+        (count-in-set intersection nums2)))
 
 ;; Example usage:
 (findIntersectionValues '(4 3 2 3 1) '(2 2 5 2 3 6))  ; Output: '(3 4)

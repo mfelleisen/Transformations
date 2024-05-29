@@ -22,23 +22,28 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
-  ;; Helper function to check if a list is sorted
-  (define (sorted? lst)
-    (andmap (lambda (pair) (<= (first pair) (second pair)))
-            (map list lst (rest lst))))
-  
-  ;; Calculate the length of the list
   (define n (length nums))
-  
-  ;; If the list has only one element, it is already sorted
-  (if (= n 1)
-      0
-      (let loop ([start 0])
-        (cond
-          [(= start n) -1]  ;; If no valid shift found after checking all starts
-          [(sorted? (append (drop nums start) (take nums start))) start]
-          [else (loop (add1 start))]))))
 
+  (define sorted-nums (sort nums <))
+
+  (define (valid-shift? start)
+    (for/and ([i (in-range n)])
+      (= (list-ref nums (modulo (+ start i) n)) (list-ref sorted-nums i))))
+
+  (define (find-shift start)
+    (cond
+      [(>= start n) -1]
+      [(valid-shift? start) (modulo (- n start) n)]
+      [else (find-shift (add1 start))]))
+
+  (cond
+    [(= n 1) 0]
+    [else (find-shift 0)]))
+
+;; Examples to test the function
+(minimumRightShifts '(3 4 5 1 2))  ; Output: 2
+(minimumRightShifts '(1 3 5))      ; Output: 0
+(minimumRightShifts '(2 1 4))      ; Output: -1
 
 (require rackunit)
 

@@ -19,12 +19,15 @@
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
   (define initial-balance 100)
-  (define rounded-amount 
-    (let* ((lower-bound (* 10 (quotient purchaseAmount 10)))
-           (upper-bound (+ lower-bound 10)))
-      (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
-          lower-bound
-          upper-bound)))
+  (define lower-bound (* 10 (quotient purchaseAmount 10)))
+  (define upper-bound (+ lower-bound 10))
+
+  (define rounded-amount
+    (if (or (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
+            (= (- purchaseAmount lower-bound) (- upper-bound purchaseAmount)))
+        upper-bound
+        lower-bound))
+
   (- initial-balance rounded-amount))
 
 ;; The function can be tested with:

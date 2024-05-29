@@ -15,12 +15,16 @@
 ;;  * nums[i].length == 2
 ;;  * 1 <= starti <= endi <= 100
 (define (numberOfPoints nums)
-  (set-count 
-   (for*/set ([range nums]
-              [point (in-range (first range) (add1 (second range)))])
+  ;; Use a set comprehension to gather all unique points covered by any car.
+  (set-count
+   (for*/set ([start-end (in-list nums)]
+              [point (in-range (first start-end) (add1 (second start-end)))])
      point)))
 
-;; The `numberOfPoints` function takes a list of pairs `nums`, where each pair represents the start and end points of a car on a number line. It uses nested `for` loops to generate all points covered by each car, collects these points into a set (which automatically handles duplicate points), and then returns the count of this set, representing the number of unique points covered.
+;; The function `numberOfPoints` takes a list of pairs, where each pair represents the start and end points
+;; of a car on a number line. It generates all points covered by each car using nested comprehensions,
+;; collects these points into a set (which automatically handles duplicate points), and then returns
+;; the count of this set, representing the number of unique points covered.
 
 (require rackunit)
 

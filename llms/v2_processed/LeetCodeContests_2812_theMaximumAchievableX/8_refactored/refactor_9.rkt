@@ -20,14 +20,14 @@
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
 (define (theMaximumAchievableX num t)
-  ;; The maximum achievable x is obtained by increasing x by t and 
-  ;; simultaneously increasing num by t, which results in:
-  ;; x = num + 2 * t
+  ;; Given two integers, num and t, this function calculates the maximum achievable number x.
+  ;; The maximum x is achieved by increasing x by t and simultaneously decreasing num by t.
+  ;; This results in x = num + 2 * t.
   (+ num (* 2 t)))
 
-;; Examples:
-;; (theMaximumAchievableX 4 1) ; Output: 6
-;; (theMaximumAchievableX 3 2) ; Output: 7
+;; Examples
+(theMaximumAchievableX 4 1) ; Output: 6
+(theMaximumAchievableX 3 2) ; Output: 7
 
 (require rackunit)
 

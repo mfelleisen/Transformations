@@ -28,32 +28,26 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
-  ;; Helper function to check if a subarray starting at index i is valid
-  (define (valid-subarray-start? nums threshold i)
-    (and (even? (list-ref nums i))
-         (<= (list-ref nums i) threshold)))
+  ;; Define a helper function to check if an element is valid at the start of a subarray
+  (define (valid-subarray-start? num)
+    (and (even? num) (<= num threshold)))
   
-  ;; Helper function to calculate the maximum alternating length from index i
-  (define (max-alternating-length-from nums threshold i)
-    (let loop ([j (+ i 1)]
-               [current-length 1]
-               [last-value (list-ref nums i)])
-      (if (and (< j (length nums))
-               (<= (list-ref nums j) threshold)
-               (not (= (remainder last-value 2) (remainder (list-ref nums j) 2))))
-          (loop (+ j 1) (+ current-length 1) (list-ref nums j))
-          current-length)))
+  ;; Define a helper function to calculate the length of a valid alternating subarray starting from a given index
+  (define (max-alternating-length-from idx)
+    (let loop ([j (add1 idx)] [current-length 1] [last-value (list-ref nums idx)])
+      (cond
+        [(or (>= j (length nums))
+             (> (list-ref nums j) threshold)
+             (= (remainder last-value 2) (remainder (list-ref nums j) 2)))
+         current-length]
+        [else
+         (loop (add1 j) (add1 current-length) (list-ref nums j))])))
   
-  ;; Function to find the maximum alternating subarray length
-  (define (find-max-length nums threshold)
-    (for/fold ([max-len 0])
-              ([i (in-range (length nums))])
-      (let ([current-length (if (valid-subarray-start? nums threshold i)
-                                (max-alternating-length-from nums threshold i)
-                                0)])
-        (max max-len current-length))))
-  
-  (find-max-length nums threshold))
+  ;; Iterate over the list to find the maximum length of a valid subarray
+  (for/fold ([max-len 0]) ([i (in-range (length nums))])
+    (if (valid-subarray-start? (list-ref nums i))
+        (max max-len (max-alternating-length-from i))
+        max-len)))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3

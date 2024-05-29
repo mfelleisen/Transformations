@@ -22,16 +22,13 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  ;; A helper function to determine if the element at index i is a peak.
-  (define (is-peak? left current right)
-    (and (> current left) (> current right)))
-  
-  ;; Generate a list of peaks using a fold to maintain immutability and recursion.
-  (for/fold ([peaks '()] [left (first mountain)] [current (second mountain)] #:result (reverse peaks))
-            ([right (in-list (rest (rest mountain)))] [i (in-naturals 1)])
-    (if (is-peak? left current right)
-        (values (cons i peaks) current right)
-        (values peaks current right))))
+  ;; This function finds all the peaks in the given mountain list.
+  ;; A peak is an element that is strictly greater than its neighbors.
+  ;; The first and last elements are never considered as peaks.
+  (for/list ([i (in-range 1 (- (length mountain) 1))]
+             #:when (and (> (list-ref mountain i) (list-ref mountain (sub1 i)))
+                         (> (list-ref mountain i) (list-ref mountain (add1 i)))))
+    i))
 
 ;; Example usage:
 ;; (findPeaks '(1 4 3 8 5))  ; This should return '(1 3)

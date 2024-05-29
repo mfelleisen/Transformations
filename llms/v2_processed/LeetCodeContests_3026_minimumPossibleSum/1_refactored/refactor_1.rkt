@@ -33,16 +33,21 @@
 (define (minimumPossibleSum n target)
   (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
 
-  ;; Recursive function to construct the nums list with an accumulator
-  (define (construct-nums nums candidate sum)
-    (if (= (length nums) n)
-        sum
-        (if (not (ormap (lambda (num) (= (+ num candidate) target)) nums))
-            (construct-nums (cons candidate nums) (+ candidate 1) (+ sum candidate))
-            (construct-nums nums (+ candidate 1) sum))))
+  ;; Helper function to construct the nums list
+  (define (construct-nums n target)
+    (define (helper remaining current sum used)
+      (if (zero? remaining)
+          sum
+          (if (not (set-member? used (- target current)))
+              (helper (sub1 remaining) 
+                      (add1 current) 
+                      (+ sum current) 
+                      (set-add used current))
+              (helper remaining (add1 current) sum used))))
+    (helper n 1 0 (set)))
 
   ;; Calculate the sum of the beautiful array mod MOD
-  (modulo (construct-nums '() 1 0) MOD))
+  (modulo (construct-nums n target) MOD))
 
 ;; Example test cases
 (display (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

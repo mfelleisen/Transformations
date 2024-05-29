@@ -23,31 +23,21 @@
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
   (define n (length nums))
-
-  ;; Helper function to determine the parity of a number
-  (define (parity num)
-    (modulo num 2))
-
-  ;; Recursive function to calculate the maximum score
-  (define (calc-max-score idx current-score current-parity memo)
-    (if (>= idx n)
-        current-score
-        (let* ([current-num (list-ref nums idx)]
-               [new-score (+ current-score current-num)]
-               [new-parity (parity current-num)]
-               [penalty (if (not (= current-parity new-parity)) x 0)]
-               [final-score (- new-score penalty)])
-
-          (or (hash-ref memo (list idx current-score current-parity) #f)
-              (let ([result (calc-max-score (add1 idx) final-score new-parity memo)])
-                (hash-set! memo (list idx current-score current-parity) result)
-                result)))))
-
-  ;; Initialize memoization hash table
-  (define memo (make-hash))
-
-  ;; Start calculation from index 1 (since we always start with nums[0] score)
-  (calc-max-score 1 (first nums) (parity (first nums)) memo))
+  (define dp (make-vector n -inf.0))
+  (vector-set! dp 0 (first nums))
+  
+  (define (update-score i j)
+    (let* ([current-score (+ (vector-ref dp i) (list-ref nums j))]
+           [updated-score (if (not (= (modulo (list-ref nums i) 2) (modulo (list-ref nums j) 2)))
+                              (- current-score x)
+                              current-score)])
+      (vector-set! dp j (max (vector-ref dp j) updated-score))))
+  
+  (for* ([i (in-range n)]
+         [j (in-range (add1 i) n)])
+    (update-score i j))
+  
+  (apply max (vector->list dp)))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

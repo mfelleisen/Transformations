@@ -16,17 +16,21 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Define a helper function to generate the k-avoiding array
-  (define (k-avoiding-array n k start)
-    (let loop ([i start] [count 0] [acc '()])
-      (cond
-        [(= count n) (reverse acc)]
-        [(or (not (member (- k i) acc)) (= i (- k i)))
-         (loop (add1 i) (add1 count) (cons i acc))]
-        [else (loop (add1 i) count acc)])))
+  ;; Generate a sequence of numbers, filtering out those that create pairs summing to k
+  (define (generate-k-avoiding n k)
+    (define (avoid? num used)
+      (not (set-member? used (- k num))))
+    
+    (define (accumulate num used count total)
+      (if (= count n)
+          total
+          (if (avoid? num used)
+              (accumulate (add1 num) (set-add used num) (add1 count) (+ total num))
+              (accumulate (add1 num) used count total))))
+    
+    (accumulate 1 (set) 0 0))
   
-  ;; Calculate the sum of the k-avoiding array
-  (apply + (k-avoiding-array n k 1)))
+  (generate-k-avoiding n k))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

@@ -19,16 +19,19 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  ;; Helper function to simulate the game
-  (define (play-game nums acc)
-    (if (empty? nums)
-        (reverse acc)
-        (let* ([sorted (sort nums <)]
-               [alice-choice (first sorted)]
-               [bob-choice (second sorted)]
-               [remaining (drop sorted 2)])
-          (play-game remaining (cons alice-choice (cons bob-choice acc))))))
-  (play-game nums '()))
+  ;; Sort the numbers in ascending order
+  (define sorted-nums (sort nums <))
+  
+  ;; Define a helper function that processes the list in pairs
+  (define (process-pairs lst)
+    (if (empty? lst)
+        '()
+        (let ([bob (second lst)]  ; Bob's turn (second element in the pair)
+              [alice (first lst)]) ; Alice's turn (first element in the pair)
+          (cons bob (cons alice (process-pairs (drop lst 2))))))) ; Recursively process the rest of the list
+  
+  ;; Process the sorted numbers in pairs and return the result
+  (process-pairs sorted-nums))
 
 ;; Example usage:
 (numberGame '(5 4 2 3))  ; Output: '(3 2 5 4)

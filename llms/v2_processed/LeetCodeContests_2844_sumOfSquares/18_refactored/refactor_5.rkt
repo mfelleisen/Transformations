@@ -17,18 +17,21 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
-  ;; Calculate the length of the nums list
   (define n (length nums))
   
   ;; Helper function to check if an index is special
-  (define (is-special? i)
-    (zero? (modulo n i)))
-  
-  ;; Generate a list of indices from 1 to n and filter special indices, then calculate the sum of their squares
-  (for/sum ([i (in-range 1 (add1 n))]
-            #:when (is-special? i))
-    (let ([num (list-ref nums (sub1 i))])
-      (* num num))))
+  (define (special? i)
+    (zero? (remainder n i)))
+
+  ;; Calculate the sum of squares of special elements
+  (for/fold ([sum 0]) ([i (in-range 1 (add1 n))])
+    (if (special? i)
+        (+ sum (sqr (list-ref nums (sub1 i))))
+        sum)))
+
+;; Example usage:
+(sumOfSquares '(1 2 3 4))       ;; Expected output: 21
+(sumOfSquares '(2 7 1 19 18 3)) ;; Expected output: 63
 
 (require rackunit)
 

@@ -22,18 +22,16 @@
 ;; 0 <= nums[i] <= 106
 ;; 0 <= k <= 106
 (define (minOperations nums k)
-  ;; Calculate the bitwise XOR of all elements in nums
+  ;; Calculate the bitwise XOR of all elements in nums using foldl
   (define current-xor (foldl bitwise-xor 0 nums))
   
   ;; XOR current-xor with k to find the bits that need to be flipped
   (define xor-with-k (bitwise-xor current-xor k))
   
-  ;; Count the number of 1s in the binary representation of xor-with-k
-  ;; Each 1 represents a bit that needs to be flipped
+  ;; Function to count the number of 1s in the binary representation of a number
   (define (count-ones x)
-    (if (= x 0)
-        0
-        (+ (bitwise-and x 1) (count-ones (arithmetic-shift x -1)))))
+    (for/sum ([bit (in-range 0 (integer-length x))])
+      (bitwise-and 1 (arithmetic-shift x (- bit)))))
   
   ;; Return the count of 1s which is the minimum number of operations required
   (count-ones xor-with-k))

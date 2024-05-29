@@ -23,8 +23,8 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; This function simulates the described operations in a right-to-left folding manner,
-  ;; combining elements from right to left if they meet the condition.
+  ;; This function performs the described operations by traversing the list from right to left,
+  ;; combining elements as needed to achieve the maximum possible value.
   (define (fold-nums lst)
     (for/fold ([combined '()])
               ([current (in-list (reverse lst))])

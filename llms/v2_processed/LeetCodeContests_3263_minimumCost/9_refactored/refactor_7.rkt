@@ -25,20 +25,20 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Function to determine the minimum cost of dividing an array into 3 contiguous subarrays.
-  (let* ((n (length nums)))
-    (if (= n 3)
-        ;; If there are exactly 3 elements, the cost is the sum of all elements.
-        (apply + nums)
-        ;; Otherwise, find the minimum cost by trying all possible splits.
-        (for*/fold ([min-cost +inf.0] #:result min-cost)
-                   ([i (in-range 1 (- n 1))]
-                    [j (in-range (+ i 1) n)])
-          (let* ((cost1 (first nums))  ; Cost of the first subarray starting from the first element.
-                 (cost2 (list-ref nums i))  ; Cost of the second subarray starting at index i.
-                 (cost3 (list-ref nums j))  ; Cost of the third subarray starting at index j.
-                 (total-cost (+ cost1 cost2 cost3)))  ; Calculate total cost for this partition.
-            (min min-cost total-cost))))))  ; Keep the minimum cost found.
+  (define n (length nums))
+  
+  ;; Helper function to calculate the cost of dividing the array into 3 subarrays
+  (define (calculate-cost i j)
+    (+ (first nums) (list-ref nums i) (list-ref nums j)))
+  
+  ;; Generate all possible pairs (i, j) such that 0 < i < j < n
+  (define all-pairs
+    (for*/list ([i (in-range 1 (- n 1))]
+                [j (in-range (+ i 1) n)])
+      (calculate-cost i j)))
+  
+  ;; Find the minimum cost among all possible pairs
+  (apply min all-pairs))
 
 
 (require rackunit)

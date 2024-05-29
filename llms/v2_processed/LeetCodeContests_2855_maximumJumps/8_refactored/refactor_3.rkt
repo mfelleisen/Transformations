@@ -35,30 +35,40 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  ;; Get the length of the nums list
+  ;; Define the length of the nums list
   (define n (length nums))
+  
+  ;; Helper function to determine possible jumps from the current index
+  (define (can-jump? i j)
+    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
+  
+  ;; Main recursive function with memoization
+  (define (max-jumps i memo)
+    (cond
+      ;; If we have already computed the value for this index, return it
+      ((hash-has-key? memo i) (hash-ref memo i))
+      
+      ;; If we reach the last index, return 0
+      ((= i (sub1 n)) 0)
+      
+      ;; Otherwise, compute the maximum jumps from this index
+      (else
+       (define best -1)
+       (for ([j (in-range (add1 i) n)])
+         (when (can-jump? i j)
+           (define next-jump (max-jumps j memo))
+           (when (not (= next-jump -1))
+             (set! best (max best (add1 next-jump))))))
+       ;; Memoize the result for this index
+       (hash-set! memo i best)
+       best)))
 
-  ;; Define a helper function to calculate the maximum jumps
-  (define (calculate-max-jumps nums target dp i)
-    (for/fold ([dp dp]) ([j (in-range (add1 i) n)])
-      (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-          (let ((updated (max (list-ref dp j) (add1 (list-ref dp i)))))
-            (list-set dp j updated))
-          dp)))
-
-  ;; Initialize the dp list with negative infinity for all indices except the first one set to 0
-  (define dp (cons 0 (make-list (sub1 n) -inf.0)))
-
-  ;; Process each index to update dp values
-  (define dp-updated
-    (for/fold ([dp dp]) ([i (in-range n)])
-      (if (not (= (list-ref dp i) -inf.0))
-          (calculate-max-jumps nums target dp i)
-          dp)))
-
-  ;; Check the value at the last index to determine if the end is reachable
-  (let ((final-value (list-ref dp-updated (sub1 n))))
-    (if (= final-value -inf.0) -1 final-value)))
+  ;; Initialize memo table
+  (define memo (make-hash))
+  
+  ;; Start the calculation from index 0
+  (define result (max-jumps 0 memo))
+  (if (= result -1) -1 result))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

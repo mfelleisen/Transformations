@@ -33,18 +33,24 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus as 10^9 + 7.
-  
-  ;; Helper function to generate the beautiful array recursively
-  (define (generate-beautiful-nums n target current candidate acc)
-    (if (= n current)
-        acc
-        (if (not (member (- target candidate) acc))
-            (generate-beautiful-nums n target (add1 current) (add1 candidate) (cons candidate acc))
-            (generate-beautiful-nums n target current (add1 candidate) acc))))
-  
+
+  ;; Helper function to generate the beautiful array recursively.
+  (define (generate-beautiful-nums n target current-num accum)
+    (cond
+      [(zero? n) accum]  ; If no more numbers needed, return the accumulated list.
+      [(can-use? accum current-num target)  ; If current number can be used.
+       (generate-beautiful-nums (sub1 n) target (add1 current-num) (cons current-num accum))]
+      [else  ; Skip the current number.
+       (generate-beautiful-nums n target (add1 current-num) accum)]))
+
+  ;; Helper function to check if adding `candidate` to `nums` would still keep `nums` beautiful.
+  (define (can-use? nums candidate target)
+    (for/and ([num (in-list nums)])
+      (not (= (+ num candidate) target))))  ; Ensure no two numbers sum to `target`.
+
   ;; Generate the beautiful array starting with an empty list and candidate 1.
-  (define beautiful-nums (generate-beautiful-nums n target 0 1 '()))
-  
+  (define beautiful-nums (generate-beautiful-nums n target 1 '()))
+
   ;; Calculate the sum of the beautiful array modulo MOD.
   (modulo (apply + beautiful-nums) MOD))
 

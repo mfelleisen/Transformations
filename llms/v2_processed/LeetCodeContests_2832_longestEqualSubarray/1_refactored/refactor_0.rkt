@@ -24,26 +24,32 @@
 ;;  * 0 <= k <= nums.length
 (define (longestEqualSubarray nums k)
   (define (update-counts counts num increment)
-    (hash-update counts num (lambda (v) (+ v increment)) 0))
+    (hash-update counts num (λ (v) (+ v increment)) 0))
 
-  (define (max-frequency count)
-    (apply max (hash-values count)))
+  ;; Helper function to calculate the maximum frequency in the current window
+  (define (max-freq counts)
+    (apply max (hash-values counts)))
 
-  (define (sliding-window nums k)
-    (define-values (max-length left count) (values 0 0 (hash)))
-    (for/fold ([max-length max-length]
-               [left left]
-               [count count])
-              ([right (in-range (length nums))])
-      (define new-count (update-counts count (list-ref nums right) 1))
-      (define max-freq (max-frequency new-count))
-      (define window-length (+ 1 (- right left)))
-      (if (> (- window-length max-freq) k)
-          (values max-length (+ left 1) (update-counts new-count (list-ref nums left) -1))
-          (values (max max-length window-length) left new-count))))
+  (define-values (max-length left count) (values 0 0 (make-hash)))
 
-  (car (sliding-window nums k)))
+  ;; Iterate through nums with a right pointer
+  (for ([right (in-range (length nums))])
+    (define current-num (list-ref nums right))
+    (set! count (update-counts count current-num 1))
 
+    (define window-length (+ 1 (- right left)))
+    (define max-freq-in-window (max-freq count))
+
+    ;; Check if the window needs to be shrunk
+    (when (> (- window-length max-freq-in-window) k)
+      (set! count (update-counts count (list-ref nums left) -1))
+      (set! left (+ left 1)))
+
+    ;; Update the maximum length found
+    (set! max-length (max max-length (- window-length (- window-length max-freq-in-window)))))
+
+  ;; Return the maximum length of an equal subarray that can be achieved
+  max-length)
 
 (require rackunit)
 

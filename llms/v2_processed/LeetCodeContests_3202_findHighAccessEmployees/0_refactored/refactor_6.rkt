@@ -32,36 +32,46 @@
 ;; access_times[i][1].length == 4
 ;; access_times[i][1] is in 24-hour time format.
 ;; access_times[i][1] consists only of '0' to '9'.
-(define (findHighAccessEmployees access_times)
+(define (findHighAccessEmployees access-times)
   ;; Helper function to convert time string to minutes
   (define (time-to-minutes time)
     (+ (* 60 (string->number (substring time 0 2)))
        (string->number (substring time 2 4))))
-
+  
+  ;; Helper function to check if two times are within one hour
+  (define (within-one-hour? start end)
+    (< (- end start) 60))
+  
   ;; Group access times by employee
-  (define access-groups
-    (for/fold ([acc (hash)]) ([entry (in-list access_times)])
+  (define employee-times
+    (for/fold ([acc (hash)])
+              ([entry (in-list access-times)])
       (hash-update acc (first entry)
                    (lambda (lst) (cons (time-to-minutes (second entry)) lst))
                    '())))
-
+  
+  ;; Sort the times for each employee
+  (define sorted-employee-times
+    (for/hash ([emp (in-hash-keys employee-times)])
+      (values emp (sort (hash-ref employee-times emp) <))))
+  
   ;; Check if any employee has high access within any one-hour period
   (define (has-high-access? times)
-    (define sorted-times (sort times <))
-    (for/or ([start (in-list sorted-times)])
-      (>= (length (takef (drop sorted-times (index-of sorted-times start))
-                         (λ (time) (< (- time start) 60))))
-          3)))
-
-  ;; Filter and collect high access employees
-  (for/list ([employee (in-hash-keys access-groups)]
-             #:when (has-high-access? (hash-ref access-groups employee)))
-    employee))
+    (for/or ([start (in-list times)])
+      (>= (length (takef (cdr (dropf times (lambda (time) (< time start))))
+                         (lambda (time) (within-one-hour? start time))))
+          2)))
+  
+  ;; Find and return high access employees
+  (for/list ([emp (in-hash-keys sorted-employee-times)]
+             #:when (has-high-access? (hash-ref sorted-employee-times emp)))
+    emp))
 
 ;; Example usage:
 (findHighAccessEmployees '(("a" "0549") ("b" "0457") ("a" "0532") ("a" "0621") ("b" "0540")))
 (findHighAccessEmployees '(("d" "0002") ("c" "0808") ("c" "0829") ("e" "0215") ("d" "1508") ("d" "1444") ("d" "1410") ("c" "0809")))
 (findHighAccessEmployees '(("cd" "1025") ("ab" "1025") ("cd" "1046") ("cd" "1055") ("ab" "1124") ("ab" "1120")))
+
 
 (require rackunit)
 

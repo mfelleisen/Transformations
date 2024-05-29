@@ -21,25 +21,30 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  ;; Helper function to calculate the square of the diagonal length and the area of a rectangle
-  (define (calculate-diagonal-and-area length width)
-    (values (+ (* length length) (* width width)) (* length width)))
+  ;; Define a helper function to calculate the square of the diagonal length and the area of a rectangle.
+  (define (diagonal-sq length width)
+    (+ (* length length) (* width width)))
 
-  ;; Fold over the dimensions to find the rectangle with the longest diagonal or maximum area
-  (define (update-max-rectangle dim acc)
-    (match-define (list length width) dim)
-    (match-define (list max-diagonal max-area) acc)
-    (define-values (diagonal-squared area) (calculate-diagonal-and-area length width))
-    (if (or (> diagonal-squared max-diagonal)
-            (and (= diagonal-squared max-diagonal) (> area max-area)))
-        (list diagonal-squared area)
-        acc))
+  (define (area length width)
+    (* length width))
 
-  ;; Use foldl to traverse the list and find the desired rectangle
-  (define result (foldl update-max-rectangle (list 0 0) dimensions))
+  ;; Fold over the dimensions to find the maximum diagonal and corresponding area
+  (define-values (max-diagonal max-area)
+    (for/fold ([max-diagonal 0] [max-area 0])
+              ([dim (in-list dimensions)])
+      (match-define (list length width) dim)
+      (define current-diagonal (diagonal-sq length width))
+      (define current-area (area length width))
+      (cond
+        [(> current-diagonal max-diagonal)
+         (values current-diagonal current-area)]
+        [(and (= current-diagonal max-diagonal) (> current-area max-area))
+         (values max-diagonal current-area)]
+        [else
+         (values max-diagonal max-area)])))
 
-  ;; Extract and return the area from the result
-  (second result))
+  ;; Return the area corresponding to the maximum diagonal
+  max-area)
 
 ;; Example usage:
 (define dimensions1 '((9 3) (8 6)))

@@ -21,20 +21,20 @@
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (hasTrailingZeros nums)
-  ;; Check if there are at least two elements with a trailing zero in their bitwise OR
-  (define (bitwise-or-has-trailing-zero? a b)
-    (even? (bitwise-ior a b)))
+  ;; This function checks if it's possible to select two or more elements from `nums`
+  ;; such that the bitwise OR of these elements has at least one trailing zero.
+  (define (has-trailing-zero? n)
+    (even? n)) ; Trailing zero in binary means the number is even
 
-  ;; Use for/fold to iterate through the list and check combinations
-  (define (check-combinations nums)
-    (for/first ([i (in-list nums)]
-                [j (in-list nums)]
+  ;; Generate all combinations of two different elements from `nums`
+  (define (generate-combinations lst)
+    (for*/list ([i (in-list lst)]
+                [j (in-list lst)]
                 #:when (< i j))
-      (when (bitwise-or-has-trailing-zero? i j)
-        #t)))
+      (bitwise-ior i j)))
 
-  ;; Check if any valid combination exists
-  (or (check-combinations nums) #f))
+  ;; Check if any combination has at least one trailing zero
+  (ormap has-trailing-zero? (generate-combinations nums)))
 
 ;; Example usage:
 (hasTrailingZeros '(1 2 3 4 5))  ; Output: #t

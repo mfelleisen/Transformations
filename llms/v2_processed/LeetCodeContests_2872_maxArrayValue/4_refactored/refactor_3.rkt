@@ -23,15 +23,14 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Use a fold from the right to simulate combining elements from the end to the beginning.
-  (define (combine-right lst)
-    (foldr (lambda (x acc)
-             (if (<= x acc)
-                 (+ x acc)
-                 x))
-           0
-           lst))
-  (combine-right nums))
+  (define (combine-nums lst acc)
+    (match lst
+      [(list) acc]
+      [(cons x xs)
+       (if (<= x acc)
+           (combine-nums xs (+ x acc))
+           (combine-nums xs x))]))
+  (combine-nums (reverse nums) 0))
 
 ;; Example usage:
 (maxArrayValue '(2 3 7 9 3))  ; Output: 21

@@ -17,13 +17,14 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
-  ;; Calculate the length of the input list
   (define n (length nums))
-  ;; Use for/sum to iterate over indices from 1 to n and sum the squares of
-  ;; elements at indices that are divisors of n.
+  (define (special-index? i)
+    (zero? (remainder n i)))
+  (define (square x) (* x x))
+
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (remainder n i)))  ; Check if n % i == 0
-    (sqr (list-ref nums (sub1 i)))))         ; Square the element at index i-1 (0-based index)
+            #:when (special-index? i))
+    (square (list-ref nums (sub1 i)))))
 
 (require rackunit)
 

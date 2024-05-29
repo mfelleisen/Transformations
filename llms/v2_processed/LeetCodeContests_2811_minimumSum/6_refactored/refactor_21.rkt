@@ -17,29 +17,25 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Define a helper function to check if a number can be added without violating the k-avoiding property
-  (define (can-add? used-numbers current-number)
-    ;; Check if (k - current-number) is not in the set
-    (not (set-member? used-numbers (- k current-number))))
-  
-  ;; Define a recursive helper function to build the k-avoiding array and calculate its sum
-  (define (helper used-numbers current-number count total-sum)
-    (if (= count n)  ;; Base case: if we have added n numbers, return the total sum
-        total-sum
-        (if (can-add? used-numbers current-number)  ;; Check if we can add the current number
-            ;; Recursive case: add current number and recurse
-            (helper (set-add used-numbers current-number)
-                    (+ current-number 1)
-                    (+ count 1)
-                    (+ total-sum current-number))
-            ;; Recursive case: skip current number and recurse without adding it
-            (helper used-numbers
-                    (+ current-number 1)
-                    count
-                    total-sum))))
-  
-  ;; Start the recursion with an empty set for used numbers, starting number 1, count 0, and total sum 0
-  (helper (set) 1 0 0))
+  ;; Define a helper function to build the k-avoiding array and calculate its sum
+  (define (helper current-number count used-numbers total-sum)
+    (cond
+      [(= count n) total-sum]  ;; Base case: if we have added n numbers, return the total sum
+      [(or (not (set-member? used-numbers (- k current-number)))
+           (= current-number (- k current-number)))
+       ;; Recursive case: add current number and recurse
+       (helper (+ current-number 1)
+               (+ count 1)
+               (set-add used-numbers current-number)
+               (+ total-sum current-number))]
+      [else
+       ;; Recursive case: skip current number and recurse without adding it
+       (helper (+ current-number 1)
+               count
+               used-numbers
+               total-sum)]))
+  ;; Start the recursion with starting number 1, count 0, an empty set for used numbers, and total sum 0
+  (helper 1 0 (set) 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

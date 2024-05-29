@@ -29,27 +29,30 @@
 (define (minimumCost nums k dist)
   (define n (length nums))
   
-  (define (calculate-cost indices)
+  (define (compute-cost indices)
     (apply + (map (lambda (idx) (list-ref nums idx)) indices)))
-
+  
   (define (valid-partition? indices)
     (<= (- (list-ref indices (- k 1)) (list-ref indices 1)) dist))
-
-  (define (dfs start-index depth current-indices)
+  
+  (define (find-min-cost start depth indices current-min)
     (if (= depth k)
-        (if (valid-partition? current-indices)
-            (calculate-cost current-indices)
-            +inf.0)
-        (let ([next-start-limit (- n (- k depth))])
-          (for/fold ([min-cost +inf.0])
-                    ([next-start (in-range (+ start-index 1) (+ next-start-limit 1))])
-            (min min-cost (dfs next-start (+ depth 1) (append current-indices (list next-start))))))))
-
+        (if (valid-partition? indices)
+            (min current-min (compute-cost indices))
+            current-min)
+        (let loop ([next-start (+ start 1)] [min-cost current-min])
+          (if (<= next-start (- n (- k depth)))
+              (loop (+ next-start 1)
+                    (find-min-cost next-start (+ depth 1) (append indices (list next-start)) min-cost))
+              min-cost))))
+  
   (if (= k 1)
       (first nums)
-      (for/fold ([min-cost +inf.0])
-                ([first-end (in-range 1 (+ (- n k) 2))])
-        (min min-cost (dfs first-end 2 (list 0 first-end))))))
+      (let loop ([first-end 1] [min-cost +inf.0])
+        (if (<= first-end (- n k 1))
+            (loop (+ first-end 1)
+                  (find-min-cost first-end 2 (list 0 first-end) min-cost))
+            min-cost))))
 
 ;; Example usage
 (minimumCost '(1 3 2 6 4 2) 3 3)  ; Output: 5

@@ -27,27 +27,28 @@
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
   (define max-bits 31)
-
-  ;; Helper function to count the number of elements with the i-th bit set
-  (define (count-set-bits i)
-    (for/sum ([num nums])
-      (if (bitwise-and num (arithmetic-shift 1 i)) 1 0)))
-
-  ;; Recursive function to construct the K-or result
-  (define (construct-result i acc)
+  
+  ;; Helper function to count how many numbers have the ith bit set
+  (define (count-set-bits i nums)
+    (length (filter (lambda (num) (not (zero? (bitwise-and num (expt 2 i)))))
+                    nums)))
+  
+  ;; Construct the result by checking each bit position
+  (define (construct-result i)
     (if (= i max-bits)
-        acc
-        (let ([bit-count (count-set-bits i)])
-          (construct-result (add1 i)
-                            (if (>= bit-count k)
-                                (bitwise-ior acc (arithmetic-shift 1 i))
-                                acc)))))
-
-  (construct-result 0 0))
+        0  ;; Base case: if we've checked all bits, return 0
+        (let ([bit-count (count-set-bits i nums)])
+          ;; If at least k numbers have the ith bit set, include this bit in the result
+          (bitwise-ior
+           (if (>= bit-count k) (expt 2 i) 0)
+           (construct-result (add1 i))))))
+  
+  ;; Start the recursive construction of the result from the 0th bit
+  (construct-result 0))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)  ;; Output: 9
-(findKOr '(2 12 1 11 4 5) 6)  ;; Output: 0
+(findKOr '(2 12 1 11 4 5) 6)   ;; Output: 0
 (findKOr '(10 8 5 9 11 6 8) 1)  ;; Output: 15
 
 (require rackunit)

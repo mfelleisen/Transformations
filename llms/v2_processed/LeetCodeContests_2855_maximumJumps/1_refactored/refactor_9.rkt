@@ -33,32 +33,36 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  ;; Helper function to check if a jump is valid
-  (define (valid-jump? a b)
-    (<= (abs (- b a)) target))
 
-  ;; Recursive function to find the maximum jumps
-  (define (max-jumps-from index memo)
-    (if (hash-has-key? memo index)
-        (hash-ref memo index)
-        (let loop ([j (add1 index)] [max-jumps -1])
-          (if (>= j (length nums))
-              (begin
-                (hash-set! memo index max-jumps)
-                max-jumps)
-              (if (valid-jump? (list-ref nums index) (list-ref nums j))
-                  (let ([next-jumps (max-jumps-from j memo)])
-                    (loop (add1 j) (max max-jumps (add1 next-jumps))))
-                  (loop (add1 j) max-jumps))))))
+  ;; Helper function to determine if a jump is valid
+  (define (valid-jump? num-i num-j)
+    (<= (abs (- num-j num-i)) target))
+  
+  ;; Recursive helper function with memoization
+  (define (max-jumps-from i memo)
+    (cond
+      ;; If already computed, return the stored value
+      [(hash-has-key? memo i) (hash-ref memo i)]
+      ;; If we're at the last index, no more jumps needed
+      [(= i (sub1 (length nums))) 0]
+      ;; Otherwise, calculate the maximum jumps from the current index
+      [else
+       (define max-jumps
+         (for/fold ([max-jumps -1])
+                   ([j (in-range (add1 i) (length nums))]
+                    #:when (valid-jump? (list-ref nums i) (list-ref nums j)))
+           (define jumps (max-jumps-from j memo))
+           (if (= jumps -1)
+               max-jumps
+               (max max-jumps (add1 jumps)))))
+       (hash-set! memo i max-jumps)
+       max-jumps]))
 
-  ;; Initialize memoization hash table
+  ;; Initialize memoization hash
   (define memo (make-hash))
-
-  ;; Start from the first index
-  (let ([result (max-jumps-from 0 memo)])
-    (if (= result -1)
-        -1
-        result)))
+  
+  ;; Start the recursive calculation from index 0
+  (max-jumps-from 0 memo))
 
 ;; Examples:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

@@ -15,23 +15,26 @@
 ;; It can be proven that there is no k-avoiding array with a sum less than 3.
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
-(define (minimumSum n k) ;; contract  minimumSum/c
+(define (minimumSum n k)
+  ;; Helper function to check if adding a number will violate the k-avoiding property
   (define (violates-k-avoiding? used-numbers current-number)
     (and (set-member? used-numbers (- k current-number))
          (not (= current-number (- k current-number)))))
 
+  ;; Recursive helper function to build the k-avoiding array and calculate the sum
   (define (build-and-sum used-numbers current-number count total-sum)
     (cond
-      [(= count n) total-sum]
+      [(= count n) total-sum]  ;; Base case: if we've added enough numbers, return the sum
       [(or (violates-k-avoiding? used-numbers current-number)
            (set-member? used-numbers current-number))
-       (build-and-sum used-numbers (add1 current-number) count total-sum)]
+       (build-and-sum used-numbers (+ current-number 1) count total-sum)]  ;; Skip current number
       [else
-       (build-and-sum (set-add used-numbers current-number)
-                      (add1 current-number)
-                      (add1 count)
-                      (+ total-sum current-number))]))
+       (build-and-sum (set-add used-numbers current-number)  ;; Add current number to set
+                      (+ current-number 1)
+                      (+ count 1)
+                      (+ total-sum current-number))]))  ;; Add to sum and recurse
 
+  ;; Start the recursive process with an empty set, starting number 1, count 0, and sum 0
   (build-and-sum (set) 1 0 0))
 
 ;; Example usage:

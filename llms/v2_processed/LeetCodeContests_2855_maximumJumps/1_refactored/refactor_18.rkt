@@ -34,17 +34,28 @@
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
   (define n (length nums))
+  
+  ;; Define a helper function to check if a jump is valid
+  (define (valid-jump? i j)
+    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
 
-  (define (jump-from i)
-    (for/fold ([max-jumps -1]) ([j (in-range (add1 i) n)])
-      (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-          (let ([jumps (jump-from j)])
-            (if (= jumps -1)
-                max-jumps
-                (max max-jumps (add1 jumps))))
-          max-jumps)))
+  ;; Define a recursive function that computes the maximum jumps
+  (define (max-jumps-from i memo)
+    (cond
+      [(= i (sub1 n)) 0]  ; Reached the last index
+      [(hash-has-key? memo i) (hash-ref memo i)]  ; Check memoized results
+      [else
+       (define max-jumps
+         (for/fold ([max-jumps -1]) ([j (in-range (add1 i) n)])
+           (if (valid-jump? i j)
+               (max max-jumps (add1 (max-jumps-from j memo)))
+               max-jumps)))
+       (hash-set! memo i max-jumps)
+       max-jumps]))
 
-  (jump-from 0))
+  (define memo (make-hash))
+  (define result (max-jumps-from 0 memo))
+  (if (= result -1) -1 result))
 
 ;; Examples:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

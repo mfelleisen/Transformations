@@ -39,21 +39,15 @@
 ;;  * 0 <= nums[i] <= 109
 ;;  * 0 <= k <= 109
 (define (minIncrementOperations nums k)
-  ;; Define a helper function to calculate the needed increments for a window of size 3
-  (define (needed-increments window)
-    (let ([max-in-window (apply max window)])
-      (max 0 (- k max-in-window))))
-  
-  ;; Define a function to recursively process the list and calculate total increments
-  (define (process-window nums index total-increments)
-    (if (>= index (- (length nums) 2))
-        total-increments
-        (let* ([current-window (take (drop nums index) 3)]
-               [needed (needed-increments current-window)])
-          (process-window nums (+ index 1) (+ total-increments needed)))))
-
-  ;; Start processing from the first index with an initial count of 0 increments
-  (process-window nums 0 0))
+  (define (process-windows nums k)
+    (for/fold ([increments 0] #:result increments)
+              ([index (in-range 0 (- (length nums) 2))])
+      (let* ([current-window (take (drop nums index) 3)]
+             [max-in-window (apply max current-window)]
+             [needed (if (< max-in-window k) (- k max-in-window) 0)])
+        (+ increments needed))))
+    
+  (process-windows nums k))
 
 ;; Example usage:
 (minIncrementOperations '(2 3 0 0 2) 4)  ;; Output: 3

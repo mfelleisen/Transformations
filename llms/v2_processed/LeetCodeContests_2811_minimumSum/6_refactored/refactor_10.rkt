@@ -17,25 +17,20 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  (define (can-add? used-numbers current-number)
-    (not (or (set-member? used-numbers (- k current-number))
-             (= current-number (- k current-number)))))
+  ;; Helper function to generate a k-avoiding sequence
+  (define (generate-sequence n k)
+    (define (next-number x)
+      (if (= x k)
+          (+ x 1)
+          x))
+    (define (generate acc x i)
+      (if (= i n)
+          (reverse acc)
+          (generate (cons x acc) (next-number (+ x 1)) (+ i 1))))
+    (generate '() 1 0))
   
-  (define (helper used-numbers current-number count total-sum)
-    (cond
-      [(= count n) total-sum]
-      [(can-add? used-numbers current-number)
-       (helper (set-add used-numbers current-number)
-               (add1 current-number)
-               (add1 count)
-               (+ total-sum current-number))]
-      [else
-       (helper used-numbers
-               (add1 current-number)
-               count
-               total-sum)]))
-  
-  (helper (set) 1 0 0))
+  ;; Generate the sequence and calculate its sum
+  (apply + (generate-sequence n k)))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

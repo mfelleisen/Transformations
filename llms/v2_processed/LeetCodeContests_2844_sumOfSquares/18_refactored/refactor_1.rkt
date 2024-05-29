@@ -18,16 +18,10 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  
-  (define (is-special? idx)
-    (zero? (remainder n (add1 idx))))
-  
-  (define (square x) (* x x))
-  
-  (for/sum ([elem nums]
-            [idx (in-naturals)]
-            #:when (is-special? idx))
-    (square elem)))
+  (define (is-special-index? i) (zero? (remainder n (add1 i))))
+  (for/sum ([i (in-indexed nums)] #:when (is-special-index? (car i)))
+    (let ([value (cdr i)])
+      (* value value))))
 
 (require rackunit)
 

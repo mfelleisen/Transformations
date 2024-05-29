@@ -15,19 +15,20 @@
 ;;  * nums[i].length == 2
 ;;  * 1 <= starti <= endi <= 100
 (define (numberOfPoints nums)
-  ;; Use `for/fold` to collect unique points covered by cars.
+  ;; Use a set to collect all unique points covered by the cars
   (define covered-points
-    (for/fold ([points (set)]) ([range nums])
-      (for/fold ([pts points]) ([point (in-range (first range) (add1 (second range)))])
-        (set-add pts point))))
+    (for*/set ([range nums]       ; For each pair in the input list `nums`
+               [point (in-range (first range) (add1 (second range)))]) ; Generate range from start to end inclusive
+      point)) ; Collect each point into a set
   
-  ;; Return the number of unique points
+  ;; Return the number of unique points by getting the size of the set
   (set-count covered-points))
 
 ;; The function `numberOfPoints` takes a list of pairs, where each pair represents the start and end points
-;; of a car on a number line. It generates all points covered by each car using nested `for` loops with `for/fold`,
+;; of a car on a number line. It generates all points covered by each car using nested `for` loops,
 ;; collects these points into a set (which automatically handles duplicate points), and then returns
 ;; the count of this set, representing the number of unique points covered.
+
 
 (require rackunit)
 

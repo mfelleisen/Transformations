@@ -27,24 +27,25 @@
 ;; Constraints:
 ;; 1 <= k <= 1015
 ;; 1 <= x <= 8
-(define (price num x)
-  ;; Calculate the price of a number num given x
-  (define bin-rep (number->string num 2))
-  (for/sum ([i (in-range (string-length bin-rep))])
-    (if (and (= (modulo (+ i 1) x) 0)
-             (char=? (string-ref bin-rep (- (string-length bin-rep) i 1)) #\1))
-        1
-        0)))
-
 (define (findMaximumNumber k x)
-  ;; Helper function to accumulate the current sum and check the condition
-  (define (loop num current-sum)
-    (let ([new-sum (+ current-sum (price num x))])
+  ;; Helper function to calculate the price of a number
+  (define (price-of num)
+    (let loop ([num num] [index 1] [price 0])
+      (cond
+        [(zero? num) price]
+        [(and (= (modulo index x) 0) (= (bitwise-and num 1) 1))
+         (loop (arithmetic-shift num -1) (add1 index) (add1 price))]
+        [else (loop (arithmetic-shift num -1) (add1 index) price)])))
+  
+  ;; Iterate to find the maximum number
+  (define (find-max num current-sum)
+    (let ([price (price-of num)]
+          [new-sum (+ current-sum (price-of num))])
       (if (> new-sum k)
           (sub1 num)
-          (loop (add1 num) new-sum))))
-  ;; Start the loop with num = 1 and current-sum = 0
-  (loop 1 0))
+          (find-max (add1 num) new-sum))))
+  
+  (find-max 1 0))
 
 ;; Example use cases
 (findMaximumNumber 9 1)  ; Output: 6

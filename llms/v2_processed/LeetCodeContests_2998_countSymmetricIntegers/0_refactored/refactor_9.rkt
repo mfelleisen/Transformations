@@ -14,24 +14,24 @@
 ;; Constraints:
 ;;  * 1 <= low <= high <= 104
 (define (countSymmetricIntegers low high)
-  ;; Convert number to list of digits
-  (define (number->digits num)
-    (map (lambda (char) (- (char->integer char) (char->integer #\0)))
-         (string->list (number->string num))))
-  
   ;; Helper function to check if a number is symmetric
   (define (is-symmetric? num)
-    (let* ((digits (number->digits num))
-           (n (length digits)))
-      (and (even? n)
-           (let* ((mid (/ n 2))
-                  (first-half (take digits mid))
-                  (second-half (drop digits mid)))
-             (= (apply + first-half) (apply + second-half))))))
-  
+    (define s (number->string num))  ; Convert number to string
+    (define n (string-length s))     ; Get the length of the string
+    (and (even? n)                   ; Check if the number of digits is even
+         (let* ((mid (/ n 2))        ; Calculate the midpoint
+                (first-half (substring s 0 mid))      ; Get the first half of the digits
+                (second-half (substring s mid n)))    ; Get the second half of the digits
+           (= (sum-digits first-half) (sum-digits second-half)))))  ; Check if sums are equal
+
+  ;; Helper function to sum the digits of a string representing a number
+  (define (sum-digits str)
+    (apply + (map (λ (char) (- (char->integer char) (char->integer #\0)))  ; Sum the integer values of chars
+                  (string->list str))))  ; Convert string to list of characters
+
   ;; Main computation: count symmetric numbers in the given range
-  (for/sum ([num (in-range low (add1 high))])
-    (if (is-symmetric? num) 1 0)))
+  (for/sum ([num (in-range low (add1 high))] #:when (is-symmetric? num))
+    1))
 
 ;; Example usage:
 (countSymmetricIntegers 1 100)     ; Output: 9

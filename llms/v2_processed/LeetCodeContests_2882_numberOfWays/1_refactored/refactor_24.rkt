@@ -20,26 +20,30 @@
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
-  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))  ; Calculate the maximum base
-
-  ;; Recursive helper function with memoization
-  (define (ways i j)
-    (define dp (make-hash))  ; Memoization table
-    (define (helper i j)
-      (cond
-        [(= j 0) 1]  ; Base case: there's one way to sum up to zero
-        [(or (< j 0) (> i max-base)) 0]  ; Invalid case
-        [else (hash-ref dp (cons i j)
-                        (lambda ()
-                          (define current-power (expt i x))
-                          (define result (modulo (+ (helper (+ i 1) (- j current-power))
-                                                    (helper (+ i 1) j))
-                                                 MOD))
-                          (hash-set! dp (cons i j) result)
-                          result))]))
-    (helper i j))
-
-  (ways 1 n))  ; Start the recursion with base 1 and the target sum n
+  
+  ;; Dynamic programming function with memoization
+  (define memo (make-hash))
+  
+  (define (ways n k)
+    (cond
+      [(= n 0) 1]
+      [(or (< n 0) (< k 1)) 0]
+      [else
+       (hash-ref memo (list n k)
+                 (lambda ()
+                   (define k-power (expt k x))
+                   (define result
+                     (modulo (+ (ways (- n k-power) (- k 1))
+                                (ways n (- k 1)))
+                             MOD))
+                   (hash-set! memo (list n k) result)
+                   result))]))
+  
+  ;; Calculate maximum base
+  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
+  
+  ;; Start the recursive computation
+  (ways n max-base))
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

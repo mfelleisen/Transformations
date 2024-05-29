@@ -28,23 +28,19 @@
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
   (define n (length nums))
-
-  ;; Helper function to calculate minimum absolute difference given a list of pairs.
-  (define (find-min-diff pairs)
-    (for/fold ([min-diff +inf.0]) ([pair pairs])
-      (let* ([diff (abs (- (first pair) (second pair)))])
-        (min min-diff diff))))
-
-  ;; Create pairs of elements with indices at least x apart.
-  (define pairs
-    (for*/list ([i (in-range 0 (- n x))]
-                [j (in-range (+ i x) n)])
-      (list (list-ref nums i) (list-ref nums j))))
-
-  ;; Find and return the minimum absolute difference.
-  (if (empty? pairs)
-      0
-      (find-min-diff pairs)))
+  
+  (define (min-diff i min-diff-so-far)
+    (if (>= i (- n x))
+        min-diff-so-far
+        (let loop ((j (+ i x)) (current-min min-diff-so-far))
+          (if (>= j n)
+              (min-diff (+ i 1) current-min)
+              (let ((diff (abs (- (list-ref nums i) (list-ref nums j)))))
+                (if (zero? diff)
+                    0
+                    (loop (+ j 1) (min current-min diff))))))))
+  
+  (min-diff 0 +inf.0))
 
 ;; Example usage:
 (minAbsoluteDifference '(4 3 2 4) 2)  ; Output: 0

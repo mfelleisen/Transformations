@@ -30,31 +30,31 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
+  ;; Helper function to determine the maximum length of non-decreasing subarray.
+  (define (update-max-lengths prev1 prev2 cur1 cur2 dp1 dp2)
+    (values
+     (max (if (<= prev1 cur1) (+ dp1 1) 1)
+          (if (<= prev2 cur1) (+ dp2 1) 1))
+     (max (if (<= prev1 cur2) (+ dp1 1) 1)
+          (if (<= prev2 cur2) (+ dp2 1) 1))))
+  
   (define n (length nums1))
-  
-  ;; Helper function to update the dp values
-  (define (update-dp dp1 dp2 i)
-    (cond
-      [(>= (list-ref nums1 i) (list-ref nums1 (sub1 i)))
-       (max (vector-ref dp1 i) (+ (vector-ref dp1 (sub1 i)) 1))]
-      [(>= (list-ref nums1 i) (list-ref nums2 (sub1 i)))
-       (max (vector-ref dp1 i) (+ (vector-ref dp2 (sub1 i)) 1))]
-      [(>= (list-ref nums2 i) (list-ref nums1 (sub1 i)))
-       (max (vector-ref dp2 i) (+ (vector-ref dp1 (sub1 i)) 1))]
-      [(>= (list-ref nums2 i) (list-ref nums2 (sub1 i)))
-       (max (vector-ref dp2 i) (+ (vector-ref dp2 (sub1 i)) 1))]
-      [else (vector-ref dp1 i)]))
 
-  ;; Initialize dp arrays to store maximum lengths
-  (define-values (dp1 dp2) (values (make-vector n 1) (make-vector n 1)))
-  
-  ;; Loop through each index from 1 to n-1 and update dp values
-  (for ([i (in-range 1 n)])
-    (vector-set! dp1 i (update-dp dp1 dp2 i))
-    (vector-set! dp2 i (update-dp dp2 dp1 i)))
+  ;; Traverse through the arrays and calculate the max length of non-decreasing subarray.
+  (for/fold ([max-len 1] [dp1 1] [dp2 1] #:result max-len)
+            ([i (in-range 1 n)])
+    (define cur1 (list-ref nums1 i))
+    (define cur2 (list-ref nums2 i))
+    (define prev1 (list-ref nums1 (sub1 i)))
+    (define prev2 (list-ref nums2 (sub1 i)))
 
-  ;; Return the maximum length of the non-decreasing subarray
-  (apply max (append (vector->list dp1) (vector->list dp2))))
+    (define-values (new-dp1 new-dp2) (update-max-lengths prev1 prev2 cur1 cur2 dp1 dp2))
+    (values (max max-len new-dp1 new-dp2) new-dp1 new-dp2)))
+
+;; Example usage:
+(maxNonDecreasingLength '(1 3 2 1) '(2 2 3 4)) ;; Output: 4
+(maxNonDecreasingLength '(1 1) '(2 2)) ;; Output: 2
+(maxNonDecreasingLength '(2 3 1) '(1 2 1)) ;; Output: 2
 
 (require rackunit)
 

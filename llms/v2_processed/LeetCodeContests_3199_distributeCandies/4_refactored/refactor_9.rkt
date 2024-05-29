@@ -14,16 +14,16 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Use a higher-order function to iterate over possible candy distributions for two children
+  ;; Use a nested loop to iterate over possible candy distributions for two children
   ;; and compute the candies for the third child directly.
   (define (valid-candy-distributions)
-    (for*/sum ([a (in-range (add1 (min n limit)))]  ; Iterates from 0 to min(n, limit)
-               [b (in-range (add1 (min (- n a) limit)))]  ; Iterates from 0 to min(n-a, limit)
-               #:when (<= (- n a b) limit))  ; Ensure the third child's candies do not exceed limit
-      1))  ; Count each valid distribution
-  
+    (for*/list ([a (in-range (add1 (min n limit)))]  ; Iterates from 0 to min(n, limit)
+                [b (in-range (add1 (min (- n a) limit)))]  ; Iterates from 0 to min(n-a, limit)
+                #:when (<= (- n a b) limit))  ; Ensure the third child's candies do not exceed limit
+      (list a b (- n a b))))  ; Return the distribution as a list
+
   ;; Count the number of valid distributions
-  (valid-candy-distributions))
+  (length (valid-candy-distributions)))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

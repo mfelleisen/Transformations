@@ -24,14 +24,14 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= num[i] <= 200
 (define (isGood nums)
-  (define n (apply max nums))  ; Find the maximum element in nums, which is 'n'
-  (define counts (for/fold ([dict (hash)]) ([num (in-list nums)])
-                   (hash-update dict num (lambda (v) (add1 (or v 0))) 0)))  ; Create a hash table of counts for each number
+  (define n (apply max nums))
+  (define counts (for/fold ([dict (make-immutable-hash)]) ([num (in-list nums)])
+                   (hash-update dict num (curry + 1) 1)))
 
-  ;; Check if all integers from 1 to n-1 are present exactly once, and n is present exactly twice
-  (and (for/and ([i (in-range 1 n)]) (= (hash-ref counts i 0) 1))  ; All numbers from 1 to n-1 should appear once
-       (= (hash-ref counts n 0) 2)  ; n should appear exactly twice
-       (= (add1 n) (length nums))))  ; The length of nums must be n + 1
+  (and (= (hash-ref counts n 0) 2)
+       (for/and ([i (in-range 1 n)])
+         (= (hash-ref counts i 0) 1))
+       (= (add1 n) (length nums))))
 
 ;; Example usage:
 (displayln (isGood '(2 1 3)))  ; Output: #f

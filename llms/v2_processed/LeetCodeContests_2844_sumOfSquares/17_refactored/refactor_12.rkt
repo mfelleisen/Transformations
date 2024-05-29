@@ -20,9 +20,12 @@
   (define n (length nums))
   (for/sum ([i (in-range 1 (add1 n))]
             #:when (zero? (remainder n i)))
-    (sqr (list-ref nums (sub1 i)))))
+    (let ([num (list-ref nums (sub1 i))])
+      (* num num))))
 
-;; The refactored code uses idiomatic constructs such as `for/sum` and `#:when` to filter and sum the squares of special elements directly.
+;; Example usage:
+(sumOfSquares '(1 2 3 4)) ; Output: 21
+(sumOfSquares '(2 7 1 19 18 3)) ; Output: 63
 
 (require rackunit)
 

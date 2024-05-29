@@ -27,29 +27,23 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  (define len (length nums))
-
-  ;; Define a helper function to calculate the minimum absolute difference
-  ;; with at least x indices apart using a sliding window approach.
-  (define (sliding-window min-diff i)
-    (if (>= i len)
-        min-diff
-        (let loop ((j (+ i x)) (current-min-diff min-diff))
-          (if (>= j len)
-              (sliding-window current-min-diff (+ i 1))
-              (let* ((diff (abs (- (list-ref nums i) (list-ref nums j))))
-                     (new-min (min current-min-diff diff)))
-                (if (zero? new-min)
-                    0
-                    (loop (+ j 1) new-min)))))))
-
-  ;; Start the sliding window approach
-  (sliding-window +inf.0 0))
-
-;; Example usage
-(minAbsoluteDifference '(4 3 2 4) 2)  ; Output: 0
-(minAbsoluteDifference '(5 3 2 10 15) 1)  ; Output: 1
-(minAbsoluteDifference '(1 2 3 4) 3)  ; Output: 3
+  ;; Define a function to calculate the minimum absolute difference
+  ;; with at least x indices apart.
+  (define (min-abs-diff nums x)
+    (define (calc-diff i j)
+      (abs (- (list-ref nums i) (list-ref nums j))))
+    
+    (define (helper i min-diff)
+      (if (>= i (- (length nums) x))
+          min-diff
+          (let ((new-min-diff
+                 (for/fold ([current-min-diff min-diff])
+                           ([j (in-range (+ i x) (length nums))])
+                   (min current-min-diff (calc-diff i j)))))
+            (helper (+ i 1) new-min-diff))))
+    (helper 0 +inf.0))
+  
+  (min-abs-diff nums x))
 
 (require rackunit)
 

@@ -31,11 +31,11 @@
   ;; Count the number of 1s in the binary representation of xor-with-k
   ;; Each 1 represents a bit that needs to be flipped
   (define (count-ones x)
-    (define (helper x acc)
+    (define (count-ones-acc x acc)
       (if (= x 0)
           acc
-          (helper (arithmetic-shift x -1) (+ acc (bitwise-and x 1)))))
-    (helper x 0))
+          (count-ones-acc (arithmetic-shift x -1) (+ acc (bitwise-and x 1)))))
+    (count-ones-acc x 0))
   
   ;; Return the count of 1s which is the minimum number of operations required
   (count-ones xor-with-k))

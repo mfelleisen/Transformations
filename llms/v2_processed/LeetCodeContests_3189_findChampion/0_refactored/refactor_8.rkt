@@ -28,29 +28,21 @@
 ;;  * The input is generated such that if team a is stronger than team b, team b is not stronger than team a.
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion n edges)
-  ;; Function to determine the champion of a tournament represented as a DAG.
-  ;; n: number of teams
-  ;; edges: list of directed edges where each edge [u, v] indicates team u is stronger than team v
-
-  ;; Create a list to keep track of the number of incoming edges for each team
-  (define in-degrees (make-vector n 0))
+  (define in-degrees
+    (for/fold ([deg (make-vector n 0)])
+              ([edge edges])
+      (define to (second edge))
+      (vector-set! deg to (add1 (vector-ref deg to)))
+      deg))
   
-  ;; Populate the in-degrees vector by iterating over each edge
-  (for-each (λ (edge)
-              (match-define (list _ v) edge)
-              (vector-set! in-degrees v (+ 1 (vector-ref in-degrees v))))
-            edges)
-  
-  ;; Find the teams with zero in-degrees
   (define zero-in-degree-teams
-    (for/list ([team (in-range n)]
-               #:when (= (vector-ref in-degrees team) 0))
-      team))
+    (for/list ([i (in-range n)]
+               #:when (= (vector-ref in-degrees i) 0))
+      i))
   
-  ;; Determine the result based on the number of teams with zero in-degrees
   (match zero-in-degree-teams
-    [(list champion) champion] ;; If exactly one, return it
-    [_ -1])) ;; Otherwise, return -1 indicating no unique champion or no champion at all
+    [(list unique-champion) unique-champion]
+    [_ -1]))
 
 ;; Example usage:
 (findChampion 3 '((0 1) (1 2)))  ;; Output: 0

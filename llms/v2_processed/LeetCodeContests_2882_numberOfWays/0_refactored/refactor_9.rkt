@@ -20,23 +20,29 @@
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))
-
-  ;; Helper function to compute the number of ways recursively with memoization
-  (define memo (make-hash))
   
-  (define (ways n base)
-    (cond
-      [(= n 0) 1]
-      [(or (< n 0) (> (expt base x) n)) 0]
-      [else
-       (hash-ref! memo (list n base)
-                  (lambda ()
-                    (modulo (+ (ways n (+ base 1))
-                               (ways (- n (expt base x)) (+ base 1)))
-                            MOD)))]))
-
-  ;; Start the computation from the largest possible base
-  (ways n 1))
+  ;; Compute the maximum base such that base^x <= n
+  (define max-base (inexact->exact (floor (expt n (/ 1.0 x)))))
+  
+  ;; Initialize dp vector with 0s and set dp[0] to 1
+  (define dp (make-vector (add1 n) 0))
+  (define (update-dp! idx val)
+    (vector-set! dp idx (modulo (+ (vector-ref dp idx) val) MOD)))
+  
+  (define (iterate-bases base)
+    (define current-power (expt base x))
+    (for ([i (in-range n (sub1 current-power) -1)])
+      (update-dp! i (vector-ref dp (- i current-power)))))
+  
+  ;; Set dp[0] to 1
+  (vector-set! dp 0 1)
+  
+  ;; Iterate over each possible base and update dp vector
+  (for ([base (in-range 1 (add1 max-base))])
+    (iterate-bases base))
+  
+  ;; Return the number of ways to express n
+  (vector-ref dp n))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

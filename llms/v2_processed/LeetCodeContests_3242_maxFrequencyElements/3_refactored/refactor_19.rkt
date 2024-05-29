@@ -17,20 +17,21 @@
 ;; 1 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (maxFrequencyElements nums)
-  ;; Calculate frequencies using a hash map
+  ;; First, compute the frequency of each element using a hash table
   (define freqs
     (for/fold ([freqs (hash)])
-              ([num (in-list nums)])
+              ([num nums])
       (hash-update freqs num add1 0)))
-  
-  ;; Find the maximum frequency
-  (define max-freq
-    (apply max (hash-values freqs)))
 
+  ;; Find the maximum frequency by taking the maximum of the hash values
+  (define max-freq (apply max (hash-values freqs)))
+  
   ;; Calculate the total number of elements that have the maximum frequency
-  (for/sum ([pair (in-hash freqs)]
-            #:when (= (cdr pair) max-freq))
-    (cdr pair)))
+  (for/fold ([count 0] #:result count)
+            ([(key val) (in-hash freqs)])
+    (if (= val max-freq)
+        (+ count val)
+        count)))
 
 ;; Example usage:
 ;; (maxFrequencyElements '(1 2 2 3 1 4)) ; Output: 4

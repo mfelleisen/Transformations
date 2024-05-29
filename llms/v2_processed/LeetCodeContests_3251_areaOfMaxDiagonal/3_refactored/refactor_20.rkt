@@ -19,31 +19,26 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  ;; Use foldl to find the rectangle with the longest diagonal and the maximum area
-  (define (max-diagonal-and-area dim1 dim2)
-    (define (diagonal-squared dim)
-      (+ (* (first dim) (first dim)) (* (second dim) (second dim))))
-    (define (area dim)
-      (* (first dim) (second dim)))
+  (define (diagonal-squared length width)
+    (+ (* length length) (* width width)))
 
-    (define diag1 (diagonal-squared dim1))
-    (define diag2 (diagonal-squared dim2))
-    (define area1 (area dim1))
-    (define area2 (area dim2))
+  (define (max-diagonal-area best current)
+    (match-define (list max-diagonal max-area) best)
+    (match-define (list length width) current)
+    (define current-diagonal (diagonal-squared length width))
+    (define current-area (* length width))
+    (if (or (> current-diagonal max-diagonal)
+            (and (= current-diagonal max-diagonal) (> current-area max-area)))
+        (list current-diagonal current-area)
+        best))
 
-    (cond
-      [(> diag1 diag2) dim1]
-      [(> diag2 diag1) dim2]
-      [else (if (> area1 area2) dim1 dim2)]))
-
-  (define max-dimension
-    (foldl max-diagonal-and-area (first dimensions) (rest dimensions)))
-
-  (* (first max-dimension) (second max-dimension)))
+  (define initial-best (list 0 0))
+  (define final-best (foldl max-diagonal-area initial-best dimensions))
+  (second final-best))
 
 ;; Example usage:
-(areaOfMaxDiagonal '((9 3) (8 6)))  ; Output: 48
-(areaOfMaxDiagonal '((3 4) (4 3)))  ; Output: 12
+(areaOfMaxDiagonal '((9 3) (8 6))) ;; Output: 48
+(areaOfMaxDiagonal '((3 4) (4 3))) ;; Output: 12
 
 (require rackunit)
 

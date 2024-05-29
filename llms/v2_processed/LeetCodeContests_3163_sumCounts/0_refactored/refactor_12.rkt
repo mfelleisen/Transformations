@@ -29,15 +29,19 @@
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
   ;; Calculate the sum of the squares of distinct counts for all subarrays
-  (for/fold ([total-sum 0]) ([i (in-range (length nums))])
-    (let loop ([j i] [seen (set)] [acc 0])
-      (if (>= j (length nums))
-          (+ total-sum acc)
-          (let* ([current-num (list-ref nums j)]
-                 [new-seen (set-add seen current-num)]
-                 [distinct-count (set-count new-seen)])
-            (loop (add1 j) new-seen (+ acc (* distinct-count distinct-count))))))))
+  (define (square x) (* x x))
+  (define n (length nums))
+  (for/fold ([total-sum 0]) ([i (in-range n)])
+    (define-values (seen partial-sum)
+      (for/fold ([seen (set)] [partial-sum 0]) ([j (in-range i n)])
+        (define current (list-ref nums j))
+        (define new-seen (set-add seen current))
+        (values new-seen (+ partial-sum (square (set-count new-seen))))))
+    (+ total-sum partial-sum)))
 
+;; Test cases
+(sumCounts '(1 2 1))  ;; Output: 15
+(sumCounts '(1 1))    ;; Output: 3
 
 (require rackunit)
 

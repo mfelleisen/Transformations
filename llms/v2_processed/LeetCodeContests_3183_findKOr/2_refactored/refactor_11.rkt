@@ -26,22 +26,30 @@
 ;;  * 0 <= nums[i] < 231
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
+  ;; Helper function to check if a specific bit is set in a number
   (define (bit-set? num bit)
     (not (zero? (bitwise-and num bit))))
 
-  (define (count-bit-set bit)
-    (length (filter (lambda (num) (bit-set? num bit)) nums)))
+  ;; Helper function to count how many numbers have a specific bit set
+  (define (count-bit-set bit nums)
+    (count (lambda (num) (bit-set? num bit)) nums))
 
-  (define (update-result bit result)
-    (if (>= (count-bit-set bit) k)
-        (bitwise-ior result bit)
-        result))
+  ;; Compute the K-or by examining each bit position up to 31
+  (define (compute-K-or bits nums k)
+    (for/fold ([result 0]) ([bit bits])
+      (if (>= (count-bit-set bit nums) k)
+          (bitwise-ior result bit)
+          result)))
 
-  (foldl update-result 0 (map (lambda (i) (expt 2 i)) (range 31))))
+  ;; Generate the list of bit values (2^0, 2^1, ..., 2^30)
+  (define bits (map (λ (i) (expt 2 i)) (range 0 31)))
+
+  ;; Compute and return the K-or
+  (compute-K-or bits nums k))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)  ; Output: 9
-(findKOr '(2 12 1 11 4 5) 6)  ; Output: 0
+(findKOr '(2 12 1 11 4 5) 6)   ; Output: 0
 (findKOr '(10 8 5 9 11 6 8) 1)  ; Output: 15
 
 (require rackunit)

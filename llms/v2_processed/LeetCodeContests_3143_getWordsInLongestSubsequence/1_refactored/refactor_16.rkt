@@ -32,21 +32,19 @@
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
 (define (getWordsInLongestSubsequence n words groups)
-  (define (helper curr-words curr-groups)
-    (let loop ([prev-group (first curr-groups)]
-               [remaining-words (rest curr-words)]
-               [remaining-groups (rest curr-groups)]
-               [acc (list (first curr-words))])
-      (match remaining-groups
-        ['() (reverse acc)]
-        [(cons next-group next-groups)
-         (if (not (= prev-group next-group))
-             (loop next-group (rest remaining-words) next-groups (cons (first remaining-words) acc))
-             (loop prev-group (rest remaining-words) next-groups acc))])))
-
-  (if (zero? n)
+  (define (helper idx last-group acc)
+    (cond
+      [(= idx n) (reverse acc)]
+      [else
+       (define cur-group (list-ref groups idx))
+       (define cur-word (list-ref words idx))
+       (if (not (= cur-group last-group))
+           (helper (add1 idx) cur-group (cons cur-word acc))
+           (helper (add1 idx) last-group acc))]))
+  
+  (if (= n 0)
       '()
-      (helper words groups)))
+      (helper 1 (first groups) (list (first words)))))
 
 ;; Example usage:
 (define n 4)

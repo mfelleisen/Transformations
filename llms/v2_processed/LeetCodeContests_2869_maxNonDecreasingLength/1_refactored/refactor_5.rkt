@@ -28,26 +28,29 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  ;; Helper function to calculate the maximum non-decreasing subarray lengths
-  (define (update-lengths prev1 prev2 cur1 cur2)
-    (define len1 (if (>= cur1 prev1) (add1 (car prev1)) 1))
-    (define len2 (if (>= cur1 prev2) (max len1 (add1 (car prev2))) len1))
-    (define len3 (if (>= cur2 prev1) (max len2 (add1 (car prev1))) len2))
-    (define len4 (if (>= cur2 prev2) (max len3 (add1 (car prev2))) len3))
-    (values len4 len4))
+  ;; Recursively find the maximum non-decreasing subarray length
+  (define (max-length idx prev1 prev2 len1 len2)
+    (if (= idx (length nums1))
+        (max len1 len2)
+        (let* ([num1 (list-ref nums1 idx)]
+               [num2 (list-ref nums2 idx)]
+               [new-len1 (if (>= num1 prev1) (+ len1 1) 1)]
+               [new-len2 (if (>= num2 prev2) (+ len2 1) 1)]
+               [len1-updated (max-length (+ idx 1) num1 prev2 new-len1 len2)]
+               [len2-updated (max-length (+ idx 1) prev1 num2 len1 new-len2)]
+               [len1-alt (if (>= num1 prev2) (+ len2 1) 1)]
+               [len2-alt (if (>= num2 prev1) (+ len1 1) 1)]
+               [len1-updated-alt (max-length (+ idx 1) num1 prev1 len1-alt len2)]
+               [len2-updated-alt (max-length (+ idx 1) prev1 num2 len1 len2-alt)])
+          (max len1-updated len2-updated len1-updated-alt len2-updated-alt))))
 
-  ;; Fold over the list to compute the lengths
-  (define (calculate-lengths nums1 nums2)
-    (for/fold ([prev1 1] [prev2 1] [max-len 1])
-              ([i (in-range 1 (length nums1))])
-      (define cur1 (list-ref nums1 i))
-      (define cur2 (list-ref nums2 i))
-      (define-values (new1 new2) (update-lengths prev1 prev2 cur1 cur2))
-      (values new1 new2 (max max-len new1 new2))))
+  ;; Start with initial values
+  (max-length 1 (list-ref nums1 0) (list-ref nums2 0) 1 1))
 
-  ;; Calculate the maximum length
-  (define-values (final1 final2 max-len) (calculate-lengths nums1 nums2))
-  max-len)
+;; Examples
+(maxNonDecreasingLength '(2 3 1) '(1 2 1)) ; => 2
+(maxNonDecreasingLength '(1 3 2 1) '(2 2 3 4)) ; => 4
+(maxNonDecreasingLength '(1 1) '(2 2)) ; => 2
 
 (require rackunit)
 

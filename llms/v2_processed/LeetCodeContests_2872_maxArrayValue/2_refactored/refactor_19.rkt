@@ -23,15 +23,17 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Right-to-left fold to combine elements according to the described operations
   (define (fold-nums lst)
     (foldr (lambda (current combined)
-             (if (and (pair? combined) (<= current (car combined)))
-                 (cons (+ current (car combined)) (cdr combined))
-                 (cons current combined)))
+             (match combined
+               [(cons first rest)
+                (if (<= current first)
+                    (cons (+ current first) rest)
+                    (cons current combined))]
+               [empty
+                (cons current empty)]))
            '()
            lst))
-  ;; The largest value in the folded list is the result.
   (apply max (fold-nums nums)))
 
 ;; Example usage:

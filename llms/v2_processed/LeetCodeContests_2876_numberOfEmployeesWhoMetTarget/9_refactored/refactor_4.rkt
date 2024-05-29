@@ -28,7 +28,7 @@
 ;;  * 1 <= n == hours.length <= 50
 ;;  * 0 <= hours[i], target <= 105
 (define (numberOfEmployeesWhoMetTarget hours target)
-  ;; Use 'for/sum' to count the number of hours that meet or exceed the target.
+  ;; Use 'for/sum' to count the number of employees who met or exceeded the target hours.
   (for/sum ([hour (in-list hours)])
     (if (>= hour target) 1 0)))
 

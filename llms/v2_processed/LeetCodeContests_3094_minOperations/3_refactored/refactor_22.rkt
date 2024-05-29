@@ -22,7 +22,11 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (minOperations nums)
-  ;; Function to calculate the minimum operations for a given frequency
+  ;; Use a frequency map to count occurrences of each number in the list
+  (define freq (for/fold ([h (hash)]) ([num (in-list nums)])
+                 (hash-update h num add1 0)))
+
+  ;; Define a helper function to calculate the minimum operations for a given frequency
   (define (calc-ops freq)
     (match (remainder freq 3)
       [0 (/ freq 3)]  ; If divisible by 3, use triplet removals
@@ -32,10 +36,6 @@
       [2 (if (>= freq 2)  ; If remainder is 2 and at least 2, use one pair removal
              (+ (/ (- freq 2) 3) 1)
              -1)]))  ; Otherwise, it's impossible
-
-  ;; Count occurrences of each number in the list
-  (define freq (for/fold ([h (hash)]) ([num nums])
-                 (hash-update h num add1 0)))
 
   ;; Calculate total operations and handle cases where it's impossible to empty the array
   (define-values (total-ops impossible)

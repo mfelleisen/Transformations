@@ -18,12 +18,21 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  (define special-indices (filter (lambda (i) (zero? (remainder n i))) (range 1 (add1 n))))
-  (for/sum ([i (in-list special-indices)])
-    (sqr (list-ref nums (sub1 i)))))
+  
+  (define (special? i)
+    (zero? (remainder n i)))
+  
+  (define (square x)
+    (* x x))
 
-;; The `sumOfSquares` function now uses higher-order functions such as `filter` to find the special indices, and `for/sum` to sum the squares of the special elements.
-;; The `range` function generates the list of indices from 1 to n (inclusive).
+  (for/sum ([i (in-range 1 (add1 n))])
+    (if (special? i)
+        (square (list-ref nums (sub1 i)))
+        0)))
+
+;; This refactored version separates concerns by defining helper functions for checking if an index is special
+;; and for squaring a number. The main logic remains in the `for/sum` loop, which iterates over the range and
+;; uses these helper functions. This makes the code more readable and maintainable.
 
 (require rackunit)
 

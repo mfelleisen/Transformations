@@ -23,7 +23,12 @@
 ;;  * 1 <= n == hours.length <= 50
 ;;  * 0 <= hours[i], target <= 105
 (define (numberOfEmployeesWhoMetTarget hours target)
-  (length (filter (curry >= target) hours)))
+  ;; Helper function to check if an employee met the target hours
+  (define (meets-target? hour)
+    (>= hour target))
+
+  ;; Filter the hours that meet the target and count them
+  (length (filter meets-target? hours)))
 
 ;; Example use cases
 (displayln (numberOfEmployeesWhoMetTarget '(0 1 2 3 4) 2))  ; Output: 3

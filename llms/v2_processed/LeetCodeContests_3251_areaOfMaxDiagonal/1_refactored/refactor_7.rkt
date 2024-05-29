@@ -21,27 +21,25 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  ;; Calculate the square of the diagonal length and the area of a rectangle.
-  (define (calculate-diagonal-squared length width)
+  ;; Define a helper function to calculate the square of the diagonal length and the area of a rectangle.
+  (define (diagonal-squared length width)
     (+ (* length length) (* width width)))
 
-  (define (calculate-area length width)
-    (* length width))
-
   ;; Use foldl to traverse the list once and determine the rectangle with the longest diagonal or maximum area.
-  (define (update-best-rectangle dim acc)
+  (define (update-acc dim acc)
     (match-define (list length width) dim)
     (match-define (list max-diagonal max-area) acc)
-    (let* ((diagonal-squared (calculate-diagonal-squared length width))
-           (area (calculate-area length width)))
-      ;; Determine if the current rectangle should replace the accumulated values.
-      (if (or (> diagonal-squared max-diagonal)
-              (and (= diagonal-squared max-diagonal) (> area max-area)))
-          (list diagonal-squared area)  ;; Update the accumulator with new max values.
-          acc)))  ;; Keep the old accumulator.
+    (define diag-squared (diagonal-squared length width))
+    (define area (* length width))
+    (if (or (> diag-squared max-diagonal)
+            (and (= diag-squared max-diagonal) (> area max-area)))
+        (list diag-squared area)
+        acc))
 
+  ;; Perform the fold to find the maximum diagonal and area.
+  (define final-acc (foldl update-acc (list 0 0) dimensions))
   ;; Extract the area from the result.
-  (second (foldl update-best-rectangle (list 0 0) dimensions)))
+  (second final-acc))
 
 ;; Example usage:
 (define dimensions1 '((9 3) (8 6)))

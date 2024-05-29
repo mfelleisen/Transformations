@@ -23,15 +23,16 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; This function folds the list from right to left, combining elements as specified.
-  (define (combine-nums lst)
-    (foldr (lambda (x acc)
-             (if (<= x acc)
-                 (+ x acc)
-                 (max x acc)))
-           (first lst)  ; Start with the first element.
-           (rest lst)))  ; Fold the rest of the list.
-  (combine-nums nums))  ; Start the combination process from the full list.
+  ;; Helper function to recursively combine elements from the end of the list.
+  (define (combine lst acc)
+    (match lst
+      [(list) acc]
+      [(list x) (max acc x)]
+      [(list x y xs ...) (if (<= x y)
+                             (combine (cons (+ x y) xs) acc)
+                             (combine (cons y xs) (max acc x)))]))
+  ;; Start the combination process with an initial accumulator value of 0.
+  (combine nums 0))
 
 ;; Example usage:
 (maxArrayValue '(2 3 7 9 3))  ; Output: 21

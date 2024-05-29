@@ -21,34 +21,32 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
+  ;; Helper function to calculate the square of the diagonal of a rectangle
   (define (diagonal-squared length width)
     (+ (* length length) (* width width)))
 
-  (define (better-dim? dim1 dim2)
-    (let* ((l1 (first dim1))
-           (w1 (second dim1))
-           (l2 (first dim2))
-           (w2 (second dim2))
-           (diag1 (diagonal-squared l1 w1))
-           (diag2 (diagonal-squared l2 w2))
-           (area1 (* l1 w1))
-           (area2 (* l2 w2)))
-      (or (> diag1 diag2)
-          (and (= diag1 diag2) (> area1 area2)))))
+  ;; Helper function to calculate the area of a rectangle
+  (define (area length width)
+    (* length width))
 
-  (define (max-dim current max-so-far)
-    (if (better-dim? current max-so-far)
-        current
-        max-so-far))
+  ;; Function to update the accumulator with the maximum diagonal and area
+  (define (update-max-dimensions dim acc)
+    (match-define (list length width) dim)
+    (match-define (list max-diagonal max-area) acc)
+    (let* ((current-diagonal (diagonal-squared length width))
+           (current-area (area length width)))
+      (if (or (> current-diagonal max-diagonal)
+              (and (= current-diagonal max-diagonal) (> current-area max-area)))
+          (list current-diagonal current-area)
+          acc)))
 
-  (define best-dim
-    (foldl max-dim (first dimensions) (rest dimensions)))
+  ;; Using foldl to iterate through the list of dimensions
+  (define result (foldl update-max-dimensions '(0 0) dimensions))
+  (second result))
 
-  (* (first best-dim) (second best-dim)))
-
-;; Example Usage:
-(areaOfMaxDiagonal '((9 3) (8 6))) ; Should return 48
-(areaOfMaxDiagonal '((3 4) (4 3))) ; Should return 12
+;; Example usage
+(areaOfMaxDiagonal '((9 3) (8 6))) ;; Output: 48
+(areaOfMaxDiagonal '((3 4) (4 3))) ;; Output: 12
 
 (require rackunit)
 

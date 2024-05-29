@@ -35,28 +35,27 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  ;; Get the length of the nums list
   (define n (length nums))
   
-  ;; Helper function to recursively calculate the maximum jumps for each index
-  (define (max-jumps-from i dp)
-    (if (>= i n)
-        dp
-        (let ([current-jumps (list-ref dp i)])
-          (if (= current-jumps -inf.0)
-              (max-jumps-from (add1 i) dp)
-              (let loop ([j (add1 i)] [updated-dp dp])
-                (if (>= j n)
-                    (max-jumps-from (add1 i) updated-dp)
-                    (let ([diff (abs (- (list-ref nums j) (list-ref nums i)))]
-                          [new-jumps (add1 current-jumps)])
-                      (if (<= diff target)
-                          (loop (add1 j) (list-set updated-dp j (max (list-ref updated-dp j) new-jumps)))
-                          (loop (add1 j) updated-dp)))))))))
-  
-  ;; Initialize the dp list with negative infinity for all indices except the first one set to 0
-  (define initial-dp (cons 0 (make-list (sub1 n) -inf.0)))
-  (define final-dp (max-jumps-from 0 initial-dp))
+  ;; Define the recursive function to update the dp list
+  (define (update-dp dp i)
+    (cond
+      [(= i n) dp]
+      [(= (list-ref dp i) -inf.0) (update-dp dp (add1 i))]
+      [else
+       (define (inner-loop dp j)
+         (cond
+           [(= j n) dp]
+           [(<= (abs (- (list-ref nums j) (list-ref nums i))) target)
+            (inner-loop
+             (list-set dp j (max (list-ref dp j) (add1 (list-ref dp i))))
+             (add1 j))]
+           [else (inner-loop dp (add1 j))]))
+       (update-dp (inner-loop dp (add1 i)) (add1 i))]))
+
+  ;; Initialize the dp list and call the update-dp function
+  (define dp (cons 0 (make-list (sub1 n) -inf.0)))
+  (define final-dp (update-dp dp 0))
   
   ;; Check the value at the last index to determine if the end is reachable
   (define final-value (list-ref final-dp (sub1 n)))

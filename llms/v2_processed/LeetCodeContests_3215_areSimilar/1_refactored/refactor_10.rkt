@@ -25,33 +25,38 @@
 ;; 1 <= mat[i][j] <= 25
 ;; 1 <= k <= 50
 (define (areSimilar mat k)
-  (define (shift-row row shift-fn)
-    (define len (length row))
-    (define shifts (modulo k len))
-    (if (= shifts 0)
-        row
-        (shift-fn row shifts)))
+  ;; Helper function to perform cyclic shift
+  (define (cyclic-shift row shifts direction)
+    (let* ([len (length row)]
+           [shifts (modulo shifts len)]
+           [shifted (if (eq? direction 'right)
+                        (append (drop-right row shifts) (take-right row shifts))
+                        (append (drop row shifts) (take row shifts)))])
+      shifted))
 
-  (define (right-shift row shifts)
-    (append (take-right row shifts) (drop-right row shifts)))
-
-  (define (left-shift row shifts)
-    (append (drop row shifts) (take row shifts)))
-
+  ;; Function to apply appropriate shift depending on the row index
   (define (process-row idx row)
     (if (even? idx)
-        (shift-row row left-shift)
-        (shift-row row right-shift)))
+        (cyclic-shift row k 'left)
+        (cyclic-shift row k 'right)))
 
+  ;; Transform the matrix by applying shifts
   (define transformed-mat
     (map-indexed process-row mat))
 
+  ;; Compare initial and final matrices
   (equal? mat transformed-mat))
 
+;; The function `map-indexed` using `for/list` and `in-indexed`
 (define (map-indexed f lst)
-  (for/list ([idx (in-naturals)] [item (in-list lst)])
+  (for/list ([item lst]
+             [idx (in-naturals)])
     (f idx item)))
 
+;; Example usage
+(areSimilar '((1 2 1 2) (5 5 5 5) (6 3 6 3)) 2) ;; Output: #t
+(areSimilar '((2 2) (2 2)) 3) ;; Output: #t
+(areSimilar '((1 2)) 1) ;; Output: #f
 
 (require rackunit)
 

@@ -16,27 +16,29 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; This function calculates the minimum possible sum of a k-avoiding array of length n.
+  ;; Helper function to check if adding a number will violate the k-avoiding property
+  (define (violates-k-avoiding? used-numbers current-number)
+    (set-member? used-numbers (- k current-number)))
 
   ;; Recursive helper function to build the k-avoiding array and calculate the sum
-  (define (build-and-sum current-number count total-sum used-numbers)
+  (define (build-and-sum used-numbers current-number count total-sum)
     (cond
-      [(= count n) total-sum]  ;; Base case: if we've added enough numbers, return the sum
-      [(or (set-member? used-numbers current-number) ;; Check uniqueness
-           (set-member? used-numbers (- k current-number))) ;; Check k-avoiding condition
-       (build-and-sum (+ current-number 1) count total-sum used-numbers)] ;; Skip current number
+      [(= count n) total-sum] ;; Base case: if we've added enough numbers, return the sum
+      [(or (violates-k-avoiding? used-numbers current-number)
+           (set-member? used-numbers current-number)) ;; Check k-avoiding condition and uniqueness
+       (build-and-sum used-numbers (+ current-number 1) count total-sum)] ;; Skip current number
       [else
-       (build-and-sum (+ current-number 1)
+       (build-and-sum (set-add used-numbers current-number) ;; Add current number to set
+                      (+ current-number 1)
                       (+ count 1)
-                      (+ total-sum current-number)
-                      (set-add used-numbers current-number))])) ;; Add current number to set
-  
-  ;; Start the recursive process with starting number 1, count 0, and sum 0 and an empty set
-  (build-and-sum 1 0 0 (set)))
+                      (+ total-sum current-number))])) ;; Add to sum and recurse
+
+  ;; Start the recursive process with an empty set, starting number 1, count 0, and sum 0
+  (build-and-sum (set) 1 0 0))
 
 ;; Example usage:
-(minimumSum 5 4)  ;; Output: 18
-(minimumSum 2 6)  ;; Output: 3
+(minimumSum 5 4) ;; Output: 18
+(minimumSum 2 6) ;; Output: 3
 
 (require rackunit)
 

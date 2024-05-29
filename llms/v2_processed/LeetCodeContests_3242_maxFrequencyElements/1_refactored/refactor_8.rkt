@@ -25,9 +25,14 @@
   (define max-freq
     (apply max (hash-values frequencies)))
 
-  (for/sum ([freq (in-hash-values frequencies)]
-            #:when (= freq max-freq))
-    freq))
+  (for/fold ([total 0])
+            ([(key value) (in-hash frequencies)]
+             #:when (= value max-freq))
+    (+ total value)))
+
+;; Example usage:
+;; (maxFrequencyElements [1 2 2 3 1 4]) ; => 4
+;; (maxFrequencyElements [1 2 3 4 5])   ; => 5
 
 (require rackunit)
 

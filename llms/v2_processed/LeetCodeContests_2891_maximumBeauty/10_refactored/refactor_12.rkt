@@ -25,15 +25,17 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 0 <= nums[i], k <= 105
 (define (maximumBeauty nums k)
-  ;; Calculate the potential frequency for each value in the modified range
-  (define freq-map
-    (for/fold ([freq (hash)])
-              ([num nums])
-      (for/fold ([freq freq])
-                ([possible-value (in-range (- num k) (+ num k 1))])
-        (hash-update freq possible-value (curry add1) 0))))
-  
-  ;; Find the maximum frequency in the map
+  (define (range a b)
+    (in-range a (add1 b)))
+
+  (define (add-freq map num)
+    (for ([i (range (- num k) (+ num k))])
+      (hash-update! map i add1 0))
+    map)
+
+  (define freq-map (for/fold ([map (make-hash)]) ([num nums])
+                     (add-freq map num)))
+
   (apply max (hash-values freq-map)))
 
 ;; Example usage

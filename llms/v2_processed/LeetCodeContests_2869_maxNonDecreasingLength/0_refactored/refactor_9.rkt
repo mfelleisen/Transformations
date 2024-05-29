@@ -30,30 +30,26 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  ;; Helper function to update max length based on conditions
-  (define (update-max-length i prev-len cur-len cur-val prev-val)
-    (if (>= cur-val prev-val)
-        (max cur-len (+ prev-len 1))
-        cur-len))
+  (define n (length nums1))
   
-  ;; Recursively calculate the maximum non-decreasing length
-  (define (calculate-max-length nums1 nums2 i prev-dp1 prev-dp2 max-len)
-    (if (= i (length nums1))
-        max-len
-        (let* ([cur-dp1 (update-max-length i prev-dp1 1 (list-ref nums1 i) (list-ref nums1 (sub1 i)))]
-               [cur-dp1 (update-max-length i prev-dp2 cur-dp1 (list-ref nums1 i) (list-ref nums2 (sub1 i)))]
-               [cur-dp2 (update-max-length i prev-dp1 1 (list-ref nums2 i) (list-ref nums1 (sub1 i)))]
-               [cur-dp2 (update-max-length i prev-dp2 cur-dp2 (list-ref nums2 i) (list-ref nums2 (sub1 i)))]
-               [new-max-len (max max-len cur-dp1 cur-dp2)])
-          (calculate-max-length nums1 nums2 (add1 i) cur-dp1 cur-dp2 new-max-len))))
+  ;; Helper function to compute the maximum non-decreasing length
+  (define (compute-max-length dp nums1 nums2)
+    (for/fold ([max-len 1] [dp (vector 1)])
+              ([i (in-range 1 n)])
+      (define max-current
+        (max (if (<= (list-ref nums1 (sub1 i)) (list-ref nums1 i)) (add1 (vector-ref dp (sub1 i))) 1)
+             (if (<= (list-ref nums2 (sub1 i)) (list-ref nums1 i)) (add1 (vector-ref dp (sub1 i))) 1)
+             (if (<= (list-ref nums1 (sub1 i)) (list-ref nums2 i)) (add1 (vector-ref dp (sub1 i))) 1)
+             (if (<= (list-ref nums2 (sub1 i)) (list-ref nums2 i)) (add1 (vector-ref dp (sub1 i))) 1)))
+      (values (max max-len max-current) (vector-set! dp i max-current))))
   
-  ;; Start the recursive calculation from index 1
-  (calculate-max-length nums1 nums2 1 1 1 1))
+  ;; Calculate the maximum length for both possibilities
+  (define-values (max-len1 dp1) (compute-max-length (make-vector n 1) nums1 nums2))
+  (define-values (max-len2 dp2) (compute-max-length (make-vector n 1) nums2 nums1))
+  
+  ;; Return the maximum of the two results
+  (max max-len1 max-len2))
 
-;; Example usage:
-(maxNonDecreasingLength '(2 3 1) '(1 2 1))  ;; Output: 2
-(maxNonDecreasingLength '(1 3 2 1) '(2 2 3 4))  ;; Output: 4
-(maxNonDecreasingLength '(1 1) '(2 2))  ;; Output: 2
 
 (require rackunit)
 

@@ -2,31 +2,29 @@
 
 ;; Check if a number is prime
 (define (is-prime? num)
-  ;; Returns #t if num is prime, otherwise #f
   (cond
     [(<= num 1) #f]
     [(<= num 3) #t]
-    [(or (= (modulo num 2) 0) (= (modulo num 3) 0)) #f]
+    [(or (zero? (modulo num 2)) (zero? (modulo num 3))) #f]
     [else
      (let loop ([i 5])
        (cond
          [(> (* i i) num) #t]
-         [(or (= (modulo num i) 0) (= (modulo num (+ i 2)) 0)) #f]
+         [(or (zero? (modulo num i)) (zero? (modulo num (+ i 2)))) #f]
          [else (loop (+ i 6))]))]))
 
 ;; Generate a list of prime numbers up to n
 (define (list-primes n)
-  (filter is-prime? (range 2 (+ n 1))))
+  (filter is-prime? (range 2 (add1 n))))
 
 ;; Find prime pairs that sum to n
 (define (findPrimePairs n)
-  ;; Generate a list of all primes less than or equal to n
   (define primes (list-primes n))
-  ;; Generate all prime pairs that sum to n
-  (for*/list ([x (in-list primes)]
-              [y (in-list primes)]
-              #:when (and (<= x y) (= (+ x y) n)))
-    (list x y)))
+  (define prime-set (set primes))
+  (for/list ([x primes]
+             #:unless (< (* 2 x) n)
+             #:when (set-member? prime-set (- n x)))
+    (list x (- n x))))
 
 ;; Example usage
 (findPrimePairs 10)  ; Output: '((3 7) (5 5))

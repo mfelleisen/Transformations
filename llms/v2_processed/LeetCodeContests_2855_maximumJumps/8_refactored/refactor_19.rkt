@@ -36,26 +36,29 @@
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
   (define n (length nums))
-  ;; Initialize the dp list with -1 for all indices except the first one set to 0
-  (define dp (cons 0 (make-list (sub1 n) -1)))
   
-  ;; Define a helper function to update dp values based on the current index i
-  (define (update-dp i dp)
-    (if (= (list-ref dp i) -1)  ;; Only proceed if the current index is reachable
-        dp
-        (for/fold ([dp dp]) ([j (in-range (add1 i) n)])
-          (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-              (list-set dp j (max (list-ref dp j) (add1 (list-ref dp i))))
-              dp))))
+  ;; Define a helper function to compute the maximum jumps from a given index
+  (define (max-jumps-from i dp)
+    (define (helper j)
+      (when (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
+        (set! dp (list-set dp j (max (list-ref dp j) (add1 (list-ref dp i)))))))
+    (for ([j (in-range (add1 i) n)])
+      (helper j)))
   
-  ;; Process each index to update dp values
-  (define final-dp
-    (for/fold ([dp dp]) ([i (in-range n)])
-      (update-dp i dp)))
+  ;; Recursive function to update dp values
+  (define (compute-dp dp)
+    (for ([i (in-range n)])
+      (when (not (= (list-ref dp i) -inf.0))
+        (max-jumps-from i dp)))
+    dp)
   
-  ;; Check the value at the last index to determine if the end is reachable
+  ;; Initialize the dp list and compute the result
+  (define initial-dp (cons 0 (make-list (sub1 n) -inf.0)))
+  (define final-dp (compute-dp initial-dp))
+  
+  ;; Return the final value at the last index
   (define final-value (list-ref final-dp (sub1 n)))
-  (if (= final-value -1) -1 final-value))
+  (if (= final-value -inf.0) -1 final-value))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

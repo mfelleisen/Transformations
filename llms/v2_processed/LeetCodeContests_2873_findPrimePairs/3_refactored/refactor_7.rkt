@@ -2,44 +2,38 @@
 
 ;; Function to check if a number is prime
 (define (is-prime? num)
+  ;; Helper function for checking prime status
+  (define (check-prime i)
+    (and (<= (* i i) num)
+         (not (or (zero? (remainder num i))
+                  (zero? (remainder num (+ i 2)))))
+         (check-prime (+ i 6))))
+  
   ;; Check for non-prime conditions
-  (cond
-    [(<= num 1) #f]
-    [(<= num 3) #t]
-    [(zero? (remainder num 2)) #f]
-    [(zero? (remainder num 3)) #f]
-    [else
-     ;; Check divisibility from 5 onwards, skipping even numbers
-     (let loop ([i 5])
-       (cond
-         [(> (* i i) num) #t]
-         [(zero? (remainder num i)) #f]
-         [(zero? (remainder num (+ i 2))) #f]
-         [else (loop (+ i 6))]))]))
+  (cond [(<= num 1) #f]
+        [(<= num 3) #t]
+        [(or (zero? (remainder num 2)) (zero? (remainder num 3))) #f]
+        [else (check-prime 5)]))
 
 ;; Function to find prime pairs that add up to n
 (define (findPrimePairs n)
   ;; Generate a list of primes up to n
   (define primes (filter is-prime? (range 2 (add1 n))))
   
-  ;; Find pairs using a recursive helper function
-  (define (find-pairs lst)
-    (cond
-      [(empty? lst) '()]
-      [else
-       (let ([x (first lst)])
-         (append
-          (for/list ([y (in-list primes)]
-                     #:when (and (<= x y) (= (+ x y) n)))
-            (list x y))
-          (find-pairs (rest lst))))]))
+  ;; Find pairs using a filtered Cartesian product
+  (define (valid-pair? x y)
+    (and (<= x y) (= (+ x y) n)))
   
-  ;; Call the helper function with the list of primes
-  (find-pairs primes))
+  ;; Collect valid pairs
+  (for*/list ([x primes]
+              [y primes]
+              #:when (valid-pair? x y))
+    (list x y)))
 
 ;; Example usage
 (findPrimePairs 10)  ; Output: '((3 7) (5 5))
 (findPrimePairs 2)   ; Output: '()
+
 
 (require rackunit)
 

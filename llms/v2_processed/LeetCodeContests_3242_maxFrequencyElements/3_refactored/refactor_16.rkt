@@ -20,11 +20,11 @@
   (define freqs
     (for/fold ([freqs (hash)])
               ([num (in-list nums)])
-      (hash-update freqs num (λ (v) (add1 (or v 0))) 0)))
-  
+      (hash-update freqs num add1 0)))
+
   (define max-freq
     (apply max (hash-values freqs)))
-  
+
   (for/sum ([pair (in-hash freqs)]
             #:when (= (cdr pair) max-freq))
     (cdr pair)))

@@ -24,31 +24,30 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
+  ;; Define a helper function to calculate the square of the diagonal length
   (define (diagonal-squared length width)
     (+ (* length length) (* width width)))
 
+  ;; Define a helper function to calculate the area of the rectangle
   (define (area length width)
     (* length width))
 
   ;; Use foldl to traverse the list and find the rectangle with the longest diagonal or maximum area
-  (define-values (max-diagonal max-area)
-    (for/fold ([max-diagonal 0] [max-area 0]) ([dim dimensions])
-      (define length (first dim))
-      (define width (second dim))
-      (define current-diagonal (diagonal-squared length width))
-      (define current-area (area length width))
+  (define (compare-rectangles r1 r2)
+    (let* ((d1 (diagonal-squared (first r1) (second r1)))
+           (d2 (diagonal-squared (first r2) (second r2)))
+           (a1 (area (first r1) (second r1)))
+           (a2 (area (first r2) (second r2))))
       (cond
-        ;; Check if current diagonal is longer
-        [(> current-diagonal max-diagonal)
-         (values current-diagonal current-area)]
-        ;; Check if diagonals are equal but current area is larger
-        [(and (= current-diagonal max-diagonal) (> current-area max-area))
-         (values max-diagonal current-area)]
-        ;; Otherwise, keep the previous result
-        [else
-         (values max-diagonal max-area)])))
+        ((> d1 d2) r1)
+        ((< d1 d2) r2)
+        ((> a1 a2) r1)
+        (else r2))))
 
-  max-area)
+  (define max-rectangle
+    (foldl compare-rectangles '(0 0) dimensions))
+
+  (area (first max-rectangle) (second max-rectangle)))
 
 ;; Example usage:
 (define dimensions1 '((9 3) (8 6)))

@@ -18,13 +18,12 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
+  (define (special-index? i) (zero? (remainder n i)))
   (define (square x) (* x x))
   
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (remainder n i)))
+            #:when (special-index? i))
     (square (list-ref nums (sub1 i)))))
-
-;; The function sumOfSquares now accepts a list of numbers and returns the sum of the squares of all special elements.
 
 (require rackunit)
 

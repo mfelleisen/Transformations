@@ -28,8 +28,13 @@
 ;;  * 1 <= n == hours.length <= 50
 ;;  * 0 <= hours[i], target <= 105
 (define (numberOfEmployeesWhoMetTarget hours target)
-  ;; Use 'filter' to select hours that meet or exceed the target, and 'length' to count these filtered elements.
-  (count (lambda (hour) (>= hour target)) hours))
+  ;; Helper function to check if an hour meets or exceeds the target
+  (define (meets-target? hour)
+    (>= hour target))
+  
+  ;; Use 'filter' with 'meets-target?' to select hours that meet or exceed the target.
+  ;; Then 'length' to count these filtered elements.
+  (length (filter meets-target? hours)))
 
 ;; Example usage:
 ;; (numberOfEmployeesWhoMetTarget '(0 1 2 3 4) 2)  ; Output: 3

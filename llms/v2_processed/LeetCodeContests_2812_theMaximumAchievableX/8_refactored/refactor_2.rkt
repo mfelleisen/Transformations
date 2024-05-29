@@ -20,9 +20,8 @@
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
 (define (theMaximumAchievableX num t)
+  ;; The maximum achievable number x is calculated by adding twice the number of operations t to num.
   (+ num (* 2 t)))
-
-;; The function remains the same in behavior and signature, but it is already idiomatic and concise.
 
 (require rackunit)
 

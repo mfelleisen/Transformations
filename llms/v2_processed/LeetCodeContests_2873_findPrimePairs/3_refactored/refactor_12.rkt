@@ -2,27 +2,27 @@
 
 ;; Function to check if a number is prime
 (define (is-prime? num)
+  ;; Helper function for checking prime status
+  (define (check-divisors i)
+    (cond [(> (* i i) num) #t]
+          [(zero? (remainder num i)) #f]
+          [(zero? (remainder num (+ i 2))) #f]
+          [else (check-divisors (+ i 6))]))
+  ;; Check for non-prime conditions and use helper function otherwise
   (cond [(<= num 1) #f]
         [(<= num 3) #t]
-        [(or (zero? (remainder num 2))
-             (zero? (remainder num 3))) #f]
-        [else
-         (let loop ([i 5])
-           (cond [(> (* i i) num) #t]
-                 [(or (zero? (remainder num i))
-                      (zero? (remainder num (+ i 2)))) #f]
-                 [else (loop (+ i 6))]))]))
+        [(or (zero? (remainder num 2)) (zero? (remainder num 3))) #f]
+        [else (check-divisors 5)]))
 
 ;; Function to find prime pairs that add up to n
 (define (findPrimePairs n)
-  (define primes
-    (for/list ([x (in-range 2 (add1 n))]
-               #:when (is-prime? x))
-      x))
-  
-  (for*/list ([x (in-list primes)]
-              [y (in-list primes)]
-              #:when (and (<= x y) (= (+ x y) n)))
+  ;; Generate list of primes up to n
+  (define primes (filter is-prime? (range 1 (add1 n))))
+  ;; Find pairs using a filtered Cartesian product
+  (define (valid-pair? x y)
+    (and (<= x y) (= (+ x y) n)))
+  ;; Filter pairs that meet the criteria
+  (for*/list ([x primes] [y primes] #:when (valid-pair? x y))
     (list x y)))
 
 ;; Example usage

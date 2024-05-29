@@ -29,18 +29,15 @@
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
   (define n (length nums))
-
-  ;; Helper function to calculate the sum of squares of distinct counts starting from index i
+  
   (define (sum-from-start i)
-    (define (loop j seen total)
+    (let loop ([j i] [seen (set)] [total 0])
       (if (>= j n)
           total
-          (let ((current-num (list-ref nums j))
-                (new-seen (set-add seen (list-ref nums j))))
-            (loop (add1 j) new-seen (+ total (sqr (set-count new-seen)))))))
-    (loop i (set) 0))
+          (let ([seen (set-add seen (list-ref nums j))]
+                [distinct-count (set-count seen)])
+            (loop (add1 j) seen (+ total (sqr distinct-count)))))))
 
-  ;; Sum the results of sum-from-start for each starting index in the array.
   (for/fold ([total-sum 0]) ([i (in-range n)])
     (+ total-sum (sum-from-start i))))
 

@@ -27,23 +27,19 @@
   
   (define (calculate-area length width)
     (* length width))
-  
+
   ;; Use foldl to traverse the list once and determine the rectangle with the longest diagonal or maximum area.
-  (define-values (max-diagonal max-area)
-    (for/fold ([max-diagonal 0] [max-area 0]) ([dim (in-list dimensions)])
-      ;; Destructure the current dimension.
-      (match-define (list length width) dim)
-      ;; Calculate diagonal squared and area for the current rectangle.
-      (define diagonal-squared (calculate-diagonal-squared length width))
-      (define area (calculate-area length width))
-      ;; Determine if the current rectangle should replace the accumulated values.
-      (if (or (> diagonal-squared max-diagonal)
-              (and (= diagonal-squared max-diagonal) (> area max-area)))
-          (values diagonal-squared area)
-          (values max-diagonal max-area))))
+  (define (process-dimension max-dim dim)
+    (match-define (list length width) dim)
+    (define diagonal-squared (calculate-diagonal-squared length width))
+    (define area (calculate-area length width))
+    (match-define (list max-diagonal-squared max-area) max-dim)
+    (if (or (> diagonal-squared max-diagonal-squared)
+            (and (= diagonal-squared max-diagonal-squared) (> area max-area)))
+        (list diagonal-squared area)
+        max-dim))
   
-  ;; Return the area from the result.
-  max-area)
+  (second (foldl process-dimension (list 0 0) dimensions)))
 
 ;; Example usage:
 (define dimensions1 '((9 3) (8 6)))

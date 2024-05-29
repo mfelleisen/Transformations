@@ -16,11 +16,10 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function to check if a number can be added to the k-avoiding array
   (define (valid-add? used-numbers current-number)
-    (not (set-member? used-numbers (- k current-number))))
+    (or (not (set-member? used-numbers (- k current-number)))
+        (= current-number (- k current-number))))
   
-  ;; Recursive function to construct the k-avoiding array and compute the sum
   (define (construct-k-avoiding used-numbers current-number count total-sum)
     (if (= count n)
         total-sum
@@ -34,7 +33,6 @@
                                   count
                                   total-sum))))
   
-  ;; Start the recursive process
   (construct-k-avoiding (set) 1 0 0))
 
 ;; Example usage:

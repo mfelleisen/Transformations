@@ -14,13 +14,20 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * nums[i].length == 2
 ;;  * 1 <= starti <= endi <= 100
-(define (numberOfPoints nums) ;; contract  numberOfPoints/c
+(define (numberOfPoints nums)
+  ;; Function to calculate the number of unique integer points covered by cars on a number line.
   (define (range-list start end)
-    (for/list ([i (in-range start (add1 end))]) i))
+    ;; Helper function to generate a list of integers from start to end (inclusive).
+    (build-list (+ (- end start) 1) (lambda (i) (+ i start))))
   
-  (set-count (for/fold ([points (set)])
-                     ([interval (in-list nums)])
-               (apply set-add points (apply range-list interval)))))
+  ;; Generate a set of points for each car and union them to get the final set of unique points.
+  (define all-points 
+    (for/fold ([points (set)])
+              ([pair (in-list nums)])
+      (set-union points (apply range-list pair))))
+  
+  ;; Count the number of unique points in the set.
+  (set-count all-points))
 
 ;; Example usage:
 ;; (numberOfPoints '((3 6) (1 5) (4 7)))  ; Should return 7

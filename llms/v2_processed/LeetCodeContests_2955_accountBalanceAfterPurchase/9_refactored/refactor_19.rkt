@@ -18,23 +18,21 @@
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
-  ;; Calculate the nearest multiple of 10, choosing the larger one in case of a tie
+  (define initial-balance 100)
+
+  ;; Calculate the nearest multiple of 10 to the purchaseAmount.
   (define rounded-amount
     (let* ([lower-bound (* 10 (quotient purchaseAmount 10))]
-           [upper-bound (+ lower-bound 10)]
-           [lower-diff (- purchaseAmount lower-bound)]
-           [upper-diff (- upper-bound purchaseAmount)])
-      (if (< lower-diff upper-diff)
+           [upper-bound (+ lower-bound 10)])
+      (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
           lower-bound
           upper-bound)))
-  
-  ;; Return the new balance after the purchase
-  (- 100 rounded-amount))
 
-;; The function accountBalanceAfterPurchase uses idiomatic Racket features such as
-;; defining local variables (rounded-amount and its components) and using let* for variable bindings
-;; and pure functions for calculations. It avoids mutation by using define for variable bindings
-;; and pure functions for calculations.
+  ;; Calculate the new balance after the purchase.
+  (- initial-balance rounded-amount))
+
+;; The function accountBalanceAfterPurchase is now more idiomatic and avoids
+;; mutation by using define for variable bindings and pure functions for calculations.
 
 (require rackunit)
 

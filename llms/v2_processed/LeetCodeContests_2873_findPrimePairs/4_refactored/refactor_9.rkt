@@ -2,36 +2,27 @@
 
 ;; Function to check if a number is prime
 (define (is-prime? num)
-  (define (divisible? x)
-    (zero? (remainder num x)))
-  ;; Check base cases
-  (cond
-    [(<= num 1) #f]
-    [(<= num 3) #t]
-    [(or (divisible? 2) (divisible? 3)) #f]
-    [else
-     ;; Check for factors from 5 upwards, skipping even numbers
-     (let loop ([i 5])
-       (cond
-         [(> (* i i) num) #t]
-         [(or (divisible? i) (divisible? (+ i 2))) #f]
-         [else (loop (+ i 6))]))]))
+  (cond [(<= num 1) #f]
+        [(<= num 3) #t]
+        [(zero? (remainder num 2)) #f]
+        [(zero? (remainder num 3)) #f]
+        [else
+         (let loop ([i 5])
+           (cond [(> (* i i) num) #t]
+                 [(zero? (remainder num i)) #f]
+                 [(zero? (remainder num (+ i 2))) #f]
+                 [else (loop (+ i 6))]))]))
 
 ;; Function to find prime pairs that sum to n
 (define (findPrimePairs n)
-  ;; Generate list of primes up to n
-  (define primes
-    (filter is-prime?
-            (range 2 (add1 n)))) ;; Start from 2 as 1 is not a prime
-
-  ;; Find all pairs (x, y) where x + y = n and both x and y are prime
-  (define (find-pairs primes)
-    (for*/list ([x (in-list primes)]
-                [y (in-list primes)]
-                #:when (and (<= x y) (= (+ x y) n)))
+  (define primes (filter is-prime? (range 1 (add1 n))))
+  
+  (define (find-pairs ps)
+    (for/list ([x ps]
+               #:when (<= x (/ n 2))
+               [y (in-list (filter (λ (p) (and (is-prime? p) (= (+ x p) n))) ps))])
       (list x y)))
 
-  ;; Return the sorted list of prime pairs
   (find-pairs primes))
 
 ;; Example usage

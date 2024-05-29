@@ -22,24 +22,33 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  ;; Define a memoized recursive function to calculate the maximum score
-  (define memo (make-hash))
-  
-  (define (dp i)
-    (hash-ref! memo i
-               (lambda ()
-                 (if (= i (sub1 (length nums)))
-                     (list-ref nums i)
-                     (apply max
-                            (for/list ([j (in-range (add1 i) (length nums))])
-                              (let ([current-score
-                                     (+ (dp j) (list-ref nums i))])
-                                (if (not (= (modulo (list-ref nums i) 2)
-                                            (modulo (list-ref nums j) 2)))
-                                    (- current-score x)
-                                    current-score))))))))
-  
-  (dp 0))
+  (define n (length nums))
+  (define max-score (make-vector n -inf.0))
+  (define (parity v) (modulo v 2))
+
+  ;; Helper function to update scores recursively
+  (define (update-scores i j score)
+    (if (>= j n)
+        score
+        (let* ((current-value (list-ref nums j))
+               (new-score (+ score current-value))
+               (penalty (if (not (= (parity (list-ref nums i))
+                                    (parity current-value)))
+                            x
+                            0))
+               (final-score (- new-score penalty)))
+          (vector-set! max-score j (max (vector-ref max-score j) final-score))
+          (update-scores i (+ j 1) score))))
+
+  ;; Initialize the first element in the dp array
+  (vector-set! max-score 0 (first nums))
+
+  ;; Main function to iterate over all elements
+  (for ([i (in-range n)])
+    (update-scores i (+ i 1) (vector-ref max-score i)))
+
+  ;; Return the maximum value from the dp array
+  (apply max (vector->list max-score)))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

@@ -36,30 +36,29 @@
 (define (maximumJumps nums target)
   (define n (length nums))
 
-  ;; Helper function to check if jump is within target
-  (define (valid-jump? a b)
-    (<= (abs (- a b)) target))
-
-  ;; Helper function to update dp list
+  ;; Helper function to update dp based on the current index i
   (define (update-dp i dp)
     (if (= (list-ref dp i) -inf.0)
-        dp
-        (for/fold ([dp dp])
+        dp  ; If dp[i] is -inf, return dp unchanged
+        (for/fold ([dp-acc dp])
                   ([j (in-range (+ i 1) n)])
-          (if (valid-jump? (list-ref nums i) (list-ref nums j))
-              (list-set dp j (max (list-ref dp j) (+ 1 (list-ref dp i))))
-              dp))))
-  
+          (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
+              (list-set dp-acc j (max (list-ref dp-acc j) (+ 1 (list-ref dp-acc i))))
+              dp-acc))))
+
   ;; Initialize the dp list with negative infinity except the first element set to 0
-  (define dp (cons 0 (make-list (- n 1) -inf.0)))
-  
+  (define initial-dp (cons 0 (make-list (- n 1) -inf.0)))
+
   ;; Fold over the range from 0 to n to update dp for each index
-  (define final-dp (for/fold ([dp dp]) ([i (in-range n)]) (update-dp i dp)))
-  
+  (define final-dp (for/fold ([dp initial-dp])
+                            ([i (in-range n)])
+                     (update-dp i dp)))
+
   ;; Check the last element of dp; if it's still -inf, return -1, otherwise return the value
-  (if (= (last final-dp) -inf.0)
-      -1
-      (last final-dp)))
+  (let ([result (last final-dp)])
+    (if (= result -inf.0)
+        -1
+        result)))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

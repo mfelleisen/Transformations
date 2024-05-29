@@ -18,19 +18,10 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  
-  (define (is-special-index? i)
-    (zero? (remainder n i)))
-
-  (define (index-to-square i)
-    (sqr (list-ref nums (- i 1))))
-
-  (define (sum-special-squares acc i)
-    (if (is-special-index? i)
-        (+ acc (index-to-square i))
-        acc))
-  
-  (foldl sum-special-squares 0 (range 1 (add1 n))))
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (zero? (remainder n i)))
+    (let ([val (list-ref nums (sub1 i))])
+      (* val val))))
 
 (require rackunit)
 

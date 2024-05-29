@@ -28,28 +28,28 @@
 ;;  * The input is generated such that if team a is stronger than team b, team b is not stronger than team a.
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion n edges)
-  ;; Create an in-degree hash table for nodes
+  ;; Build a hash table to keep track of the number of incoming edges for each team
   (define in-degrees (make-hash))
   
-  ;; Initialize in-degrees for all nodes
+  ;; Initialize the in-degrees hash table with 0 for each team
   (for ([i (in-range n)])
     (hash-set! in-degrees i 0))
   
-  ;; Count in-degrees for each node
+  ;; Count the in-degrees for each node
   (for ([edge edges])
-    (define target (second edge))
-    (hash-update! in-degrees target add1 0))
+    (hash-update! in-degrees (second edge) add1 0))
   
-  ;; Find nodes with zero in-degrees
+  ;; Find the nodes with zero in-degrees
   (define zero-in-degree
     (for/list ([i (in-range n)]
                #:when (= (hash-ref in-degrees i) 0))
       i))
   
-  ;; Determine the champion based on the number of zero in-degree nodes
-  (match zero-in-degree
-    [(list only) only]
-    [_ -1]))
+  ;; If there is exactly one team with zero in-degrees, that's our champion
+  (if (= (length zero-in-degree) 1)
+      (first zero-in-degree)
+      ;; If there are no teams or more than one with zero in-degrees, return -1
+      -1))
 
 ;; Example usage:
 (findChampion 3 '((0 1) (1 2)))  ;; Output: 0

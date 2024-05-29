@@ -18,17 +18,10 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  (define (special-element? i) (zero? (remainder n i)))
-
-  ;; Use `for/fold` to accumulate the sum of the squares of the special elements
-  (for/fold ([total 0]) ([i (in-range 1 (add1 n))])
-    (if (special-element? i)
-        (+ total (sqr (list-ref nums (sub1 i))))
-        total)))
-
-;; Example usage:
-(sumOfSquares '(1 2 3 4)) ; Output: 21
-(sumOfSquares '(2 7 1 19 18 3)) ; Output: 63
+  (for/sum ([i (in-naturals 1)] #:break (> i n))
+    (if (zero? (remainder n i))
+        (sqr (list-ref nums (sub1 i)))
+        0)))
 
 (require rackunit)
 

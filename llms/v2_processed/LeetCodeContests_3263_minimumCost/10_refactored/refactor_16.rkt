@@ -25,21 +25,17 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Helper function to calculate the sum of the costs of three subarrays
-  (define (calculate-cost i j k)
-    (+ (list-ref nums i) (list-ref nums j) (list-ref nums k)))
+  ;; Helper function to calculate the minimum sum of the costs of three disjoint contiguous subarrays.
+  (define (calculate-min-cost nums n)
+    (for*/fold ([min-cost +inf.0])
+               ([i (in-range 1 (- n 1))]
+                [j (in-range (+ i 1) n)])
+      (min min-cost (+ (first nums) (list-ref nums i) (list-ref nums j)))))
 
-  ;; Generate all possible indices for the split points
-  (define indices (for*/list ([i (in-range 1 (sub1 (length nums)))]
-                              [j (in-range (add1 i) (length nums))])
-                    (list i j)))
-
-  ;; Find the minimum possible sum of the costs by iterating over all possible splits
-  (apply min
-         (for/list ([idx indices])
-           (let* ([i (first idx)]
-                  [j (second idx)])
-             (calculate-cost 0 i j)))))
+  (define n (length nums))
+  (cond
+    [(= n 3) (apply + nums)] ;; If the list has exactly three elements, each element forms its own subarray.
+    [else (calculate-min-cost nums n)])) ;; Calculate the minimum cost by checking different breakpoints.
 
 ;; Examples:
 (minimumCost '(1 2 3 12))  ; Output: 6

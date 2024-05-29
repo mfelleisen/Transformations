@@ -16,31 +16,29 @@
 ;; 1 <= nums[i] <= 50
 (define (missingInteger nums)
   ;; Helper function to find the longest sequential prefix
-  (define (longest-sequential-prefix seq)
-    (let loop ([sum (first seq)] [i 0])
-      (if (and (< (+ i 1) (length seq))
-               (= (list-ref seq (+ i 1)) (+ (list-ref seq i) 1)))
-          (loop (+ sum (list-ref seq (+ i 1))) (+ i 1))
-          sum)))
-  
-  ;; Calculate the sum of the longest sequential prefix
-  (define sum-prefix (longest-sequential-prefix nums))
-  
-  ;; Helper function to find the smallest missing integer
-  (define (smallest-missing x seen)
-    (if (set-member? seen x)
-        (smallest-missing (+ x 1) seen)
-        x))
-  
-  ;; Convert list to set for efficient membership checking
-  (define nums-set (set nums))
-  
-  ;; Find the smallest missing integer greater than or equal to sum_prefix
-  (smallest-missing sum-prefix nums-set))
+  (define (longest-sequential-prefix nums)
+    (for/fold ([sum (first nums)]
+               [i 0])
+              ([j (in-range 1 (length nums))]
+               #:when (= (list-ref nums j) (+ (list-ref nums (sub1 j)) 1)))
+      (values (+ sum (list-ref nums j)) j)))
 
-;; Examples
-(missingInteger '(1 2 3 2 5))  ; Output: 6
-(missingInteger '(3 4 5 1 12 14 13))  ; Output: 15
+  ;; Calculate the sum of the longest sequential prefix
+  (define-values (sum-prefix _) (longest-sequential-prefix nums))
+
+  ;; Helper function to find the smallest missing integer
+  (define (smallest-missing x nums)
+    (if (member x nums)
+        (smallest-missing (+ x 1) nums)
+        x))
+
+  ;; Find the smallest missing integer greater than or equal to sum_prefix
+  (smallest-missing sum-prefix nums))
+
+;; The function uses recursion instead of iteration for both finding the
+;; longest sequential prefix and the smallest missing integer.
+;; It leverages Racket's `member` function to check for the presence of an element in the list,
+;; and `values` to return multiple values from the helper function.
 
 (require rackunit)
 

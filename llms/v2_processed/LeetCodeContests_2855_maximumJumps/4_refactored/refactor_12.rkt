@@ -34,34 +34,32 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  ;; This function calculates the maximum number of jumps to reach the last index of nums.
-
-  ;; Helper function to determine if a jump is valid based on the target.
-  (define (valid-jump? from to)
-    (<= (abs (- to from)) target))
-
-  ;; Recursive function to calculate the maximum jumps using memoization.
-  (define (max-jumps idx memo)
-    (if (>= idx (length nums))
+  (define n (length nums))
+  ;; Helper function to check if a jump from index i to j is valid
+  (define (valid-jump? i j)
+    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
+  
+  ;; Helper function to update the DP table
+  (define (update-dp dp i j)
+    (vector-set! dp j (max (vector-ref dp j) (add1 (vector-ref dp i)))))
+  
+  ;; Initialize DP table with -1 for unreachable positions and 0 for the start position
+  (define dp (make-vector n -1))
+  (vector-set! dp 0 0)
+  
+  ;; Iterate over each index as the starting point for jumps
+  (for ([i (in-range n)])
+    (when (not (= (vector-ref dp i) -1))  ; Only consider reachable positions
+      ;; Check possible jumps from index i to index j
+      (for ([j (in-range (add1 i) n)])
+        (when (valid-jump? i j)
+          (update-dp dp i j)))))
+  
+  ;; Check the value for the last position; return -1 if it's still -1
+  (let ([last-jump (vector-ref dp (sub1 n))])
+    (if (= last-jump -1)
         -1
-        (hash-ref memo idx
-                  (lambda ()
-                    (let loop ([j (+ idx 1)] [max-jump -1])
-                      (if (>= j (length nums))
-                          (begin
-                            (hash-set! memo idx max-jump)
-                            max-jump)
-                          (if (valid-jump? (list-ref nums idx) (list-ref nums j))
-                              (let ([jumps (+ 1 (max-jumps j memo))])
-                                (loop (add1 j) (max max-jump jumps)))
-                              (loop (add1 j) max-jump))))))))
-
-  ;; Initialize memoization hash and start from index 0.
-  (let ([memo (make-hash)])
-    (let ([result (max-jumps 0 memo)])
-      (if (= result -1)
-          -1
-          result))))
+        last-jump)))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

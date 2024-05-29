@@ -23,19 +23,21 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Function to fold the list from right to left
+  ;; Define a helper function for folding
   (define (fold-nums lst)
+    ;; Use a right fold to combine elements from right to left
     (foldr (lambda (current acc)
+             ;; Accumulate by adding current to the head of acc if condition is met
              (match acc
-               [(cons first rest)
-                (if (<= current first)
-                    (cons (+ current first) rest)
-                    (cons current acc))]
-               [else
-                (cons current acc)]))
-           '()
+               ['() (list current)]
+               [(cons head tail)
+                (if (<= current head)
+                    (cons (+ current head) tail)
+                    (cons current acc))]))
+           '()  ;; Initial accumulator is an empty list
            lst))
-  ;; The largest value in the folded list is the result.
+
+  ;; Compute the maximum value in the folded list
   (apply max (fold-nums nums)))
 
 ;; Example usage:

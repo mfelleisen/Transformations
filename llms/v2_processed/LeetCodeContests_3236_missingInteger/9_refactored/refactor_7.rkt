@@ -15,31 +15,24 @@
 ;; 1 <= nums.length <= 50
 ;; 1 <= nums[i] <= 50
 (define (missingInteger nums)
-  (define (longest-sequential-prefix lst)
-    (define (helper prev lst)
-      (match lst
-        [(cons x xs)
-         (if (= x (add1 prev))
-             (cons x (helper x xs))
-             '())]
-        [else '()]))
-    (if (null? nums)
-        '()
-        (cons (car nums) (helper (car nums) (cdr nums)))))
+  (define (longest-sequential-prefix nums)
+    (for/fold ([prefix '()] [last (sub1 (first nums))] #:result (reverse prefix))
+              ([x nums])
+      (if (= x (add1 last))
+          (values (cons x prefix) x)
+          (values prefix x))))
 
-  (define (sum-prefix lst)
-    (foldl + 0 lst))
-
-  (define (smallest-missing-int sum-prefix nums)
-    (define (loop x seen)
-      (if (set-member? seen x)
-          (loop (add1 x) seen)
-          x))
-    (loop sum-prefix (set (list->set nums))))
+  (define (sum-prefix seq)
+    (apply + seq))
   
-  (let* ((lsp (longest-sequential-prefix nums))
-         (sum-lsp (sum-prefix lsp)))
-    (smallest-missing-int sum-lsp nums)))
+  (define (smallest-missing-int sum-prefix nums)
+    (for/first ([x (in-naturals sum-prefix)]
+                #:unless (member x nums))
+      x))
+  
+  (define lsp (longest-sequential-prefix nums))
+  (define sum-lsp (sum-prefix lsp))
+  (smallest-missing-int sum-lsp nums))
 
 ;; Example usage:
 (display (missingInteger '(1 2 3 2 5)))  ; Output: 6

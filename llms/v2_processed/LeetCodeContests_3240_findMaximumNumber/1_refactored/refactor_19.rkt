@@ -32,26 +32,20 @@
   ;; Helper function to calculate the price of a number based on its binary representation
   ;; and the given x (position multiple to check)
   (define (price-of-number num)
-    (define bin-rep (number->string num 2))
-    (for/sum ([index (in-range 1 (add1 (string-length bin-rep)))])
-      (if (and (= (modulo index x) 0)
-               (char=? (string-ref bin-rep (- (string-length bin-rep) index)) #\1))
+    (for/sum ([i (in-range 1 (add1 (integer-length num)) x)])
+      (if (bitwise-bit-set? num (sub1 i))
           1
           0)))
+  
+  ;; Accumulator function to find the maximum number
+  (define (find-max num current-sum)
+    (define new-sum (+ current-sum (price-of-number num)))
+    (if (> new-sum k)
+        (sub1 num)
+        (find-max (add1 num) new-sum)))
 
-  ;; Binary search to find the maximum number
-  (define (binary-search low high)
-    (if (> low high)
-        (sub1 low)
-        (let* ([mid (quotient (+ low high) 2)]
-               [total-sum (for/sum ([num (in-range 1 (add1 mid))])
-                            (price-of-number num))])
-          (if (<= total-sum k)
-              (binary-search (add1 mid) high)
-              (binary-search low (sub1 mid))))))
-
-  ;; Start binary search from 1 to k
-  (binary-search 1 k))
+  ;; Start the search from 1 with initial sum 0
+  (find-max 1 0))
 
 ;; Example use cases
 (findMaximumNumber 9 1)  ; Output: 6

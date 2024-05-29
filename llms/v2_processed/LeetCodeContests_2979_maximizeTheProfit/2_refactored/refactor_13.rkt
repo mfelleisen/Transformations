@@ -24,9 +24,8 @@
 ;;  * 0 <= starti <= endi <= n - 1
 ;;  * 1 <= goldi <= 103
 (define (maximizeTheProfit n offers)
-  ;; Sort offers by their ending time
-  (define sorted-offers (sort offers < #:key second))
-  
+  (define sorted-offers (list->vector (sort offers < #:key second)))
+
   ;; Helper function to find the last non-conflicting offer using binary search
   (define (find-last-non-conflicting offers i)
     (let loop ((low 0) (high (- i 1)))
@@ -40,33 +39,19 @@
                     mid)
                 (loop low (- mid 1)))))))
 
-  ;; Recursive function to calculate maximum profit using memoization
-  (define (calculate-max-profit sorted-offers)
-    (define len (vector-length sorted-offers))
-    (define memo (make-vector len -1))
-    
-    (define (dp i)
-      (if (= (vector-ref memo i) -1)
-          (begin
-            (vector-set! memo i
-                         (if (= i 0)
-                             (third (vector-ref sorted-offers 0))
-                             (let* ((current-offer (vector-ref sorted-offers i))
-                                    (profit-including-current (third current-offer))
-                                    (l (find-last-non-conflicting sorted-offers i)))
-                               (when (>= l 0)
-                                 (set! profit-including-current (+ profit-including-current (dp l))))
-                               (max (dp (- i 1)) profit-including-current))))
-            (vector-ref memo i))
-          (vector-ref memo i)))
-    
-    (dp (- len 1)))
+  (define dp (make-vector (vector-length sorted-offers) 0))
+  (define (calculate-max-profit i)
+    (let ([profit-including-current (third (vector-ref sorted-offers i))]
+          [l (find-last-non-conflicting sorted-offers i)])
+      (when (>= l 0)
+        (set! profit-including-current (+ profit-including-current (vector-ref dp l))))
+      (vector-set! dp i (max (if (= i 0) 0 (vector-ref dp (- i 1))) profit-including-current))
+      (vector-ref dp i)))
+
+  (for ([i (in-range 0 (vector-length sorted-offers))])
+    (calculate-max-profit i))
   
-  ;; Convert offers list to vector for efficient access
-  (define offers-vector (list->vector sorted-offers))
-  
-  ;; Calculate the maximum profit
-  (calculate-max-profit offers-vector))
+  (vector-ref dp (- (vector-length sorted-offers) 1)))
 
 ;; Example usage:
 (maximizeTheProfit 5 (list (list 0 0 1) (list 0 2 2) (list 1 3 2)))  ;; Output: 3

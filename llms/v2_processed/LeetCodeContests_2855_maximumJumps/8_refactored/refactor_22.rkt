@@ -35,27 +35,28 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
+  ;; Get the length of the nums list
   (define n (length nums))
-  
-  ;; Initialize a helper function to perform the jump calculations recursively.
-  (define (update-dp i dp)
-    (if (= i n)
-        dp
-        (let loop ([j (add1 i)] [dp dp])
-          (cond
-            [(= j n) (update-dp (add1 i) dp)]
-            [(<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-             (loop (add1 j)
-                   (list-set dp j (max (list-ref dp j) (add1 (list-ref dp i)))))]
-            [else (loop (add1 j) dp)]))))
 
-  ;; Initialize the dp list with negative infinity for all indices except the first one set to 0.
-  (define dp (cons 0 (make-list (sub1 n) -inf.0)))
-  ;; Calculate the dp values starting from index 0.
-  (define final-dp (update-dp 0 dp))
-  ;; Check the value at the last index to determine if the end is reachable.
-  (define final-value (list-ref final-dp (sub1 n)))
-  (if (= final-value -inf.0) -1 final-value))
+  ;; Initialize the dp vector with negative infinity for all indices except the first one set to 0
+  (define dp (build-vector n (lambda (i) (if (= i 0) 0 -inf.0))))
+
+  ;; Define a helper function to update dp values based on the current index i
+  (define (update-dp i)
+    (when (not (= (vector-ref dp i) -inf.0))  ;; Only proceed if the current index is reachable
+      ;; Iterate over all possible jumps from index i
+      (for ([j (in-range (add1 i) n)])
+        (when (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
+          ;; Update the dp value at index j if a better jump count is found
+          (vector-set! dp j (max (vector-ref dp j) (add1 (vector-ref dp i))))))))
+
+  ;; Process each index to update dp values
+  (for ([i (in-range n)])
+    (update-dp i))
+
+  ;; Check the value at the last index to determine if the end is reachable
+  (let ((final-value (vector-ref dp (sub1 n))))
+    (if (= final-value -inf.0) -1 final-value)))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

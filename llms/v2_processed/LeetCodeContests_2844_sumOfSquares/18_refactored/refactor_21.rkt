@@ -17,21 +17,17 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
-  ;; Calculate the length of the nums list
   (define n (length nums))
-  
-  ;; Define a function to square a number
   (define (square x) (* x x))
   
-  ;; Calculate the sum of squares of special elements using for/fold
-  (for/fold ([sum 0]) ([i (in-range 1 (add1 n))])
-    (if (zero? (remainder n i))
-        (+ sum (square (list-ref nums (sub1 i))))
-        sum)))
+  (define special-squared
+    (for/list ([i (in-range 1 (add1 n))]
+               #:when (zero? (modulo n i)))
+      (square (list-ref nums (sub1 i)))))
+  
+  (apply + special-squared))
 
-;; Example usage
-(sumOfSquares '(1 2 3 4))  ;; -> 21
-(sumOfSquares '(2 7 1 19 18 3))  ;; -> 63
+;; The function sumOfSquares now accepts a list of numbers and returns the sum of the squares of all special elements.
 
 (require rackunit)
 

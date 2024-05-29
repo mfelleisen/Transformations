@@ -16,19 +16,21 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function to generate the k-avoiding array
-  (define (generate-k-avoiding n k)
-    (define (gen-avoid current count acc)
-      (cond
-        [(= count n) (reverse acc)]
-        [(or (not (member (- k current) acc))
-             (= current (- k current)))
-         (gen-avoid (add1 current) (add1 count) (cons current acc))]
-        [else (gen-avoid (add1 current) count acc)]))
-    (gen-avoid 1 0 '()))
+  ;; Helper function to check if adding `current` would violate the k-avoiding property
+  (define (valid-add? used current)
+    (not (set-member? used (- k current))))
 
-  ;; Calculate the sum of the k-avoiding array
-  (apply + (generate-k-avoiding n k)))
+  ;; Recursive function to construct the k-avoiding array and calculate its sum
+  (define (construct-k-avoiding used current count total-sum)
+    (cond
+      [(= count n) total-sum]
+      [(valid-add? used current)
+       (construct-k-avoiding (set-add used current) (+ current 1) (+ count 1) (+ total-sum current))]
+      [else
+       (construct-k-avoiding used (+ current 1) count total-sum)]))
+
+  ;; Start the recursive process with an empty set, starting number 1, count 0, and total sum 0
+  (construct-k-avoiding (set) 1 0 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ; Output: 18

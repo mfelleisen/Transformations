@@ -27,9 +27,10 @@
   ;; The first and last elements are never considered as peaks.
 
   (define (is-peak left x right)
-    ;; Helper function to determine if the element x is a peak compared to its neighbors left and right.
-    (and (> x left) (> x right)))
+    (and (< left x) (> x right)))
 
+  ;; Generate a list of indices from 1 to second last element index.
+  ;; Filter indices where the element is a peak.
   (for/list ([i (in-range 1 (sub1 (length mountain)))]
              #:when (is-peak (list-ref mountain (sub1 i))
                              (list-ref mountain i)

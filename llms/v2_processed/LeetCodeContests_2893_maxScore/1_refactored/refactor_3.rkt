@@ -22,28 +22,23 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  ;; Helper function to determine if two numbers have different parities
-  (define (different-parities? a b)
-    (not (= (modulo a 2) (modulo b 2))))
+  ;; Helper function to determine the parity of a number
+  (define (parity n) (modulo n 2))
 
-  ;; Recursive function to calculate max score using memoization
-  (define (max-score-from i memo)
-    (hash-ref memo i
-              (lambda ()
-                (let ((current-score (list-ref nums i)))
-                  (let loop ((j (add1 i)) (best current-score))
-                    (if (>= j (length nums))
-                        (begin
-                          (hash-set! memo i best)
-                          best)
-                        (let* ((next-score (list-ref nums j))
-                               (penalty (if (different-parities? current-score next-score) x 0))
-                               (new-score (+ best (- next-score penalty))))
-                          (loop (add1 j) (max best new-score)))))))))
+  ;; Process the list with a fold to compute the maximum score
+  (define-values (max-even max-odd _)
+    (for/fold ([max-even (first nums)]
+               [max-odd (- (first nums) x)]
+               [best (first nums)])
+              ([num (in-list (rest nums))])
+      (define new-even (max max-even (- max-odd x)))
+      (define new-odd (max max-odd (- max-even x)))
+      (define new-best (max best (+ num (if (zero? (parity num)) new-even new-odd))))
+      (values (if (zero? (parity num)) (+ new-even num) new-even)
+              (if (zero? (parity num)) new-odd (+ new-odd num))
+              new-best)))
 
-  ;; Start the calculation from index 0
-  (let ((memo (make-hash)))
-    (max-score-from 0 memo)))
+  max-even)
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

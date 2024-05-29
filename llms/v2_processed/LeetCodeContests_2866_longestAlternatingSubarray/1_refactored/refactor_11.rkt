@@ -28,29 +28,30 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
-  (define (valid-start? num)
-    (and (= (modulo num 2) 0) (<= num threshold)))
-  
-  (define (valid-next? prev curr)
-    (and (<= curr threshold)
-         (not (= (modulo prev 2) (modulo curr 2)))))
+  (define (valid-alternating? lst)
+    (and (<= (length lst) 100)
+         (even? (first lst))
+         (for/and ([i (in-range 1 (length lst))])
+           (<= (list-ref lst i) threshold)
+           (not (= (modulo (list-ref lst (- i 1)) 2) (modulo (list-ref lst i) 2))))))
 
-  (define (find-longest l)
-    (let loop ([r (+ l 1)] [current-length 1])
-      (cond
-        [(>= r (length nums)) current-length]
-        [(valid-next? (list-ref nums (- r 1)) (list-ref nums r))
-         (loop (+ r 1) (+ current-length 1))]
-        [else current-length])))
+  (define (max-length current max-len)
+    (if (empty? current)
+        max-len
+        (let ([new-max (if (valid-alternating? current) (max max-len (length current)) max-len)])
+          (max-length (rest current) new-max))))
 
-  (for/fold ([max-length 0])
-            ([i (in-range (length nums))]
-             #:when (valid-start? (list-ref nums i)))
-    (max max-length (find-longest i))))
+  (define (find-longest nums)
+    (for/fold ([max-len 0])
+              ([sublist (in-list (for/list ([start (in-range (length nums))])
+                                   (drop nums start)))])
+      (max-length sublist max-len)))
+
+  (find-longest nums))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3
-(longestAlternatingSubarray '(1 2) 2)      ; Output: 1
+(longestAlternatingSubarray '(1 2) 2)       ; Output: 1
 (longestAlternatingSubarray '(2 3 4 5) 4)  ; Output: 3
 
 (require rackunit)

@@ -32,11 +32,9 @@
   (define (area length width)
     (* length width))
 
-  ;; Use foldl to traverse the list and find the rectangle with the longest diagonal or maximum area
+  ;; Use `for/fold` to traverse the list and find the rectangle with the longest diagonal or maximum area
   (define-values (max-diagonal max-area)
-    (for/fold ([max-diagonal 0]
-               [max-area 0])
-              ([dim (in-list dimensions)])
+    (for/fold ([max-diagonal 0] [max-area 0]) ([dim (in-list dimensions)])
       (define length (first dim))
       (define width (second dim))
       (define current-diagonal (diagonal-squared length width))
@@ -52,7 +50,6 @@
         [else
          (values max-diagonal max-area)])))
 
-  ;; Return the maximum area
   max-area)
 
 ;; Example usage:

@@ -32,18 +32,27 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
-  
-  ;; Helper function to generate a sequence of integers while skipping numbers that would form invalid pairs
-  (define (generate-sequence n target)
-    (let loop ((i 1) (count 0) (result '()))
-      (if (= count n)
-          (reverse result)
-          (if (ormap (λ (x) (= (+ x i) target)) result)
-              (loop (+ i 1) count result)
-              (loop (+ i 1) (+ count 1) (cons i result))))))
 
-  ;; Compute the sum of the generated sequence and take modulo
-  (modulo (apply + (generate-sequence n target)) MOD))
+  ;; Helper function to calculate the sum of first m natural numbers
+  (define (sum-first-m m)
+    (/ (* m (+ m 1)) 2))
+
+  ;; Compute the sum of the beautiful array and take modulo
+  (define (beautiful-sum n target)
+    (define-values (sum total i)
+      (for/fold ([sum 0]
+                 [total 0]
+                 [i 1])
+                ([count (in-range n)])
+        (if (< (- target i) i)
+            (values (+ sum i) (+ total 1) (+ i 1))
+            (values sum total (+ i 1)))))
+    (define excess (- n total))
+    (if (zero? excess)
+        (modulo sum MOD)
+        (modulo (+ sum (sum-first-m excess)) MOD)))
+
+  (beautiful-sum n target))
 
 ;; Example test cases
 (minimumPossibleSum 2 3)   ; Output: 4

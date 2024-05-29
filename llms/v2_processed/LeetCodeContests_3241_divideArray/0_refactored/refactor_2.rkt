@@ -25,21 +25,30 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (define (group-ok? group k)
+  (define (valid-group? group)
     (<= (- (last group) (first group)) k))
-  
-  (define (partition-helper remaining result)
-    (match remaining
-      [(list) (reverse result)]
-      [(list _ _)
-       '()]
-      [(list-rest x y z rest)
-       (let ([group (list x y z)])
-         (if (group-ok? group k)
-             (partition-helper rest (cons group result))
-             '()))]))
-  
-  (partition-helper (sort nums <) '()))
+
+  (define (try-grouping sorted-nums accum)
+    (match sorted-nums
+      [(list) (reverse accum)]
+      [(list-rest _ _)
+       (if (>= (length sorted-nums) 3)
+           (let ([group (take sorted-nums 3)])
+             (if (valid-group? group)
+                 (try-grouping (drop sorted-nums 3) (cons group accum))
+                 '()))
+           '())]))
+
+  (define sorted-nums (sort nums <))
+  (try-grouping sorted-nums '()))
+
+;; Example Usage:
+;; (divideArray '(1 3 4 8 7 9 3 5 1) 2)
+;; Output: '((7 8 9) (3 4 5) (1 1 3))
+
+;; (divideArray '(1 3 3 2 7 3) 3)
+;; Output: '()
+
 
 (require rackunit)
 

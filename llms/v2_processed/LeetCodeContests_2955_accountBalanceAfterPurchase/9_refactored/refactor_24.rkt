@@ -18,19 +18,21 @@
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
-  ;; Calculate the nearest multiple of 10
-  (define rounded-amount
-    (let ([lower-bound (* 10 (quotient purchaseAmount 10))]
-          [upper-bound (+ (* 10 (quotient purchaseAmount 10)) 10)])
-      (if (<= (- upper-bound purchaseAmount) (- purchaseAmount lower-bound))
-          upper-bound
-          lower-bound)))
-  ;; Calculate the remaining balance
-  (- 100 rounded-amount))
+  (define initial-balance 100)
+  
+  (define (round-to-nearest-multiple-of-10 amount)
+    (define lower-bound (* 10 (quotient amount 10)))
+    (define upper-bound (+ lower-bound 10))
+    (if (< (- amount lower-bound) (- upper-bound amount))
+        lower-bound
+        upper-bound))
+  
+  (define rounded-amount (round-to-nearest-multiple-of-10 purchaseAmount))
+  (- initial-balance rounded-amount))
 
-;; The refactored function `accountBalanceAfterPurchase` maintains the same behavior,
-;; using local bindings to calculate the nearest multiple of 10 and the remaining balance
-;; without relying on mutable data structures or imperative constructs.
+;; Examples:
+(accountBalanceAfterPurchase 9)  ; Output: 90
+(accountBalanceAfterPurchase 15) ; Output: 80
 
 (require rackunit)
 

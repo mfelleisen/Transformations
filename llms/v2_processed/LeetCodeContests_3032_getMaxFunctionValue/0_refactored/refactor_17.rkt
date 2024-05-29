@@ -29,8 +29,8 @@
 ;;  * 1 <= k <= 1010
 (define (getMaxFunctionValue receiver k)
   (define n (length receiver))
-
-  ;; Function to calculate f(x) for a given starting player x using recursion
+  
+  ;; Function to calculate f(x) for a given starting player x
   (define (calculate-f-value start)
     (define (loop current-id f-value passes)
       (if (= passes k)
@@ -38,9 +38,10 @@
           (let ([next-id (list-ref receiver current-id)])
             (loop next-id (+ f-value next-id) (+ passes 1)))))
     (loop start start 0))
-
-  ;; Use higher-order functions to find the maximum f(x) for all starting players
-  (apply max (map calculate-f-value (range n))))
+  
+  ;; Find the maximum of f(x) for all x from 0 to n-1
+  (apply max (for/list ([x (in-range n)])
+                (calculate-f-value x))))
 
 ;; Example tests
 (getMaxFunctionValue '(2 0 1) 4)  ; Output: 6

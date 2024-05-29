@@ -15,27 +15,21 @@
 ;; It can be proven that there is no k-avoiding array with a sum less than 3.
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
-(define (minimumSum n k) ;; contract  ms/c
-  ;; Helper function to check if a number violates the k-avoiding property
-  (define (violates-k-avoiding? used-numbers current-number)
-    (set-member? used-numbers (- k current-number)))
-  
-  ;; Recursive helper function to build the k-avoiding array and calculate the sum
-  (define (build-and-sum used-numbers current-number count total-sum)
-    (cond
-      [(= count n)  ;; Base case: if we've added enough numbers, return the sum
-       total-sum]
-      [(or (violates-k-avoiding? used-numbers current-number)  ;; Check k-avoiding condition
-           (set-member? used-numbers current-number))  ;; Check uniqueness
-       (build-and-sum used-numbers (+ current-number 1) count total-sum)]  ;; Skip current number
-      [else
-       (build-and-sum (set-add used-numbers current-number)  ;; Add current number to set
-                      (+ current-number 1)
-                      (+ count 1)
-                      (+ total-sum current-number))]))  ;; Add to sum and recurse
-  
-  ;; Start the recursive process with an empty set, starting number 1, count 0, and sum 0
-  (build-and-sum (set) 1 0 0))
+(define (minimumSum n k)
+  ;; Define a function to build the sequence of k-avoiding numbers.
+  (define (build-seq n k)
+    (define (loop num used count total)
+      (cond
+        [(= count n) total]  ;; Base case: if we've added enough numbers, return the sum
+        [(or (set-member? used num)
+             (set-member? used (- k num)))
+         (loop (add1 num) used count total)]  ;; Skip if it violates k-avoiding condition
+        [else
+         (loop (add1 num) (set-add used num) (add1 count) (+ total num))]))  ;; Add the number to set and sum
+    (loop 1 (set) 0 0))
+
+  ;; Start building the sequence and return the total sum.
+  (build-seq n k))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

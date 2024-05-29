@@ -26,26 +26,26 @@
 ;;  * 0 <= nums[i] < 231
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
-  ;; Define the maximum number of bits to consider (up to 31 bits for 32-bit integers)
+  ;; Calculate the bitwise OR for the k-or condition
   (define max-bits 31)
-  
-  ;; Helper function to count how many numbers have the ith bit set
-  (define (count-set-bits i nums)
-    (length (filter (lambda (num) (not (zero? (bitwise-and num (expt 2 i)))))
-                    nums)))
-  
-  ;; Construct the result by checking each bit position
-  (define (construct-result i nums)
-    (if (= i max-bits)
-        0  ;; Base case: if we've checked all bits, return 0
-        (let ((bit-count (count-set-bits i nums)))
-          ;; If at least k numbers have the ith bit set, include this bit in the result
-          (if (>= bit-count k)
-              (bitwise-ior (expt 2 i) (construct-result (add1 i) nums)) ;; Set the ith bit and recurse
-              (construct-result (add1 i) nums))))) ;; Recurse without setting the bit
-  
-  ;; Start the recursive construction of the result from the 0th bit
-  (construct-result 0 nums))
+
+  ;; Helper function to count set bits for a given bit index
+  (define (count-set-bits i)
+    (for/fold ([count 0]) ([num (in-list nums)])
+      (if (bitwise-and num (arithmetic-shift 1 i))
+          (add1 count)
+          count)))
+
+  ;; Construct the result recursively
+  (define (construct-result i)
+    (cond
+      [(= i max-bits) 0]
+      [(>= (count-set-bits i) k)
+       (bitwise-ior (arithmetic-shift 1 i) (construct-result (add1 i)))]
+      [else (construct-result (add1 i))]))
+
+  ;; Start the recursive construction from bit index 0
+  (construct-result 0))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)  ;; Output: 9

@@ -34,26 +34,21 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  (let ([n (length nums)])
-    ;; Define a helper function to update dp based on the current index i
-    (define (update-dp i dp)
-      (if (= (list-ref dp i) -inf.0)
-          dp  ; If dp[i] is -inf, return dp unchanged
-          (for/fold ([dp-acc dp])
-                    ([j (in-range (+ i 1) n)])
-            (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-                (list-set dp-acc j (max (list-ref dp-acc j) (+ 1 (list-ref dp-acc i))))
-                dp-acc))))
-    
-    ;; Fold over the range from 0 to n to update dp for each index
-    (define final-dp (for/fold ([dp (cons 0 (make-list (- n 1) -inf.0))])
-                                ([i (in-range n)])
-                      (update-dp i dp)))
-    
-    ;; Check the last element of dp; if it's still -inf, return -1, otherwise return the value
-    (if (= (last final-dp) -inf.0)
-        -1
-        (last final-dp))))
+  ;; Helper function to compute the maximum number of jumps from a given index
+  (define (max-jumps-from i)
+    (define start (list-ref nums i))
+    (for/fold ([max-jumps 0])
+              ([j (in-range (+ i 1) (length nums))]
+               #:when (<= (abs (- (list-ref nums j) start)) target))
+      (max (max-jumps-from j) (add1 max-jumps))))
+
+  (define n (length nums))
+  (define result (max-jumps-from 0))
+
+  ;; If result is 0 and the length of the list is more than 1, return -1 as it's unreachable
+  (if (and (= result 0) (> n 1))
+      -1
+      result))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

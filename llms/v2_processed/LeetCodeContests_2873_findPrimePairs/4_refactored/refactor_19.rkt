@@ -2,31 +2,31 @@
 
 ;; Function to check if a number is prime
 (define (is-prime? num)
-  (cond 
+  (cond
     [(<= num 1) #f]
     [(<= num 3) #t]
-    [(or (zero? (remainder num 2)) (zero? (remainder num 3))) #f]
-    [else
-     (let loop ([i 5])
-       (cond 
-         [(> (* i i) num) #t]
-         [(or (zero? (remainder num i)) (zero? (remainder num (+ i 2)))) #f]
-         [else (loop (+ i 6))]))]))
+    [(zero? (remainder num 2)) #f]
+    [(zero? (remainder num 3)) #f]
+    [else (let loop ([i 5])
+            (cond
+              [(> (* i i) num) #t]
+              [(or (zero? (remainder num i))
+                   (zero? (remainder num (+ i 2)))) #f]
+              [else (loop (+ i 6))]))]))
 
 ;; Function to find prime pairs that sum to n
 (define (findPrimePairs n)
-  ;; Generate a list of primes up to n
-  (define primes (filter is-prime? (range 1 (add1 n))))
+  ;; Generate list of primes up to n
+  (define primes
+    (for/list ([x (in-range 2 (add1 n))]
+               #:when (is-prime? x))
+      x))
   
-  ;; Helper function to find pairs
-  (define (find-pairs primes)
-    (for*/list ([x (in-list primes)]
-                [y (in-list primes)]
-                #:when (and (<= x y) (= (+ x y) n)))
-      (list x y)))
-  
-  ;; Return the sorted list of prime pairs
-  (find-pairs primes))
+  ;; Find all pairs (x, y) where x + y = n and both x and y are prime
+  (for*/list ([x primes]
+              [y primes]
+              #:when (and (<= x y) (= (+ x y) n)))
+    (list x y)))
 
 ;; Example usage
 (findPrimePairs 10)  ;; Output: '((3 7) (5 5))

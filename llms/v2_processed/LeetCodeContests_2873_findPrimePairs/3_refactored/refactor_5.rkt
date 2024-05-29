@@ -2,27 +2,24 @@
 
 ;; Function to check if a number is prime
 (define (is-prime? num)
-  ;; Check for non-prime conditions
+  (define (check-divisors i)
+    (or (> (* i i) num)
+        (and (not (zero? (remainder num i)))
+             (not (zero? (remainder num (+ i 2))))
+             (check-divisors (+ i 6)))))
   (cond [(<= num 1) #f]
         [(<= num 3) #t]
-        [(zero? (remainder num 2)) #f]
-        [(zero? (remainder num 3)) #f]
-        [else
-         ;; Check divisibility from 5 onwards, skipping even numbers
-         (define (divisible? x y) (zero? (remainder x y)))
-         (let loop ([i 5])
-           (cond [(> (* i i) num) #t]
-                 [(divisible? num i) #f]
-                 [(divisible? num (+ i 2)) #f]
-                 [else (loop (+ i 6))]))]))
+        [(or (zero? (remainder num 2))
+             (zero? (remainder num 3))) #f]
+        [else (check-divisors 5)]))
 
 ;; Function to find prime pairs that add up to n
 (define (findPrimePairs n)
-  ;; Generate list of primes up to n
-  (define primes (filter is-prime? (range 2 (add1 n))))
+  ;; Generate a list of primes up to n
+  (define primes (filter is-prime? (range 1 (add1 n))))
   ;; Find pairs using a filtered Cartesian product
   (for*/list ([x primes]
-              [y (in-list (drop-right primes (sub1 (length primes))))] ;; Ensure y <= x
+              [y (in-list primes)]
               #:when (and (<= x y) (= (+ x y) n)))
     (list x y)))
 

@@ -45,8 +45,10 @@
   
   ;; Calculate the K-or by iterating over each bit position and combining the results.
   (define (calculate-k-or bits)
-    (for/fold ([result 0]) ([bit bits])
-      (bitwise-ior result (result-bit bit))))
+    (foldl (lambda (bit acc)
+             (bitwise-ior (result-bit bit) acc))
+           0
+           bits))
   
   ;; Generate a list of bit positions from 0 to max-bits-1 and compute the K-or.
   (calculate-k-or (range 0 max-bits)))

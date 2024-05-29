@@ -18,11 +18,16 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  (define (square x) (* x x))
-  (define (special? i) (zero? (modulo n i)))
-  
-  (for/sum ([i (in-range 1 (add1 n))] #:when (special? i))
-    (square (list-ref nums (sub1 i)))))
+
+  ;; Define a helper function that checks if an index is a divisor of n
+  (define (is-divisor? i)
+    (zero? (modulo n i)))
+
+  ;; Compute the sum of the squares of elements at indices that divide n
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (is-divisor? i))
+    (let ([elem (list-ref nums (sub1 i))])
+      (* elem elem))))
 
 ;; Example usage:
 (sumOfSquares '(1 2 3 4)) ; Output: 21

@@ -27,12 +27,13 @@
   ;; from right to left, combining elements when the left one is less than or equal to the right one.
   (define (merge-right-to-left lst)
     (foldr (lambda (current acc)
-             (if (<= current (car acc))
-                 (cons (+ current (car acc)) (cdr acc))
-                 (cons current acc)))
-           (list (first lst))
-           (rest lst)))
-
+             (match acc
+               [(cons a rest) (if (<= current a)
+                                  (cons (+ current a) rest)
+                                  (cons current acc))]
+               [_ (cons current acc)]))
+           '()
+           lst))
   ;; The largest element after all possible merges is the maximum of the resulting list.
   (apply max (merge-right-to-left nums)))
 

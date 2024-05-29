@@ -31,12 +31,15 @@
          (list-ref sorted-nums i))))
 
   (define (find-shift start)
-    (cond
-      [(= start n) -1]
-      [(is-valid-shift start) (modulo (- n start) n)]
-      [else (find-shift (+ start 1))]))
+    (if (>= start n)
+        -1
+        (if (is-valid-shift start)
+            (modulo (- n start) n)
+            (find-shift (+ start 1)))))
 
-  (find-shift 0))
+  (if (= n 1)
+      0
+      (find-shift 0)))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2

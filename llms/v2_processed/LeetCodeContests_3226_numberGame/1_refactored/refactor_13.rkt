@@ -19,15 +19,21 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  (define (game-loop sorted-nums acc)
-    (if (null? sorted-nums)
-        (reverse acc)
-        (let ([alice-choice (first sorted-nums)]
-              [bob-choice (second sorted-nums)])
-          (game-loop (cddr sorted-nums)
-                     (cons alice-choice (cons bob-choice acc))))))
+  ;; Function to simulate the game between Alice and Bob where they alternately pick the minimum element from nums
+  ;; and append it to a result list, with Bob's choices first.
+  (define (simulate-game nums)
+    (define sorted-nums (sort nums <))
+    (define (play-game alice-turn nums acc)
+      (match nums
+        [(list) (reverse acc)]
+        [(cons a (cons b rst))
+         (if alice-turn
+             (play-game #f rst (cons b (cons a acc)))
+             (play-game #t rst (cons a (cons b acc))))]))
+    (play-game #t sorted-nums '()))
 
-  (game-loop (sort nums <) '()))
+  ;; Return the resulting array after the game
+  (simulate-game nums))
 
 ;; Example usage:
 (numberGame '(5 4 2 3)) ;; Output: '(3 2 5 4)

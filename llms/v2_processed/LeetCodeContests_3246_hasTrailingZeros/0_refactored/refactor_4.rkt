@@ -20,23 +20,21 @@
 ;; Constraints:
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
-(define (bitwise-or-has-trailing-zero? x y)
-  (zero? (bitwise-and (bitwise-ior x y) 1)))
-
-;; Function to generate combinations of the list of size n
-(define (combinations lst n)
-  (cond
-    [(zero? n) '(())]
-    [else
-     (for*/list ([x lst]
-                 [rest (in-list (combinations (cdr (member x lst)) (- n 1)))])
-       (cons x rest))]))
-
-;; Main function to check if any combination of two elements in the list has trailing zeros in the bitwise OR
 (define (hasTrailingZeros nums)
+  (define (bitwise-or-has-trailing-zero? x y)
+    (zero? (bitwise-and (bitwise-ior x y) 1)))
+
+  ;; Helper function to generate combinations of size 2.
+  (define (combinations2 lst)
+    (for*/list ([i (in-list lst)]
+                [j (in-list (cdr (member i lst)))])
+      (list i j)))
+
+  ;; Check if any pair of elements in nums has a bitwise OR with trailing zero.
   (ormap (lambda (pair)
-           (apply bitwise-or-has-trailing-zero? pair))
-         (combinations nums 2)))
+           (match pair
+             [(list x y) (bitwise-or-has-trailing-zero? x y)]))
+         (combinations2 nums)))
 
 ;; Example usage:
 (displayln (hasTrailingZeros '(1 2 3 4 5)))  ; Output: #t

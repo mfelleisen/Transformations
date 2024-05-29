@@ -25,16 +25,17 @@
   (define (triplet-value a b c)
     (* (- a b) c))
   
-  ;; Generate all valid triplets (i, j, k) where i < j < k
-  (define (generate-triplets nums)
-    (for*/list ((i (in-range 0 (- (length nums) 2)))
-                (j (in-range (+ i 1) (- (length nums) 1)))
-                (k (in-range (+ j 1) (length nums))))
-      (triplet-value (list-ref nums i) (list-ref nums j) (list-ref nums k))))
+  ;; Generate all valid triplets (i, j, k) where i < j < k and compute their values
+  (define values
+    (for*/list ([i (in-list nums)]
+                [j (in-list (rest nums))]
+                [k (in-list (rest (rest nums)))]
+                #:when (< (index-of nums i) (index-of nums j) (index-of nums k)))
+      (triplet-value i j k)))
   
   ;; Compute the maximum value from all triplets or 0 if all are negative
   (define max-triplet-value
-    (apply max 0 (generate-triplets nums)))
+    (apply max 0 values))
   
   ;; Return the computed maximum value
   max-triplet-value)

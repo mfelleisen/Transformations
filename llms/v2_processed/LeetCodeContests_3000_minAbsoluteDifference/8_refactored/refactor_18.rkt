@@ -27,21 +27,22 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  (define n (length nums))
+  ;; Convert list to vector for faster access
+  (define v (list->vector nums))
+  (define len (vector-length v))
+  (define (valid-indices? i j) (>= (- j i) x))
+  (define (abs-diff i j) (abs (- (vector-ref v i) (vector-ref v j))))
   
-  (define (loop i min-diff)
-    (if (< i (- n x))
-        (let ((current-num (list-ref nums i)))
-          (let ((new-min-diff (for/fold ([current-min min-diff])
-                                ([j (in-range (+ i x) n)])
-                                (min current-min
-                                     (abs (- current-num (list-ref nums j)))))))
-            (if (zero? new-min-diff)
-                0
-                (loop (+ i 1) new-min-diff))))
-        min-diff))
+  ;; Helper function to find minimum absolute difference for a given index i
+  (define (min-diff-for-i i)
+    (for/fold ([min-diff +inf.0]) ([j (in-range (+ i x) len)])
+      (if (valid-indices? i j)
+          (min min-diff (abs-diff i j))
+          min-diff)))
   
-  (loop 0 +inf.0))
+  ;; Main computation: iterate over all valid starting indices
+  (for/fold ([min-diff +inf.0]) ([i (in-range (- len x))])
+    (min min-diff (min-diff-for-i i))))
 
 ;; Example usage:
 (minAbsoluteDifference '(4 3 2 4) 2)  ; Output: 0

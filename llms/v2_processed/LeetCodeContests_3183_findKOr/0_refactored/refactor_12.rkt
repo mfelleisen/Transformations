@@ -26,30 +26,26 @@
 ;;  * 0 <= nums[i] < 231
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
-  (define max-bits 31)  ; Maximum number of bits to consider
+  ;; Define the maximum number of bits to consider (up to 31 bits for 32-bit integers)
+  (define max-bits 31)
 
-  ;; Helper function to count set bits for a given bit position
-  (define (count-set-bits i)
-    (for/sum ([num (in-list nums)])
-      (if (zero? (bitwise-and num (arithmetic-shift 1 i)))
-          0
-          1)))
+  ;; Helper function to check if the ith bit is set in num
+  (define (bit-set? num i)
+    (not (zero? (bitwise-and num (arithmetic-shift 1 i)))))
 
   ;; Construct the result by checking each bit position
-  (define (construct-result i acc)
-    (if (= i max-bits)
-        acc
-        (let ([bit-count (count-set-bits i)])
-          (if (>= bit-count k)
-              (construct-result (add1 i) (bitwise-ior acc (arithmetic-shift 1 i)))
-              (construct-result (add1 i) acc)))))
-
-  ;; Start the recursive construction of the result from the 0th bit
-  (construct-result 0 0))
+  (for/fold ([result 0])
+            ([i (in-range max-bits)])
+    (define bit-count
+      (for/sum ([num (in-list nums)])
+        (if (bit-set? num i) 1 0)))
+    (if (>= bit-count k)
+        (bitwise-ior result (arithmetic-shift 1 i))
+        result)))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)  ;; Output: 9
-(findKOr '(2 12 1 11 4 5) 6)  ;; Output: 0
+(findKOr '(2 12 1 11 4 5) 6)   ;; Output: 0
 (findKOr '(10 8 5 9 11 6 8) 1)  ;; Output: 15
 
 (require rackunit)

@@ -26,18 +26,20 @@
 (define (isGood nums)
   ;; Determine if the list nums is a "good" array.
   ;; A "good" array is a permutation of [1, 2, ..., n - 1, n, n] where n is the maximum element in nums.
+  
+  ;; Calculate the maximum element which will act as 'n'
   (define n (apply max nums))
 
-  ;; Generate the expected "good" array based on n
-  (define good-array (append (range 1 n) (list n n)))
-
-  ;; Check if nums is a permutation of the good-array
-  (define (is-permutation? lst1 lst2)
-    (equal? (sort lst1 <) (sort lst2 <)))
-
-  ;; Ensure the list length is exactly n+1 and nums is a permutation of the good array
+  ;; Create a frequency dictionary of elements in nums
+  (define counts (for/fold ([dict (hash)]) ([num nums])
+                   (hash-update dict num add1 0)))
+  
+  ;; Ensure the list length is exactly n+1
   (and (= (length nums) (+ n 1))
-       (is-permutation? nums good-array)))
+       ;; Check for the presence of each element from 1 to n-1 exactly once, and n exactly twice
+       (for/and ([i (in-range 1 n)])
+         (= (hash-ref counts i 0) 1))
+       (= (hash-ref counts n 0) 2)))
 
 ;; Example usage:
 (isGood '(2 1 3))  ; Output: #f

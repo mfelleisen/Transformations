@@ -25,24 +25,18 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Helper function to calculate the cost of splitting the list into 3 contiguous subarrays
-  (define (calculate-cost splits)
-    (apply + (map (λ (split) (first split)) splits)))
-
-  ;; Generate all possible ways to split the list into 3 contiguous subarrays
-  (define (generate-splits nums)
-    (for*/list ([i (in-range 1 (- (length nums) 2))]
-                [j (in-range (+ i 1) (- (length nums) 1))])
-      (list (take nums i) (take (drop nums i) (- j i)) (drop nums j))))
-
-  ;; Find the minimum cost from all possible splits
-  (define (find-min-cost splits)
-    (apply min (map calculate-cost splits)))
-
-  ;; If the list has exactly 3 elements, each element forms its own subarray
-  (if (= (length nums) 3)
+  ;; Function to calculate the minimum cost of splitting the list into 3 contiguous subarrays
+  (define n (length nums))
+  (define (cost i j) (+ (list-ref nums 0) (list-ref nums i) (list-ref nums j)))
+  
+  (if (= n 3)
+      ;; If there are exactly 3 elements, each element forms its own subarray
       (apply + nums)
-      (find-min-cost (generate-splits nums))))
+      ;; Otherwise, find the minimum cost by examining possible splits
+      (for*/fold ([min-cost +inf.0])
+                 ([i (in-range 1 (- n 1))]
+                  [j (in-range (+ i 1) n)])
+        (min min-cost (cost i j)))))
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

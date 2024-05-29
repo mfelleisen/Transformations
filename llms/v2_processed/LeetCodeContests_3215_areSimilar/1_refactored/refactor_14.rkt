@@ -24,37 +24,40 @@
 ;; 1 <= mat[i].length <= 25
 ;; 1 <= mat[i][j] <= 25
 ;; 1 <= k <= 50
+(define (right-shift row k)
+  (define len (length row))
+  (define shifts (modulo k len))
+  (append (drop-right row shifts)
+          (take-right row shifts)))
+
+;; Helper function to perform left cyclic shift
+(define (left-shift row k)
+  (define len (length row))
+  (define shifts (modulo k len))
+  (append (drop row shifts)
+          (take row shifts)))
+
+;; Function to apply appropriate shift depending on the row index
+(define (process-row k idx row)
+  (if (even? idx)
+      (left-shift row k)
+      (right-shift row k)))
+
+;; Main function to check if cyclic shifts on matrix rows result in the same matrix
 (define (areSimilar mat k)
-  ;; Helper function to perform a cyclic shift
-  (define (cyclic-shift row shifts)
-    (let* ([len (length row)]
-           [effective-shifts (modulo shifts len)])
-      (append (drop row (- len effective-shifts))
-              (take row (- len effective-shifts)))))
-
-  ;; Function to apply appropriate shift depending on the row index
-  (define (process-row row idx)
-    (if (even? idx)
-        (cyclic-shift row (- k)) ; left shift
-        (cyclic-shift row k)))   ; right shift
-
   ;; Transform the matrix by applying shifts
   (define transformed-mat
-    (map-indexed process-row mat))
+    (map-indexed (curry process-row k) mat))
   
   ;; Compare initial and final matrices
   (equal? mat transformed-mat))
 
 ;; The function `map-indexed` is not built-in in Racket, so we define it using `map` and `in-indexed`
 (define (map-indexed f lst)
-  (map (lambda (idx item) (f item idx))
-       (build-list (length lst) values)
-       lst))
+  (for/list ([idx (in-naturals)]
+             [item (in-list lst)])
+    (f idx item)))
 
-;; Example usage
-;; (areSimilar '((1 2 1 2) (5 5 5 5) (6 3 6 3)) 2)
-;; (areSimilar '((2 2) (2 2)) 3)
-;; (areSimilar '((1 2)) 1)
 
 (require rackunit)
 

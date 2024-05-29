@@ -22,36 +22,29 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  ;; Sorting the numbers
+  ;; Sort the list of numbers
   (define sorted-nums (sort nums <))
   
-  ;; Helper function to divide the list into groups of 3
-  (define (group-of-3 lst)
-    (define (helper lst result)
-      (if (empty? lst)
-          (reverse result)
-          (let ([group (take lst 3)])
-            (if (= (length group) 3)
-                (helper (drop lst 3) (cons group result))
-                '()))))
-    (helper lst '()))
-
-  ;; Checking the condition for each group
-  (define (valid-group? group)
-    (and (= (length group) 3)
-         (<= (- (last group) (first group)) k)))
-
-  ;; Main logic
+  ;; Helper function to recursively create groups of size 3
+  (define (create-groups lst)
+    (match lst
+      ;; If the list is empty, return an empty list of groups
+      [(list) '()]
+      ;; If the list has less than 3 elements, return an empty list (invalid case)
+      [(list _ _ ...) '()]
+      ;; Try to create a group of 3
+      [(list a b c rest ...)
+       (if (<= (- c a) k)
+           (cons (list a b c) (create-groups rest))
+           '())])) ; Return empty list if the condition is not met
+  
+  ;; Check if the length of the list is divisible by 3
   (if (not (= (remainder (length nums) 3) 0))
-      '() ; Return empty list if the length of nums is not divisible by 3
-      (let ([groups (group-of-3 sorted-nums)])
-        (if (and groups (for/and ([group groups]) (valid-group? group)))
-            groups
-            '()))))
+      '() ; Return empty list if not divisible by 3
+      (create-groups sorted-nums)))
 
-;; Test examples
+;; Example usage
 (display (divideArray '(1 3 4 8 7 9 3 5 1) 2)) ; Output: '((1 1 3) (3 4 5) (7 8 9))
-(newline)
 (display (divideArray '(1 3 3 2 7 3) 3)) ; Output: '()
 
 (require rackunit)

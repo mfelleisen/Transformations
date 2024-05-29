@@ -21,25 +21,28 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  (define (window-sum lst)
-    (apply + lst))
+  (define (almost-unique-subarray-sum subarray)
+    (define distinct-count (length (remove-duplicates subarray)))
+    (if (>= distinct-count m)
+        (apply + subarray)
+        0))
 
-  (define (has-enough-distinct-elements? lst)
-    (>= (length (remove-duplicates lst)) m))
+  (define (subarrays nums k)
+    (if (>= (length nums) k)
+        (cons (take nums k) (subarrays (rest nums) k))
+        '()))
 
-  (define (process-windows nums max-sum window)
-    (match (drop nums k)
-      [(cons next rest)
-       (let* ([new-window (append (rest window) (list next))]
-              [current-sum (window-sum new-window)]
-              [valid-window? (has-enough-distinct-elements? new-window)]
-              [new-max-sum (if valid-window? (max max-sum current-sum) max-sum)])
-         (process-windows (rest nums) new-max-sum new-window))]
-      [else max-sum]))
+  (define max-sum
+    (for/fold ([max-sum 0])
+              ([subarray (in-list (subarrays nums k))])
+      (max max-sum (almost-unique-subarray-sum subarray))))
+  
+  max-sum)
 
-  (if (< (length nums) k)
-      0
-      (process-windows nums 0 (take nums k))))
+;; Testing with examples
+(maxSum '(2 6 7 3 1 7) 3 4)   ;; Expected output: 18
+(maxSum '(5 9 9 2 4 5 4) 1 3) ;; Expected output: 23
+(maxSum '(1 2 1 2 1 2 1) 3 3) ;; Expected output: 0
 
 (require rackunit)
 

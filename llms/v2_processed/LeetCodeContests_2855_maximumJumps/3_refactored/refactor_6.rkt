@@ -34,27 +34,31 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  (let ([n (length nums)])
-    ;; Define a helper function to update dp based on the current index i
-    (define (update-dp i dp)
-      (if (= (list-ref dp i) -inf.0)
-          dp  ; If dp[i] is -inf, return dp unchanged
-          (for/fold ([dp-acc dp])
-                    ([j (in-range (+ i 1) n)])
-            (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-                (list-set dp-acc j (max (list-ref dp-acc j) (+ 1 (list-ref dp-acc i))))
-                dp-acc))))
-    
-    ;; Initialize the dp list with negative infinity except the first element set to 0
-    (define initial-dp (cons 0 (make-list (- n 1) -inf.0)))
-    
-    ;; Fold over the range from 0 to n to update dp for each index
-    (define final-dp (foldl update-dp initial-dp (range n)))
-    
-    ;; Check the last element of dp; if it's still -inf, return -1, otherwise return the value
-    (if (= (last final-dp) -inf.0)
-        -1
-        (last final-dp))))
+  (define n (length nums))
+
+  ;; Helper function to determine if a jump is valid
+  (define (valid-jump? num1 num2)
+    (<= (abs (- num1 num2)) target))
+
+  ;; Recursive helper function to calculate maximum jumps
+  (define (max-jumps i dp)
+    (cond
+      [(>= i n) (vector-ref dp (sub1 n))]
+      [(vector-ref dp i) => identity]  ; If the value is already computed, return it
+      [else
+       (let loop ([j (add1 i)] [max-jump -inf.0])
+         (cond
+           [(>= j n) (begin
+                       (vector-set! dp i (if (= max-jump -inf.0) -1 max-jump))
+                       (max-jumps (add1 i) dp))]
+           [(valid-jump? (list-ref nums i) (list-ref nums j))
+            (loop (add1 j) (max (vector-ref dp j) (add1 (max-jumps j dp))))]
+           [else (loop (add1 j) max-jump)]))]))
+
+  ;; Initialize dp vector with -inf.0 except the first element set to 0
+  (define dp (make-vector n -inf.0))
+  (vector-set! dp 0 0)
+  (max-jumps 0 dp))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

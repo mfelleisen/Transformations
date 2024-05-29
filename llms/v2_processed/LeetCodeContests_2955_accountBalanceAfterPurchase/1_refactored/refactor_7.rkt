@@ -19,19 +19,15 @@
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
   (define initial-balance 100)
-  (define rounded-amount 
-    (let ([lower-bound (* (quotient purchaseAmount 10) 10)]
-          [upper-bound (+ (* (quotient purchaseAmount 10) 10) 10)])
-      (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
-          lower-bound
-          upper-bound)))
+  (define lower-bound (* (quotient purchaseAmount 10) 10))
+  (define upper-bound (+ lower-bound 10))
+  
+  (define rounded-amount
+    (match (<= (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
+      [#true  lower-bound]
+      [#false upper-bound]))
+  
   (- initial-balance rounded-amount))
-
-;; Explanation:
-;; - `initial-balance` is defined as a constant.
-;; - `lower-bound` and `upper-bound` are calculated directly within a `let` expression to avoid mutable state.
-;; - The `if` expression is used to determine the `rounded-amount`.
-;; - Finally, the result is computed by subtracting `rounded-amount` from `initial-balance`.
 
 (require rackunit)
 

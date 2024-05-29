@@ -5,12 +5,28 @@
 ;; Function to compute number of ways to express n as the sum of xth powers of unique positive integers
 ;; Given two positive integers n and x.
 ;; Return the number of ways n can be expressed as the sum of the xth power of unique positive integers, in other words, the number of sets of unique integers [n1, n2, ..., nk] where n = n1^x + n2^x + ... + nk^x.
-(define (numberOfWays n x)
+;; Since the result can be very large, return it modulo 10^9 + 7.
+;; For example, if n = 160 and x = 3, one way to express n is n = 2^3 + 3^3 + 5^3.
+;; Example 1:
+;; Input: n = 10, x = 2
+;; Output: 1
+;; Explanation: We can express n as the following: n = 3^2 + 1^2 = 10.
+;; It can be shown that it is the only way to express 10 as the sum of the 2nd power of unique integers.
+;; Example 2:
+;; Input: n = 4, x = 1
+;; Output: 2
+;; Explanation: We can express n in the following ways:
+;; - n = 4^1 = 4.
+;; - n = 3^1 + 1^1 = 4.
+;; Constraints:
+;;  * 1 <= n <= 300
+;;  * 1 <= x <= 5
 
-  ;; Initialize the dp vector with zeros and set dp[0] to 1
+(define (numberOfWays n x)
+  ;; Initialize dp vector with zeros, and set dp[0] to 1
   (define dp (make-vector (+ n 1) 0))
   (vector-set! dp 0 1)
-  
+
   ;; Calculate the maximum base such that base^x <= n
   (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
   
@@ -18,9 +34,9 @@
   (for ([base (in-range 1 (+ max-base 1))])
     (define current-power (expt base x))
     ;; Update dp values from n down to current_power
-    (for/fold ([acc dp]) ([i (in-range n (- current-power 1) -1)])
+    (for ([i (in-range n (- current-power 1) -1)])
       (vector-set! dp i (modulo (+ (vector-ref dp i) (vector-ref dp (- i current-power))) MOD))))
-  
+
   ;; Return the number of ways to express n as specified
   (vector-ref dp n))
 

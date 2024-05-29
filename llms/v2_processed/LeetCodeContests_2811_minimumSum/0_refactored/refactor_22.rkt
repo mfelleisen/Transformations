@@ -16,15 +16,21 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  (define (k-avoiding-sum seen count total current)
+  ;; Generate numbers, skipping those that form k-avoiding pairs
+  (define (generate-numbers current-number used-numbers total-sum count)
     (cond
-      [(= count n) total]
-      [(set-member? seen (- k current))
-       (k-avoiding-sum seen count total (add1 current))]
+      [(= count n) total-sum]
+      [(or (set-member? used-numbers (- k current-number))
+           (= current-number (- k current-number)))
+       (generate-numbers (add1 current-number) used-numbers total-sum count)]
       [else
-       (k-avoiding-sum (set-add seen current) (add1 count) (+ total current) (add1 current))]))
+       (generate-numbers (add1 current-number)
+                         (set-add used-numbers current-number)
+                         (+ total-sum current-number)
+                         (add1 count))]))
 
-  (k-avoiding-sum (set) 0 0 1))
+  ;; Start the generation process
+  (generate-numbers 1 (set) 0 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

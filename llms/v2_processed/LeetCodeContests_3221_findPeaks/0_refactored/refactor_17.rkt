@@ -22,14 +22,14 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  (define (is-peak? left x right)
-    (and (< left x) (> x right)))
+  (define (is-peak? idx)
+    (and (> (list-ref mountain idx) (list-ref mountain (sub1 idx)))
+         (> (list-ref mountain idx) (list-ref mountain (add1 idx)))))
   
-  (for/list ([i (in-range 1 (sub1 (length mountain)))]
-             #:when (is-peak? (list-ref mountain (sub1 i))
-                              (list-ref mountain i)
-                              (list-ref mountain (add1 i))))
-    i))
+  (define (process-index idx)
+    (if (is-peak? idx) idx #f))
+  
+  (filter-map process-index (range 1 (sub1 (length mountain)))))
 
 ;; Example usage:
 ;; (findPeaks '(1 4 3 8 5))  ;; Should return '(1 3)

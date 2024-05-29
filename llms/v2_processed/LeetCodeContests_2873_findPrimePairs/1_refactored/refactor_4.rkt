@@ -2,34 +2,32 @@
 
 ;; Function to check if a number is prime
 (define (is-prime? num)
+  ;; Helper function for the prime check loop
+  (define (prime-loop i)
+    (cond
+      [(> (* i i) num) #t]  ;; No divisors found, num is prime
+      [(or (zero? (remainder num i)) (zero? (remainder num (+ i 2)))) #f]  ;; Divisible by i or i+2, not prime
+      [else (prime-loop (+ i 6))]))  ;; Check next potential prime factors
+
   ;; Check for non-prime conditions
   (cond
     [(<= num 1) #f]  ;; Numbers <= 1 are not prime
     [(<= num 3) #t]  ;; 2 and 3 are prime numbers
-    [(zero? (remainder num 2)) #f]  ;; Even numbers > 2 are not prime
-    [(zero? (remainder num 3)) #f]  ;; Multiples of 3 > 3 are not prime
-    [else
-     ;; Check for divisibility from 5 onward, skipping even numbers
-     (let loop ([i 5])
-       (cond
-         [(> (* i i) num) #t]  ;; No divisors found, num is prime
-         [(zero? (remainder num i)) #f]  ;; Divisible by i, not prime
-         [(zero? (remainder num (+ i 2))) #f]  ;; Divisible by i+2, not prime
-         [else (loop (+ i 6))]))]))  ;; Check next potential prime factors
+    [(or (zero? (remainder num 2)) (zero? (remainder num 3))) #f]  ;; Multiples of 2 or 3 > 3 are not prime
+    [else (prime-loop 5)]))  ;; Start checking from 5 onward
 
 ;; Function to find prime pairs that add up to n
 (define (findPrimePairs n)
-  ;; Helper function to generate list of primes up to n
-  (define (generate-primes up-to)
-    (filter is-prime? (range 2 (add1 up-to))))
+  ;; Generate a list of primes up to n
+  (define primes (filter is-prime? (range 1 (add1 n))))
   
-  ;; Generate list of primes up to n
-  (define primes (generate-primes n))
+  ;; Use a set for quick prime checking
+  (define prime-set (set primes))
   
   ;; Find all pairs (x, y) such that x + y = n and both x and y are prime
-  (for*/list ([x primes]
-              [y (in-list primes)]
-              #:when (and (<= x y) (= (+ x y) n)))
+  (for/list ([x primes]
+             #:when (<= x (/ n 2))
+             [y (in-list (filter (λ (y) (and (set-member? prime-set y) (= (+ x y) n))) primes))])
     (list x y)))
 
 ;; Example usage:

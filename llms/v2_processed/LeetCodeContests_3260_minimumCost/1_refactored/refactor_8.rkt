@@ -28,28 +28,25 @@
 ;; k - 2 <= dist <= n - 2
 (define (minimumCost nums k dist)
   (define n (length nums))
-
-  (define (valid-partitions current-partition remaining-elements)
-    (if (= (length current-partition) k)
-        (if (<= (- (last current-partition) (second current-partition)) dist)
-            (list current-partition)
-            '())
-        (for*/list ([i (in-range (add1 (first remaining-elements)) (sub1 n))]
-                    [partition (valid-partitions (append current-partition (list i)) (rest remaining-elements))])
-          partition)))
-
-  (define (calculate-cost partition)
-    (apply + (map (lambda (idx) (list-ref nums idx)) partition)))
-
-  (define (partition-and-calculate-cost first-end)
-    (define partitions (valid-partitions (list 0 first-end) (range 1 (sub1 n))))
-    (map calculate-cost partitions))
-
-  (define all-costs (apply append (map partition-and-calculate-cost (range 1 (sub1 (- n k))))))
-
-  (if (empty? all-costs)
-      +inf.0
-      (apply min all-costs)))
+  
+  ;; Helper function to calculate the cost based on the starting indices
+  (define (calculate-cost start-indices)
+    (apply + (map (lambda (idx) (list-ref nums idx)) start-indices)))
+  
+  ;; Helper function to generate valid partitions using DFS
+  (define (dfs start-index depth current-indices min-cost)
+    (if (= depth k)
+        (if (<= (- (last current-indices) (second current-indices)) dist)
+            (min min-cost (calculate-cost current-indices))
+            min-cost)
+        (for/fold ([min-cost min-cost])
+                  ([next-start (in-range (+ start-index 1) (+ (- n (- k depth)) 1))])
+          (dfs next-start (+ depth 1) (append current-indices (list next-start)) min-cost))))
+  
+  ;; Start the DFS process for all possible first partitions
+  (for/fold ([min-cost +inf.0])
+            ([first-end (in-range 1 (+ (- n k) 2))])
+    (dfs first-end 2 (list 0 first-end) min-cost)))
 
 ;; Example usage
 (minimumCost '(1 3 2 6 4 2) 3 3)  ; Output: 5

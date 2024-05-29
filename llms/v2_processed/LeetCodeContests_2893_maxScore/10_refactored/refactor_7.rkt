@@ -22,33 +22,26 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  ;; Helper function to compute the parity of a number
-  (define (parity n)
-    (modulo n 2))
+  (define (parity n) (modulo n 2))
 
-  ;; Recursively process each position with accumulators
-  (define (helper i dp-even dp-odd)
-    (if (= i (length nums))
-        ;; Return the maximum value between the last even and odd dp arrays
-        (apply max (append dp-even dp-odd))
-        (let* ([num (list-ref nums i)]
-               [parity-i (parity num)]
-               [dp-even-next (if (= parity-i 0)
-                                 (map (λ (v) (max v (+ v num))) dp-even)
-                                 (map (λ (v) (max v (+ v num (- x)))) dp-odd))]
-               [dp-odd-next (if (= parity-i 1)
-                                (map (λ (v) (max v (+ v num))) dp-odd)
-                                (map (λ (v) (max v (+ v num (- x)))) dp-even))])
-          (helper (+ i 1) dp-even-next dp-odd-next))))
+  (define n (length nums))
+  (define dp (make-vector n -inf.0))
+  (vector-set! dp 0 (first nums))
 
-  ;; Initialize the dp arrays
-  (let ([initial-num (first nums)]
-        [initial-dp (make-list (length nums) -inf.0)])
-    (helper 1 (cons initial-num (rest initial-dp)) initial-dp)))
+  (for ([i (in-range n)])
+    (for ([j (in-range (add1 i) n)])
+      (let* ([current-score (+ (vector-ref dp i) (list-ref nums j))]
+             [current-score (if (= (parity (list-ref nums i)) (parity (list-ref nums j)))
+                               current-score
+                               (- current-score x))])
+        (when (> current-score (vector-ref dp j))
+          (vector-set! dp j current-score)))))
+
+  (apply max (vector->list dp)))
 
 ;; Example cases
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13
-(maxScore '(2 4 6 8) 3)      ;; Output: 20
+(maxScore '(2 4 6 8) 3)       ;; Output: 20
 
 (require rackunit)
 

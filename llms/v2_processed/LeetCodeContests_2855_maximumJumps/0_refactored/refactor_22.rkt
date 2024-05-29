@@ -2,30 +2,36 @@
 
 (provide (rename-out [maximumJumps max-jump]))
 
+;; You are given a 0-indexed array nums of n integers and an integer target.
+;; You are initially positioned at index 0. In one step, you can jump from index i to any index j such that:
+;;  * 0 <= i < j < n
+;;  * -target <= nums[j] - nums[i] <= target
+;; Return the maximum number of jumps you can make to reach index n - 1.
+;; If there is no way to reach index n - 1, return -1.
+
 (define (maximumJumps nums target)
-  ;; Define the length of nums list
-  (define n (length nums))
+  ;; Helper function to check if jump is valid
+  (define (valid-jump? i j)
+    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
   
-  ;; Define a helper function that takes the current index and the current state of dp list
+  ;; Helper function to update dp list
   (define (update-dp i dp)
-    (let ([current (list-ref nums i)])
-      (foldl (lambda (j dp)
-               (let ([next (list-ref nums j)])
-                 (if (<= (abs (- next current)) target)
-                     (list-set dp j (max (list-ref dp j) (add1 (list-ref dp i))))
-                     dp)))
-             dp
-             (range (add1 i) n))))
+    (if (= (list-ref dp i) -inf.0)
+        dp
+        (for/fold ([dp dp]) ([j (in-range (add1 i) (length nums))])
+          (if (valid-jump? i j)
+              (list-set dp j (max (list-ref dp j) (add1 (list-ref dp i))))
+              dp))))
   
-  ;; Initialize the DP list with negative infinity, except the first element which is 0
-  (define dp (cons 0 (make-list (sub1 n) -inf.0)))
+  ;; Initialize dp list
+  (define dp (cons 0 (make-list (sub1 (length nums)) -inf.0)))
   
-  ;; Update dp for each index from 0 to n-1
-  (define final-dp (foldl (lambda (i dp) (update-dp i dp))
-                          dp
-                          (range n)))
+  ;; Update dp for each index
+  (define final-dp
+    (for/fold ([dp dp]) ([i (in-range (length nums))])
+      (update-dp i dp)))
   
-  ;; Check the last element of dp; if it's still -inf, return -1, otherwise return its value
+  ;; Return result based on final dp value
   (if (= (last final-dp) -inf.0) -1 (last final-dp)))
 
 ;; Examples

@@ -36,28 +36,24 @@
 ;;  * 1 <= n == maxHeights <= 103
 ;;  * 1 <= maxHeights[i] <= 109
 (define (maximumSumOfHeights maxHeights)
-  ;; Define a helper function to calculate maximum sum with a given peak index
+  ;; Helper function to calculate maximum sum with a given peak index
   (define (calculate-max-sum-with-peak peak)
-    (define left (reverse (take maxHeights (add1 peak))))
-    (define right (drop maxHeights peak))
-
-    ;; Calculate the heights for the left side of the peak
-    (define left-heights
-      (for/fold ([heights (list (first left))]) ([height (in-list (rest left))])
-        (cons (min height (first heights)) heights)))
-
-    ;; Calculate the heights for the right side of the peak
-    (define right-heights
-      (for/fold ([heights (list (first right))]) ([height (in-list (rest right))])
-        (cons (min height (first heights)) heights)))
-
-    ;; Combine left and right heights and sum them
-    (apply + (append (reverse left-heights) (rest right-heights))))
-
-  ;; Iterate over each index to try it as a peak and find the maximum sum
-  (apply max
-         (for/list ([i (in-range (length maxHeights))])
-           (calculate-max-sum-with-peak i))))
+    ;; Create a list of heights initialized to 0
+    (define heights (make-vector (length maxHeights) 0))
+    ;; Set the peak height
+    (vector-set! heights peak (list-ref maxHeights peak))
+    ;; Expand to the left of the peak
+    (for ([i (in-range (sub1 peak) -1 -1)])
+      (vector-set! heights i (min (list-ref maxHeights i) (vector-ref heights (add1 i)))))
+    ;; Expand to the right of the peak
+    (for ([i (in-range (add1 peak) (length maxHeights))])
+      (vector-set! heights i (min (list-ref maxHeights i) (vector-ref heights (sub1 i)))))
+    ;; Calculate the sum of the heights vector
+    (apply + (vector->list heights)))
+  
+  ;; Use for/fold to find the maximum sum
+  (for/fold ([max-sum 0]) ([i (in-range (length maxHeights))])
+    (max max-sum (calculate-max-sum-with-peak i))))
 
 ;; Example usage
 (maximumSumOfHeights '(5 3 4 1 1))  ; Output: 13

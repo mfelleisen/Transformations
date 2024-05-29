@@ -14,17 +14,19 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Helper function to generate all possible distributions
-  ;; of `n` candies among 3 children with each child getting
-  ;; up to `limit` candies
-  (define (distributions n limit)
-    (for*/list ([a (in-range (min n (add1 limit)))]
-                [b (in-range (min (- n a) (add1 limit)))]
-                #:when (<= (- n a b) limit))
-      (list a b (- n a b))))
-  
-  ;; Calculate and return the number of valid distributions
-  (length (distributions n limit)))
+  ;; Helper function to count valid distributions
+  (define (count-distributions a b sum)
+    (cond
+      [(> b (min sum limit)) 0]
+      [else
+       (let ([c (- sum b)])
+         (if (<= c limit)
+             (+ 1 (count-distributions a (add1 b) sum))
+             (count-distributions a (add1 b) sum)))]))
+
+  ;; Main function to calculate total distributions
+  (for/sum ([a (in-range 0 (add1 (min n limit)))])
+    (count-distributions a 0 (- n a))))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

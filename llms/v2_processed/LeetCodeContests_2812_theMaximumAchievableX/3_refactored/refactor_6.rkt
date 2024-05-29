@@ -20,14 +20,7 @@
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
 (define (theMaximumAchievableX num t)
-  ;; This function calculates the maximum achievable x given `num` and `t`.
-  ;; The logic is based on the fact that the maximum x can be obtained by
-  ;; increasing x by t and decreasing num by t, which results in x = num + 2 * t.
   (+ num (* 2 t)))
-
-;; Examples for testing
-(theMaximumAchievableX 4 1)  ; Output: 6
-(theMaximumAchievableX 3 2)  ; Output: 7
 
 (require rackunit)
 

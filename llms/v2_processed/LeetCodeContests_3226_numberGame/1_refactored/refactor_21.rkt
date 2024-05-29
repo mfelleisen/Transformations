@@ -19,18 +19,29 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  (define (play-game remaining sorted acc)
-    (if (null? remaining)
-        (reverse acc)
-        (let* ([alice-choice (first sorted)]
-               [remaining-after-alice (remove* (list alice-choice) remaining)]
-               [sorted-after-alice (remove* (list alice-choice) sorted)]
-               [bob-choice (first sorted-after-alice)]
-               [remaining-after-bob (remove* (list bob-choice) remaining-after-alice)]
-               [sorted-after-bob (remove* (list bob-choice) sorted-after-alice)])
-          (play-game remaining-after-bob sorted-after-bob (cons alice-choice (cons bob-choice acc))))))
-  
-  (play-game nums (sort nums <) '()))
+  ;; Helper function to split the sorted list into two lists of Alice's and Bob's picks
+  (define (split-picks sorted-nums)
+    (let loop ([sorted-nums sorted-nums]
+               [alice-picks '()]
+               [bob-picks '()])
+      (match sorted-nums
+        [(list) (values (reverse alice-picks) (reverse bob-picks))]
+        [(cons a (cons b rest))
+         (loop rest (cons a alice-picks) (cons b bob-picks))])))
+
+  ;; Sort the list first and split the picks
+  (define sorted-nums (sort nums <))
+  (define-values (alice-picks bob-picks) (split-picks sorted-nums))
+
+  ;; Interleave Bob's picks and Alice's picks
+  (define (interleave lst1 lst2)
+    (cond
+      [(empty? lst1) lst2]
+      [(empty? lst2) lst1]
+      [else (cons (first lst2) (cons (first lst1) (interleave (rest lst1) (rest lst2))))]))
+
+  ;; Interleave the picks in the correct order
+  (interleave alice-picks bob-picks))
 
 ;; Example usage:
 (numberGame '(5 4 2 3)) ;; Output: '(3 2 5 4)

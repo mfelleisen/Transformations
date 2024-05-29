@@ -32,22 +32,18 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
-
-  ;; Helper function to determine if the current candidate can be used
-  (define (can-use? used-set candidate)
-    (not (set-member? used-set (- target candidate))))
-
-  ;; Recursive function to construct the nums list
-  (define (construct-nums used-set candidate remaining)
-    (cond
-      [(= remaining 0) 0]
-      [(can-use? used-set candidate)
-       (+ candidate
-          (construct-nums (set-add used-set candidate) (add1 candidate) (sub1 remaining)))]
-      [else (construct-nums used-set (add1 candidate) remaining)]))
   
+  ;; Define a helper function to generate the sequence avoiding the pairs that sum to the target
+  (define (generate-sequence n target)
+    (define (loop i acc)
+      (cond
+        [(= (length acc) n) (reverse acc)]
+        [(ormap (lambda (x) (= (+ x i) target)) acc) (loop (add1 i) acc)]
+        [else (loop (add1 i) (cons i acc))]))
+    (loop 1 '()))
+
   ;; Calculate the sum of the beautiful array mod MOD
-  (modulo (construct-nums (set) 1 n) MOD))
+  (modulo (apply + (generate-sequence n target)) MOD))
 
 ;; Example test cases
 (display (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

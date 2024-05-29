@@ -36,20 +36,25 @@
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
   (define n (length nums))
+  ;; Initialize the dp vector with negative infinity for all indices except the first one set to 0
+  (define dp (make-vector n -inf.0))
+  (vector-set! dp 0 0)
 
-  (define (update-dp i dp)
-    (if (and (>= (list-ref dp i) 0))
-        (for/fold ([dp dp]) ([j (in-range (add1 i) n)])
-          (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-              (list-set dp j (max (list-ref dp j) (add1 (list-ref dp i))))
-              dp))
-        dp))
+  ;; Helper function to update dp values based on the current index i
+  (define (update-dp i)
+    (when (not (= (vector-ref dp i) -inf.0))
+      ;; Iterate over all possible jumps from index i
+      (for ([j (in-range (add1 i) n)])
+        (when (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
+          ;; Update the dp value at index j if a better jump count is found
+          (vector-set! dp j (max (vector-ref dp j) (add1 (vector-ref dp i))))))))
 
-  (define dp
-    (for/fold ([dp (cons 0 (make-list (sub1 n) -inf.0))]) ([i (in-range n)])
-      (update-dp i dp)))
+  ;; Process each index to update dp values
+  (for ([i (in-range n)])
+    (update-dp i))
 
-  (define final-value (list-ref dp (sub1 n)))
+  ;; Check the value at the last index to determine if the end is reachable
+  (define final-value (vector-ref dp (sub1 n)))
   (if (= final-value -inf.0) -1 final-value))
 
 ;; Example usage:

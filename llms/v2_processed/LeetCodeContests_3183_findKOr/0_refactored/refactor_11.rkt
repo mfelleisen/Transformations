@@ -28,26 +28,23 @@
 (define (findKOr nums k)
   (define max-bits 31)
 
-  ;; Helper function to check if a bit is set in a number
-  (define (bit-set? num i)
-    (not (zero? (bitwise-and num (arithmetic-shift 1 i)))))
+  (define (count-set-bits i)
+    (for/sum ([num (in-list nums)])
+      (if (bitwise-and num (expt 2 i)) 1 0)))
 
-  ;; Construct the result by checking each bit position
-  (define (construct-result i acc)
-    (if (= i max-bits)
-        acc
-        (let ((bit-count (count (curry bit-set? i) nums)))
-          (construct-result (add1 i)
-                            (if (>= bit-count k)
-                                (bitwise-ior acc (arithmetic-shift 1 i))
-                                acc)))))
+  (define (construct-result i)
+    (if (>= i max-bits)
+        0
+        (let ([bit-count (count-set-bits i)])
+          (if (>= bit-count k)
+              (bitwise-ior (expt 2 i) (construct-result (add1 i)))
+              (construct-result (add1 i))))))
 
-  ;; Start the recursive construction of the result from the 0th bit
-  (construct-result 0 0))
+  (construct-result 0))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)  ;; Output: 9
-(findKOr '(2 12 1 11 4 5) 6)  ;; Output: 0
+(findKOr '(2 12 1 11 4 5) 6)   ;; Output: 0
 (findKOr '(10 8 5 9 11 6 8) 1)  ;; Output: 15
 
 (require rackunit)

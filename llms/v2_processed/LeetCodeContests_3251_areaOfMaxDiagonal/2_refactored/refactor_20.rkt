@@ -21,28 +21,31 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  ;; Helper function to calculate the diagonal squared and area of a rectangle
-  (define (calc-diagonal-area dim)
-    (let* ([length (first dim)]
-           [width (second dim)]
-           [diagonal-squared (+ (* length length) (* width width))]
-           [area (* length width)])
-      (list diagonal-squared area)))
-  
-  ;; Fold over the dimensions to find the rectangle with the longest diagonal or largest area if diagonals are equal
+  ;; Calculate the diagonal squared for a given length and width
+  (define (diagonal-squared length width)
+    (+ (* length length) (* width width)))
+
+  ;; Calculate the area for a given length and width
+  (define (area length width)
+    (* length width))
+
+  ;; Fold over the list to find the rectangle with the longest diagonal or largest area if diagonals are equal
   (define-values (max-diagonal max-area)
     (for/fold ([max-diagonal 0] [max-area 0]) ([dim (in-list dimensions)])
-      (define-values (diagonal-squared area) (apply values (calc-diagonal-area dim)))
-      (if (or (> diagonal-squared max-diagonal)
-              (and (= diagonal-squared max-diagonal) (> area max-area)))
-          (values diagonal-squared area)
-          (values max-diagonal max-area))))
-  
+      (define length (first dim))
+      (define width (second dim))
+      (define d-squared (diagonal-squared length width))
+      (define a (area length width))
+      (cond
+        [(> d-squared max-diagonal) (values d-squared a)]
+        [(and (= d-squared max-diagonal) (> a max-area)) (values d-squared a)]
+        [else (values max-diagonal max-area)])))
+
   max-area)
 
-;; Test cases
-(areaOfMaxDiagonal '((9 3) (8 6))) ;; Should return 48
-(areaOfMaxDiagonal '((3 4) (4 3))) ;; Should return 12
+;; Example Usage:
+;; (areaOfMaxDiagonal '((9 3) (8 6))) ; Should return 48
+;; (areaOfMaxDiagonal '((3 4) (4 3))) ; Should return 12
 
 (require rackunit)
 

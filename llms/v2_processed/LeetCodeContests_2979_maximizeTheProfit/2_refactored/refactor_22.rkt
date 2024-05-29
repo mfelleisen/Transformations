@@ -26,7 +26,7 @@
 (define (maximizeTheProfit n offers)
   ;; Sort offers by their ending time
   (define sorted-offers (sort offers < #:key second))
-  
+
   ;; Helper function to find the last non-conflicting offer using binary search
   (define (find-last-non-conflicting offers i)
     (let loop ((low 0) (high (- i 1)))
@@ -35,36 +35,39 @@
           (let* ((mid (quotient (+ low high) 2))
                  (mid-offer (list-ref offers mid)))
             (if (< (second mid-offer) (first (list-ref offers i)))
-                (if (< (second (list-ref offers (+ mid 1))) (first (list-ref offers i)))
-                    (loop (+ mid 1) high)
-                    mid)
+                (let ((next-offer (list-ref offers (+ mid 1))))
+                  (if (< (second next-offer) (first (list-ref offers i)))
+                      (loop (+ mid 1) high)
+                      mid))
                 (loop low (- mid 1)))))))
-  
+
   ;; Recursive function to calculate maximum profit using memoization
-  (define dp (make-vector (length sorted-offers) 0))
-  (vector-set! dp 0 (third (list-ref sorted-offers 0))) ;; Base case
-  
-  (define (calculate-max-profit i)
+  (define (calculate-max-profit dp sorted-offers i)
     (if (= i 0)
         (vector-ref dp 0)
-        (let ((profit-including-current (third (list-ref sorted-offers i)))
-              (l (find-last-non-conflicting sorted-offers i)))
-          (when (>= l 0)
-            (set! profit-including-current (+ profit-including-current (vector-ref dp l))))
+        (let* ((current-offer (list-ref sorted-offers i))
+               (current-profit (third current-offer))
+               (last-non-conflict (find-last-non-conflicting sorted-offers i))
+               (profit-including-current (if (>= last-non-conflict 0)
+                                             (+ current-profit (vector-ref dp last-non-conflict))
+                                             current-profit)))
           (vector-set! dp i (max (vector-ref dp (- i 1)) profit-including-current))
           (vector-ref dp i))))
-  
+
+  ;; Initialize dp vector
+  (define dp (make-vector (length sorted-offers) 0))
+  (vector-set! dp 0 (third (first sorted-offers))) ;; Base case
+
   ;; Fill dp vector using recursion
   (for ([i (in-range 1 (length sorted-offers))])
-    (calculate-max-profit i))
-  
+    (calculate-max-profit dp sorted-offers i))
+
   ;; Return the last element in dp vector as the result
   (vector-ref dp (- (length sorted-offers) 1)))
 
 ;; Example usage:
 (maximizeTheProfit 5 (list (list 0 0 1) (list 0 2 2) (list 1 3 2)))  ;; Output: 3
 (maximizeTheProfit 5 (list (list 0 0 1) (list 0 2 10) (list 1 3 2)))  ;; Output: 10
-
 
 (require rackunit)
 

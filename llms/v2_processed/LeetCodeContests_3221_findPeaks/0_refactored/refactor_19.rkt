@@ -22,13 +22,11 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  (define (is-peak? left center right)
-    (and (> center left) (> center right)))
-
+  (define (is-peak? idx)
+    (and (> (list-ref mountain idx) (list-ref mountain (sub1 idx)))
+         (> (list-ref mountain idx) (list-ref mountain (add1 idx)))))
   (for/list ([i (in-range 1 (sub1 (length mountain)))]
-             #:when (is-peak? (list-ref mountain (sub1 i))
-                              (list-ref mountain i)
-                              (list-ref mountain (add1 i))))
+             #:when (is-peak? i))
     i))
 
 ;; Example usage:

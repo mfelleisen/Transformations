@@ -25,22 +25,20 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; This function calculates the minimum possible sum of the costs of three disjoint contiguous subarrays.
+  ;; Helper function to compute the sum of the costs of three disjoint contiguous subarrays.
+  (define (compute-cost nums i j)
+    (+ (first nums) (list-ref nums i) (list-ref nums j)))
+
+  ;; Use for/fold to find the minimum cost
   (define n (length nums))
-  
-  (define (cost i j)
-    (+ (list-ref nums 0)
-       (list-ref nums i)
-       (list-ref nums j)))
-  
   (if (= n 3)
       ;; If the list has exactly three elements, each element forms its own subarray.
       (apply + nums)
       ;; Otherwise, we need to find the minimum cost by checking different breakpoints.
-      (for*/fold ([min-cost +inf.0]) 
-                 ([i (in-range 1 (- n 1))] 
+      (for*/fold ([min-cost +inf.0])
+                 ([i (in-range 1 (- n 1))]
                   [j (in-range (+ i 1) n)])
-        (min min-cost (cost i j)))))
+        (min min-cost (compute-cost nums i j)))))
 
 ;; Examples:
 (minimumCost '(1 2 3 12))  ; Output: 6

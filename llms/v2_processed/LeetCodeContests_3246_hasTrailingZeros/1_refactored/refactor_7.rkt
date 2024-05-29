@@ -21,15 +21,15 @@
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (hasTrailingZeros nums)
-  ;; Checks if there are two or more elements whose bitwise OR has at least one trailing zero.
-  (define (has-trailing-zero? n)
-    (even? n)) ;; Checks if the number is even.
-
-  ;; Uses `for/or` to efficiently check for the condition without generating all combinations.
+  ;; Check if any combination of two elements from `nums` has a bitwise OR that results in an even number
+  (define (has-trailing-zero? x y)
+    (even? (bitwise-ior x y)))
+  
+  ;; Use `for/or` to iterate over pairs and check the condition
   (for/or ([i (in-list nums)]
            [j (in-list nums)]
-           #:when (not (eq? i j)))
-    (has-trailing-zero? (bitwise-ior i j))))
+           #:when (not (equal? i j)))
+    (has-trailing-zero? i j)))
 
 ;; Example usage:
 (hasTrailingZeros '(1 2 3 4 5))  ; Output: #t

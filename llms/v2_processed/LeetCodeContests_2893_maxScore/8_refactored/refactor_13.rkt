@@ -23,33 +23,36 @@
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
   (define n (length nums))
-  
-  ;; Helper function to compute the score with given parameters
-  (define (compute-score current-score i j)
-    (let* ((num-i (list-ref nums i))
-           (num-j (list-ref nums j))
-           (score (+ current-score num-j))
-           (penalty (if (not (= (modulo num-i 2) (modulo num-j 2)))
-                        x
-                        0)))
-      (- score penalty)))
 
-  ;; Recursive helper function to compute max score using memoization
-  (define memo (make-hash))
-  (define (helper i)
-    (cond
-      [(= i 0) (list-ref nums 0)]
-      [(hash-has-key? memo i) (hash-ref memo i)]
-      [else
-       (define max-score -inf.0)
-       (for ([j (in-range 0 i)])
-         (set! max-score
-               (max max-score (compute-score (helper j) j i))))
-       (hash-set! memo i max-score)
-       max-score]))
+  ;; Define a helper function to calculate the parity of a number
+  (define (parity num)
+    (modulo num 2))
 
-  ;; Compute max score for each index and return the maximum
-  (apply max (map helper (range n))))
+  ;; Define a recursive function to calculate the maximum score
+  (define (max-score-helper i dp)
+    (if (>= i n)
+        dp
+        (for/fold ([dp dp])
+                  ([j (in-range (add1 i) n)])
+          (let* ([current-score (+ (vector-ref dp i) (list-ref nums j))]
+                 [penalty (if (not (= (parity (list-ref nums i)) (parity (list-ref nums j))))
+                              x
+                              0)]
+                 [new-score (- current-score penalty)])
+            (vector-set! dp j (max (vector-ref dp j) new-score))
+            dp))))
+
+  ;; Initialize the dp vector with -inf and set the first element to the first value in nums
+  (define dp (make-vector n -inf.0))
+  (vector-set! dp 0 (first nums))
+
+  ;; Calculate the maximum score
+  (define final-dp (for/fold ([dp dp])
+                    ([i (in-range n)])
+                    (max-score-helper i dp)))
+
+  ;; Return the maximum value from the dp vector
+  (apply max (vector->list final-dp)))
 
 ;; Example cases
 (displayln (maxScore '(2 3 6 1 9 2) 5))  ;; Output: 13

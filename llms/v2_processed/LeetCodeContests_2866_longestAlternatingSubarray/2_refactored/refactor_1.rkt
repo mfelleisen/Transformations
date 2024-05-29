@@ -28,31 +28,36 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
-  (define (valid-start? x)
-    (and (even? x) (<= x threshold)))
-
-  (define (valid-next? last current)
-    (and (<= current threshold)
-         (not (= (remainder last 2) (remainder current 2)))))
-
-  (define (max-alternating-length-from nums)
-    (let loop ([lst nums] [current-length 0] [max-length 0] [last-value (car nums)])
-      (cond
-        [(empty? lst) max-length]
-        [(valid-next? last-value (car lst))
-         (loop (cdr lst) (+ current-length 1) (max (+ current-length 1) max-length) (car lst))]
-        [else
-         (loop (cdr lst) 0 max-length (car lst))])))
-
-  (define (check-subarrays nums)
-    (for/fold ([max-length 0]) ([i (in-range (length nums))] #:when (valid-start? (list-ref nums i)))
-      (max max-length (max-alternating-length-from (drop nums i)))))
-
-  (check-subarrays nums))
+  ;; Checks if the value is within the threshold and alternates parity with the last value
+  (define (valid-next? last-val val)
+    (and (<= val threshold)
+         (not (= (remainder last-val 2) (remainder val 2)))))
+  
+  ;; Finds the maximum alternating length starting from a given index
+  (define (max-alternating-length-from idx)
+    (let loop ([j (add1 idx)]
+               [current-length 1]
+               [last-val (list-ref nums idx)])
+      (if (and (< j (length nums))
+               (valid-next? last-val (list-ref nums j)))
+          (loop (add1 j) (add1 current-length) (list-ref nums j))
+          current-length)))
+  
+  ;; Traverses the list to find the maximum alternating subarray length
+  (define (find-max-length idx max-len)
+    (if (< idx (length nums))
+        (let ([current-length (if (and (even? (list-ref nums idx))
+                                       (<= (list-ref nums idx) threshold))
+                                (max-alternating-length-from idx)
+                                0)])
+          (find-max-length (add1 idx) (max max-len current-length)))
+        max-len))
+  
+  (find-max-length 0 0))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3
-(longestAlternatingSubarray '(1 2) 2)       ; Output: 1
+(longestAlternatingSubarray '(1 2) 2)      ; Output: 1
 (longestAlternatingSubarray '(2 3 4 5) 4)  ; Output: 3
 
 (require rackunit)

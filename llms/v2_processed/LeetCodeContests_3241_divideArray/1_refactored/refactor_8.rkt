@@ -22,22 +22,33 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  ;; Check if the length of nums is a multiple of 3
-  (if (not (zero? (modulo (length nums) 3)))
+  ;; Ensure nums can be divided into groups of 3
+  (define n (length nums))
+  (if (not (zero? (modulo n 3)))
       '()  ; Return an empty list if not divisible by 3
       (let* ((sorted-nums (sort nums <))  ; Sort the list in ascending order
              (groups (partition-list sorted-nums 3)))  ; Partition the list into groups of 3
         ;; Check each group to ensure the difference between max and min is <= k
-        (if (andmap (lambda (group) (<= (- (apply max group) (apply min group)) k)) groups)
+        (if (andmap (lambda (group) (<= (- (last group) (first group)) k)) groups)
             groups  ; Return the groups if all groups satisfy the condition
-            '()))))  ; Otherwise, return an empty list
+            '())))  ; Otherwise, return an empty list
+)
 
 (define (partition-list lst n)
   ;; Helper function to partition a list into sublists of size n
-  (cond
-    [(empty? lst) '()]
-    [else (cons (take lst n) (partition-list (drop lst n) n))]))
+  (define (partition-aux lst n acc)
+    (if (empty? lst)
+        (reverse acc)
+        (partition-aux (drop lst n) n (cons (take lst n) acc))))
+  (partition-aux lst n '()))
 
+(define (last lst)
+  ;; Helper function to get the last element of a list
+  (car (reverse lst)))
+
+;; Example usage:
+(divideArray '(1 3 4 8 7 9 3 5 1) 2) ;; Should output '((1 1 3) (3 4 5) (7 8 9))
+(divideArray '(1 3 3 2 7 3) 3) ;; Should output '()
 
 (require rackunit)
 

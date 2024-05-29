@@ -17,27 +17,28 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Define a helper function to check if a number can be added without violating the k-avoiding property
-  (define (can-add? used-numbers current-number)
-    (or (not (set-member? used-numbers (- k current-number)))
-        (= current-number (- k current-number))))
-  
-  ;; Recursive helper function to build the k-avoiding array and calculate its sum
+  ;; Define a helper function to build the k-avoiding array and calculate its sum
   (define (helper used-numbers current-number count total-sum)
-    (if (= count n)  ;; Base case: if we have added n numbers, return the total sum
-        total-sum
-        (if (can-add? used-numbers current-number)  ;; Check if we can add the current number
-            ;; Recursive case: add current number and recurse
-            (helper (set-add used-numbers current-number)
-                    (+ current-number 1)
-                    (+ count 1)
-                    (+ total-sum current-number))
-            ;; Recursive case: skip current number and recurse without adding it
-            (helper used-numbers
-                    (+ current-number 1)
-                    count
-                    total-sum))))
-  
+    (cond
+      ;; Base case: if we have added n numbers, return the total sum
+      [(= count n) total-sum]
+      
+      ;; Check if we can add the current number
+      [(or (not (set-member? used-numbers (- k current-number)))
+           (= current-number (- k current-number)))
+       ;; Recursive case: add current number and recurse
+       (helper (set-add used-numbers current-number)
+               (add1 current-number)
+               (add1 count)
+               (+ total-sum current-number))]
+      
+      ;; Recursive case: skip current number and recurse without adding it
+      [else
+       (helper used-numbers
+               (add1 current-number)
+               count
+               total-sum)]))
+
   ;; Start the recursion with an empty set for used numbers, starting number 1, count 0, and total sum 0
   (helper (set) 1 0 0))
 

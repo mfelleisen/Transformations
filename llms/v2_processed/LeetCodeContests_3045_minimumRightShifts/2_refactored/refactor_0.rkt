@@ -24,17 +24,21 @@
 (define (minimumRightShifts nums)
   (define n (length nums))
   (define sorted-nums (sort nums <))
-  
-  ;; Helper function to check if a given start index results in a valid shift
-  (define (is-valid-shift start)
+
+  (define (valid-shift? start)
     (for/and ([i (in-range n)])
       (= (list-ref nums (modulo (+ start i) n))
          (list-ref sorted-nums i))))
 
-  ;; Find the valid shift
-  (for/or ([start (in-range n)])
-    (when (is-valid-shift start)
-      (modulo (- n start) n))))
+  (define (find-valid-shift start)
+    (cond
+      [(>= start n) -1]
+      [(valid-shift? start) (modulo (- n start) n)]
+      [else (find-valid-shift (add1 start))]))
+
+  (if (= n 1)
+      0
+      (find-valid-shift 0)))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2

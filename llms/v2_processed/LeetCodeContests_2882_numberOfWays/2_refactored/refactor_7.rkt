@@ -22,23 +22,28 @@
 ;;  * 1 <= n <= 300
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
-  (define MOD (+ (expt 10 9) 7))  ; Define the modulus
+  (define MOD (+ (expt 10 9) 7))
 
-  ;; Recursive helper function to calculate the number of ways.
-  (define (helper n base)
-    (cond
-      [(= n 0) 1]  ; If n is 0, there's one way to express it (use no numbers)
-      [(or (< n 0) (<= base 0)) 0]  ; If n is negative or base is non-positive, no way to express
-      [else
-       (let ([current-power (expt base x)])
-         (modulo (+ (helper (- n current-power) (- base 1))  ; Use current base
-                    (helper n (- base 1)))  ; Don't use current base
-                 MOD))]))
+  (define (init-dp len)
+    (define dp (make-vector len 0))
+    (vector-set! dp 0 1)
+    dp)
 
-  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
+  (define max-base (inexact->exact (floor (expt n (/ 1.0 x)))))
 
-  ;; Start the recursion with the initial values
-  (helper n max-base))
+  (define (update-dp dp base)
+    (define current-power (expt base x))
+    (for/fold ([dp dp]) ([i (in-range n (- current-power 1) -1)])
+      (vector-set! dp i (modulo (+ (vector-ref dp i)
+                                   (vector-ref dp (- i current-power)))
+                                MOD))
+      dp))
+
+  (define dp (init-dp (add1 n)))
+  (for ([base (in-range 1 (add1 max-base))])
+    (set! dp (update-dp dp base)))
+
+  (vector-ref dp n))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

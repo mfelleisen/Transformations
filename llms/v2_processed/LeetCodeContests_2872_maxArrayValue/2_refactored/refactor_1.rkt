@@ -23,19 +23,11 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Helper function to fold the list from right to left
-  (define (fold-nums lst)
-    (foldr (lambda (current acc)
-             (match acc
-               [(cons first rest)
-                (if (<= current first)
-                    (cons (+ current first) rest)
-                    (cons current acc))]
-               [_ (cons current acc)]))
-           '()
-           lst))
-  ;; The largest value in the folded list is the result.
-  (apply max (fold-nums nums)))
+  (define-values (max-val _)
+    (for/fold ([max-val 0] [acc 0]) ([num (in-list (reverse nums))])
+      (define new-acc (+ acc num))
+      (values (max max-val new-acc) new-acc)))
+  max-val)
 
 ;; Example usage:
 (maxArrayValue '(2 3 7 9 3))  ; Output: 21

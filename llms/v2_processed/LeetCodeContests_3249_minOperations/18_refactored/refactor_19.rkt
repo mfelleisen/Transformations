@@ -28,8 +28,7 @@
   ;; XOR the result with k to find differing bits
   (define xor-with-k (bitwise-xor current-xor k))
   
-  ;; Count the number of 1s in xor-with-k, which are the differing bits
-  ;; This is done using recursion and bitwise operations
+  ;; Count the number of 1s in xor-with-k
   (define (count-ones x)
     (if (zero? x)
         0

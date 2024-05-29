@@ -22,28 +22,23 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  ;; Function to find indices of peaks in the mountain list.
-  ;; A peak is defined as an element that is strictly greater than its neighboring elements.
-  ;; The first and last elements of the array are not considered peaks.
-  (define len (length mountain))  ; Store the length of the mountain list
-  (define (is-peak? i)
-    (and (> (list-ref mountain i) (list-ref mountain (- i 1)))
-         (> (list-ref mountain i) (list-ref mountain (+ i 1)))))
+  (define (is-peak? i lst)
+    (and (> (list-ref lst i) (list-ref lst (- i 1)))
+         (> (list-ref lst i) (list-ref lst (+ i 1)))))
 
   (define (find-peaks-acc i peaks)
     (cond
-      [(>= i (- len 1)) (reverse peaks)]
-      [(is-peak? i) (find-peaks-acc (+ i 1) (cons i peaks))]
+      [(>= i (- (length mountain) 1)) (reverse peaks)]
+      [(is-peak? i mountain) (find-peaks-acc (+ i 1) (cons i peaks))]
       [else (find-peaks-acc (+ i 1) peaks)]))
 
-  (if (< len 3) ; If there are less than 3 elements, return an empty list
+  (if (< (length mountain) 3)
       '()
-      (find-peaks-acc 1 '()))) ; Start from index 1 to avoid the first element
+      (find-peaks-acc 1 '())))
 
 ;; Example usage:
 ;; (findPeaks '(1 4 3 8 5))  ; Output: '(1 3)
 ;; (findPeaks '(2 4 4))      ; Output: '()
-
 
 (require rackunit)
 

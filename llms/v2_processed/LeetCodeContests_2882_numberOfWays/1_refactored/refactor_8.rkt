@@ -18,22 +18,31 @@
 ;; Constraints:
 ;;  * 1 <= n <= 300
 ;;  * 1 <= x <= 5
+(define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
+
 (define (numberOfWays n x)
-  (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
-  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))  ; Calculate the maximum base
-
-  ;; Recursive function to calculate the number of ways
-  (define (count-ways target current)
-    (cond
-      [(= target 0) 1]  ; Base case: one way to sum up to zero using no numbers
-      [(or (< target 0) (> current max-base)) 0]  ; If target is negative or current exceeds max-base, no ways
-      [else
-       (define current-power (expt current x))
-       (modulo (+ (count-ways (- target current-power) (+ current 1))
-                  (count-ways target (+ current 1)))
-               MOD)]))
-
-  (count-ways n 1))
+  ;; Helper function to compute the number of ways using dynamic programming
+  (define (compute-ways n x)
+    ;; Initialize a vector with zeros and set the base case: one way to sum up to zero using no numbers
+    (define dp (build-vector (+ n 1) (lambda (i) (if (= i 0) 1 0))))
+    
+    ;; Calculate the maximum base
+    (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
+    
+    ;; Iterate over each base and update the dp vector
+    (for ([base (in-range 1 (+ max-base 1))])
+      (define current-power (expt base x))  ; Calculate the current power of the base
+      ;; Update dp vector entries from n down to current-power
+      (for ([i (in-range n (- current-power 1) -1)])
+        (vector-set! dp i
+                     (modulo (+ (vector-ref dp i)
+                                (vector-ref dp (- i current-power)))
+                             MOD))))
+    dp)
+  
+  ;; Compute the number of ways and return the result for n
+  (define ways (compute-ways n x))
+  (vector-ref ways n))
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

@@ -15,19 +15,14 @@
 ;;  * nums[i].length == 2
 ;;  * 1 <= starti <= endi <= 100
 (define (numberOfPoints nums)
-  ;; Use `for/set` to create a set of points covered by any car, avoiding duplicates automatically.
   (define covered-points
-    (for*/set ([range nums]       ; For each pair in the input list `nums`
-               [point (in-range (first range) (add1 (second range)))]) ; Generate range from start to end inclusive
-      point)) ; Collect each point into a set
-  
-  ;; Return the number of unique points by getting the size of the set
+    (for*/set ([range nums]
+               [point (in-range (first range) (add1 (second range)))])
+      point))
   (set-count covered-points))
 
-;; The function `numberOfPoints` takes a list of pairs, where each pair represents the start and end points
-;; of a car on a number line. It generates all points covered by each car using nested `for` loops,
-;; collects these points into a set (which automatically handles duplicate points), and then returns
-;; the count of this set, representing the number of unique points covered.
+;; The function `numberOfPoints` generates all points covered by each car,
+;; collects them into a set to handle duplicates automatically, and returns the count of this set.
 
 (require rackunit)
 

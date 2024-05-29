@@ -25,14 +25,17 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  (define n (length nums))
-  (if (= n 3)
+  (define (split-min a b c)
+    (+ (first a) (first b) (first c)))
+  
+  (define (all-splits lst)
+    (for*/list ([i (in-range 1 (- (length lst) 2))]
+                [j (in-range (+ i 1) (- (length lst) 1))])
+      (list (take lst i) (take (drop lst i) (- j i)) (drop lst j))))
+  
+  (if (= (length nums) 3)
       (apply + nums)
-      (for*/fold ([min-cost +inf.0])
-                 ([i (in-range 1 (- n 1))]
-                  [j (in-range (+ i 1) n)])
-        (let ((cost (+ (first nums) (list-ref nums i) (list-ref nums j))))
-          (min cost min-cost)))))
+      (apply min (map (lambda (split) (apply split-min split)) (all-splits nums)))))
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

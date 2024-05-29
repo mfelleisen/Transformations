@@ -36,31 +36,33 @@
 ;;  * 1 <= maxHeights[i] <= 109
 (define (maximumSumOfHeights maxHeights)
   (define n (length maxHeights))
-
-  ;; Helper function to calculate max sum for a given peak index
+  
+  ;; Function to calculate the maximum sum with a fixed peak position
   (define (calculate-max-sum-with-peak peak)
-    (define (expand-left i heights)
-      (if (negative? i)
-          heights
-          (let* ([next-height (min (list-ref maxHeights i) (car heights))]
-                 [new-heights (cons next-height heights)])
-            (expand-left (sub1 i) new-heights))))
-    
-    (define (expand-right i heights)
-      (if (>= i n)
-          heights
-          (let* ([next-height (min (list-ref maxHeights i) (last heights))]
-                 [new-heights (append heights (list next-height))])
-            (expand-right (add1 i) new-heights))))
-    
-    (let* ([peak-height (list-ref maxHeights peak)]
-           [left-expanded (expand-left (sub1 peak) (list peak-height))]
-           [fully-expanded (expand-right (add1 peak) left-expanded)])
-      (apply + fully-expanded)))
+    (define heights
+      (let loop ([left peak] [right peak] [heights (vector (list-ref maxHeights peak))])
+        (cond
+          [(and (>= left 1)
+                (>= (list-ref maxHeights (sub1 left))
+                    (vector-ref heights 0)))
+           (loop (sub1 left) right (vector-append (vector (list-ref maxHeights (sub1 left))) heights))]
+          [(and (< right (sub1 n))
+                (>= (list-ref maxHeights (add1 right))
+                    (vector-ref heights (sub1 (vector-length heights)))))
+           (loop left (add1 right) (vector-append heights (vector (list-ref maxHeights (add1 right)))))]
+          [else heights])))
 
-  ;; Main function to find the maximum sum
-  (for/fold ([max-sum 0]) ([i (in-range n)])
-    (max max-sum (calculate-max-sum-with-peak i))))
+    ;; Calculate the sum of the heights array
+    (for/sum ([height (in-vector heights)])
+      height))
+  
+  ;; Try every position as a peak
+  (define (find-max-sum)
+    (for/fold ([max-sum 0]) ([i (in-range n)])
+      (max max-sum (calculate-max-sum-with-peak i))))
+  
+  ;; Return the maximum possible sum
+  (find-max-sum))
 
 ;; Example usage
 (maximumSumOfHeights '(5 3 4 1 1))  ; Output: 13

@@ -14,16 +14,15 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Function to calculate the number of ways to distribute `n` candies among 3 children
-  ;; such that no child receives more than `limit` candies.
-  (define (ways a b)
-    (define c (- n (+ a b)))
-    (and (<= c limit) (>= c 0)))
-
-  (for/sum ([a (in-range (min n limit))]
-            [b (in-range (min n limit))]
-            #:when (ways a b))
-    1))
+  ;; Helper function to count valid distributions for a given value of `a`.
+  (define (count-distributions a)
+    (for/sum ([b (in-range 0 (min (- n a) limit 1))])
+      (define c (- n a b))
+      (if (<= c limit) 1 0)))
+  
+  ;; Sum over all possible values of `a`.
+  (for/sum ([a (in-range 0 (min n limit 1))])
+    (count-distributions a)))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

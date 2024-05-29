@@ -33,22 +33,33 @@
 (define (minimumPossibleSum n target)
   (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
 
-  ;; Helper function to recursively build the array and calculate the sum
-  (define (build-array-and-sum idx count sum seen)
-    (cond
-      [(= count n) (modulo sum MOD)]  ; If we've added n numbers, return the sum modulo MOD
-      [(member idx seen) (build-array-and-sum (add1 idx) count sum seen)]  ; If idx is already in seen set, skip it
-      [(member (- target idx) seen) (build-array-and-sum (add1 idx) count sum seen)]  ; If target - idx is in seen set, skip idx
-      [else
-       (build-array-and-sum (add1 idx) (add1 count) (+ sum idx) (cons idx seen))]))  ; Otherwise, add idx to the seen set and update the sum
+  ;; Helper function to generate the next valid number while skipping invalid pairs
+  (define (next-valid-num candidate nums)
+    (if (not (ormap (lambda (num) (= (+ num candidate) target)) nums))
+        candidate
+        (next-valid-num (+ candidate 1) nums)))
 
-  ;; Start the recursive process with initial values
-  (build-array-and-sum 1 0 0 '()))
+  ;; Recursive function to build the array using accumulators
+  (define (build-array nums candidate count)
+    (if (= count n)
+        nums
+        (let ([next-num (next-valid-num candidate nums)])
+          (build-array (cons next-num nums) (+ next-num 1) (+ count 1)))))
+
+  ;; Generate the beautiful array
+  (define beautiful-array (build-array '() 1 0))
+
+  ;; Calculate the sum of the array elements modulo MOD
+  (define (mod-sum nums)
+    (foldl (lambda (num acc) (modulo (+ acc num) MOD)) 0 nums))
+
+  ;; Compute and return the minimum possible sum
+  (mod-sum beautiful-array))
 
 ;; Example test cases
 (displayln (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])
 (displayln (minimumPossibleSum 3 3))   ; Expected: 8 (nums = [1, 3, 4])
-(displayln (minimumPossibleSum 1 1))   ; Expected: 1 (nums = [1])
+(displayln (minimumPossibleSum 1 1))   ; Expected: 1 (nums = [1]))
 
 (require rackunit)
 

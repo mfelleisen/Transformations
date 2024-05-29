@@ -36,27 +36,27 @@
 (define (maximumJumps nums target)
   (define n (length nums))
 
-  ;; Define a helper function to recursively calculate the maximum jumps.
-  (define (max-jumps-from i dp)
-    (if (>= i n)
-        -inf.0
-        (if (not (equal? (vector-ref dp i) -1))
-            (vector-ref dp i)
-            (let loop ([j (+ i 1)] [max-jumps -inf.0])
-              (if (>= j n)
-                  (begin
-                    (vector-set! dp i (if (equal? max-jumps -inf.0) -1 max-jumps))
-                    (vector-ref dp i))
-                  (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-                      (loop (+ j 1) (max max-jumps (+ 1 (max-jumps-from j dp))))
-                      (loop (+ j 1) max-jumps)))))))
+  ;; Helper function to determine if a jump is possible
+  (define (can-jump? x y)
+    (<= (abs (- x y)) target))
+  
+  ;; Recursive function to calculate the maximum jumps using memoization
+  (define (max-jumps idx memo)
+    (cond
+      [(= idx (sub1 n)) 0] ;; Reached the last index
+      [(hash-ref memo idx #f)] ;; Return memoized result if exists
+      [else
+       (let loop ([j (+ idx 1)] [max-jump -1])
+         (cond
+           [(>= j n) (begin (hash-set! memo idx max-jump) max-jump)] ;; End of list
+           [(can-jump? (list-ref nums idx) (list-ref nums j))
+            (let ([jumps (max-jumps j memo)])
+              (loop (add1 j) (max max-jump (add1 jumps))))]
+           [else (loop (add1 j) max-jump)]))]))
 
-  ;; Initialize DP table with -1 (unvisited) values.
-  (define dp (make-vector n -1))
-
-  ;; Start the calculation from the first index.
-  (let ([result (max-jumps-from 0 dp)])
-    (if (equal? result -1) -1 result)))
+  ;; Initialize memoization table and start recursion from index 0
+  (let ([memo (make-hash)])
+    (max-jumps 0 memo)))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

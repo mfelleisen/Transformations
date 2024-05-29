@@ -16,28 +16,20 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; This function calculates the minimum possible sum of a k-avoiding array of length n.
-  ;; A k-avoiding array does not have any pair of distinct elements that sum to k.
-  
-  ;; Helper function to check if adding a number will violate the k-avoiding property
-  (define (violates-k-avoiding? used-numbers current-number)
-    (set-member? used-numbers (- k current-number)))
-  
-  ;; Recursive helper function to build the k-avoiding array and calculate the sum
-  (define (build-and-sum used-numbers current-number count total-sum)
-    (cond
-      [(= count n) total-sum]  ;; Base case: if we've added enough numbers, return the sum
-      [(or (violates-k-avoiding? used-numbers current-number)
-           (set-member? used-numbers current-number))
-       (build-and-sum used-numbers (+ current-number 1) count total-sum)]  ;; Skip current number
-      [else
-       (build-and-sum (set-add used-numbers current-number)
-                      (+ current-number 1)
-                      (+ count 1)
-                      (+ total-sum current-number))]))  ;; Add to sum and recurse
-  
-  ;; Start the recursive process with an empty set, starting number 1, count 0, and sum 0
-  (build-and-sum (set) 1 0 0))
+  (define (build-and-sum current-number count total-sum used-numbers)
+    (if (= count n)
+        total-sum
+        (cond
+          [(or (set-member? used-numbers current-number)
+               (set-member? used-numbers (- k current-number)))
+           (build-and-sum (add1 current-number) count total-sum used-numbers)]
+          [else
+           (build-and-sum (add1 current-number)
+                          (add1 count)
+                          (+ total-sum current-number)
+                          (set-add used-numbers current-number))])))
+
+  (build-and-sum 1 0 0 (set)))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

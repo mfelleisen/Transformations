@@ -28,30 +28,35 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
-  (define (parity x) (modulo x 2))
-  (define (valid? x) (<= x threshold))
-  (define (even? x) (= (parity x) 0))
+  ;; Helper function to determine if a number is even
+  (define (even? n) (= (modulo n 2) 0))
   
-  ;; Find the length of the longest alternating subarray starting from the given index
-  (define (find-longest-from start)
-    (define (extend-subarray i len)
-      (if (or (>= i (length nums))
-              (not (valid? (list-ref nums i)))
-              (= (parity (list-ref nums i))
-                 (parity (list-ref nums (- i 1)))))
-          len
-          (extend-subarray (+ i 1) (+ len 1))))
-    (if (and (even? (list-ref nums start))
-             (valid? (list-ref nums start)))
-        (extend-subarray (+ start 1) 1)
-        0))
+  ;; Helper function to check if a subarray starting at l and ending at r is valid
+  (define (valid-subarray? nums l r threshold)
+    (and (<= (list-ref nums r) threshold)
+         (or (= l r)
+             (and (not (= (modulo (list-ref nums (- r 1)) 2)
+                          (modulo (list-ref nums r) 2)))
+                  (valid-subarray? nums l (- r 1) threshold)))))
   
-  ;; Iterate through the list to find the maximum length of valid subarrays
-  (foldl max 0 (map find-longest-from (range (length nums)))))
+  ;; Find the longest valid subarray starting at index l
+  (define (find-max-length-from l)
+    (for/fold ([max-len 0]) ([r (in-range l (length nums))])
+      (if (valid-subarray? nums l r threshold)
+          (max max-len (+ 1 (- r l)))
+          max-len)))
+  
+  ;; Iterate through each starting index where the number is even and below the threshold
+  (define valid-starts (filter (λ (i) (and (even? (list-ref nums i))
+                                           (<= (list-ref nums i) threshold)))
+                               (range (length nums))))
+  
+  ;; Find the maximum length of valid subarrays starting from any valid index
+  (apply max 0 (map find-max-length-from valid-starts)))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3
-(longestAlternatingSubarray '(1 2) 2)       ; Output: 1
+(longestAlternatingSubarray '(1 2) 2)      ; Output: 1
 (longestAlternatingSubarray '(2 3 4 5) 4)  ; Output: 3
 
 (require rackunit)

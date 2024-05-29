@@ -19,18 +19,25 @@
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
   (define initial-balance 100)
+  
+  ;; Calculate the rounded purchase amount
   (define rounded-amount
-    (let* ([lower-bound (* 10 (quotient purchaseAmount 10))]
-           [upper-bound (+ lower-bound 10)])
-      (if (<= (- upper-bound purchaseAmount)
-              (- purchaseAmount lower-bound))
-          upper-bound
-          lower-bound)))
+    (let* ((lower-bound (* 10 (quotient purchaseAmount 10)))
+           (upper-bound (+ lower-bound 10)))
+      (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
+          lower-bound
+          upper-bound)))
+  
+  ;; Calculate the new balance by subtracting the rounded amount from the initial balance
   (- initial-balance rounded-amount))
 
-;; The function can be tested with:
-;; (accountBalanceAfterPurchase 9)  ; should return 90
-;; (accountBalanceAfterPurchase 15) ; should return 80
+;; Tests
+(module+ test
+  (require rackunit)
+  (check-equal? (accountBalanceAfterPurchase 9) 90)
+  (check-equal? (accountBalanceAfterPurchase 15) 80)
+  (check-equal? (accountBalanceAfterPurchase 0) 100)
+  (check-equal? (accountBalanceAfterPurchase 100) 0))
 
 (require rackunit)
 

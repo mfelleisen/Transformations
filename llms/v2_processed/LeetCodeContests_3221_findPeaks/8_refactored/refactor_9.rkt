@@ -22,18 +22,14 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  ;; Use filter-map to find the peaks.
-  (filter-map
-   (lambda (i)
-     ;; Check if the current element is a peak by comparing it with its neighbors.
-     (and (> i 0) (< i (- (length mountain) 1)) ; Ensure index is not the first or last
-          (> (list-ref mountain i) (list-ref mountain (- i 1))) ; Current element > Previous element
-          (> (list-ref mountain i) (list-ref mountain (+ i 1))) ; Current element > Next element
-          i)) ; Return the index if it's a peak
-   (range (length mountain)))) ; Generate a list of indices from 0 to length of mountain - 1
+  (for/list ([i (in-range 1 (sub1 (length mountain)))]
+             #:when (and (> (list-ref mountain i) (list-ref mountain (sub1 i)))
+                         (> (list-ref mountain i) (list-ref mountain (+ i 1)))))
+    i))
 
-;; Example usage:
-(findPeaks '(1 4 3 8 5)) ; Output: '(1 3)
+;; Example usage
+(findPeaks '(2 4 4))      ;; Output: '()
+(findPeaks '(1 4 3 8 5))  ;; Output: '(1 3)
 
 (require rackunit)
 

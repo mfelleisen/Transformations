@@ -27,32 +27,24 @@
 ;;  * 3 <= nums.length <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
-  ;; Helper function to get the minimum value less than 'current' in a list
-  (define (min-less-than current lst)
-    (let ([filtered (filter (lambda (x) (< x current)) lst)])
-      (if (null? filtered)
-          +inf.0
-          (apply min filtered))))
+  (define len (length nums))
 
-  ;; Function to calculate the minimum sum of the mountain triplet
-  (define (calculate-min-sum nums)
-    (for/fold ([min-sum +inf.0] [found? #f] #:result (if found? min-sum -1))
-              ([j (in-range 1 (sub1 (length nums)))])
+  (define (valid-mountain-triplet? i j k)
+    (and (< i j k)
+         (< (list-ref nums i) (list-ref nums j))
+         (< (list-ref nums k) (list-ref nums j))))
 
-      (define current (list-ref nums j))
-      (define left-nums (take nums j))
-      (define right-nums (drop nums (add1 j)))
-      (define left-min (min-less-than current left-nums))
-      (define right-min (min-less-than current right-nums))
+  (define (mountain-triplets)
+    (for*/list ([i (in-range 0 (- len 2))]
+                [j (in-range (add1 i) (- len 1))]
+                [k (in-range (add1 j) len)]
+                #:when (valid-mountain-triplet? i j k))
+      (+ (list-ref nums i) (list-ref nums j) (list-ref nums k))))
 
-      (if (and (< left-min +inf.0) (< right-min +inf.0))
-          (values (min min-sum (+ left-min current right-min)) #t)
-          (values min-sum found?))))
-  
-  ;; Check if the input list has less than 3 elements, if so, no mountain triplet can exist
-  (if (< (length nums) 3)
-      -1
-      (calculate-min-sum nums)))
+  (let ([triplet-sums (mountain-triplets)])
+    (if (null? triplet-sums)
+        -1
+        (apply min triplet-sums))))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ; Output: 9

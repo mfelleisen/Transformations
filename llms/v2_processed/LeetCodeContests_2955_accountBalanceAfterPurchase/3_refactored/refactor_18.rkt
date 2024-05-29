@@ -17,17 +17,15 @@
 ;; Hence, your account balance becomes 100 - 20 = 80.
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
-(define (accountBalanceAfterPurchase purchaseAmount)
+(define (accountBalanceAfterPurchase amount)
   (define initial-balance 100)
-  (define rounded-amount
-    (let* ([lower-bound (* (quotient purchaseAmount 10) 10)]
-           [upper-bound (+ lower-bound 10)]
-           [lower-diff (- purchaseAmount lower-bound)]
-           [upper-diff (- upper-bound purchaseAmount)])
-      (if (< lower-diff upper-diff)
-          lower-bound
-          upper-bound)))
-  (- initial-balance rounded-amount))
+  (define round-to-nearest-10
+    (lambda (x)
+      (let* ([lower (* (quotient x 10) 10)]
+             [upper (+ lower 10)]
+             [rounded (if (< (- x lower) (- upper x)) lower upper)])
+        rounded)))
+  (- initial-balance (round-to-nearest-10 amount)))
 
 ;; Example usage:
 ;; (accountBalanceAfterPurchase 9)  ; Output: 90

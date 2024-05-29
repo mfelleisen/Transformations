@@ -31,20 +31,21 @@
 ;;  * 1 <= n <= 109
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
-  (define MOD (+ (expt 10 9) 7))
+  (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
 
-  ;; Helper function to generate the sequence
-  (define (gen-seq n target)
-    (define (loop i count acc)
+  ;; Helper function to build the beautiful array
+  (define (build-beautiful-nums n target)
+    (define (loop acc candidate count)
       (cond
         [(= count n) (reverse acc)]
-        [(ormap (λ (x) (= (+ x i) target)) acc)
-         (loop (add1 i) count acc)]
-        [else (loop (add1 i) (add1 count) (cons i acc))]))
-    (loop 1 0 '()))
+        [(ormap (λ (num) (= (+ num candidate) target)) acc)
+         (loop acc (+ candidate 1) count)]
+        [else
+         (loop (cons candidate acc) (+ candidate 1) (+ count 1))]))
+    (loop '() 1 0))
 
-  ;; Compute the sum and take modulo
-  (modulo (apply + (gen-seq n target)) MOD))
+  ;; Compute the sum of the beautiful array and take modulo
+  (modulo (apply + (build-beautiful-nums n target)) MOD))
 
 ;; Example test cases
 (minimumPossibleSum 2 3)   ; Output: 4

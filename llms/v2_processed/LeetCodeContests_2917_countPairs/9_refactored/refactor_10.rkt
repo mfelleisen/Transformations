@@ -27,16 +27,13 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * -50 <= nums[i], target <= 50
 (define (countPairs nums target)
-  ;; Calculate the number of valid index pairs (i, j) such that nums[i] + nums[j] < target
-  (for/sum ([i (in-range (length nums))])
-    (for/sum ([j (in-range (add1 i) (length nums))])
-      (if (< (+ (list-ref nums i) (list-ref nums j)) target)
-          1
-          0))))
+  (for/sum ([i (in-naturals)] [x (in-list nums)] #:unless (empty? (rest nums)))
+    (for/sum ([y (in-list (rest nums))])
+      (if (< (+ x y) target) 1 0))))
 
 ;; Example usage:
-(countPairs '[-1 1 2 3 1] 2) ; Output: 3
-(countPairs '[-6 2 5 -2 -7 -1 3] -2) ; Output: 10
+(countPairs '(-1 1 2 3 1) 2) ; Output: 3
+(countPairs '(-6 2 5 -2 -7 -1 3) -2) ; Output: 10
 
 (require rackunit)
 

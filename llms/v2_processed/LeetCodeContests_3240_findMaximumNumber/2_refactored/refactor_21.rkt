@@ -29,20 +29,23 @@
 ;; 1 <= k <= 1015
 ;; 1 <= x <= 8
 (define (findMaximumNumber k x)
-  ;; Calculate the price of a number based on its binary representation.
+  ;; Helper function to calculate the price of a number based on its binary representation.
   (define (price-of-num num)
-    (for/sum ([i (in-naturals 1)]
-              #:break (> (expt 2 i) num)
-              #:when (and (= (modulo i x) 0)
-                          (= (bitwise-and num (expt 2 (- i 1))) (expt 2 (- i 1)))))
-      1))
+    (define bin-rep (number->string num 2))  ; Convert number to binary string
+    (define len (string-length bin-rep))     ; Length of the binary string
+    ;; Calculate price by filtering indices where the condition holds and summing them
+    (for/sum ([i (in-range 1 (+ len 1))])
+      (if (and (= (modulo i x) 0)    ; Check if index is multiple of x
+               (char=? (string-ref bin-rep (- len i)) #\1))  ; Check if the bit at this index is 1
+          1
+          0)))
 
-  ;; Tail-recursive helper function to find the maximum number.
+  ;; Main loop to find the maximum number using a tail-recursive helper function.
   (define (loop num current-sum)
     (let ([new-price (price-of-num num)])
-      (if (> (+ current-sum new-price) k)
-          (- num 1)
-          (loop (add1 num) (+ current-sum new-price)))))
+      (if (> (+ current-sum new-price) k)  ; Check if adding this number's price exceeds k
+          (- num 1)                        ; Return the previous number
+          (loop (+ num 1) (+ current-sum new-price)))))  ; Otherwise, continue with the next number
 
   ;; Start the loop with num = 1 and current-sum = 0
   (loop 1 0))

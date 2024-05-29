@@ -24,17 +24,17 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  ;; Helper function to calculate the square of the diagonal length
+  ;; Define a helper function to calculate the square of the diagonal length
   (define (diagonal-squared length width)
     (+ (* length length) (* width width)))
 
-  ;; Helper function to calculate the area of the rectangle
+  ;; Define a helper function to calculate the area of the rectangle
   (define (area length width)
     (* length width))
 
   ;; Use foldl to traverse the list and find the rectangle with the longest diagonal or maximum area
   (define-values (max-diagonal max-area)
-    (for/fold ([max-diagonal 0] [max-area 0]) ([dim (in-list dimensions)])
+    (for/fold ([max-diagonal 0] [max-area 0]) ([dim dimensions])
       (define length (first dim))
       (define width (second dim))
       (define current-diagonal (diagonal-squared length width))
@@ -49,6 +49,7 @@
         ;; Otherwise, keep the previous result
         [else
          (values max-diagonal max-area)])))
+
   ;; Return the maximum area
   max-area)
 

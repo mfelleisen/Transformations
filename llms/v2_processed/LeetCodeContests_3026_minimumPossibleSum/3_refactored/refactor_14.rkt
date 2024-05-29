@@ -33,17 +33,25 @@
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
 
-  (define (build-beautiful-nums n target)
-    (define (loop i nums sum)
-      (if (= (length nums) n)
-          sum
-          (if (ormap (lambda (num) (= (+ num i) target)) nums)
-              (loop (add1 i) nums sum)
-              (loop (add1 i) (cons i nums) (+ sum i)))))
-    (loop 1 '() 0))
+  (define (sum-of-first-n n)
+    (* n (+ n 1) 1/2))
 
-  ;; Compute the sum of the beautiful array and take modulo
-  (modulo (build-beautiful-nums n target) MOD))
+  (define (sum-excluding-pairs total count excluded-sum)
+    (if (zero? count)
+        total
+        (sum-excluding-pairs (+ total target)
+                             (- count 1)
+                             (- excluded-sum target))))
+
+  (define (compute-sum n target)
+    (define pairs (quotient target 2))
+    (define full-pairs (min pairs n))
+    (define remaining (max 0 (- n pairs)))
+    (define total-sum (sum-of-first-n (+ full-pairs remaining)))
+    (define excluded-sum (sum-of-first-n full-pairs))
+    (sum-excluding-pairs total-sum full-pairs excluded-sum))
+
+  (modulo (compute-sum n target) MOD))
 
 ;; Example test cases
 (minimumPossibleSum 2 3)   ; Output: 4

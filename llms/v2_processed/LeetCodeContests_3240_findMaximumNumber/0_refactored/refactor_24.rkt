@@ -28,10 +28,8 @@
 ;; 1 <= k <= 1015
 ;; 1 <= x <= 8
 (define (findMaximumNumber k x)
-  ;; This function calculates the greatest integer num such that the sum of the prices of all numbers from 1 to num is less than or equal to k.
-  
-  ;; Define a helper function to calculate the price of a number
-  (define (price num x)
+  ;; This helper function calculates the price of a number based on the given x
+  (define (price num)
     (define bin-rep (number->string num 2))
     (for/sum ([i (in-range (string-length bin-rep))])
       (if (and (= (modulo (+ i 1) x) 0)
@@ -39,13 +37,15 @@
           1
           0)))
 
-  ;; Define an inner recursive function for calculating the maximum number
+  ;; Recursive helper function to find the greatest number
   (define (loop num current-sum)
-    (let ([new-sum (+ current-sum (price num x))])
-      (if (> new-sum k)
-          (sub1 num)
-          (loop (add1 num) new-sum))))
-  
+    (let ([p (price num)])
+      (let ([new-sum (+ current-sum p)])
+        (if (> new-sum k)
+            (- num 1)
+            (loop (+ num 1) new-sum)))))
+
+  ;; Start the recursion with num=1 and current-sum=0
   (loop 1 0))
 
 ;; Example use cases

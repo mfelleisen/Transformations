@@ -2,25 +2,53 @@
 
 ;; Function to check if a number is prime
 (define (is-prime? num)
-  (define (check-divisors i)
-    (cond
-      [(> (* i i) num) #t]
-      [(zero? (remainder num i)) #f]
-      [(zero? (remainder num (+ i 2))) #f]
-      [else (check-divisors (+ i 6))]))
+  ;; Helper function for checking divisibility
+  (define (divisible? n d)
+    (zero? (remainder n d)))
+
   (cond
-    [(<= num 1) #f]
-    [(<= num 3) #t]
-    [(or (zero? (remainder num 2)) (zero? (remainder num 3))) #f]
-    [else (check-divisors 5)]))
+    [(<= num 1) #f]  ;; Numbers <= 1 are not prime
+    [(<= num 3) #t]  ;; 2 and 3 are prime numbers
+    [(or (divisible? num 2) (divisible? num 3)) #f]  ;; Multiples of 2 or 3 are not prime
+    [else
+     ;; Check for divisibility from 5 onward, skipping even numbers
+     (let loop ([i 5])
+       (cond
+         [(> (* i i) num) #t]  ;; No divisors found, num is prime
+         [(or (divisible? num i) (divisible? num (+ i 2))) #f]  ;; Divisible by i or i+2, not prime
+         [else (loop (+ i 6))]))]))  ;; Check next potential prime factors
 
 ;; Function to find prime pairs that add up to n
+;;     You are given an integer n. We say that two integers x and y form a prime number pair if:
+;; * 1 <= x <= y <= n
+;; * x + y == n
+;; * x and y are prime numbers
+;;     Return the 2D sorted list of prime number pairs [xi, yi]. The list should be sorted in increasing order of xi. If there are no prime number pairs at all, return an empty array.
+;;     Note: A prime number is a natural number greater than 1 with only two factors, itself and 1.
+;;     Example 1:
+;;     Input: n = 10
+;;     Output: [[3,7],[5,5]]
+;;     Explanation: In this example, there are two prime pairs that satisfy the criteria.
+;;     These pairs are [3,7] and [5,5], and we return them in the sorted order as described in the problem statement.
+;;     Example 2:
+;;     Input: n = 2
+;;     Output: []
+;;     Explanation: We can show that there is no prime number pair that gives a sum of 2, so we return an empty array.
+;;     Constraints:
+;; * 1 <= n <= 106
 (define (findPrimePairs n)
+  ;; Generate list of primes up to n
   (define primes (filter is-prime? (range 2 (add1 n))))
-  (for*/list ([x primes]
-              [y (drop primes (index-of primes x))]
-              #:when (= (+ x y) n))
-    (list x y)))
+
+  ;; Helper function to find pairs (x, y) such that x + y = n and both x and y are prime
+  (define (find-pairs primes)
+    (for*/list ([x (in-list primes)]
+                [y (in-list primes)]
+                #:when (and (<= x y) (= (+ x y) n)))
+      (list x y)))
+
+  ;; Return the list of prime pairs
+  (find-pairs primes))
 
 ;; Example usage:
 (findPrimePairs 10)  ;; Output: '((3 7) (5 5))

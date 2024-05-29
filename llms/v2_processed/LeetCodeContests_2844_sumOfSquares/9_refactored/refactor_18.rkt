@@ -18,18 +18,16 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  (define (square x) (* x x))
+  
+  ;; Function to check if an index is a divisor of n and return its square
+  (define (special-square i)
+    (if (zero? (modulo n i))
+        (sqr (list-ref nums (sub1 i))) ; list-ref is 0-indexed, hence (sub1 i)
+        0))
 
-  (define (is-special-index i)
-    (zero? (modulo n i)))
-
-  (define special-elements
-    (filter-map (lambda (i)
-                  (and (is-special-index i)
-                       (list-ref nums (sub1 i))))
-                (range 1 (add1 n))))
-
-  (apply + (map square special-elements)))
+  ;; Sum up the squares of elements at indices that divide n
+  (for/sum ([i (in-range 1 (add1 n))])
+    (special-square i)))
 
 ;; Example usage:
 (sumOfSquares '(1 2 3 4)) ; Output: 21

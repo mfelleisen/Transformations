@@ -4,14 +4,12 @@
 ;; and the given position x.
 (define (calculate-price num x)
   (define bin-rep (number->string num 2))  ; Convert number to binary string
-  (for/fold ([price 0])  ; Accumulate the price using a fold
-            ([i (in-range (string-length bin-rep))]
-             #:when (and (= (modulo (+ i 1) x) 0)  ; Check if the position is a multiple of x
+  (for/sum ([i (in-range (string-length bin-rep))]
+            #:when (and (= (modulo (+ i 1) x) 0)  ; Check if the position is a multiple of x
                         (char=? (string-ref bin-rep (- (string-length bin-rep) i 1)) #\1)))  ; Check if the bit is set
-    (add1 price)))  ; Increment the price if conditions are met
+    1))  ; Increment the price if conditions are met
 
-;; Find the maximum number such that the sum of prices from 1 to that number
-;; does not exceed k.
+;; Find the maximum number such that the sum of prices from 1 to that number does not exceed k.
 ;; You are given an integer k and an integer x.
 ;; Consider s is the 1-indexed binary representation of an integer num. The price of a number num is the number of i's such that i % x == 0 and s[i] is a set bit.
 ;; Return the greatest integer num such that the sum of prices of all numbers from 1 to num is less than or equal to k.
@@ -41,13 +39,13 @@
 ;; 1 <= x <= 8
 
 (define (findMaximumNumber k x)
-  (define (helper num current-sum)
-    (define price (calculate-price num x))  ; Calculate price for current number
-    (define new-sum (+ current-sum price))  ; Update the sum
-    (if (> new-sum k)
-        (sub1 num)  ; Return the previous number
-        (helper (add1 num) new-sum)))  ; Recurse with the next number and updated sum
-  (helper 1 0))  ; Start recursion with initial number 1 and sum 0
+  (define (search num current-sum)
+    (let* ([price (calculate-price num x)]  ; Calculate price for current number
+           [new-sum (+ current-sum price)])  ; Update the sum
+      (if (> new-sum k)  ; Check if the sum exceeds k
+          (sub1 num)  ; Return the previous number
+          (search (add1 num) new-sum))))  ; Recurse with the next number and updated sum
+  (search 1 0))  ; Start recursion with initial number 1 and sum 0
 
 ;; Example use cases
 (findMaximumNumber 9 1)  ; Output: 6

@@ -19,16 +19,14 @@
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
   (define initial-balance 100)
-  
-  (define (round-to-nearest-10 amount)
-    (let* ((lower-bound (* (quotient amount 10) 10))
-           (upper-bound (+ lower-bound 10)))
-      (if (< (- amount lower-bound) (- upper-bound amount))
+  (define nearest-multiple-of-10
+    (let* ([lower-bound (* (quotient purchaseAmount 10) 10)]
+           [upper-bound (+ lower-bound 10)])
+      (if (or (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
+              (= (- purchaseAmount lower-bound) (- upper-bound purchaseAmount)))
           lower-bound
           upper-bound)))
-  
-  (define rounded-amount (round-to-nearest-10 purchaseAmount))
-  (- initial-balance rounded-amount))
+  (- initial-balance nearest-multiple-of-10))
 
 ;; Example usage:
 ;; (accountBalanceAfterPurchase 9)  ; Output: 90

@@ -23,26 +23,28 @@
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus
-  
-  ;; Recursive helper function with memoization
-  (define (helper n x)
-    (define cache (make-hash))  ; Cache to store results for memoization
-    
-    (define (ways n current)
-      (cond
-        [(= n 0) 1]  ; Base case: one way to make 0 (use no numbers)
-        [(or (< n 0) (> current n)) 0]  ; No way to make a negative number or if current exceeds n
-        [else
-         (hash-ref! cache (list n current)
-                    (lambda ()
-                      (modulo (+ (ways (- n (expt current x)) (add1 current))
-                                 (ways n (add1 current)))
-                              MOD)))]))
-    
-    (ways n 1))
+  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
 
-  ;; Return the number of ways to express n
-  (helper n x))
+  ;; Create a memoization table initialized to 0, except for the base case
+  (define memo (make-hash))
+  (hash-set! memo 0 1)
+
+  ;; Helper function for memoized recursion
+  (define (ways target max-base)
+    (cond
+      [(zero? target) 1]
+      [(negative? target) 0]
+      [(hash-ref memo (list target max-base) #f)
+       => identity]
+      [else
+       (define result
+         (for/fold ([sum 0]) ([base (in-range 1 (+ max-base 1))])
+           (define current-power (expt base x))
+           (modulo (+ sum (ways (- target current-power) (- base 1))) MOD)))
+       (hash-set! memo (list target max-base) result)
+       result]))
+
+  (ways n max-base))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

@@ -33,7 +33,8 @@
                 (if (<= current first)
                     (cons (+ current first) rest)
                     (cons current acc))]
-               [_ (cons current acc)]))
+               [empty
+                (cons current acc)]))
            '()  ;; Start with an empty list as the accumulator
            lst))
   ;; Return the maximum value from the combined list

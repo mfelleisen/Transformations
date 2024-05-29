@@ -24,34 +24,35 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  ;; Define a helper function to calculate the square of the diagonal length
+  ;; Helper function to calculate the square of the diagonal length
   (define (diagonal-squared length width)
     (+ (* length length) (* width width)))
 
-  ;; Define a helper function to calculate the area of the rectangle
+  ;; Helper function to calculate the area of the rectangle
   (define (area length width)
     (* length width))
 
-  ;; Use foldl to traverse the list and find the rectangle with the longest diagonal or maximum area
-  (define (compare-rectangles dim result)
-    (let* ([length (first dim)]
-           [width (second dim)]
-           [current-diagonal (diagonal-squared length width)]
-           [current-area (area length width)]
-           [max-diagonal (first result)]
-           [max-area (second result)])
+  ;; Fold over the dimensions to find the rectangle with the longest diagonal or maximum area
+  (define-values (max-diagonal max-area)
+    (for/fold ([max-diagonal 0] [max-area 0])
+              ([dim (in-list dimensions)])
+      (define length (first dim))
+      (define width (second dim))
+      (define current-diagonal (diagonal-squared length width))
+      (define current-area (area length width))
       (cond
         ;; Check if current diagonal is longer
         [(> current-diagonal max-diagonal)
-         (list current-diagonal current-area)]
+         (values current-diagonal current-area)]
         ;; Check if diagonals are equal but current area is larger
         [(and (= current-diagonal max-diagonal) (> current-area max-area))
-         (list max-diagonal current-area)]
+         (values max-diagonal current-area)]
         ;; Otherwise, keep the previous result
-        [else result])))
+        [else
+         (values max-diagonal max-area)])))
 
-  ;; Extract the maximum area from the result
-  (second (foldl compare-rectangles '(0 0) dimensions)))
+  ;; Return the maximum area
+  max-area)
 
 ;; Example usage:
 (define dimensions1 '((9 3) (8 6)))

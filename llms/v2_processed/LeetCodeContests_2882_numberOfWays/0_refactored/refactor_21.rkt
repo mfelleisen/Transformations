@@ -21,22 +21,25 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))
 
-  ;; Helper function to compute the number of ways recursively
-  (define (count-ways target base)
+  ;; Helper function to compute the maximum base such that base^x <= n
+  (define (max-base n x)
+    (inexact->exact (floor (expt n (/ 1.0 x)))))
+
+  ;; Recursive function with memoization
+  (define memo (make-hash))
+  
+  (define (ways n base)
     (cond
-      [(= target 0) 1]
-      [(or (< target 0) (= base 0)) 0]
+      [(zero? n) 1]
+      [(or (< n 0) (zero? base)) 0]
       [else
-       (let ([current-power (expt base x)])
-         (modulo (+ (count-ways (- target current-power) (sub1 base))
-                    (count-ways target (sub1 base)))
-                 MOD))]))
-
-  ;; Compute the maximum base such that base^x <= n
-  (define max-base (inexact->exact (floor (expt n (/ 1.0 x)))))
-
-  ;; Start the recursive counting from the max base
-  (count-ways n max-base))
+       (hash-ref! memo (cons n base)
+                  (lambda ()
+                    (modulo (+ (ways n (sub1 base))
+                               (ways (- n (expt base x)) (sub1 base)))
+                            MOD)))]))
+  
+  (ways n (max-base n x)))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

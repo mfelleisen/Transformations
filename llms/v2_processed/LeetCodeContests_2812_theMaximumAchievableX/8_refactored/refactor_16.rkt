@@ -20,8 +20,15 @@
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
 (define (theMaximumAchievableX num t)
-  ;; The maximum achievable number x is num plus twice t.
   (+ num (* 2 t)))
+
+;; Test cases
+(module+ test
+  (require rackunit)
+  (check-equal? (theMaximumAchievableX 4 1) 6)
+  (check-equal? (theMaximumAchievableX 3 2) 7)
+  (check-equal? (theMaximumAchievableX 1 50) 101)
+  (check-equal? (theMaximumAchievableX 50 1) 52))
 
 (require rackunit)
 

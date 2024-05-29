@@ -21,27 +21,27 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
 
-  ;; Helper function to calculate the number of ways using dynamic programming
-  (define (dp-ways n x)
-    ;; Create a vector initialized with zeros and set base case
-    (define dp (make-vector (+ n 1) 0))
-    (vector-set! dp 0 1)
+  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))  ; Calculate the maximum base
 
-    ;; Calculate the maximum base
-    (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
+  ;; Helper function to compute the number of ways using dynamic programming
+  (define (compute-ways n x)
+    (define dp (make-vector (add1 n) 0))  ; Create a vector initialized with zeros
+    (vector-set! dp 0 1)  ; Base case: one way to sum up to zero using no numbers
 
     ;; Iterate over each base and update the dp vector
-    (for/fold ([dp dp]) ([base (in-range 1 (+ max-base 1))])
-      (define current-power (expt base x))
-      (for ([i (in-range n (- current-power 1) -1)])
+    (for ([base (in-range 1 (add1 max-base))])
+      (define current-power (expt base x))  ; Calculate the current power of the base
+      ;; Update dp vector entries from n down to current-power
+      (for ([i (in-range n (sub1 current-power) -1)])
         (vector-set! dp i
                      (modulo (+ (vector-ref dp i)
                                 (vector-ref dp (- i current-power)))
-                             MOD)))
-      dp))
+                             MOD))))
+    dp)
 
-  (define dp (dp-ways n x))
-  (vector-ref dp n))  ; Return the number of ways to express n
+  ;; Get the dp vector and return the number of ways to express n
+  (let ([dp (compute-ways n x)])
+    (vector-ref dp n)))  ; Return the number of ways to express n
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

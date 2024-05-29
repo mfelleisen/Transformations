@@ -28,43 +28,33 @@
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
   (define n (length nums))
-  (define +inf (current-inexact-milliseconds)) ;; Use a large value to represent +inf
 
-  ;; Define a helper function to find the minimum on the left of each peak
-  (define (find-left-mins nums)
-    (let loop ([i 1] [prev-min +inf] [left-mins '()])
-      (if (>= i n)
-          (reverse left-mins)
-          (let ([curr-min (min prev-min (list-ref nums (sub1 i)))])
-            (loop (add1 i) curr-min (cons curr-min left-mins))))))
+  (define (find-left-min j)
+    (for/fold ([left-min +inf.0]) ([i (in-range 0 j)])
+      (if (< (list-ref nums i) (list-ref nums j))
+          (min left-min (list-ref nums i))
+          left-min)))
 
-  ;; Define a helper function to find the minimum on the right of each peak
-  (define (find-right-mins nums)
-    (let loop ([i (- n 2)] [prev-min +inf] [right-mins '()])
-      (if (< i 0)
-          (reverse right-mins)
-          (let ([curr-min (min prev-min (list-ref nums (add1 i)))])
-            (loop (sub1 i) curr-min (cons curr-min right-mins))))))
+  (define (find-right-min j)
+    (for/fold ([right-min +inf.0]) ([k (in-range (+ j 1) n)])
+      (if (< (list-ref nums k) (list-ref nums j))
+          (min right-min (list-ref nums k))
+          right-min)))
 
-  ;; Get the minimum values to the left and right of each peak
-  (define left-mins (find-left-mins nums))
-  (define right-mins (find-right-mins nums))
+  (define (find-min-sum)
+    (for/fold ([min-sum +inf.0]) ([j (in-range 1 (- n 1))])
+      (define left-min (find-left-min j))
+      (define right-min (find-right-min j))
+      (if (and (not (= left-min +inf.0)) (not (= right-min +inf.0)))
+          (min min-sum (+ left-min (list-ref nums j) right-min))
+          min-sum)))
 
-  ;; Calculate the minimum sum of a mountain triplet
-  (define min-sum
-    (for/fold ([min-sum +inf])
-              ([j (in-range 1 (- n 1))])
-      (let ([left-min (list-ref left-mins (sub1 j))]
-            [peak (list-ref nums j)]
-            [right-min (list-ref right-mins j)])
-        (if (and (< left-min peak) (< right-min peak))
-            (min min-sum (+ left-min peak right-min))
-            min-sum))))
-  
-  ;; Return the result, if no valid mountain was found return -1
-  (if (= min-sum +inf)
+  (if (< n 3)
       -1
-      min-sum))
+      (let ([result (find-min-sum)])
+        (if (= result +inf.0)
+            -1
+            result))))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ;; Output: 9

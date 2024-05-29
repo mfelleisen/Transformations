@@ -21,29 +21,28 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  (define (distinct-count lst)
-    (length (remove-duplicates lst)))
-
-  (define (valid-window? window)
-    (>= (distinct-count window) m))
-
-  (define (window-sum window)
-    (apply + window))
-
-  (define (update-max-sum max-sum window)
-    (if (valid-window? window)
-        (max max-sum (window-sum window))
-        max-sum))
-
-  (define (sliding-windows lst k)
-    (if (< (length lst) k)
-        '()
-        (cons (take lst k) (sliding-windows (cdr lst) k))))
-
-  (define windows (sliding-windows nums k))
-
-  (for/fold ([max-sum 0]) ([window (in-list windows)])
-    (update-max-sum max-sum window)))
+  (define n (length nums))
+  
+  (define (window-sum lst)
+    (apply + lst))
+  
+  (define (valid-window? window m)
+    (>= (length (remove-duplicates window)) m))
+  
+  (define (slide-window nums k)
+    (for/list ([i (in-range 0 (- (length nums) (sub1 k)))])
+      (take (drop nums i) k)))
+  
+  (define (max-sum-windows windows m)
+    (for/fold ([max-sum 0] #:result max-sum) ([window windows])
+      (if (valid-window? window m)
+          (max max-sum (window-sum window))
+          max-sum)))
+  
+  (if (< n k)
+      0
+      (let ([windows (slide-window nums k)])
+        (max-sum-windows windows m))))
 
 ;; Example usage:
 (maxSum '(2 6 7 3 1 7) 3 4)  ; Output: 18

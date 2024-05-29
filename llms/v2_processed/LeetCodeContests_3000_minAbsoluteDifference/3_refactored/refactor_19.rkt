@@ -27,23 +27,22 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  ;; Helper function to find the minimum absolute difference in a list
-  (define (min-diff lst)
-    (if (empty? lst) +inf.0
-        (for/fold ([min-diff +inf.0]) ([i lst] [j (cdr lst)])
-          (let ([diff (abs (- i j))])
-            (min min-diff diff)))))
-
-  ;; Create a list of pairs (i, num) for each element in nums
-  (define indexed-nums (map list (in-naturals) nums))
-
-  ;; Create a list of windows, each containing elements that are at least x indices apart
-  (define windows (for/list ([i (in-range 0 (- (length nums) x))])
-                    (map second (drop indexed-nums i))))
-
-  ;; Calculate the minimum absolute difference for each window
-  (apply min (map min-diff windows)))
-
+  (define (abs-diff a b)
+    (abs (- a b)))
+  
+  (define len (length nums))
+  
+  (define (find-min-diff i min-diff)
+    (define (update-min-diff j current-min)
+      (if (>= j len)
+          current-min
+          (let ([diff (abs-diff (list-ref nums i) (list-ref nums j))])
+            (update-min-diff (+ j 1) (min current-min diff)))))
+    (if (>= i (- len x))
+        min-diff
+        (find-min-diff (+ i 1) (update-min-diff (+ i x) min-diff))))
+  
+  (find-min-diff 0 +inf.0))
 
 (require rackunit)
 

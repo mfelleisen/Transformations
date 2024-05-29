@@ -24,33 +24,28 @@
 (define (maxScore nums x)
   (define n (length nums))
   
-  ;; Helper function to compute the updated score
-  (define (update-score current-score i j)
-    (let* ((new-score (+ current-score (list-ref nums j)))
-           (i-parity (modulo (list-ref nums i) 2))
-           (j-parity (modulo (list-ref nums j) 2)))
-      (if (not (= i-parity j-parity))
-          (- new-score x)
-          new-score)))
+  ;; Helper function to calculate maximum score using recursion with memoization
+  (define memo-table (make-hash))
   
-  ;; Recursive function to calculate maximum score
-  (define (max-score-rec i memo)
-    (if (hash-has-key? memo i)
-        (hash-ref memo i)
-        (let* ((current-score (list-ref nums i))
-               (next-scores (for/list ([j (in-range (add1 i) n)])
-                              (max-score-rec j memo)))
-               (best-next-score (if (empty? next-scores) 0 (apply max next-scores)))
-               (updated-score (update-score current-score i (if (empty? next-scores) i (add1 i))))
-               (max-score (max current-score (+ best-next-score updated-score))))
-          (hash-set! memo i max-score)
-          max-score)))
+  (define (memoize key val)
+    (hash-set! memo-table key val)
+    val)
   
-  ;; Initialize memoization hash table
-  (define memo (make-hash))
+  (define (max-score-from i)
+    (or (hash-ref memo-table i #f)
+        (memoize i
+                 (if (= i (sub1 n))
+                     (list-ref nums i)
+                     (let* ((current-val (list-ref nums i))
+                            (next-vals (map (λ (j)
+                                             (let ((next-val (list-ref nums j)))
+                                               (if (= (modulo current-val 2) (modulo next-val 2))
+                                                   (+ current-val (max-score-from j))
+                                                   (- (+ current-val (max-score-from j)) x))))
+                                           (range (add1 i) n))))
+                       (apply max (cons current-val next-vals)))))))
   
-  ;; Start recursion from the first element
-  (max-score-rec 0 memo))
+  (max-score-from 0))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

@@ -22,20 +22,23 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  ;; Define a helper function to check if an element is a peak
-  (define (is-peak? left current right)
-    (and (> current left) (> current right)))
+  ;; Helper function to check if an element is a peak
+  (define (is-peak? left mid right)
+    (and (> mid left) (> mid right)))
   
-  ;; Use for/fold to accumulate the indices of peaks
-  (for/fold ([peaks '()] [prev (first mountain)] [i 1] #:result (reverse peaks))
-            ([current (rest (rest mountain))] [idx (in-range 1 (- (length mountain) 1))])
-    (if (is-peak? prev (first current) (second current))
-        (values (cons idx peaks) (first current) (add1 idx))
-        (values peaks (first current) (add1 idx)))))
+  ;; Use for/fold to iterate through the mountain and collect peaks
+  (for/fold ([peaks '()]) ([i (in-range 1 (- (length mountain) 1))])
+    (define left (list-ref mountain (sub1 i)))
+    (define mid (list-ref mountain i))
+    (define right (list-ref mountain (add1 i)))
+    (if (is-peak? left mid right)
+        (cons i peaks)
+        peaks)))
 
 ;; Example usage:
 ;; (findPeaks '(1 4 3 8 5))  ;; Should return '(1 3)
 ;; (findPeaks '(2 4 4))      ;; Should return '()
+
 
 (require rackunit)
 

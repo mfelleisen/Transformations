@@ -14,15 +14,15 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Function to generate all combinations of three numbers (a, b, c)
-  ;; that sum to n and are within the limit
-  (define (valid-combination? a b c)
-    (and (<= a limit) (<= b limit) (<= c limit)))
-
-  (for/sum ([a (in-range 0 (add1 (min n limit)))]
-           [b (in-range 0 (add1 (min n limit)))]
-           #:when (valid-combination? a b (- n a b)))
-    (if (<= (- n a b) limit) 1 0)))
+  ;; Function to count valid distributions for a given first child's candies `a`
+  (define (valid-distributions a)
+    (for/sum ([b (in-range 0 (add1 (min (- n a) limit)))])
+      (define c (- n a b))
+      (if (<= c limit) 1 0)))
+  
+  ;; Sum valid distributions for all possible values of `a`
+  (for/sum ([a (in-range 0 (add1 (min n limit)))])
+    (valid-distributions a)))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

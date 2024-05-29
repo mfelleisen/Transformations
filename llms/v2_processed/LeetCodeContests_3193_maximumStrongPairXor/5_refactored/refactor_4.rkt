@@ -28,16 +28,17 @@
   (define (strong-pair? x y)
     (<= (abs (- x y)) (min x y)))
 
-  ;; Calculate the maximum XOR value of all strong pairs.
-  (define max-xor
-    (for/fold ([max-xor 0])
-              ([x (in-list nums)]
-               [y (in-list nums)])
-      (if (strong-pair? x y)
-          (max max-xor (bitwise-xor x y))
-          max-xor)))
+  ;; Helper function to compute the maximum XOR if the pair (x, y) is strong.
+  (define (max-xor-for-pair x y max-xor)
+    (if (strong-pair? x y)
+        (max max-xor (bitwise-xor x y))
+        max-xor))
 
-  max-xor)
+  ;; Main function that iterates over each number in the list.
+  (for/fold ([max-xor 0])
+            ([x (in-list nums)]
+             [y (in-list nums)])
+    (max-xor-for-pair x y max-xor)))
 
 ;; Examples
 (maximumStrongPairXor '(1 2 3 4 5))  ; Output: 7

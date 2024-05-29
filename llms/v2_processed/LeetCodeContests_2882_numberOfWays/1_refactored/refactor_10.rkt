@@ -21,18 +21,26 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
 
-  ;; Recursive helper function with memoization
-  (define (ways i total)
-    (cond
-      [(= total 0) 1]          ; Base case: one way to sum up to zero using no numbers
-      [(or (< total 0) (> i n)) 0]  ; Base case: no valid way to sum up to a negative number or if i exceeds n
-      [else
-       (define power (expt i x))
-       (define include (ways (add1 i) (- total power)))  ; Include the current number
-       (define exclude (ways (add1 i) total))            ; Exclude the current number
-       (modulo (+ include exclude) MOD)]))  ; Return the number of ways to express n
+  ;; Helper function to calculate the dp table recursively
+  (define (compute-dp n x)
+    (define max-base (floor (expt n (/ 1 x))))  ; Calculate the maximum base
 
-  (ways 1 n))  ; Start with the first number and total sum n
+    ;; Initialize the dp vector with 1 way to sum up to zero using no numbers
+    (define dp (build-vector (add1 n) (lambda (i) (if (= i 0) 1 0))))
+
+    ;; Iterate over each base and update the dp vector
+    (for ([base (in-range 1 (add1 max-base))])
+      (define current-power (expt base x))  ; Calculate the current power of the base
+      ;; Update dp vector entries from n down to current-power
+      (for ([i (in-range n (sub1 current-power) -1)])
+        (vector-set! dp i
+                     (modulo (+ (vector-ref dp i)
+                                (vector-ref dp (- i current-power)))
+                             MOD))))
+    dp)
+
+  ;; Calculate the dp table and return the number of ways to express n
+  (vector-ref (compute-dp n x) n))
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

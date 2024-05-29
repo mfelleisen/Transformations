@@ -31,25 +31,25 @@
   ;; Function to determine the champion of a tournament represented as a DAG.
   ;; n: number of teams
   ;; edges: list of directed edges where each edge [u, v] indicates team u is stronger than team v
-  
-  ;; Create a list to keep track of the number of incoming edges for each team
+
   (define in-degrees (make-vector n 0))
   
   ;; Populate the in-degrees vector by iterating over each edge
   (for-each (λ (edge)
-              (vector-set! in-degrees (second edge)
-                           (+ 1 (vector-ref in-degrees (second edge)))))
+              (match edge
+                [(list _ v)
+                 (vector-set! in-degrees v (add1 (vector-ref in-degrees v)))]))
             edges)
-  
+
   ;; Find the teams with zero in-degrees
   (define zero-in-degree-teams
     (for/list ([team (in-range n)]
                #:when (= (vector-ref in-degrees team) 0))
       team))
-  
+
   ;; Determine the result based on the number of teams with zero in-degrees
   (match zero-in-degree-teams
-    [(list champion) champion]
+    [(list only-team) only-team]
     [_ -1]))
 
 ;; Example usage:

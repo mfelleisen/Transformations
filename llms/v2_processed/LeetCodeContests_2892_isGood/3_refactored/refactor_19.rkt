@@ -24,18 +24,21 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= num[i] <= 200
 (define (isGood nums)
-  ;; Determine if the array is a "good" array, meaning it is a permutation of
-  ;; the base array [1, 2, ..., n - 1, n, n] where n is the maximum element in nums.
-  (define n (apply max nums))  ; Find the maximum element in the list
-  (define counts (for/fold ([dict (make-immutable-hash)]) ([num (in-list nums)])
-                   (hash-update dict num add1 0)))  ; Create a frequency dictionary
-  (define expected-length (+ n 1))  ; Calculate the expected length of nums
+  (define n (apply max nums))
+  (define expected-length (+ n 1))
+  (define counts (make-hash))
 
-  ;; Check if 'n' appears exactly twice and all numbers from 1 to n-1 appear exactly once
+  ;; Create frequency dictionary
+  (for ([num nums])
+    (hash-update! counts num add1 0))
+
+  ;; Check if 'n' appears exactly twice
   (and (= (hash-ref counts n 0) 2)
-       (for/and ([i (in-range 1 n)])  ; Check if all numbers from 1 to n-1 appear exactly once
+       ;; Check if all numbers from 1 to n-1 appear exactly once
+       (for/and ([i (in-range 1 n)])
          (= (hash-ref counts i 0) 1))
-       (= (length nums) expected-length)))  ; Ensure the length of nums is exactly n+1
+       ;; Ensure the length of nums is exactly n+1
+       (= (length nums) expected-length)))
 
 ;; Example usage:
 (displayln (isGood '(2 1 3)))  ; Output: #f

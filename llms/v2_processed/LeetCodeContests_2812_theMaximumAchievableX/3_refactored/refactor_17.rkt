@@ -22,10 +22,6 @@
 (define (theMaximumAchievableX num t)
   (+ num (* 2 t)))
 
-;; Test cases
-(theMaximumAchievableX 4 1)  ; Expected output: 6
-(theMaximumAchievableX 3 2)  ; Expected output: 7
-
 (require rackunit)
 
 

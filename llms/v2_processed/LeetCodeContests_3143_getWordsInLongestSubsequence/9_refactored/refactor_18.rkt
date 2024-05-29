@@ -30,20 +30,19 @@
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
 (define (getWordsInLongestSubsequence n words groups)
-  ;; Helper function to recursively build the longest subsequence
   (define (helper idx last-group acc)
-    (if (>= idx n)
-        (reverse acc)  ; Return the accumulated result in reverse order
-        (let ([current-group (list-ref groups idx)]
-              [current-word (list-ref words idx)])
-          (if (not (= current-group last-group))  ; Check if groups are different
-              (helper (add1 idx) current-group (cons current-word acc))  ; Add current word to result
-              (helper (add1 idx) last-group acc)))))  ; Continue with the same result
+    (cond
+      [(= idx n) (reverse acc)]
+      [else
+       (define current-group (list-ref groups idx))
+       (define current-word (list-ref words idx))
+       (if (not (= current-group last-group))
+           (helper (add1 idx) current-group (cons current-word acc))
+           (helper (add1 idx) last-group acc))]))
 
-  ;; Initialize the recursion with the first element
-  (if (= n 0)
-      '()  ; Return an empty list if n is 0
-      (helper 1 (list-ref groups 0) (list (list-ref words 0)))))
+  (if (zero? n)
+      '()
+      (helper 1 (first groups) (list (first words)))))
 
 ;; Example usage:
 (define n 4)

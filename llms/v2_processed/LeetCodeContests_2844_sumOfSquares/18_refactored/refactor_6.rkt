@@ -18,20 +18,16 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-
-  ;; Define a helper function to determine if an index is special.
-  (define (special-index? i)
+  
+  (define (special? i)
     (zero? (remainder n i)))
+  
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (special? i))
+    (let ([element (list-ref nums (sub1 i))])
+      (* element element))))
 
-  ;; Use for/fold to accumulate the sum of squares of special elements.
-  (for/fold ([acc 0]) ([i (in-range 1 (add1 n))])
-    (if (special-index? i)
-        (+ acc (sqr (list-ref nums (sub1 i))))
-        acc)))
-
-;; Examples:
-;; (sumOfSquares '(1 2 3 4)) should return 21
-;; (sumOfSquares '(2 7 1 19 18 3)) should return 63
+;; The function sumOfSquares now accepts a list of numbers and returns the sum of the squares of all special elements.
 
 (require rackunit)
 

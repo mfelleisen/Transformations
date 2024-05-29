@@ -21,25 +21,32 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  (define (subarrays lst n)
-    (if (< (length lst) n)
-        '()
-        (cons (take lst n) (subarrays (rest lst) n))))
-  
-  (define (valid-subarray? sub)
-    (>= (length (remove-duplicates sub)) m))
-  
-  (define (sum-subarray sub)
-    (apply + sub))
-  
-  (define subarray-sums
-    (for/list ([sub (in-list (subarrays nums k))]
-               #:when (valid-subarray? sub))
-      (sum-subarray sub)))
-  
-  (if (null? subarray-sums)
+  ;; Helper function to check if a subarray has at least `m` distinct elements
+  (define (valid-window? window)
+    (>= (length (remove-duplicates window)) m))
+
+  ;; Helper function to compute the sum of a subarray
+  (define (window-sum window)
+    (apply + window))
+
+  ;; Use for/fold to traverse the list and calculate the maximum sum of valid subarrays
+  (define (compute-max-sum nums)
+    (for/fold ([i 0]
+               [max-sum 0]
+               [window (take nums k)]
+               #:result max-sum)
+              ([num (drop nums k)])
+      ;; Update the window by removing the first element and adding the current element
+      (define new-window (append (rest window) (list num)))
+      (define current-sum (window-sum new-window))
+      (define new-max-sum (if (valid-window? new-window)
+                              (max max-sum current-sum)
+                              max-sum))
+      (values (add1 i) new-max-sum new-window)))
+
+  (if (< (length nums) k)
       0
-      (apply max subarray-sums)))
+      (compute-max-sum nums)))
 
 (require rackunit)
 

@@ -28,33 +28,29 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
-  ;; Helper function to determine if a number is even and within the threshold
-  (define (valid-start? num)
-    (and (even? num) (<= num threshold)))
+  (define (eligible? i)
+    (let loop ([i i] [len 0] [last-even? #f])
+      (cond
+        [(>= i (length nums)) len]
+        [(> (list-ref nums i) threshold) len]
+        [(= (modulo (list-ref nums i) 2) 0)
+         (if (and last-even? (= len 0))
+             (loop (+ i 1) (+ len 1) #t)
+             len)]
+        [else
+         (if (or (and last-even? (= len 0))
+                 (and (not last-even?) (= (modulo (list-ref nums i) 2) (modulo (list-ref nums (- i 1)) 2))))
+             (loop (+ i 1) (+ len 1) (not last-even?))
+             len)])))
 
-  ;; Helper function to determine if two numbers alternate in parity
-  (define (alternates? a b)
-    (not (= (modulo a 2) (modulo b 2))))
-
-  ;; Helper function to find the maximum length of an alternating subarray starting from index l
-  (define (max-alternating-length-from l)
-    (define (aux r current-length)
-      (if (and (< r (length nums))
-               (<= (list-ref nums r) threshold)
-               (alternates? (list-ref nums (- r 1)) (list-ref nums r)))
-          (aux (+ r 1) (+ current-length 1))
-          current-length))
-    (aux (+ l 1) 1))
-
-  ;; Find the maximum length among all valid starting points
-  (for/fold ([max-length 0] #:result max-length) ([i (in-range (length nums))])
-    (if (valid-start? (list-ref nums i))
-        (max max-length (max-alternating-length-from i))
+  (for/fold ([max-length 0]) ([i (in-range (length nums))])
+    (if (and (= (modulo (list-ref nums i) 2) 0) (<= (list-ref nums i) threshold))
+        (max max-length (eligible? i))
         max-length)))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3
-(longestAlternatingSubarray '(1 2) 2)      ; Output: 1
+(longestAlternatingSubarray '(1 2) 2)       ; Output: 1
 (longestAlternatingSubarray '(2 3 4 5) 4)  ; Output: 3
 
 (require rackunit)

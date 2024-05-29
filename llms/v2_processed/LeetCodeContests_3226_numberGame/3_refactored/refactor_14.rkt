@@ -19,16 +19,23 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  (define (game-loop sorted-nums result)
-    (match sorted-nums
-      ;; Base case: when nums is empty, return the result
-      [(list) (reverse result)]
-      ;; Recursive case: Alice picks the first minimum, Bob picks the second minimum
-      [(list alice-choice bob-choice rest ...)
-       (game-loop rest (cons alice-choice (cons bob-choice result)))]))
-
-  ;; Sort the input list and start the game loop
-  (game-loop (sort nums <) '()))
+  ;; This function performs a round of the game, updating the remaining numbers and result list.
+  (define (game-round remaining-nums result)
+    (define sorted-nums (sort remaining-nums <))  ; Sort to find minimums easily
+    (define alice-choice (first sorted-nums))     ; Alice picks the first minimum
+    (define bob-choice (second sorted-nums))      ; Bob picks the second minimum
+    (define new-nums (drop sorted-nums 2))        ; Update remaining nums by dropping first two
+    (values new-nums (append result (list bob-choice alice-choice))))  ; Append Bob's choice first, then Alice's
+  
+  ;; This function recursively processes rounds until no numbers remain.
+  (define (game-loop remaining-nums result)
+    (if (empty? remaining-nums)  ; Base case: when nums is empty
+        result
+        (call-with-values (lambda () (game-round remaining-nums result))
+          game-loop)))  ; Continue the game loop with updated state
+    
+  ;; Initiate the game loop with the input list and an empty result list
+  (game-loop nums '()))
 
 ;; Example usage:
 (numberGame '(5 4 2 3))  ; Output: '(3 2 5 4)

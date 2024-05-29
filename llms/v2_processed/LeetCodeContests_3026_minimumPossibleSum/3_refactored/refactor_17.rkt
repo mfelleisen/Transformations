@@ -33,17 +33,18 @@
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
   
-  ;; Recursive function to build the beautiful array and calculate its sum
-  (define (build-beautiful-sum i acc sum)
-    (cond
-      [(= (length acc) n) sum]
-      [(ormap (λ (num) (= (+ num i) target)) acc)
-       (build-beautiful-sum (+ i 1) acc sum)]
-      [else
-       (build-beautiful-sum (+ i 1) (cons i acc) (+ sum i))]))
+  ;; Generate a list of numbers that do not have any two elements summing up to the target
+  (define (generate-beautiful-nums n target)
+    (define (helper current nums count)
+      (cond
+        [(= count n) (reverse nums)]
+        [(ormap (lambda (x) (= (+ x current) target)) nums)
+         (helper (+ current 1) nums count)]
+        [else (helper (+ current 1) (cons current nums) (+ count 1))]))
+    (helper 1 '() 0))
 
   ;; Compute the sum of the beautiful array and take modulo
-  (modulo (build-beautiful-sum 1 '() 0) MOD))
+  (modulo (apply + (generate-beautiful-nums n target)) MOD))
 
 ;; Example test cases
 (minimumPossibleSum 2 3)   ; Output: 4

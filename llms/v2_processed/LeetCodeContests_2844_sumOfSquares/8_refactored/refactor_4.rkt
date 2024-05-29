@@ -18,16 +18,10 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  (define (special? i) (zero? (remainder n i)))
-  
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (special? i))
+            #:when (zero? (modulo n i)))
     (let ([num (list-ref nums (sub1 i))])
       (* num num))))
-
-;; Example usage:
-(sumOfSquares '(1 2 3 4))  ; Output: 21
-(sumOfSquares '(2 7 1 19 18 3))  ; Output: 63
 
 (require rackunit)
 

@@ -33,18 +33,19 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus as 10^9 + 7.
-  
-  (define (can-use? nums candidate)
-    (not (member (+ target candidate) nums)))  ; Ensure no two numbers sum to `target`.
-  
-  (define (build-beautiful-nums nums candidate remaining)
-    (if (zero? remaining)
-        nums
-        (if (can-use? nums candidate)
-            (build-beautiful-nums (cons candidate nums) (+ candidate 1) (- remaining 1))
-            (build-beautiful-nums nums (+ candidate 1) remaining))))
-  
-  (define beautiful-nums (build-beautiful-nums '() 1 n))
+
+  ;; Generate the beautiful array
+  (define (generate-beautiful-nums n target)
+    (define (helper i acc count)
+      (if (= count n)
+          acc
+          (if (member (- target i) acc)
+              (helper (add1 i) acc count)
+              (helper (add1 i) (cons i acc) (add1 count)))))
+    (helper 1 '() 0))
+
+  ;; Calculate the sum modulo MOD
+  (define beautiful-nums (generate-beautiful-nums n target))
   (modulo (apply + beautiful-nums) MOD))
 
 ;; Example test cases

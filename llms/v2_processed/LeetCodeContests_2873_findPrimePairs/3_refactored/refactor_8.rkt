@@ -2,30 +2,19 @@
 
 ;; Function to check if a number is prime
 (define (is-prime? num)
-  (cond
-    [(<= num 1) #f]
-    [(<= num 3) #t]
-    [(or (zero? (remainder num 2)) (zero? (remainder num 3))) #f]
-    [else
-     (let loop ([i 5])
-       (cond
-         [(> (* i i) num) #t]
-         [(or (zero? (remainder num i)) (zero? (remainder num (+ i 2)))) #f]
-         [else (loop (+ i 6))]))]))
+  (define (divisible? d) (zero? (remainder num d)))
+  (and (> num 1)
+       (not (ormap divisible? (range 2 (add1 (floor (sqrt num))))))))
 
 ;; Function to find prime pairs that add up to n
 (define (findPrimePairs n)
   ;; Generate list of primes up to n
-  (define primes (filter is-prime? (range 1 (add1 n))))
-  
-  ;; Function to find pairs
-  (define (valid-pairs primes)
-    (for*/list ([x primes] 
-                [y primes] 
-                #:when (and (<= x y) (= (+ x y) n)))
-      (list x y)))
-
-  (valid-pairs primes))
+  (define primes (filter is-prime? (range 2 (add1 n))))
+  ;; Find pairs using a filtered Cartesian product
+  (for*/list ([x primes]
+              [y primes]
+              #:when (and (<= x y) (= (+ x y) n)))
+    (list x y)))
 
 ;; Example usage
 (findPrimePairs 10)  ; Output: '((3 7) (5 5))

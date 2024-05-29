@@ -24,20 +24,18 @@
   ;; Helper function to check if the bitwise OR of x and y has a trailing zero.
   (define (bitwise-or-has-trailing-zero? x y)
     (zero? (bitwise-and (bitwise-ior x y) 1)))
-  
-  ;; Generate all combinations of two different elements from `nums` and check if any
-  ;; combination satisfies the condition of having a trailing zero.
-  (ormap (lambda (pair)
-           (bitwise-or-has-trailing-zero? (first pair) (second pair)))
-         (combinations nums 2)))
 
-;; Helper function to generate combinations of the list of size n
-(define (combinations lst n)
-  (if (= n 0)
-      '(())
-      (for*/list ([x lst]
-                  [rest (combinations (cdr (member x lst)) (sub1 n))])
-        (cons x rest))))
+  ;; Recursive function to find if there's any pair with trailing zero in bitwise OR.
+  (define (check-pairs nums)
+    (match nums
+      [(list) #f]                     ; Base case: no pairs left.
+      [(list x) #f]                   ; Single element: no pairs possible.
+      [(list x y rest ...)            ; Check pairs starting with the first element.
+       (or (ormap (lambda (z) (bitwise-or-has-trailing-zero? x z)) (cons y rest))
+           (check-pairs (cons y rest)))])) ; Continue checking with the rest.
+
+  ;; Initiate the recursive pair check.
+  (check-pairs nums))
 
 ;; Example usage:
 (displayln (hasTrailingZeros '(1 2 3 4 5)))  ; Output: #t

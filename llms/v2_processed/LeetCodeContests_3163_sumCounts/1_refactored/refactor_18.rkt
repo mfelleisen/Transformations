@@ -28,23 +28,24 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
-  ;; Helper function to calculate the sum of the squares of distinct counts for subarrays starting at index `i`
-  (define (sum-from-i i seen total)
-    (if (>= i (length nums))
-        total
-        (let* ([elem (list-ref nums i)]
-               [new-seen (set-add seen elem)]
-               [distinct-count (set-count new-seen)]
-               [new-total (+ total (sqr distinct-count))])
-          (sum-from-i (+ i 1) new-seen new-total))))
+  (define (sum-squares-distincts l)
+    (define (process-subarray lst seen distinct-counts)
+      (match lst
+        [(list) (apply + (map (λ (x) (* x x)) distinct-counts))]
+        [(cons x xs)
+         (define new-seen (set-add seen x))
+         (define new-count (if (set-member? seen x) distinct-counts (cons (add1 (car distinct-counts)) (cdr distinct-counts))))
+         (process-subarray xs new-seen new-count)]))
+    (for/fold ([total 0]) ([i (in-range (length l))])
+      (+ total (process-subarray (drop l i) (set) '(0)))))
+  (sum-squares-distincts nums))
 
-  ;; Sum over all starting indices
-  (for/sum ([i (in-range (length nums))])
-    (sum-from-i i (set) 0)))
+;; Helper function to increment the count of an element
+(define (add1 x) (+ x 1))
 
-;; Example usage:
-(sumCounts '(1 2 1)) ;; Should return 15
-(sumCounts '(1 1))   ;; Should return 3
+;; Example usage
+(sumCounts '(1 2 1)) ; => 15
+(sumCounts '(1 1))   ; => 3
 
 (require rackunit)
 

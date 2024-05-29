@@ -24,7 +24,9 @@
             #:when (zero? (remainder n i)))
     (square (list-ref nums (sub1 i)))))
 
-;; The function sumOfSquares now accepts a list of numbers and returns the sum of the squares of all special elements.
+;; Example test cases:
+;; (sumOfSquares '(1 2 3 4)) ; should return 21
+;; (sumOfSquares '(2 7 1 19 18 3)) ; should return 63
 
 (require rackunit)
 

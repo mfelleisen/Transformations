@@ -20,25 +20,22 @@
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))
+  (define max-base (floor (expt n (/ 1 x))))
   
-  ;; Compute the maximum base such that base^x <= n
-  (define max-base (inexact->exact (floor (expt n (/ 1.0 x)))))
+  (define dp
+    (for/fold ([dp (make-vector (+ n 1) 0)])
+              ([base (in-range 1 (add1 max-base))])
+      (define current-power (expt base x))
+      (for/fold ([dp dp]) ([i (in-range n (sub1 current-power) -1)])
+        (vector-set! dp i (modulo (+ (vector-ref dp i)
+                                     (vector-ref dp (- i current-power)))
+                                  MOD))
+        dp)))
+
+  ;; Initialize dp[0] to 1, since there's one way to sum up to zero.
+  (vector-set! dp 0 1)
   
-  ;; Helper function to compute dp recursively
-  (define (compute-dp i)
-    (if (zero? i)
-        (make-vector (add1 n) 1)
-        (let* ([prev (compute-dp (sub1 i))]
-               [current-power (expt i x)]
-               [dp (vector-copy prev)])
-          (for ([j (in-range n (sub1 current-power) -1)])
-            (vector-set! dp j
-                         (modulo (+ (vector-ref dp j)
-                                    (vector-ref prev (- j current-power)))
-                                 MOD)))
-          dp)))
-  
-  (define dp (compute-dp max-base))
+  ;; Return the number of ways to express n
   (vector-ref dp n))
 
 ;; Example usages

@@ -17,23 +17,23 @@
 ;; 1 <= k <= 105
 (define (countSubarrays nums k)
   (define max-element (apply max nums))
-  
-  ;; Helper function to process subarrays starting from a given index
-  (define (process-from-start i)
-    (let loop ([j i] [freq (hash)] [current-max 0] [count 0])
-      (if (= j (length nums))
-          count
-          (let* ([num (list-ref nums j)]
-                 [new-freq (hash-update freq num add1 0)]
-                 [new-max (max num current-max)]
-                 [new-count (if (and (= new-max max-element) (>= (hash-ref new-freq new-max 0) k))
-                                (+ count 1)
-                                count)])
-            (loop (+ j 1) new-freq new-max new-count)))))
-  
-  ;; Sum the counts of valid subarrays starting from each index
+
+  (define (process-subarray idx)
+    (define (loop j freq current-max count)
+      (match (drop nums j)
+        ['() count]
+        [(cons num rest)
+         (define new-freq (hash-update freq num add1 0))
+         (define new-max (max num current-max))
+         (define new-count (if (and (= new-max max-element) (>= (hash-ref new-freq new-max 0) k))
+                               (+ count 1)
+                               count))
+         (loop (+ j 1) new-freq new-max new-count)]))
+
+    (loop idx (hash) 0 0))
+
   (for/sum ([i (in-range (length nums))])
-    (process-from-start i)))
+    (process-subarray i)))
 
 ;; Example usage:
 (countSubarrays '(1 3 2 3 3) 2)  ;; Output: 6

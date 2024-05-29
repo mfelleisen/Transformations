@@ -16,21 +16,19 @@
 ;; Constraints:
 ;; 1 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
-(define (maxFrequencyElements nums) ;; contract  mfe/c
+(define (maxFrequencyElements nums)
   (define frequencies
     (for/fold ([freqs (hash)])
               ([num (in-list nums)])
       (hash-update freqs num add1 0)))
 
-  (define max-freq (apply max (hash-values frequencies)))
+  (define max-freq
+    (apply max (hash-values frequencies)))
 
-  (define count-max-freq-elements
-    (for/fold ([acc 0])
-              ([freq (in-hash-values frequencies)]
-               #:when (= freq max-freq))
-      (+ acc freq)))
+  (for/sum ([freq (in-list (hash-values frequencies))]
+            #:when (= freq max-freq))
+    freq))
 
-  count-max-freq-elements)
 
 (require rackunit)
 

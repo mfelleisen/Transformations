@@ -39,30 +39,20 @@
 ;;  * 0 <= nums[i] <= 109
 ;;  * 0 <= k <= 109
 (define (minIncrementOperations nums k)
-  (define (process nums increments)
-    (define (max-in-window window)
-      (apply max window))
-      
-    (define (update-window window increment)
-      (map (λ (x) (+ x increment)) window))
-      
-    (define (process-aux nums index increments)
-      (cond
-        [(>= index (- (length nums) 2)) increments]
-        [else
-         (let* ([current-window (take (drop nums index) 3)]
-                [max-in-window (max-in-window current-window)]
-                [needed (if (< max-in-window k) (- k max-in-window) 0)]
-                [updated-window (update-window current-window needed)])
-           (process-aux (append (take nums index)
-                                updated-window
-                                (drop nums (+ index 3)))
-                        (+ index 1)
-                        (+ increments needed)))]))
-    (process-aux nums 0 increments))
+  ;; Helper function to calculate the increments needed for a window
+  (define (increment-needed window)
+    (let ((max-in-window (apply max window)))
+      (max 0 (- k max-in-window))))
 
-  ;; Start processing from the first index with 0 increments
-  (process nums 0))
+  ;; Traverse the list with a sliding window of size 3 and accumulate the total increments
+  (define (process-windows nums total-increments)
+    (if (< (length nums) 3)
+        total-increments
+        (let ((needed (increment-needed (take nums 3))))
+          (process-windows (rest nums) (+ total-increments needed)))))
+
+  ;; Start processing from the beginning of the list
+  (process-windows nums 0))
 
 ;; Example usage:
 (minIncrementOperations '(2 3 0 0 2) 4)  ;; Output: 3

@@ -3,24 +3,27 @@
 (define MOD (+ 1 (expt 10 9)))
 
 (define (numberOfWays n x)
-  ;; Helper function to initialize the dp list with zeros and set dp[0] to 1
-  (define dp-init (cons 1 (make-list n 0)))
-
-  ;; Helper function to compute the max base such that base^x <= n
-  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
-
-  ;; Helper function to update dp values from n down to current-power
-  (define (update-dp dp base)
-    (let ((current-power (expt base x)))
-      (for/fold ([dp dp]) ([i (in-range n (- current-power 1) -1)])
-        (let ((updated-val (modulo (+ (list-ref dp i) (list-ref dp (- i current-power))) MOD)))
-          (list-set dp i updated-val)))))
-
-  ;; Iterate over each possible base and update dp vector
-  (let ((final-dp (for/fold ([dp dp-init]) ([base (in-range 1 (+ max-base 1))])
-                    (update-dp dp base))))
-    ;; Return the number of ways to express n as specified
-    (list-ref final-dp n)))
+  (define max-base (inexact->exact (floor (expt n (/ 1.0 x)))))
+  
+  (define (exponentiation base power)
+    (if (= power 0)
+        1
+        (* base (exponentiation base (- power 1)))))
+  
+  (define (update-dp dp current-power n)
+    (for/fold ([dp dp]) ([i (in-range n (- current-power 1) -1)])
+      (let ([new-value (modulo (+ (vector-ref dp i) (vector-ref dp (- i current-power))) MOD)])
+        (vector-set! dp i new-value)
+        dp)))
+  
+  (define dp (make-vector (+ n 1) 0))
+  (vector-set! dp 0 1)
+  
+  (for ([base (in-range 1 (+ max-base 1))])
+    (define current-power (exponentiation base x))
+    (set! dp (update-dp dp current-power n)))
+  
+  (vector-ref dp n))
 
 ;; Example usages
 (numberOfWays 10 2)  ;; Output: 1

@@ -21,6 +21,9 @@
       1))
   (valid-distributions n limit))
 
+;; The `distributeCandies` function now uses `for*/sum` to iterate over all possible
+;; values of `a` and `b` and count the number of valid distributions directly.
+
 (require rackunit)
 
 

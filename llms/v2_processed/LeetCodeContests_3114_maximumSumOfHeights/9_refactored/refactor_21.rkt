@@ -37,26 +37,25 @@
 ;;  * 1 <= maxHeights[i] <= 109
 (define (maximumSumOfHeights maxHeights)
   (define n (length maxHeights))
-
-  ;; Helper function to calculate the maximum sum for a given peak position
+  
+  ;; Function to calculate the max sum with a fixed peak position
   (define (calculate-max-sum-with-peak peak)
-    ;; Initialize left and right heights lists
-    (define left-heights (make-vector n 0))
-    (define right-heights (make-vector n 0))
-
-    ;; Set the peak height
-    (vector-set! left-heights peak (list-ref maxHeights peak))
-
-    ;; Expand to the left of the peak
-    (for ([i (in-range (sub1 peak) -1 -1)])
-      (vector-set! left-heights i (min (list-ref maxHeights i) (vector-ref left-heights (add1 i)))))
-
-    ;; Expand to the right of the peak
-    (for ([i (in-range (add1 peak) n)])
-      (vector-set! right-heights i (min (list-ref maxHeights i) (vector-ref right-heights (sub1 i)))))
-
-    ;; Calculate the total sum of heights for the given peak
-    (apply + (append (vector->list left-heights) (vector->list right-heights))))
+    ;; Left to right pass to ensure the mountain property up to the peak
+    (define left-heights
+      (for/fold ([heights (vector (first maxHeights))])
+                ([i (in-range 1 (add1 peak))])
+        (define new-height (min (list-ref maxHeights i) (add1 (vector-ref heights (sub1 i)))))
+        (vector-append heights (vector new-height))))
+    
+    ;; Right to left pass to ensure the mountain property from the peak to the end
+    (define right-heights
+      (for/fold ([heights (vector (vector-ref left-heights peak))])
+                ([i (in-range (sub1 peak) -1 -1)])
+        (define new-height (min (list-ref maxHeights i) (vector-ref heights 0)))
+        (vector-append (vector new-height) heights)))
+    
+    ;; Combine the heights
+    (apply + (vector->list right-heights)))
 
   ;; Try every position as a peak and find the maximum sum
   (for/fold ([max-sum 0]) ([i (in-range n)])

@@ -33,29 +33,22 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  ;; Recursive helper function with memoization
-  (define (helper i memo)
+  (define n (length nums))
+  ;; Use a helper function to recursively calculate maximum jumps
+  (define (max-jumps index)
     (cond
-      ;; Base case: if we reach the last index, no more jumps are needed
-      [(= i (sub1 (length nums))) 0]
-      ;; Check the memo table to avoid redundant computations
-      [(hash-ref memo i #f) => (λ (result) result)]
+      [(= index (sub1 n)) 0]
       [else
-       ;; Compute the maximum jumps from the current index
-       (define jumps
-         (for/fold ([max-jumps -1]) ([j (in-range (add1 i) (length nums))])
-           (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-               (let ([next-jumps (helper j memo)])
-                 (if (= next-jumps -1)
-                     max-jumps
-                     (max max-jumps (add1 next-jumps))))
-               max-jumps)))
-       ;; Memoize the result for the current index
-       (hash-set! memo i jumps)
-       jumps]))
+       (for/fold ([max-jump -1])
+                 ([j (in-range (add1 index) n)]
+                  #:when (<= (abs (- (list-ref nums j) (list-ref nums index))) target))
+         (max max-jump (let ([next-jump (max-jumps j)])
+                         (if (= next-jump -1)
+                             -1
+                             (add1 next-jump)))))]))
 
-  ;; Initialize memo table and start the recursion from index 0
-  (helper 0 (make-hash)))
+  ;; Start from index 0
+  (max-jumps 0))
 
 ;; Examples:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

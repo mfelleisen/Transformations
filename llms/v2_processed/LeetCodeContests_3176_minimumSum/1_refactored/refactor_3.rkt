@@ -29,24 +29,31 @@
 (define (minimumSum nums)
   (if (< (length nums) 3)
       -1
-      (let loop ([j 1]
-                 [min-sum +inf.0])
-        (if (>= j (- (length nums) 1))
-            (if (= min-sum +inf.0) -1 min-sum)
-            (let* ([left-min (for/fold ([acc +inf.0])
-                              ([i (in-range 0 j)])
-                              (if (< (list-ref nums i) (list-ref nums j))
-                                  (min acc (list-ref nums i))
-                                  acc))]
-                   [right-min (for/fold ([acc +inf.0])
-                               ([k (in-range (+ j 1) (length nums))])
-                               (if (< (list-ref nums k) (list-ref nums j))
-                                   (min acc (list-ref nums k))
-                                   acc))])
-              (if (and (not (= left-min +inf.0))
-                       (not (= right-min +inf.0)))
-                  (loop (+ j 1) (min min-sum (+ left-min (list-ref nums j) right-min)))
-                  (loop (+ j 1) min-sum)))))))
+      (let ([n (length nums)])
+        (define-values (min-sum _)
+          (for/fold ([min-sum +inf.0]
+                     [nums nums])
+                    ([j (in-range 1 (- n 1))])
+            (define left-min +inf.0)
+            (define right-min +inf.0)
+            (define current (list-ref nums j))
+
+            (for ([i (in-range 0 j)])
+              (when (< (list-ref nums i) current)
+                (set! left-min (min left-min (list-ref nums i)))))
+            
+            (for ([k (in-range (+ j 1) n)])
+              (when (< (list-ref nums k) current)
+                (set! right-min (min right-min (list-ref nums k)))))
+            
+            (if (and (not (= left-min +inf.0))
+                     (not (= right-min +inf.0)))
+                (values (min min-sum (+ left-min current right-min)) nums)
+                (values min-sum nums))))
+        
+        (if (= min-sum +inf.0)
+            -1
+            min-sum))))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ;; Output: 9

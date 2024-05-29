@@ -24,20 +24,14 @@
 ;; Constraints:
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
-(define (minimumCost nums)
+(define (minimumCost nums) ;; contract  minimum-cost/c
   (define n (length nums))
-  
-  ;; Helper function to find the minimum cost by checking different breakpoints
-  (define (find-min-cost min-cost)
-    (for*/fold ([min-cost min-cost])
-               ([i (in-range 1 (- n 1))]
-                [j (in-range (+ i 1) n)])
-      (let ([cost (+ (list-ref nums 0) (list-ref nums i) (list-ref nums j))])
-        (min cost min-cost))))
-
-  (cond
-    [(= n 3) (apply + nums)]
-    [else (find-min-cost +inf.0)]))
+  (define (cost a b c)
+    (+ (list-ref nums a) (list-ref nums b) (list-ref nums c)))
+  (apply min
+         (for*/list ([i (in-range 1 (- n 1))]
+                     [j (in-range (+ i 1) n)])
+           (cost 0 i j))))
 
 ;; Examples:
 (minimumCost '(1 2 3 12))  ; Output: 6

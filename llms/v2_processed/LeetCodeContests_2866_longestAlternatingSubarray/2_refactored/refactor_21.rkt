@@ -28,35 +28,31 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
-  (define (is-valid-start num)
-    (and (even? num) (<= num threshold)))
+  ;; Helper function to check if a subarray starting at index `i` is valid
+  (define (valid-subarray-start? i)
+    (and (even? (list-ref nums i))
+         (<= (list-ref nums i) threshold)))
 
-  (define (valid-alternating? prev curr)
-    (not (= (remainder prev 2) (remainder curr 2))))
+  ;; Helper function to find the maximum alternating length starting from index `i`
+  (define (max-alternating-length-from i)
+    (let loop ([j (+ i 1)]
+               [current-length 1]
+               [last-value (list-ref nums i)])
+      (if (and (< j (length nums))
+               (<= (list-ref nums j) threshold)
+               (not (= (remainder last-value 2) (remainder (list-ref nums j) 2))))
+          (loop (+ j 1) (+ current-length 1) (list-ref nums j))
+          current-length)))
 
-  (define (compute-length start)
-    (let loop ([current (cdr start)]
-               [last (car start)]
-               [length 1])
-      (if (and (pair? current)
-               (<= (car current) threshold)
-               (valid-alternating? last (car current)))
-          (loop (cdr current) (car current) (add1 length))
-          length)))
-
-  (define (process nums max-length)
-    (cond
-      [(null? nums) max-length]
-      [(is-valid-start (car nums))
-       (process (cdr nums) (max max-length (compute-length nums)))]
-      [else
-       (process (cdr nums) max-length)]))
-
-  (process nums 0))
+  ;; Traverse the list and find the maximum length of valid alternating subarray
+  (for/fold ([max-len 0]) ([i (in-range (length nums))])
+    (if (valid-subarray-start? i)
+        (max max-len (max-alternating-length-from i))
+        max-len)))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3
-(longestAlternatingSubarray '(1 2) 2)      ; Output: 1
+(longestAlternatingSubarray '(1 2) 2)       ; Output: 1
 (longestAlternatingSubarray '(2 3 4 5) 4)  ; Output: 3
 
 (require rackunit)

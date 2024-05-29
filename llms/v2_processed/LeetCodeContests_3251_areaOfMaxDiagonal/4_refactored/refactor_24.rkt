@@ -29,27 +29,29 @@
   (define (area length width)
     (* length width))
   
+  ;; Define a helper function to select the rectangle with maximum diagonal or area.
+  (define (max-rectangle acc dim)
+    (match-define (list length width) dim)
+    (define current-diagonal (diagonal-squared length width))
+    (define current-area (area length width))
+    (match acc
+      [(list max-diagonal max-area)
+       (cond
+         ;; Check if current diagonal is greater than the max diagonal found so far
+         [(> current-diagonal max-diagonal)
+          (list current-diagonal current-area)]
+         ;; If diagonals are the same, check if the current area is greater than the max area found so far
+         [(and (= current-diagonal max-diagonal) (> current-area max-area))
+          (list max-diagonal current-area)]
+         ;; Otherwise, keep the previous maximums
+         [else
+          acc])]))
+
   ;; Use foldl to iterate through the list and find the rectangle with the maximum diagonal or area.
-  (define (update-max acc dim)
-    (let* ((length (first dim))
-           (width (second dim))
-           (current-diagonal (diagonal-squared length width))
-           (current-area (area length width))
-           (max-diagonal (first acc))
-           (max-area (second acc)))
-      (cond
-        ;; Check if current diagonal is greater than the max diagonal found so far
-        ((> current-diagonal max-diagonal)
-         (list current-diagonal current-area))
-        ;; If diagonals are the same, check if the current area is greater than the max area found so far
-        ((and (= current-diagonal max-diagonal) (> current-area max-area))
-         (list max-diagonal current-area))
-        ;; Otherwise, keep the previous maximums
-        (else
-         acc))))
+  (define result (foldl max-rectangle (list 0 0) dimensions))
   
   ;; Extract the maximum area from the result
-  (second (foldl update-max (list 0 0) dimensions)))
+  (second result))
 
 ;; Example usage:
 (areaOfMaxDiagonal '((9 3) (8 6)))  ;; Output: 48

@@ -34,30 +34,39 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  (define n (length nums1))
-  
-  (define (update-dp prev dp1 dp2 curr1 curr2)
-    (values
-     (max (if (>= curr1 prev) (add1 dp1) 1)
-          (if (>= curr1 curr2) (add1 dp2) 1))
-     (max (if (>= curr2 prev) (add1 dp1) 1)
-          (if (>= curr2 curr1) (add1 dp2) 1))))
-  
-  (define (update-max-len max-len dp1 dp2)
-    (max max-len dp1 dp2))
-  
-  (define (loop i prev1 prev2 dp1 dp2 max-len)
-    (if (>= i n)
-        max-len
-        (let* ([curr1 (list-ref nums1 i)]
-               [curr2 (list-ref nums2 i)]
-               [new-dp1 (update-dp prev1 dp1 dp2 curr1 curr2)]
-               [new-dp2 (update-dp prev2 dp1 dp2 curr1 curr2)]
-               [new-max-len (update-max-len max-len (car new-dp1) (car new-dp2))])
-          (loop (add1 i) curr1 curr2 (car new-dp1) (car new-dp2) new-max-len))))
-  
-  (loop 1 (list-ref nums1 0) (list-ref nums2 0) 1 1 1))
+  ;; Helper function to get the maximum of previous lengths
+  (define (max-prev-len i j k)
+    (max (vector-ref i j) (vector-ref i k)))
 
+  ;; Helper function to update the dp vector
+  (define (update-dp dp curr prev)
+    (if (>= curr prev)
+        (add1 dp)
+        1))
+
+  ;; Initialize dp1 and dp2 vectors
+  (define dp1 (make-vector (length nums1) 1))
+  (define dp2 (make-vector (length nums2) 1))
+
+  ;; Accumulate the maximum length
+  (for/fold ([max-len 1])
+            ([i (in-range 1 (length nums1))])
+    (define curr1 (list-ref nums1 i))
+    (define prev1 (list-ref nums1 (sub1 i)))
+    (define prev2 (list-ref nums2 (sub1 i)))
+    (define curr2 (list-ref nums2 i))
+
+    ;; Update dp1 and dp2
+    (vector-set! dp1 i (max (update-dp (vector-ref dp1 (sub1 i)) curr1 prev1)
+                            (update-dp (vector-ref dp2 (sub1 i)) curr1 prev2)))
+    (vector-set! dp2 i (max (update-dp (vector-ref dp1 (sub1 i)) curr2 prev1)
+                            (update-dp (vector-ref dp2 (sub1 i)) curr2 prev2)))
+
+    ;; Update max-len
+    (max max-len (vector-ref dp1 i) (vector-ref dp2 i))))
+
+;; Example usage:
+;; (maxNonDecreasingLength [1,3,2,1] [2,2,3,4]) ;; => 4
 
 (require rackunit)
 

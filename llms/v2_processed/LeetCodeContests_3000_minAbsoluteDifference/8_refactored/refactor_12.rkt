@@ -27,15 +27,17 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  ;; Helper function to calculate the minimum absolute difference for a given index i
-  (define (min-diff-for-index i min-diff)
-    (for/fold ([min-diff min-diff]) ([j (in-range (+ i x) (length nums))])
-      (let ([diff (abs (- (list-ref nums i) (list-ref nums j)))])
-        (min min-diff diff))))
+  ;; Helper function to calculate the minimum absolute difference
+  (define (calc-min-diff nums x)
+    (define len (length nums))
+    (for/fold ([min-diff +inf.0]) 
+              ([i (in-range (- len x))])
+      (define diffs 
+        (for/list ([j (in-range (+ i x) len)])
+          (abs (- (list-ref nums i) (list-ref nums j)))))
+      (apply min min-diff diffs)))
 
-  ;; Main fold to go through each index and calculate the minimum absolute difference
-  (for/fold ([min-diff +inf.0]) ([i (in-range (- (length nums) x))])
-    (min-diff-for-index i min-diff)))
+  (calc-min-diff nums x))
 
 ;; Example usage:
 (minAbsoluteDifference '(4 3 2 4) 2)  ; Output: 0

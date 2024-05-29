@@ -38,19 +38,28 @@
 ;; Constraints:
 ;;  * 1 <= usageLimits.length <= 105
 ;;  * 1 <= usageLimits[i] <= 109
-(define (maxIncreasingGroups usageLimits) ;; contract  max-increasing-groups/c
+(define (maxIncreasingGroups usageLimits)
   (define sorted-limits (sort usageLimits <))
+  
+  (define (count-groups limits current-min-size total num-groups)
+    (match limits
+      ;; Base case: If we have no more limits left, return the number of groups
+      ['() num-groups]
+      ;; Recursive case: Process the current limit
+      [(cons current-limit rest-limits)
+       (define new-total (+ total current-limit))
+       ;; Check if we can form a group of at least `current-min-size`
+       (if (>= new-total current-min-size)
+           ;; If yes, form a new group and recurse with updated parameters
+           (count-groups rest-limits
+                         (+ current-min-size 1)
+                         (- new-total current-min-size)
+                         (+ num-groups 1))
+           ;; If no, just move to the next limit without forming a group
+           (count-groups rest-limits current-min-size new-total num-groups))]))
 
-  (define-values (num-groups _)
-    (for/fold ([num-groups 0]
-               [total 0])
-              ([limit sorted-limits]
-               [size (in-naturals 1)])
-      (define new-total (+ total limit))
-      (if (>= new-total size)
-          (values (add1 num-groups) (- new-total size))
-          (values num-groups new-total))))
-  num-groups)
+  ;; Start the recursive counting with initial parameters
+  (count-groups sorted-limits 1 0 0))
 
 ;; Example usage
 (maxIncreasingGroups '(1 2 5))  ; Output: 3

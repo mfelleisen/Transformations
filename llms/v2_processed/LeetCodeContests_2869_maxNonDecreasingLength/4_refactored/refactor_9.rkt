@@ -30,20 +30,36 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  ;; Helper function to compute max non-decreasing length
-  (define (compute-max-length n1 n2)
-    (let loop ([dp1 1] [dp2 1] [max-len 1] [i 1])
-      (if (= i (length n1))
-          max-len
-          (let* ([v1 (list-ref n1 i)]
-                 [v2 (list-ref n2 i)]
-                 [prev-v1 (list-ref n1 (sub1 i))]
-                 [prev-v2 (list-ref n2 (sub1 i))]
-                 [new-dp1 (max dp1 (if (>= v1 prev-v1) (+ dp1 1) 1) (if (>= v1 prev-v2) (+ dp2 1) 1))]
-                 [new-dp2 (max dp2 (if (>= v2 prev-v1) (+ dp1 1) 1) (if (>= v2 prev-v2) (+ dp2 1) 1))])
-            (loop new-dp1 new-dp2 (max max-len new-dp1 new-dp2) (+ i 1))))))
-  ;; Start computation from index 0
-  (compute-max-length nums1 nums2))
+  (define n (length nums1))
+  
+  ;; Helper function to update dp arrays
+  (define (update-dp dp curr prev1 prev2)
+    (for/fold ([new-dp dp]) ([i (in-range 1 n)])
+      (define curr-val (list-ref curr i))
+      (define prev-val1 (list-ref prev1 (sub1 i)))
+      (define prev-val2 (list-ref prev2 (sub1 i)))
+      (define new-val 
+        (max (vector-ref new-dp i)
+             (if (>= curr-val prev-val1)
+                 (+ 1 (vector-ref new-dp (sub1 i)))
+                 1)
+             (if (>= curr-val prev-val2)
+                 (+ 1 (vector-ref new-dp (sub1 i)))
+                 1)))
+      (vector-set! new-dp i new-val)
+      new-dp))
+  
+  ;; Initialize dp arrays with 1s (each element is a subarray of length 1 by itself)
+  (define dp1 (make-vector n 1))
+  (define dp2 (make-vector n 1))
+  
+  ;; Update dp arrays
+  (set! dp1 (update-dp dp1 nums1 nums1 nums2))
+  (set! dp2 (update-dp dp2 nums2 nums1 nums2))
+
+  ;; Find the maximum length found so far
+  (apply max (append (vector->list dp1) (vector->list dp2))))
+
 
 (require rackunit)
 

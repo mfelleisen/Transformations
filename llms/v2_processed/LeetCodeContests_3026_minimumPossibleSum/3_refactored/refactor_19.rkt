@@ -32,17 +32,21 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))
-
-  (define (sum-beautiful-nums n target current candidate)
-    (cond
-      [(= current n) 0]
-      [(and (not (= candidate (quotient target 2)))
-            (not (and (even? target)
-                      (= candidate (/ target 2)))))
-       (+ candidate (sum-beautiful-nums n target (add1 current) (add1 candidate)))]
-      [else (sum-beautiful-nums n target current (add1 candidate))]))
-
-  (modulo (sum-beautiful-nums n target 0 1) MOD))
+  
+  (define (next-candidate candidate used)
+    (if (ormap (λ (num) (= (+ num candidate) target)) used)
+        (next-candidate (+ candidate 1) used)
+        candidate))
+  
+  (define (build-beautiful-nums count candidate used sum)
+    (if (= count n)
+        (modulo sum MOD)
+        (let* ([next (next-candidate candidate used)]
+               [next-used (cons next used)]
+               [next-sum (+ sum next)])
+          (build-beautiful-nums (+ count 1) (+ next 1) next-used next-sum))))
+  
+  (build-beautiful-nums 0 1 '() 0))
 
 ;; Example test cases
 (minimumPossibleSum 2 3)   ; Output: 4

@@ -29,23 +29,19 @@
 ;; 1 <= k <= 1015
 ;; 1 <= x <= 8
 (define (findMaximumNumber k x)
-  ;; Function to calculate the price of a number based on its binary representation
+  ;; Helper function to calculate the price of a number based on its binary representation
   (define (price-of num)
-    (for/sum ([i (in-naturals)]
-              #:break (zero? num))
-      (define bit (remainder num 2))
-      (define pos (+ i 1))
-      (set! num (quotient num 2))
-      (if (and (= (modulo pos x) 0) (= bit 1))
-          1
-          0)))
+    (for/fold ([acc 0]) ([i (in-naturals)] [digit (in-list (string->list (number->string num 2)))])
+      (if (and (= (modulo (+ i 1) x) 0) (char=? digit #\1))
+          (+ acc 1)
+          acc)))
 
-  ;; Recursive function to find the maximum number with accumulated sum
+  ;; Recursive helper function to find the maximum number
   (define (find-max num current-sum)
     (define new-price (price-of num))
-    (if (> (+ current-sum new-price) k)
-        (- num 1)
-        (find-max (+ num 1) (+ current-sum new-price))))
+    (if (> (+ current-sum new-price) k)  ; Check if adding the new price exceeds k
+        (- num 1)  ; Return the previous number
+        (find-max (+ num 1) (+ current-sum new-price))))  ; Recurse with incremented number and updated sum
 
   ;; Start the recursive search from number 1 with an initial sum of 0
   (find-max 1 0))

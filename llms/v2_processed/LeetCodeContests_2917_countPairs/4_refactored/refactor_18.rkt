@@ -27,13 +27,16 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * -50 <= nums[i], target <= 50
 (define (countPairs nums target)
-  (define (valid-pair? i j)
-    (< (+ i j) target))
-  
-  (for/sum ([i (in-list nums)]
-            [j (in-list (drop nums 1))]
-            #:when (valid-pair? i j))
-    1))
+  ;; Define a helper function to count valid pairs starting from a given index i
+  (define (valid-pairs-from i)
+    (for/sum ([j (in-range (+ i 1) (length nums))]
+              #:when (< (+ (list-ref nums i) (list-ref nums j)) target))
+      1))
+
+  ;; Use fold to accumulate the total count of valid pairs
+  (for/fold ([total 0] #:result total)
+            ([i (in-range (length nums))])
+    (+ total (valid-pairs-from i))))
 
 ;; Example usage:
 (countPairs '(-1 1 2 3 1) 2)  ;; Output: 3

@@ -22,13 +22,14 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  ;; Helper function to determine if the element at index `i` is a peak.
-  (define (is-peak i left x right)
-    (and (> x left) (> x right)))
-
-  ;; Generate a list of peaks indices.
-  (for/list ([i (in-range 1 (- (length mountain) 1))]
-             #:when (is-peak i (list-ref mountain (sub1 i)) (list-ref mountain i) (list-ref mountain (add1 i))))
+  ;; Check if the element at index i is a peak
+  (define (is-peak? i)
+    (and (> (list-ref mountain i) (list-ref mountain (sub1 i)))
+         (> (list-ref mountain i) (list-ref mountain (add1 i)))))
+  
+  ;; Generate the list of indices and filter those that are peaks
+  (for/list ([i (in-range 1 (sub1 (length mountain)))]
+             #:when (is-peak? i))
     i))
 
 ;; Example usage:

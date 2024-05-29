@@ -23,18 +23,16 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; This function simulates the merging of elements in the array
-  ;; from right to left, combining elements when the left one is less than or equal to the right one.
+  ;; Function to merge elements from right to left
   (define (merge-right-to-left lst)
-    (foldr (lambda (current acc)
-             (match acc
-               [(cons first rest)
-                (if (<= current first)
-                    (cons (+ current first) rest)
-                    (cons current acc))]
-               [_ (list current)]))
-           '()
-           lst))
+    (for/fold ([acc '()])
+              ([current (in-list (reverse lst))])
+      (match acc
+        [(cons car cdr) (if (<= current car)
+                            (cons (+ current car) cdr)
+                            (cons current acc))]
+        [_ (cons current acc)])))
+  
   ;; The largest element after all possible merges is the maximum of the resulting list.
   (apply max (merge-right-to-left nums)))
 

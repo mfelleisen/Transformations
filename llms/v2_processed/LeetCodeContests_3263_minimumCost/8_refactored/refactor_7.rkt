@@ -25,30 +25,19 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Function to calculate the minimum cost of dividing the list into 3 contiguous subarrays
   (define n (length nums))
-
-  ;; Helper function to generate all possible triplet indices for partitioning
-  (define (partition-indices n)
-    (for*/list ([i (in-range 1 (- n 1))]
-                [j (in-range (+ i 1) n)])
-      (list i j)))
-
-  ;; Calculate the cost for a given triplet of indices
-  (define (calculate-cost nums indices)
-    (match indices
-      [(list i j)
-       (+ (first nums) (list-ref nums i) (list-ref nums j))]))
-
-  ;; Find the minimum cost among all possible partitions
-  (define (find-min-cost nums)
-    (apply min (map (lambda (indices) (calculate-cost nums indices))
-                    (partition-indices n))))
-
-  ;; Special case: if there are exactly 3 elements, return the sum of all elements
+  
+  ;; Helper function to calculate the cost of dividing the list into 3 contiguous subarrays
+  (define (calculate-min-cost lst)
+    (for*/fold ([min-cost +inf.0])
+               ([i (in-range 1 (- (length lst) 1))]
+                [j (in-range (+ i 1) (length lst))])
+      (let ([cost (+ (first lst) (list-ref lst i) (list-ref lst j))])
+        (min min-cost cost))))
+  
   (if (= n 3)
       (apply + nums)
-      (find-min-cost nums)))
+      (calculate-min-cost nums)))
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

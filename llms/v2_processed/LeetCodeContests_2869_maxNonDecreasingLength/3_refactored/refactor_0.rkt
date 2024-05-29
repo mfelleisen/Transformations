@@ -31,27 +31,26 @@
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
   (define n (length nums1))
+  
+  ;; Function to update the dp vectors
+  (define (update-dp dp1 dp2 prev1 prev2 cur1 cur2)
+    (list
+     (max (if (>= cur1 prev1) (add1 dp1) 1)
+          (if (>= cur1 prev2) (add1 dp2) 1))
+     (max (if (>= cur2 prev1) (add1 dp1) 1)
+          (if (>= cur2 prev2) (add1 dp2) 1))))
 
-  ;; Define a helper function to update the dp vectors
-  (define (update-dp dp current previous1 previous2)
-    (max
-     (if (>= current previous1) (+ dp 1) 1)
-     (if (>= current previous2) (+ dp 1) 1)))
-
-  ;; Use fold to iterate through the list and update the dp values and max-len
-  (define-values (dp1 dp2 max-len)
-    (for/fold ([dp1 1] [dp2 1] [max-len 1])
-              ([i (in-range 1 n)]
-               [prev1 (in-list (rest nums1))]
-               [prev2 (in-list (rest nums2))]
-               [cur1 (in-list nums1)]
-               [cur2 (in-list nums2)])
-      (define new-dp1 (update-dp dp1 cur1 prev1 prev2))
-      (define new-dp2 (update-dp dp2 cur2 prev1 prev2))
-      (values new-dp1 new-dp2 (max max-len new-dp1 new-dp2))))
-
-  ;; Return the maximum length of non-decreasing subarray found
-  max-len)
+  ;; Fold over the indices starting from 1 to n-1
+  (for/fold ([max-len 1]
+             [dp1 1]
+             [dp2 1]
+             #:result max-len)
+            ([i (in-range 1 n)])
+    (match-define (list new-dp1 new-dp2)
+      (update-dp dp1 dp2
+                 (list-ref nums1 (sub1 i)) (list-ref nums2 (sub1 i))
+                 (list-ref nums1 i) (list-ref nums2 i)))
+    (values (max max-len new-dp1 new-dp2) new-dp1 new-dp2)))
 
 ;; Example usage
 (maxNonDecreasingLength '(2 3 1) '(1 2 1))  ; Output: 2

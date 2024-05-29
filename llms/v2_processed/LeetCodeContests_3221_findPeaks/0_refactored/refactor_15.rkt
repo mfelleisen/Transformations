@@ -22,11 +22,14 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  ;; Generate a list of indices from 1 to (- (length mountain) 2) and filter the peaks
-  (for/list ([i (in-range 1 (- (length mountain) 1))]
-             #:when (and (> (list-ref mountain i) (list-ref mountain (sub1 i)))
-                         (> (list-ref mountain i) (list-ref mountain (add1 i)))))
-    i))
+  (define (peak? left x right)
+    (and (> x left) (> x right)))
+
+  (for/fold ([peaks '()] [prev (first mountain)] [x (second mountain)] #:result (reverse peaks))
+            ([next (in-list (rest (rest mountain)))] [i (in-range 1 (sub1 (length mountain)))])
+    (if (peak? prev x next)
+        (values (cons i peaks) x next)
+        (values peaks x next))))
 
 ;; Example usage:
 ;; (findPeaks '(1 4 3 8 5))  ;; Should return '(1 3)

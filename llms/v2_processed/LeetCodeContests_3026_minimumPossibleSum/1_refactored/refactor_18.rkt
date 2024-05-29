@@ -33,16 +33,17 @@
 (define (minimumPossibleSum n target)
   (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
 
-  ;; Helper function to construct the nums list and calculate the sum
-  (define (construct-sum n target)
-    (let loop ([i 1] [sum 0] [remaining n] [used (set)])
-      (cond
-        [(zero? remaining) sum]
-        [(set-member? used (- target i)) (loop (add1 i) sum remaining used)]
-        [else (loop (add1 i) (+ sum i) (sub1 remaining) (set-add used i))])))
+  ;; Helper function to construct the nums list
+  (define (construct-nums i sum nums)
+    (cond
+      [(= (length nums) n) sum]
+      [(ormap (lambda (num) (= (+ num i) target)) nums)
+       (construct-nums (add1 i) sum nums)]
+      [else
+       (construct-nums (add1 i) (modulo (+ sum i) MOD) (cons i nums))]))
 
-  ;; Calculate the sum of the beautiful array mod MOD
-  (modulo (construct-sum n target) MOD))
+  ;; Start constructing nums from 1 with initial sum 0 and empty list
+  (construct-nums 1 0 '()))
 
 ;; Example test cases
 (display (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

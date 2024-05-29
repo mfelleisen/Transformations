@@ -19,17 +19,18 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  ;; Helper function to simulate the game
-  (define (game-loop nums result)
-    (if (null? nums)
-        result
-        (let* ([sorted-nums (sort nums <)]
-               [alice-choice (first sorted-nums)]
-               [bob-choice (second sorted-nums)]
-               [remaining-nums (drop sorted-nums 2)])
-          (game-loop remaining-nums (cons alice-choice (cons bob-choice result))))))
   ;; Initiate the game loop with the input list and an empty result list
-  (reverse (game-loop nums '())))
+  (define (game-loop remaining-nums result)
+    (match remaining-nums
+      ['() result]  ; Base case: when nums is empty
+      [nums
+       (define sorted-nums (sort nums <))  ; Sort to find minimums easily
+       (define alice-choice (first sorted-nums))  ; Alice picks the first minimum
+       (define bob-choice (second sorted-nums))  ; Bob picks the second minimum
+       (define new-nums (drop sorted-nums 2))  ; Update remaining nums by dropping first two
+       (game-loop new-nums (append result (list bob-choice alice-choice)))]))  ; Append Bob's choice first, then Alice's
+
+  (game-loop nums '()))
 
 ;; Example usage:
 (numberGame '(5 4 2 3))  ; Output: '(3 2 5 4)

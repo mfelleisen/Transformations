@@ -27,23 +27,14 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  (define len (length nums))
-  
-  (define (min-diff-for-i i)
-    (define (diff j)
-      (abs (- (list-ref nums i) (list-ref nums j))))
-    (for/fold ([min-diff +inf.0]) ([j (in-range (+ i x) len)])
-      (min min-diff (diff j))))
-  
-  (for/fold ([min-diff +inf.0]) ([i (in-range (- len x))])
-    (min min-diff (min-diff-for-i i))))
-
-;; Example 1:
-(minAbsoluteDifference '(4 3 2 4) 2) ; Output: 0
-;; Example 2:
-(minAbsoluteDifference '(5 3 2 10 15) 1) ; Output: 1
-;; Example 3:
-(minAbsoluteDifference '(1 2 3 4) 3) ; Output: 3
+  ;; Helper function to recursively find the minimum absolute difference
+  (define (find-min-diff i min-diff)
+    (if (>= i (- (length nums) x))
+        min-diff
+        (find-min-diff (+ i 1)
+                       (for/fold ([current-min min-diff]) ([j (in-range (+ i x) (length nums))])
+                         (min current-min (abs (- (list-ref nums i) (list-ref nums j))))))))
+  (find-min-diff 0 +inf.0))
 
 (require rackunit)
 

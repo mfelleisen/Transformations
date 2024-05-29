@@ -17,23 +17,26 @@
 ;; 1 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (maxFrequencyElements nums)
-  ;; Calculate the frequency of each element using foldl
+  ;; Calculate the frequency of each element
   (define frequencies
-    (for/fold ([acc (hash)]) ([item (in-list nums)])
-      (hash-update acc item add1 0)))
+    (for/fold ([freqs (hash)]) ([num (in-list nums)])
+      (hash-update freqs num add1 0)))
 
   ;; Find the maximum frequency
-  (define max-freq
-    (apply max (hash-values frequencies)))
+  (define max-freq (apply max (hash-values frequencies)))
 
-  ;; Count the total occurrences of elements that have the maximum frequency
-  (for/sum ([freq (in-hash-values frequencies)]
-            #:when (= freq max-freq))
-    freq))
+  ;; Calculate the total occurrences of elements with the maximum frequency
+  (define total-max-freq-elements
+    (for/sum ([freq (in-hash-values frequencies)]
+              #:when (= freq max-freq))
+      freq))
 
-;; Example Usage
-(maxFrequencyElements '(1 2 2 3 1 4))  ;; Output: 4
-(maxFrequencyElements '(1 2 3 4 5))    ;; Output: 5
+  ;; Return the total count of elements with the maximum frequency
+  total-max-freq-elements)
+
+;; Test cases
+(maxFrequencyElements '(1 2 2 3 1 4)) ;; => 4
+(maxFrequencyElements '(1 2 3 4 5)) ;; => 5
 
 (require rackunit)
 

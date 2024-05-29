@@ -25,20 +25,19 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 0 <= nums[i], k <= 105
 (define (maximumBeauty nums k)
-  ;; Generate all possible values the elements can be changed to within the given range
-  (define possible-values
-    (for*/list ([num nums]
-                [val (in-range (- num k) (+ num k 1))])
-      val))
-
-  ;; Calculate the frequency of each possible value using a hash
+  ;; Function to update the hash table with the range values
+  (define (update-freq-map freq-map num)
+    (for ([possible-value (in-range (- num k) (+ num k 1))])
+      (hash-update! freq-map possible-value add1 0)))
+  
+  ;; Build the frequency map
   (define freq-map
-    (for/fold ([freq-map (make-hash)])
-              ([val possible-values])
-      (hash-update! freq-map val add1 0)
-      freq-map))
-
-  ;; Find the maximum frequency, which represents the maximum beauty
+    (for/fold ([fm (make-hash)])
+              ([num nums])
+      (update-freq-map fm num)
+      fm))
+  
+  ;; Find and return the maximum value in the frequency map
   (apply max (hash-values freq-map)))
 
 ;; Example usage

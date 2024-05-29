@@ -23,30 +23,36 @@
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
   (define n (length nums))
-
-  ;; Inner function to update the score based on the move from i to j
-  (define (update-dp i j dp)
-    (let* ((current-score (+ (vector-ref dp i) (list-ref nums j))) ; Initial score from i to j
-           (penalty (if (not (= (modulo (list-ref nums i) 2)
+  
+  ;; Recursive function to compute the maximum score
+  (define (compute-max-score i j dp)
+    (match-define (cons score-rest dp-rest) dp)
+    (define current-score (+ score-rest (list-ref nums j)))
+    (define penalty (if (not (= (modulo (list-ref nums i) 2)
                                 (modulo (list-ref nums j) 2)))
                         x
-                        0)) ; Apply penalty if parities differ
-           (new-score (- current-score penalty))) ; Final score after applying penalty
-      (if (> new-score (vector-ref dp j))
-          (vector-set! dp j new-score) ; Update dp[j] if new score is better
-          dp)))
-
-  ;; Initialize the dynamic programming vector
-  (define dp (make-vector n -inf.0))
-  (vector-set! dp 0 (first nums))
-
-  ;; Fill the dp vector using the inner function update-dp
-  (for ([i (in-range n)])
-    (for ([j (in-range (add1 i) n)])
-      (update-dp i j dp)))
-
-  ;; Return the maximum value from the dp vector as the final answer
-  (apply max (vector->list dp)))
+                        0))
+    (define new-score (- current-score penalty))
+    (if (> new-score (list-ref dp j))
+        (list-set dp j new-score)
+        dp))
+  
+  ;; Generate a list of all index pairs (i, j) where i < j
+  (define index-pairs
+    (for*/list ([i (in-range n)]
+                [j (in-range (add1 i) n)])
+      (list i j)))
+  
+  ;; Fold over the index pairs to update the dp list
+  (define dp
+    (foldl (lambda (pair dp)
+             (match pair
+               [(list i j) (compute-max-score i j dp)]))
+           (cons (first nums) (make-list (sub1 n) -inf.0))
+           index-pairs))
+  
+  ;; Return the maximum value from the dp list
+  (apply max dp))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ; Output: 13

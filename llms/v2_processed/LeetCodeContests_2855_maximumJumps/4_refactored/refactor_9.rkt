@@ -34,24 +34,35 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  ;; Helper function to check if a jump from nums[i] to nums[j] is valid
-  (define (valid-jump? i j)
+  (define n (length nums))
+  
+  ;; Helper function to determine if we can jump from index i to index j
+  (define (can-jump? i j)
     (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
-
-  ;; Recursive function to calculate the maximum number of jumps to reach the end
-  (define (max-jumps idx)
-    (if (= idx (sub1 (length nums)))
-        0
-        (let loop ([j (add1 idx)] [max-j 0])
-          (cond
-            [(>= j (length nums)) (if (= max-j 0) -1 max-j)]
-            [(valid-jump? idx j)
-             (let ([res (max-jumps j)])
-               (loop (add1 j) (max max-j (if (= res -1) -1 (+ 1 res)))))]
-            [else (loop (add1 j) max-j)]))))
-
-  ;; Start the recursion from index 0
-  (max-jumps 0))
+  
+  ;; Recursive function to find the maximum jumps using memoization
+  (define memo (make-hash))
+  
+  (define (max-jumps i)
+    (cond [(= i (sub1 n)) 0] ;; If we are at the last index, no more jumps needed
+          [(hash-ref memo i #f)] ;; Return memoized result if available
+          [else
+           (define max-jump-count
+             (for/fold ([max-count -1])
+                       ([j (in-range (add1 i) n)]
+                        #:when (can-jump? i j))
+               (max max-count (add1 (max-jumps j)))))
+           ;; Memoize and return result
+           (hash-set! memo i max-jump-count)
+           max-jump-count]))
+  
+  ;; Start from the first index
+  (define result (max-jumps 0))
+  
+  ;; If result is -1, it means we can't reach the end
+  (if (= result -1)
+      -1
+      result))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

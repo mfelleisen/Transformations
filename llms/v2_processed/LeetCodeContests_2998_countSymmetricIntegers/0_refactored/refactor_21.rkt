@@ -16,22 +16,23 @@
 (define (countSymmetricIntegers low high)
   ;; Helper function to check if a number is symmetric
   (define (is-symmetric? num)
-    (let* ((s (number->string num))  ; Convert number to string
-           (n (string-length s)))    ; Get the length of the string
-      (and (even? n)                 ; Check if the number of digits is even
-           (let ((mid (/ n 2)))      ; Calculate the midpoint
-             (= (digit-sum (substring s 0 mid)) (digit-sum (substring s mid n)))))))  ; Check if sums are equal
-
-  ;; Helper function to sum the digits of a string representing a number
-  (define (digit-sum str)
-    (for/sum ([char (in-string str)]) (- (char->integer char) (char->integer #\0))))  ; Calculate the sum of the digits
+    (define s (number->string num)) ;; Convert number to string
+    (define n (string-length s)) ;; Get the length of the string
+    (define mid (/ n 2)) ;; Calculate the midpoint
+    (define (sum-digits str)
+      (for/sum ([char (in-string str)])
+        (- (char->integer char) (char->integer #\0)))) ;; Sum the integer values of chars
+    (and (even? n) ;; Check if the number of digits is even
+         (= (sum-digits (substring s 0 mid)) ;; Get the first half of the digits
+            (sum-digits (substring s mid n))))) ;; Get the second half of the digits
 
   ;; Main computation: count symmetric numbers in the given range
-  (for/sum ([num (in-range low (add1 high))] #:when (is-symmetric? num)) 1))
+  (for/sum ([num (in-range low (add1 high))])
+    (if (is-symmetric? num) 1 0))) ;; Filter and count symmetric numbers
 
 ;; Example usage:
-(countSymmetricIntegers 1 100)     ; Output: 9
-(countSymmetricIntegers 1200 1230)  ; Output: 4
+(countSymmetricIntegers 1 100) ;; Output: 9
+(countSymmetricIntegers 1200 1230) ;; Output: 4
 
 (require rackunit)
 

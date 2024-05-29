@@ -21,25 +21,26 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  ;; Helper function to calculate the maximum sum of almost unique subarrays
-  (define (max-sum-helper nums current-index current-sum current-window max-sum)
-    (if (>= current-index (length nums))
-        max-sum
-        (let* ((next-element (list-ref nums current-index))
-               (next-window (append (rest current-window) (list next-element)))
-               (next-sum (+ (- current-sum (first current-window)) next-element))
-               (distinct-count (length (remove-duplicates next-window)))
-               (valid-window? (>= distinct-count m))
-               (updated-max-sum (if valid-window? (max max-sum next-sum) max-sum)))
-          (max-sum-helper nums (add1 current-index) next-sum next-window updated-max-sum))))
+  (define (valid-window? window)
+    (>= (length (remove-duplicates window)) m))
   
-  ;; Initialize the sliding window and call the helper function
+  (define (window-sum window)
+    (apply + window))
+  
+  (define (slide-window nums k)
+    (for/list ([i (in-range 0 (+ 1 (- (length nums) k)))])
+      (take (drop nums i) k)))
+
+  (define (max-sum-of-valid-windows windows)
+    (define valid-windows
+      (filter valid-window? windows))
+    (if (null? valid-windows)
+        0
+        (apply max (map window-sum valid-windows))))
+
   (if (< (length nums) k)
       0
-      (let ((initial-window (take nums k))
-            (initial-sum (apply + (take nums k))))
-        (max-sum-helper nums k initial-sum initial-window 0))))
-
+      (max-sum-of-valid-windows (slide-window nums k))))
 
 (require rackunit)
 

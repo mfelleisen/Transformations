@@ -35,25 +35,34 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  (define n (length nums))
-  (define memo (make-vector n -inf.0))
-  (vector-set! memo 0 0)
+  ;; Helper function to check if a jump is valid
+  (define (valid-jump? i j)
+    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
 
-  ;; Helper function to update the memo vector
-  (define (update-memo i)
-    (let loop ([j (add1 i)])
-      (when (< j n)
-        (when (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-          (vector-set! memo j (max (vector-ref memo j) (add1 (vector-ref memo i)))))
-        (loop (add1 j)))))
+  ;; Recursive helper function to calculate maximum jumps
+  (define (calc-max-jumps i dp)
+    (if (>= i (length nums))
+        dp
+        (let ([current-val (list-ref dp i)])
+          (if (= current-val -inf.0)
+              (calc-max-jumps (add1 i) dp)
+              (let loop ([j (add1 i)] [new-dp dp])
+                (if (>= j (length nums))
+                    (calc-max-jumps (add1 i) new-dp)
+                    (let ([new-dp (if (valid-jump? i j)
+                                      (list-set new-dp j (max (list-ref new-dp j) (add1 current-val)))
+                                      new-dp)])
+                      (loop (add1 j) new-dp))))))))
 
-  ;; Process each index to update memo values
-  (for ([i (in-range n)])
-    (update-memo i))
-
-  ;; Get the final value from memo
-  (define final-value (vector-ref memo (sub1 n)))
-  (if (= final-value -inf.0) -1 final-value))
+  ;; Initialize the dp list with negative infinity for all indices except the first one set to 0
+  (define initial-dp (cons 0 (make-list (sub1 (length nums)) -inf.0)))
+  
+  ;; Calculate the maximum jumps
+  (define final-dp (calc-max-jumps 0 initial-dp))
+  
+  ;; Check the value at the last index to determine if the end is reachable
+  (let ([final-value (list-ref final-dp (sub1 (length nums)))])
+    (if (= final-value -inf.0) -1 final-value)))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

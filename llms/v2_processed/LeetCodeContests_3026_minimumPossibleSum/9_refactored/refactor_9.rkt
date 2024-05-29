@@ -32,21 +32,23 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
-  
-  ;; Recursive function to build the array while maintaining immutability and using accumulators
-  (define (build-array nums candidate remaining)
-    (if (= remaining 0)
-        (reverse nums)
-        (if (not (ormap (lambda (num) (= (+ num candidate) target)) nums))
-            (build-array (cons candidate nums) (+ candidate 1) (- remaining 1))
-            (build-array nums (+ candidate 1) remaining))))
+
+  ;; Helper function to generate the beautiful array
+  (define (build-array n target)
+    (define (helper k acc)
+      (if (= (length acc) n)
+          acc
+          (if (not (ormap (lambda (x) (= (+ x k) target)) acc))
+              (helper (add1 k) (cons k acc))
+              (helper (add1 k) acc))))
+    (reverse (helper 1 '())))
 
   ;; Calculate the sum of the array elements modulo MOD
   (define (mod-sum nums)
     (foldl (lambda (num acc) (modulo (+ acc num) MOD)) 0 nums))
-  
+
   ;; Generate the beautiful array and calculate its minimum possible sum
-  (mod-sum (build-array '() 1 n)))
+  (mod-sum (build-array n target)))
 
 ;; Example test cases
 (displayln (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

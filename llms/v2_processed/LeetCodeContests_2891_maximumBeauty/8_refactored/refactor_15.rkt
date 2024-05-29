@@ -25,15 +25,19 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 0 <= nums[i], k <= 105
 (define (maximumBeauty nums k)
-  ;; This function calculates the maximum beauty of the array `nums` after applying the defined operations.
+  ;; Generate all possible target values within the range [num - k, num + k] for each num in nums
+  (define possible-values
+    (for*/list ([num nums]
+                [delta (in-range (- k) (+ k 1))])
+      (+ num delta)))
+
+  ;; Count the frequency of each possible target value
   (define freq-map
-    (for/fold ([freq-map (hash)])
-              ([num nums])
-      (for/fold ([freq-map freq-map])
-                ([possible-value (in-range (- num k) (+ num k 1))])
-        (hash-update freq-map possible-value add1 0))))
-  
-  ;; The result is the maximum frequency found in the map, which corresponds to the maximum beauty
+    (for/fold ([freq (hash)])
+              ([val possible-values])
+      (hash-update freq val add1 0)))
+
+  ;; The maximum frequency found in the map corresponds to the maximum beauty
   (apply max (hash-values freq-map)))
 
 ;; Example usage

@@ -25,26 +25,26 @@
 ;;  * 1 <= nums.length <= 50
 ;;  * 0 <= nums[i] < 231
 ;;  * 1 <= k <= nums.length
-(define (bit-set? num bit)
-  (not (zero? (bitwise-and num (arithmetic-shift 1 bit)))))
-
-;; Function to compute the K-or of a list of numbers
 (define (findKOr nums k)
-  (define max-bit 31)  ;; Maximum number of bits to check (for 32-bit integers)
+  (define (bit-set-in-k-or? bit nums k)
+    (>= (count (λ (num) (not (zero? (bitwise-and num bit)))) nums) k))
+
+  (define (bit-or-if-condition bits nums k)
+    (foldl (λ (bit acc)
+             (if (bit-set-in-k-or? bit nums k)
+                 (bitwise-ior acc bit)
+                 acc))
+           0
+           bits))
   
-  ;; Accumulator to compute the K-or result
-  (define (accumulate-kor bits)
-    (for/fold ([result 0]) ([i (in-range max-bit)])
-      (let ([count (count (lambda (num) (bit-set? num i)) nums)])
-        (if (>= count k)
-            (bitwise-ior result (arithmetic-shift 1 i))
-            result))))
+  ;; Generate bit positions [2^0, 2^1, ..., 2^30]
+  (define bit-positions (for/list ([i (in-range 31)]) (expt 2 i)))
   
-  (accumulate-kor nums))
+  (bit-or-if-condition bit-positions nums k))
 
 ;; Example usage:
-(findKOr '(7 12 9 8 9 15) 4)  ; Output: 9
-(findKOr '(2 12 1 11 4 5) 6)  ; Output: 0
+(findKOr '(7 12 9 8 9 15) 4)   ; Output: 9
+(findKOr '(2 12 1 11 4 5) 6)   ; Output: 0
 (findKOr '(10 8 5 9 11 6 8) 1) ; Output: 15
 
 (require rackunit)

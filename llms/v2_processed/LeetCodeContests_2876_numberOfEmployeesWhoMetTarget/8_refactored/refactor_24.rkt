@@ -24,8 +24,8 @@
 ;;  * 1 <= n == hours.length <= 50
 ;;  * 0 <= hours[i], target <= 105
 (define (numberOfEmployeesWhoMetTarget hours target)
-  ;; Use `filter` to create a list of employees who worked at least 'target' hours
-  ;; and then use `length` to count them.
+  ;; Use 'filter' to keep only the elements that meet the condition
+  ;; and then 'length' to count them.
   (length (filter (lambda (hour) (>= hour target)) hours)))
 
 ;; Example use cases:

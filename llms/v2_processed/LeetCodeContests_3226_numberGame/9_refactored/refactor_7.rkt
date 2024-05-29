@@ -18,23 +18,21 @@
 ;; 1 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
-(define (partition-choices nums)
-  (let loop ([nums nums] [alice '()] [bob '()])
-    (if (empty? nums)
-        (values (reverse alice) (reverse bob))
-        (loop (cddr nums) 
-              (cons (car nums) alice) 
-              (cons (cadr nums) bob)))))
-
 (define (numberGame nums)
-  ;; Sort the numbers initially
-  (define sorted-nums (sort nums <))
-  ;; Partition the choices for Alice and Bob
-  (define-values (alice-choices bob-choices) (partition-choices sorted-nums))
-  ;; Interleave Bob's and Alice's choices to form the result
-  (define result (for*/list ([b bob-choices] [a alice-choices]) (list b a)))
-  ;; Flatten the interleaved list
-  (apply append result))
+  ;; Define a recursive helper function to simulate the game
+  (define (game-loop nums acc)
+    (match nums
+      ;; If nums is empty, return the accumulated result
+      [(list) acc]
+      ;; Otherwise, process the current state
+      [_
+       (define sorted-nums (sort nums <))  ; Sort nums in ascending order
+       (define alice-choice (first sorted-nums))  ; Alice picks the first (minimum)
+       (define bob-choice (second sorted-nums))  ; Bob picks the second (next minimum)
+       (define remaining-nums (drop sorted-nums 2))  ; Remove the first two elements
+       (game-loop remaining-nums (cons alice-choice (cons bob-choice acc)))]))  ; Recur with updated nums and acc
+  ;; Start the recursive game loop with an empty accumulator
+  (reverse (game-loop nums '())))
 
 ;; Example usage:
 (numberGame '(5 4 2 3))  ; Output: '(3 2 5 4)

@@ -19,15 +19,13 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  (define (play-game nums acc)
-    (if (empty? nums)
+  (define (loop sorted-nums acc)
+    (if (empty? sorted-nums)
         (reverse acc)
-        (let* ([sorted-nums (sort nums <)]
-               [alice-choice (first sorted-nums)]
-               [bob-choice (second sorted-nums)]
-               [remaining-nums (drop sorted-nums 2)])
-          (play-game remaining-nums (cons alice-choice (cons bob-choice acc))))))
-  (play-game nums '()))
+        (let ([alice-choice (first sorted-nums)]
+              [bob-choice (second sorted-nums)])
+          (loop (cddr sorted-nums) (cons alice-choice (cons bob-choice acc))))))
+  (loop (sort nums <) '()))
 
 ;; Example usage:
 (numberGame '(5 4 2 3)) ;; Output: '(3 2 5 4)

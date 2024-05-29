@@ -22,24 +22,24 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
+  ;; Helper function to determine if a certain rotation of nums is sorted
+  (define (is-sorted-rotation? start sorted-nums)
+    (for/and ([i (in-range (length nums))])
+      (= (list-ref nums (modulo (+ start i) (length nums))) (list-ref sorted-nums i))))
+
+  ;; Length of the input list
   (define n (length nums))
-  (define sorted-nums (sort nums <))
-
-  (define (is-valid-shift shifted)
-    (andmap (λ (i)
-              (= (list-ref nums (modulo (+ shifted i) n))
-                 (list-ref sorted-nums i)))
-            (range n)))
-
-  (define (find-shift start)
-    (if (is-valid-shift start)
-        (modulo (- n start) n)
-        -1))
-
-  (for/or ([i (range n)])
-    (define shifts (find-shift i))
-    (when (not (= shifts -1))
-      shifts)))
+  
+  ;; If the list has only one element, it is already sorted
+  (if (= n 1)
+      0
+      (let ([sorted-nums (sort nums <)])  ;; Sort the list in ascending order
+        ;; Check all possible starting points for a valid shift
+        (for/first ([start (in-range n)])
+          (when (is-sorted-rotation? start sorted-nums)
+            (modulo (- n start) n)))
+        ;; If no valid shift found, return -1
+        -1)))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2

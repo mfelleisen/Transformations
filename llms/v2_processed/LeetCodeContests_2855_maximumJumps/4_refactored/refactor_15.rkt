@@ -35,30 +35,27 @@
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
   (define n (length nums))
-  
-  ;; Function to check if a jump between two indices is possible
-  (define (can-jump? i j)
-    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
-  
-  ;; Recursive helper function using memoization to store results
-  (define memo (make-hash))
-  
-  (define (max-jumps-from i)
-    (cond
-      [(= i (sub1 n)) 0]  ; If at the last index, no more jumps needed
-      [(hash-ref memo i #f)]  ; If result is already memoized, return it
-      [else
-       (define jumps
-         (for/fold ([max-jumps -inf.0])
-                   ([j (in-range (add1 i) n)]
-                    #:when (can-jump? i j))
-           (max max-jumps (add1 (max-jumps-from j)))))
-       (hash-set! memo i jumps)
-       jumps]))
-  
-  ;; Calculate the maximum jumps from the first index
-  (define result (max-jumps-from 0))
-  (if (= result -inf.0) -1 result))
+
+  ;; Helper function to calculate the maximum jumps from a given index
+  (define (max-jumps-from index dp)
+    (for/fold ([current-max -inf.0]) ([next-index (in-range (add1 index) n)])
+      (if (<= (abs (- (list-ref nums next-index) (list-ref nums index))) target)
+          (max current-max (add1 (vector-ref dp next-index)))
+          current-max)))
+
+  ;; Initialize DP table with initial values
+  (define dp (build-vector n (lambda (i) (if (= i 0) 0 -inf.0))))
+
+  ;; Process each index to calculate maximum jumps
+  (for ([i (in-range n)])
+    (when (not (= (vector-ref dp i) -inf.0))
+      (vector-set! dp i (max-jumps-from i dp))))
+
+  ;; Check the value for the last position; return -1 if it's still negative infinity.
+  (let ([last-jump (vector-ref dp (sub1 n))])
+    (if (= last-jump -inf.0)
+        -1
+        (inexact->exact last-jump))))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

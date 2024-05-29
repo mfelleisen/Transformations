@@ -21,16 +21,18 @@
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (hasTrailingZeros nums)
-  ;; Helper function to determine if a number has at least one trailing zero
+  ;; Helper function to check if a number has at least one trailing zero
   (define (has-trailing-zero? x)
     (even? x))
+
+  ;; Helper function to generate all combinations of two or more elements
+  (define (combinations lst)
+    (for*/list ([i (in-range (length lst))]
+                [j (in-range (+ i 1) (length lst))])
+      (bitwise-ior (list-ref lst i) (list-ref lst j))))
   
-  ;; Check if any combination of two or more elements has at least one trailing zero
-  (define (check-combinations nums)
-    (ormap (lambda (x) (ormap (lambda (y) (has-trailing-zero? (bitwise-ior x y))) (cdr nums))) nums))
-  
-  ;; Start the check with the list of numbers
-  (check-combinations nums))
+  ;; Generate combinations and check for trailing zeros
+  (ormap has-trailing-zero? (combinations nums)))
 
 ;; Example usage:
 (displayln (hasTrailingZeros '(1 2 3 4 5)))  ; Output: #t

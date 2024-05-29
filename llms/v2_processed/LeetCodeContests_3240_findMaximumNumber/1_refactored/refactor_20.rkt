@@ -29,28 +29,25 @@
 ;; 1 <= k <= 1015
 ;; 1 <= x <= 8
 (define (findMaximumNumber k x)
-  ;; Function to calculate the price of a number based on its binary representation
+  ;; Helper function to calculate the price of a number based on its binary representation
   ;; and the given x (position multiple to check)
   (define (price-of-number num)
-    (for/sum ([i (in-naturals)]
-              #:break (zero? num))
-      (define bit (bitwise-and num 1))
-      (set! num (arithmetic-shift num -1))
-      (if (and (= 0 (modulo (+ i 1) x)) (= 1 bit)) 1 0)))
+    (for/sum ([i (in-naturals 1)]
+              #:break (> (expt 2 i) num))
+      (if (and (= (modulo i x) 0)
+               (bitwise-and num (expt 2 (sub1 i))))
+          1
+          0)))
+  
+  ;; Recursive helper function to find the maximum number
+  (define (find-max num current-sum)
+    (define new-sum (+ current-sum (price-of-number num)))
+    (if (> new-sum k)
+        (sub1 num)  ; If sum exceeds k, return previous number
+        (find-max (add1 num) new-sum)))  ; Otherwise, continue with the next number
 
-  ;; Function to find the maximum number using binary search
-  (define (find-max low high)
-    (if (> low high)
-        (- low 1)
-        (let* ((mid (quotient (+ low high) 2))
-               (sum (for/sum ([i (in-range 1 (add1 mid))])
-                      (price-of-number i))))
-          (if (<= sum k)
-              (find-max (add1 mid) high)
-              (find-max low (sub1 mid))))))
-
-  ;; Perform binary search starting from 1 to k
-  (find-max 1 k))
+  ;; Start recursion from 1 with initial sum 0
+  (find-max 1 0))
 
 ;; Example use cases
 (findMaximumNumber 9 1)  ; Output: 6

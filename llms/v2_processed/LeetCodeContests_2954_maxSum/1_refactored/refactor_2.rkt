@@ -21,27 +21,32 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  (define n (length nums))
-  (define (valid-window? window)
-    (>= (length (remove-duplicates window)) m))
+  ;; Helper function to calculate the sum of a subarray
+  (define (subarray-sum subarray)
+    (apply + subarray))
+  
+  ;; Helper function to check if a subarray has at least m distinct elements
+  (define (valid-subarray? subarray)
+    (>= (length (remove-duplicates subarray)) m))
 
-  (define (window-sum window)
-    (apply + window))
+  ;; Iterate over all subarrays of length k and find the maximum valid subarray sum
+  (define (find-max-sum nums)
+    (for/fold ([max-sum 0])
+              ([subarray (in-slice nums k)])
+      (if (valid-subarray? subarray)
+          (max max-sum (subarray-sum subarray))
+          max-sum)))
 
-  (define (process-window idx window max-sum)
-    (if (>= idx n)
-        max-sum
-        (let ([new-window (append (rest window) (list (list-ref nums idx)))])
-          (if (valid-window? new-window)
-              (process-window (+ idx 1) new-window (max max-sum (window-sum new-window)))
-              (process-window (+ idx 1) new-window max-sum)))))
-
-  (if (< n k)
+  ;; Entry point: check if the length of nums is less than k
+  (if (< (length nums) k)
       0
-      (let ([initial-window (take nums k)])
-        (if (valid-window? initial-window)
-            (process-window k initial-window (window-sum initial-window))
-            (process-window k initial-window 0)))))
+      (find-max-sum nums)))
+
+;; Helper function to generate all subarrays of length k
+(define (in-slice lst k)
+  (define len (length lst))
+  (for/list ([i (in-range 0 (add1 (- len k)))])
+    (take (drop lst i) k)))
 
 ;; Example usage
 (maxSum '(2 6 7 3 1 7) 3 4)  ; Output: 18

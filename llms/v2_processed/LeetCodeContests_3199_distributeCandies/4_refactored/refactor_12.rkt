@@ -14,17 +14,14 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Use a higher-order function to generate all valid distributions and count them.
-  (define (valid-distribution? a b)
-    (<= (- n a b) limit))
+  ;; Returns the number of ways to distribute n candies among 3 children such that no child gets more than limit candies
+  (define (valid-candy-distributions n limit)
+    (for*/sum ([a (in-range (add1 (min n limit)))]  ; Iterate over possible candies for the first child
+               [b (in-range (add1 (min (- n a) limit)))]  ; Iterate over possible candies for the second child
+               #:when (<= (- n a b) limit))  ; Ensure the third child's candies do not exceed the limit
+      1))  ; Count each valid distribution as 1
 
-  (define (count-valid-distributions)
-    (for*/sum ([a (in-range (add1 (min n limit)))]
-               [b (in-range (add1 (min (- n a) limit)))]
-               #:when (valid-distribution? a b))
-      1))
-
-  (count-valid-distributions))
+  (valid-candy-distributions n limit))  ; Calculate the number of valid distributions
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

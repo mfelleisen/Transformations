@@ -2,30 +2,24 @@
 
 (define MOD (+ 1 (expt 10 9)))
 
-;; Function to compute number of ways to express n as the sum of xth powers of unique positive integers
 (define (numberOfWays n x)
-  ;; Helper function to recursively compute the number of ways
-  (define (compute-ways i dp)
-    (define current-power (expt i x))
-    (foldl (lambda (j acc)
-             (list-set acc j (modulo (+ (list-ref acc j) 
-                                        (list-ref acc (- j current-power))) MOD)))
-           dp
-           (range current-power (+ n 1) 1)))
-
-  ;; Initialize dp list with zeros, and set dp[0] to 1
-  (define dp (build-list (+ n 1) (lambda (i) (if (= i 0) 1 0))))
-
+  ;; Helper function to compute the number of ways recursively
+  (define (compute-ways n max-base x)
+    (define dp (make-vector (+ n 1) 0))
+    (vector-set! dp 0 1)
+    
+    (for ([base (in-range 1 (+ max-base 1))])
+      (define current-power (expt base x))
+      (for ([i (in-range n (- current-power 1) -1)])
+        (vector-set! dp i (modulo (+ (vector-ref dp i)
+                                     (vector-ref dp (- i current-power))) MOD))))
+    
+    (vector-ref dp n))
+  
   ;; Calculate the maximum base such that base^x <= n
   (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
-
-  ;; Use fold to iterate over each possible base and update dp list
-  (define final-dp (foldl (lambda (i acc) (compute-ways i acc))
-                          dp
-                          (range 1 (+ max-base 1))))
-
-  ;; Return the number of ways to express n as specified
-  (list-ref final-dp n))
+  
+  (compute-ways n max-base x))
 
 ;; Example usages
 (numberOfWays 10 2)  ;; Output: 1

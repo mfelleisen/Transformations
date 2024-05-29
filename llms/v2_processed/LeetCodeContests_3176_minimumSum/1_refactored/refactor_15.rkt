@@ -28,29 +28,33 @@
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
   (define n (length nums))
-
-  (if (< n 3)
+  
+  (define (find-left-min idx)
+    (for/fold ([left-min +inf.0])
+              ([i (in-range 0 idx)])
+      (if (< (list-ref nums i) (list-ref nums idx))
+          (min left-min (list-ref nums i))
+          left-min)))
+  
+  (define (find-right-min idx)
+    (for/fold ([right-min +inf.0])
+              ([k (in-range (+ idx 1) n)])
+      (if (< (list-ref nums k) (list-ref nums idx))
+          (min right-min (list-ref nums k))
+          right-min)))
+  
+  (define min-sum
+    (for/fold ([min-sum +inf.0])
+              ([j (in-range 1 (- n 1))])
+      (define left-min (find-left-min j))
+      (define right-min (find-right-min j))
+      (if (and (not (= left-min +inf.0)) (not (= right-min +inf.0)))
+          (min min-sum (+ left-min (list-ref nums j) right-min))
+          min-sum)))
+  
+  (if (= min-sum +inf.0)
       -1
-      (let loop ([j 1] [min-sum +inf.0])
-        (if (>= j (- n 1))
-            (if (= min-sum +inf.0)
-                -1
-                min-sum)
-            (let* ([nj (list-ref nums j)]
-                   [left-min (for/fold ([left-min +inf.0]) ([i (in-range j)])
-                               (let ([ni (list-ref nums i)])
-                                 (if (< ni nj)
-                                     (min left-min ni)
-                                     left-min)))]
-                   [right-min (for/fold ([right-min +inf.0]) ([k (in-range (+ j 1) n)])
-                                (let ([nk (list-ref nums k)])
-                                  (if (< nk nj)
-                                      (min right-min nk)
-                                      right-min)))]
-                   [current-sum (+ left-min nj right-min)])
-              (loop (add1 j) (if (and (not (= left-min +inf.0)) (not (= right-min +inf.0)))
-                                 (min min-sum current-sum)
-                                 min-sum)))))))
+      min-sum))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ;; Output: 9

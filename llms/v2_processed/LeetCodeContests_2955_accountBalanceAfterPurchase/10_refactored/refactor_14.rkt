@@ -21,18 +21,16 @@
   ;; Define the initial balance
   (define initial-balance 100)
   
-  ;; Calculate the nearest multiple of 10, preferring the larger multiple in case of a tie
+  ;; Determine the nearest multiple of 10, preferring the larger multiple in case of a tie
   (define rounded-amount
     (let* ([lower-bound (* (quotient purchaseAmount 10) 10)]
            [upper-bound (+ lower-bound 10)])
-      (if (<= (- upper-bound purchaseAmount) (- purchaseAmount lower-bound))
-          upper-bound
-          lower-bound)))
+      (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
+          lower-bound
+          upper-bound)))
   
   ;; Calculate the new balance by subtracting the rounded amount from the initial balance
   (- initial-balance rounded-amount))
-
-;; The function is now ready to be used to calculate the account balance after a purchase given a purchase amount.
 
 (require rackunit)
 

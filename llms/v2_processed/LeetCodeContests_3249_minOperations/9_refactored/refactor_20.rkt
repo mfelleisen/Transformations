@@ -22,16 +22,22 @@
 ;; 0 <= nums[i] <= 106
 ;; 0 <= k <= 106
 (define (minOperations nums k)
-  (define xor-with-k 
-    (foldl (lambda (num acc) (bitwise-xor num acc)) k nums))
+  ;; Calculate the XOR of all elements in nums
+  (define current-xor (foldl bitwise-xor 0 nums))
   
-  ;; Hamming weight computation: counting the number of 1s
-  (define (hamming-weight n)
-    (if (zero? n)
-        0
-        (+ (bitwise-and n 1) (hamming-weight (arithmetic-shift n -1)))))
+  ;; Determine the XOR of `current-xor` with `k` to find differing bits
+  (define xor-with-k (bitwise-xor current-xor k))
   
-  (hamming-weight xor-with-k))
+  ;; Count the number of 1s in `xor-with-k`
+  (define (count-ones n)
+    (define (iter n count)
+      (cond
+        [(= n 0) count]
+        [else (iter (arithmetic-shift n -1) (+ count (bitwise-and n 1)))]))
+    (iter n 0))
+  
+  ;; Return the number of operations needed to make the XOR of all elements equal to k
+  (count-ones xor-with-k))
 
 ;; Example usage:
 (minOperations '(2 1 3 4) 1)  ;; Output: 2

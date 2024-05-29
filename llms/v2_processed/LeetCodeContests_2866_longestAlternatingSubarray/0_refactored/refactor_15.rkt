@@ -28,33 +28,34 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
-  ;; Helper function to check if a given index is a valid start for the subarray
-  (define (valid-start? index)
-    (let ((val (list-ref nums index)))
-      (and (even? val) (<= val threshold))))
+  ;; Check if a number is even
+  (define (even? n) (= (modulo n 2) 0))
+  
+  ;; Check if a number is within the threshold
+  (define (within-threshold? n) (<= n threshold))
 
-  ;; Helper function to find the maximum subarray length starting from a given index
-  (define (max-subarray-length starting-index)
-    (let loop ((current-index (+ starting-index 1))
-               (current-length 1)
-               (last-modulo (modulo (list-ref nums starting-index) 2)))
-      (if (and (< current-index (length nums))
-               (<= (list-ref nums current-index) threshold)
-               (not (= (modulo (list-ref nums current-index) 2) last-modulo)))
-          (loop (+ current-index 1)
-                (+ current-length 1)
-                (modulo (list-ref nums current-index) 2))
-          current-length)))
+  ;; Function to calculate the length of the longest alternating subarray starting at a given index
+  (define (max-subarray-length-from index nums)
+    (let loop ([i index]
+               [len 0]
+               [last-modulo (modulo (list-ref nums index) 2)])
+      (cond
+        [(or (>= i (length nums))
+             (not (within-threshold? (list-ref nums i)))
+             (= (modulo (list-ref nums i) 2) last-modulo))
+         len]
+        [else
+         (loop (+ i 1) (+ len 1) (modulo (list-ref nums i) 2))])))
 
-  ;; Fold through the list to find the maximum length
-  (for/fold ([max-length 0])
-            ([i (in-range (length nums))]
-             #:when (valid-start? i))
-    (max max-length (max-subarray-length i))))
+  ;; Function to find the longest alternating subarray length in the list
+  (for/fold ([max-len 0]) ([i (in-range (length nums))])
+    (if (and (even? (list-ref nums i)) (within-threshold? (list-ref nums i)))
+        (max max-len (max-subarray-length-from i nums))
+        max-len)))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3
-(longestAlternatingSubarray '(1 2) 2)       ; Output: 1
+(longestAlternatingSubarray '(1 2) 2)      ; Output: 1
 (longestAlternatingSubarray '(2 3 4 5) 4)  ; Output: 3
 
 (require rackunit)

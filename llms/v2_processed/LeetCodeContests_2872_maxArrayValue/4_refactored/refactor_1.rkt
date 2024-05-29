@@ -23,17 +23,11 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Helper function to combine the numbers from right to left
-  (define (combine-right-to-left nums)
-    (foldr (lambda (x acc)
-             (if (and (pair? acc) (<= x (car acc)))
-                 (cons (+ x (car acc)) (cdr acc))
-                 (cons x acc)))
-           '()
-           nums))
-  
-  ;; Start the combination process and return the maximum value
-  (apply max (combine-right-to-left nums)))
+  ;; Helper function to process the list from right to left
+  (define (combine-reverse lst)
+    (for/fold ([result 0]) ([num (in-list (reverse lst))])
+      (max result (+ num (if (<= num result) result 0)))))
+  (combine-reverse nums))
 
 ;; Example usage:
 (maxArrayValue '(2 3 7 9 3))  ; Output: 21

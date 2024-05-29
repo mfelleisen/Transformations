@@ -22,23 +22,29 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (define (valid-group? grp)
-    (<= (- (last grp) (first grp)) k))
-
-  (define (partition-groups nums)
-    (if (empty? nums)
-        '()
-        (let ([group (take nums 3)])
-          (if (valid-group? group)
-              (cons group (partition-groups (drop nums 3)))
-              #f))))
-
+  ;; Ensure the list is sorted
   (define sorted-nums (sort nums <))
 
-  (if (not (= (remainder (length nums) 3) 0))
-      '()
-      (or (partition-groups sorted-nums) '())))
+  ;; Define a helper function to divide the list into groups of 3
+  (define (divide-into-groups lst)
+    (define (group-helper remaining acc)
+      (match remaining
+        [(list) (reverse acc)] ; If no remaining elements, return the accumulated result
+        [(list-rest a b c rest)
+         (if (<= (- c a) k) ; Check if the difference condition is met
+             (group-helper rest (cons (list a b c) acc))
+             '())] ; Return empty list if condition is not met
+        [_ '()])) ; Return empty list if not enough elements for a group
+    (group-helper lst '()))
 
+  ;; Check if the list length is divisible by 3 and process accordingly
+  (if (zero? (modulo (length nums) 3))
+      (divide-into-groups sorted-nums)
+      '()))
+
+;; Test cases
+(divideArray '(1 3 4 8 7 9 3 5 1) 2) ; => '((1 1 3) (3 4 5) (7 8 9))
+(divideArray '(1 3 3 2 7 3) 3) ; => '()
 
 (require rackunit)
 

@@ -24,36 +24,41 @@
 ;;  * 0 <= starti <= endi <= n - 1
 ;;  * 1 <= goldi <= 103
 (define (maximizeTheProfit n offers)
-  ;; Sort offers based on their ending time
-  (define sorted-offers (sort offers #:key second <))
+  ;; Create a sorted list of offers based on their ending time
+  (define sorted-offers (sort offers < #:key second))
 
   ;; Helper function to perform binary search and find the last non-conflicting offer
-  (define (findLastNonConflicting offers i)
+  (define (findLastNonConflicting sorted-offers i)
     (let loop ((low 0) (high (- i 1)))
       (if (> low high)
           -1
           (let ((mid (quotient (+ low high) 2)))
-            (if (< (second (list-ref offers mid)) (first (list-ref offers i)))
-                (if (< (second (list-ref offers (+ mid 1))) (first (list-ref offers i)))
+            (if (< (second (list-ref sorted-offers mid)) (first (list-ref sorted-offers i)))
+                (if (< (second (list-ref sorted-offers (+ mid 1))) (first (list-ref sorted-offers i)))
                     (loop (+ mid 1) high)
                     mid)
                 (loop low (- mid 1)))))))
 
-  ;; Function to calculate maximum profit using dynamic programming
-  (define (calculate-max-profit offers)
-    (define (dp i)
-      (if (< i 0)
-          0
-          (let* ((current-offer (list-ref offers i))
-                 (profit-including-current (third current-offer))
-                 (last-index (findLastNonConflicting offers i)))
-            (max (dp (- i 1))
-                 (+ profit-including-current (dp last-index))))))
+  ;; Use memoization to store the maximum profit up to each offer
+  (define memo (make-hash))
+  (define (max-profit i)
+    (hash-ref memo i
+              (lambda ()
+                (if (< i 0)
+                    0
+                    (let* ((current-offer (list-ref sorted-offers i))
+                           (profit-including-current (third current-offer))
+                           (last-index (findLastNonConflicting sorted-offers i))
+                           (profit-including (if (>= last-index 0)
+                                                 (+ profit-including-current (max-profit last-index))
+                                                 profit-including-current))
+                           (profit-excluding (max-profit (- i 1))))
+                      (let ((result (max profit-excluding profit-including)))
+                        (hash-set! memo i result)
+                        result))))))
 
-    (dp (- (length offers) 1)))
-
-  ;; Calculate the maximum profit
-  (calculate-max-profit sorted-offers))
+  ;; Start from the last offer and compute the maximum profit
+  (max-profit (- (length sorted-offers) 1)))
 
 ;; Example usage:
 (maximizeTheProfit 5 (list (list 0 0 1) (list 0 2 2) (list 1 3 2)))  ;; Output: 3

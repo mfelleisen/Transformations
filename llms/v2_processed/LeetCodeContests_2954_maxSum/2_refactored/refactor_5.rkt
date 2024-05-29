@@ -21,29 +21,20 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  (define (distinct-count lst)
-    (length (remove-duplicates lst)))
-
-  (define (valid-subarray? subarray)
-    (>= (distinct-count subarray) m))
-
-  (define (sliding-window-sums lst k)
-    (define (helper acc curr lst)
-      (if (< (length lst) k)
-          (reverse acc)
-          (helper (cons (apply + curr) acc)
-                  (append (cdr curr) (list (car (drop lst k))))
-                  (cdr lst))))
-    (helper '() (take lst k) lst))
-
-  (define subarray-sums
-    (filter valid-subarray?
-            (map (lambda (idx) (take (drop nums idx) k))
-                 (range 0 (add1 (- (length nums) k))))))
-
-  (if (null? subarray-sums)
+  (define n (length nums))
+  (if (< n k)
       0
-      (apply max (map (lambda (subarray) (apply + subarray)) subarray-sums))))
+      (let recur ([i 0] [max-sum 0] [current-sum (apply + (take nums k))] [window (take nums k)])
+        (if (>= i (- n k))
+            max-sum
+            (let* ([distinct-count (length (remove-duplicates window))]
+                   [next-window (append (drop window 1) (list (list-ref nums (+ i k))))]
+                   [next-sum (+ current-sum (list-ref nums (+ i k)) (- (list-ref nums i)))]
+                   [valid? (>= distinct-count m)])
+              (recur (add1 i) 
+                     (if valid? (max max-sum next-sum) max-sum)
+                     next-sum
+                     next-window))))))
 
 ;; Example usage:
 (maxSum '(2 6 7 3 1 7) 3 4)  ; Output: 18

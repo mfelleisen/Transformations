@@ -21,22 +21,31 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  (define (sum lst) (apply + lst))
-  (define (almost-unique? subarray)
-    (>= (length (remove-duplicates subarray)) m))
+  ;; Helper function to calculate the sum of a window and its distinct elements count
+  (define (window-info window)
+    (values (apply + window) (length (remove-duplicates window))))
   
-  (define (find-max-sum nums max-sum i)
-    (if (> i (- (length nums) k))
-        max-sum
-        (let* ([current-window (take (drop nums i) k)]
-               [window-sum (sum current-window)]
-               [valid-window? (almost-unique? current-window)]
-               [new-max-sum (if valid-window? (max max-sum window-sum) max-sum)])
-          (find-max-sum nums new-max-sum (+ i 1)))))
+  ;; Initialize sliding window and calculate initial window info
+  (define initial-window (take nums k))
+  (define-values (initial-sum initial-distinct) (window-info initial-window))
 
-  (if (< (length nums) k)
-      0
-      (find-max-sum nums 0 0)))
+  ;; Helper function to update window info when sliding the window
+  (define (update-window-info current-sum current-distinct old new)
+    (define new-sum (+ current-sum (- new old)))
+    (define new-distinct (if (= old new)
+                             current-distinct
+                             (length (remove-duplicates (append (rest (take initial-window k)) (list new))))))
+    (values new-sum new-distinct))
+
+  ;; Sliding window iteration
+  (for/fold ([max-sum (if (>= initial-distinct m) initial-sum 0)]
+             [current-sum initial-sum]
+             [current-distinct initial-distinct])
+            ([i (in-range k (length nums))])
+    (define old (list-ref nums (- i k)))
+    (define new (list-ref nums i))
+    (define-values (new-sum new-distinct) (update-window-info current-sum current-distinct old new))
+    (values (if (>= new-distinct m) (max max-sum new-sum) max-sum) new-sum new-distinct)))
 
 ;; Example usage
 (maxSum '(2 6 7 3 1 7) 3 4)  ; Output: 18

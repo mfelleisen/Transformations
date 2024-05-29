@@ -2,9 +2,16 @@
 
 ;; Check if a number is prime
 (define (is-prime? num)
-  (and (> num 1)
-       (not (for/or ([i (in-range 2 (add1 (integer-sqrt num)))])
-              (zero? (modulo num i))))))
+  (define (prime-helper i)
+    (and (<= (* i i) num)
+         (not (or (zero? (modulo num i))
+                  (zero? (modulo num (+ i 2)))))
+         (prime-helper (+ i 6))))
+  (cond
+    [(<= num 1) #f]
+    [(<= num 3) #t]
+    [(or (zero? (modulo num 2)) (zero? (modulo num 3))) #f]
+    [else (prime-helper 5)]))
 
 ;; Generate a list of prime numbers up to n
 (define (list-primes n)
@@ -12,19 +19,13 @@
 
 ;; Find prime pairs that sum to n
 (define (findPrimePairs n)
-  ;; Generate a list of all primes less than or equal to n
   (define primes (list-primes n))
-  
-  ;; Create a set of primes for quick lookup
+  ;; Use a set for quick lookup of prime pairs
   (define prime-set (set primes))
-  
-  ;; Filter pairs (x, y) such that x + y = n and x <= y
-  (for*/list ([x primes]
-              [y primes]
-              #:when (and (<= x y)
-                          (= (+ x y) n)
-                          (set-member? prime-set y)))
-    (list x y)))
+  (for/list ([x primes]
+             #:when (and (<= x (/ n 2))
+                         (set-member? prime-set (- n x))))
+    (list x (- n x))))
 
 ;; Example usage
 (findPrimePairs 10)  ; Output: '((3 7) (5 5))

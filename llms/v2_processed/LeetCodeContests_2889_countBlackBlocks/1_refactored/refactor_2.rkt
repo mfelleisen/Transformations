@@ -30,14 +30,12 @@
 ;;  * 0 <= coordinates[i][1] < n
 ;;  * It is guaranteed that coordinates contains pairwise distinct coordinates.
 (define (countBlackBlocks m n coordinates)
-  ;; Helper function to update the block counts for given cell
-  (define (update-blocks block-count x y)
-    (for ([dx (in-list '(-1 0))]
-          [dy (in-list '(-1 0))]
-          #:when (and (>= (+ x dx) 0)
-                      (>= (+ y dy) 0)
-                      (< (+ x dx) (- m 1))
-                      (< (+ y dy) (- n 1))))
+  ;; Helper function to update the block count for a given coordinate
+  (define (update-block-count x y block-count)
+    (for ([dx (in-range -1 1)]
+          [dy (in-range -1 1)]
+          #:when (and (<= 0 (+ x dx) (- m 2))
+                      (<= 0 (+ y dy) (- n 2))))
       (hash-update! block-count (cons (+ x dx) (+ y dy)) add1 0)))
 
   ;; Create a hash table to count black cells in each potential 2x2 block
@@ -47,14 +45,14 @@
   (for-each (lambda (coord)
               (define x (car coord))
               (define y (cadr coord))
-              (update-blocks block-count x y))
+              (update-block-count x y block-count))
             coordinates)
-
-  ;; Initialize an array to hold the result for blocks containing 0 to 4 black cells
-  (define result (make-vector 5 0))
 
   ;; Calculate the total number of potential blocks
   (define total-blocks (* (- m 1) (- n 1)))
+
+  ;; Initialize a list to hold the count of blocks with 0 to 4 black cells
+  (define result (make-vector 5 0))
 
   ;; Count the number of blocks with 1, 2, 3, and 4 black cells
   (for ([(key value) (in-hash block-count)])

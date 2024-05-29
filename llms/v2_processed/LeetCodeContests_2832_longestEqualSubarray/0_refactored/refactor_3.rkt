@@ -23,31 +23,33 @@
 ;;  * 1 <= nums[i] <= nums.length
 ;;  * 0 <= k <= nums.length
 (define (longestEqualSubarray nums k)
-  ;; Helper function to update the count hash table
-  (define (update-count count key delta)
-    (hash-update! count key (lambda (v) (+ v delta)) 0))
+  (define (helper nums k)
+    (define (update-count! count key delta)
+      (hash-update! count key (lambda (v) (+ v delta)) 0))
 
-  ;; Recursive function to find the longest equal subarray
-  (define (find-longest left right count max-length)
-    (if (>= right (length nums))
-        max-length
-        (let* ([current-num (list-ref nums right)]
-               [_ (update-count count current-num 1)]
-               [max-freq (apply max (hash-values count))]
-               [window-length (+ 1 (- right left))]
-               [new-max-length (max max-length window-length)])
-          (if (> (- window-length max-freq) k)
-              (let* ([left-num (list-ref nums left)]
-                     [_ (update-count count left-num -1)])
-                (find-longest (+ left 1) (+ right 1) count new-max-length))
-              (find-longest left (+ right 1) count new-max-length)))))
-  
-  ;; Initialize variables and start the recursive function
-  (find-longest 0 0 (make-hash) 0))
+    (define-values (result _)
+      (for/fold ([max-length 0]
+                 [left 0]
+                 [count (make-hash)])
+                ([right (in-range (length nums))])
+        (define num (list-ref nums right))
+        (update-count! count num 1)
+        (define max-freq (apply max (hash-values count)))
+        (define window-length (+ 1 (- right left)))
+        (cond
+          [(> (- window-length max-freq) k)
+           (update-count! count (list-ref nums left) -1)
+           (values max-length (+ left 1) count)]
+          [else
+           (values (max max-length window-length) left count)])))
+    result)
 
-;; Usage example
-;; (longestEqualSubarray '(1 3 2 3 1 3) 3) ; should return 3
-;; (longestEqualSubarray '(1 1 2 2 1 1) 2) ; should return 4
+  (helper nums k))
+
+;; The function uses a sliding window approach with two pointers, `left` and `right`.
+;; A hash table `count` is used to keep track of the frequency of each element in the current window.
+;; The window is expanded by moving the `right` pointer and adjusted by moving the `left` pointer when necessary.
+;; The goal is to find the maximum length of a subarray that can be made equal by deleting at most `k` elements.
 
 (require rackunit)
 

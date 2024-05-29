@@ -27,14 +27,15 @@
 (define (maximumBeauty nums k)
   ;; This function calculates the maximum beauty of the array `nums` after applying the defined operations.
   (define freq-map (make-hash))
-  
-  ;; Populate the frequency map by iterating over each number in `nums`
-  (for ([num nums])
-    ;; For each number, consider the range [num-k, num+k] of possible target values
+
+  ;; Helper function to update the frequency map for a given number within its allowable range
+  (define (update-freq-map num)
     (for ([possible-value (in-range (- num k) (+ num k 1))])
-      ;; Increment the count of each possible target value in the frequency map
       (hash-update! freq-map possible-value add1 0)))
-  
+
+  ;; Populate the frequency map by iterating over each number in `nums`
+  (for-each update-freq-map nums)
+
   ;; The result is the maximum frequency found in the map, which corresponds to the maximum beauty
   (apply max (hash-values freq-map)))
 

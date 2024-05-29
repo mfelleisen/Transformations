@@ -23,28 +23,35 @@
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
   (define n (length nums))
-  (define dp (make-vector n -inf.0))
-  (vector-set! dp 0 (first nums))
+  (define even-score (make-vector n -inf.0))
+  (define odd-score (make-vector n -inf.0))
+
+  (define (update-score dp i j score penalty)
+    (when (< j n)
+      (vector-set! dp j (max (vector-ref dp j) (- (+ score (list-ref nums j)) penalty)))))
+
+  ;; Initialize the scores for the first element
+  (vector-set! even-score 0 (first nums))
+  (vector-set! odd-score  0 (first nums))
+
+  (for ([i (in-range n)])
+    (define score (list-ref nums i))
+    (define current-even (vector-ref even-score i))
+    (define current-odd  (vector-ref odd-score  i))
+
+    (when (> current-even -inf.0)
+      (for ([j (in-range (add1 i) n)])
+        (if (= (modulo score 2) (modulo (list-ref nums j) 2))
+            (update-score even-score i j current-even 0)
+            (update-score odd-score  i j current-even x))))
   
-  (define (parity val)
-    (modulo val 2))
-  
-  ;; Recursive function to compute the maximum score
-  (define (max-score-rec i j)
-    (cond
-      [(>= i n) (vector-ref dp (sub1 n))]
-      [(>= j n) (max-score-rec (add1 i) (add1 i))]
-      [else
-       (let* ([current-score (+ (vector-ref dp i) (list-ref nums j))]
-              [penalized-score (if (not (= (parity (list-ref nums i))
-                                           (parity (list-ref nums j))))
-                                   (- current-score x)
-                                   current-score)])
-         (vector-set! dp j (max (vector-ref dp j) penalized-score))
-         (max-score-rec i (add1 j)))]))
-  
-  (max-score-rec 0 1)
-  (apply max (vector->list dp)))
+    (when (> current-odd -inf.0)
+      (for ([j (in-range (add1 i) n)])
+        (if (= (modulo score 2) (modulo (list-ref nums j) 2))
+            (update-score odd-score i j current-odd 0)
+            (update-score even-score i j current-odd x)))))
+
+  (apply max (append (vector->list even-score) (vector->list odd-score))))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

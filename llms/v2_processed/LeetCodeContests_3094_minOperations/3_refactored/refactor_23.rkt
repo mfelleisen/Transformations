@@ -38,7 +38,7 @@
              -1)]))  ; Otherwise, it's impossible
   
   ;; Calculate total operations and handle cases where it's impossible to empty the array
-  (define (calculate-operations freq)
+  (define-values (total-ops impossible)
     (for/fold ([ops 0] [impossible #f]) ([f (in-hash-values freq)])
       (let ([op (calc-ops f)])
         (if (= op -1)
@@ -46,12 +46,12 @@
             (values (+ ops op) impossible)))))  ; Otherwise, accumulate operations
   
   ;; If any frequency was impossible to deal with, return -1, otherwise return total operations
-  (define-values (total-ops impossible) (calculate-operations freq))
   (if impossible -1 total-ops))
 
 ;; Example usage:
 (minOperations '(2 3 3 2 2 4 2 3 4))  ; Output: 4
 (minOperations '(2 1 2 2 3 3))       ; Output: -1
+
 
 (require rackunit)
 

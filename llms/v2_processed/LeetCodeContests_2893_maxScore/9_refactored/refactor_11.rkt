@@ -22,24 +22,28 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  (define len (length nums))
-  
-  ;; Define a helper function to calculate the maximum score recursively
-  (define (calculate-score i current-score even-score odd-score)
-    (if (= i len)
-        current-score
-        (let* ((num (list-ref nums i))
-               (new-even-score (if (even? num)
-                                   (max even-score (+ (if (even? i) even-score odd-score) num))
-                                   even-score))
-               (new-odd-score (if (odd? num)
-                                  (max odd-score (+ (if (odd? i) odd-score even-score) num))
-                                  odd-score)))
-          (calculate-score (+ i 1) (max current-score new-even-score new-odd-score)
-                           new-even-score new-odd-score))))
-  
-  ;; Start the recursive calculation from index 0
-  (calculate-score 1 (first nums) (first nums) (- (first nums) x)))
+  (define (compute-score dp i j)
+    (let* ([current-score (+ (hash-ref dp i) (list-ref nums j))]
+           [i-parity (modulo (list-ref nums i) 2)]
+           [j-parity (modulo (list-ref nums j) 2)])
+      (if (not (= i-parity j-parity))
+          (- current-score x)
+          current-score)))
+
+  (define (update-dp dp i j)
+    (hash-update! dp j max (compute-score dp i j)))
+
+  (define (helper dp i)
+    (for ([j (range (add1 i) (length nums))])
+      (update-dp dp i j)))
+
+  (define dp (make-hash))
+  (hash-set! dp 0 (first nums))
+
+  (for ([i (range (length nums))])
+    (helper dp i))
+
+  (apply max (hash-values dp)))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

@@ -22,24 +22,25 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
+  ;; Calculates the length of the list
   (define n (length nums))
-  (define sorted-nums (sort nums <))
-
-  (define (rotated-list-equals-sorted? start)
-    (for/and ([i (in-range n)])
-      (equal? (list-ref nums (modulo (+ start i) n))
-              (list-ref sorted-nums i))))
-
-  (define (find-valid-shift start)
-    (cond
-      [(rotated-list-equals-sorted? start)
-       (modulo (- n start) n)]
-      [(< start (- n 1))
-       (find-valid-shift (add1 start))]
-      [else
-       -1]))
-
-  (find-valid-shift 0))
+  ;; Checks if the list is sorted
+  (define (sorted? lst) (apply < lst))
+  
+  (cond
+    ;; If the list has only one element, it's already sorted
+    [(= n 1) 0]
+    ;; Check all possible right shifts
+    [else
+     (let loop ([shifts 0] [lst nums])
+       (cond
+         ;; If the list is sorted, return the number of shifts
+         [(sorted? lst) shifts]
+         ;; If all shifts have been checked, return -1
+         [(= shifts n) -1]
+         ;; Otherwise, perform a right shift and continue checking
+         [else
+          (loop (add1 shifts) (cons (last lst) (take lst (sub1 n))))]))]))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2

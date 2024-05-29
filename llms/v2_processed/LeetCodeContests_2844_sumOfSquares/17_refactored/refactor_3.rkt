@@ -18,9 +18,19 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
+  
+  (define (special-index? i)
+    (zero? (remainder n i)))
+
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (remainder n i)))
-    (sqr (list-ref nums (sub1 i)))))
+            #:when (special-index? i))
+    (let ([element (list-ref nums (sub1 i))])
+      (* element element))))
+
+;; Explanation:
+;; - `special-index?` is a helper function that checks if an index `i` is special.
+;; - `for/sum` iterates over the range of indices from 1 to n, and for each special index,
+;;   it calculates the square of the corresponding element in `nums`.
 
 (require rackunit)
 

@@ -25,17 +25,15 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
+  ;; Define the length of the input list
   (define n (length nums))
-  (cond
-    [(= n 3) (apply + nums)]
-    [else
-     (define (calculate-cost i j)
-       (+ (first nums) (list-ref nums i) (list-ref nums j)))
-
-     (for*/fold ([min-cost +inf.0])
-                ([i (in-range 1 (- n 1))]
-                 [j (in-range (+ i 1) n)])
-       (min min-cost (calculate-cost i j)))]))
+  
+  ;; If the list has exactly three elements, sum them directly
+  (if (= n 3)
+      (apply + nums)
+      ;; Otherwise, find the minimum possible cost for three disjoint contiguous subarrays
+      (for*/fold ([min-cost +inf.0]) ([i (in-range 1 (- n 2))] [j (in-range (+ i 1) (- n 1))])
+        (min min-cost (+ (list-ref nums 0) (list-ref nums i) (list-ref nums j))))))
 
 ;; Examples:
 (minimumCost '(1 2 3 12))  ; Output: 6

@@ -29,17 +29,32 @@
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
   ;; This function calculates the sum of the squares of distinct counts of all subarrays of nums.
-  (for/sum ([i (in-range (length nums))])
-    (let loop ([j i]
-               [seen (set)])
-      (if (>= j (length nums))
-          0
-          (let* ([current-element (list-ref nums j)]
-                 [updated-seen (set-add seen current-element)]
-                 [distinct-count (set-count updated-seen)])
-            (+ (sqr distinct-count)
-               (loop (add1 j) updated-seen)))))))
+  (define (sum-squares-of-distincts subarray)
+    (define seen (make-hash))
+    (for/fold ([acc 0]) ([x subarray])
+      (hash-update! seen x add1 0)
+      (+ acc (* (hash-count seen) (hash-count seen)))))
+  
+  (for/sum ([subarray (in-suffixes nums)])
+    (for/sum ([subsubarray (in-prefixes subarray)])
+      (sum-squares-of-distincts subsubarray))))
 
+;; Helper functions to generate suffixes and prefixes
+(define (in-suffixes lst)
+  (let loop ([lst lst])
+    (if (null? lst)
+        (values)
+        (values lst (loop (cdr lst))))))
+
+(define (in-prefixes lst)
+  (let loop ([lst lst])
+    (if (null? lst)
+        (values)
+        (values lst (loop (butlast lst))))))
+
+;; Helper function to remove the last element from a list
+(define (butlast lst)
+  (reverse (cdr (reverse lst))))
 
 (require rackunit)
 

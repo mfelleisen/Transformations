@@ -15,11 +15,12 @@
 ;;  * nums[i].length == 2
 ;;  * 1 <= starti <= endi <= 100
 (define (numberOfPoints nums)
-  ;; Use a set comprehension to accumulate all points covered by cars into a single set
+  ;; Convert each range to a set of points and union them all together
   (define covered-points
-    (for/set ([range nums]
-              [point (in-range (first range) (add1 (second range)))])
-      point))
+    (for/fold ([acc (set)])
+              ([range (in-list nums)])
+      (set-union acc (for/set ([i (in-range (first range) (add1 (second range)))])
+                       i))))
   
   ;; Return the size of the set, which represents the number of unique points covered
   (set-count covered-points))

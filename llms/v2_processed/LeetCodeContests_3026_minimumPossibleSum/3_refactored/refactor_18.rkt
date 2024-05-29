@@ -31,23 +31,23 @@
 ;;  * 1 <= n <= 109
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
-  (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
-  
-  ;; Helper function to recursively build the beautiful array
-  (define (build-beautiful-nums candidate used count sum)
-    (cond
-      [(= count n) sum]
-      [(used candidate)
-       (build-beautiful-nums (+ candidate 1) used count sum)]
-      [else
-       (define new-sum (modulo (+ sum candidate) MOD))
-       (build-beautiful-nums (+ candidate 1)
-                             (λ (x) (or (used x) (= (+ candidate x) target)))
-                             (+ count 1)
-                             new-sum)]))
-  
-  ;; Start the recursive process
-  (build-beautiful-nums 1 (λ (x) #f) 0 0))
+  (define MOD (+ (expt 10 9) 7))
+
+  ;; Helper function to generate the next valid number
+  (define (next-valid nums candidate)
+    (if (ormap (λ (num) (= (+ num candidate) target)) nums)
+        (next-valid nums (+ candidate 1))
+        candidate))
+
+  ;; Recursive function to build the beautiful array
+  (define (build-beautiful-nums nums candidate count)
+    (if (= count 0)
+        nums
+        (let ([next-candidate (next-valid nums candidate)])
+          (build-beautiful-nums (cons next-candidate nums) (+ next-candidate 1) (- count 1)))))
+
+  ;; Compute the sum of the beautiful array and take modulo
+  (modulo (apply + (build-beautiful-nums '() 1 n)) MOD))
 
 ;; Example test cases
 (minimumPossibleSum 2 3)   ; Output: 4

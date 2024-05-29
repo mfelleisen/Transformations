@@ -2,24 +2,21 @@
 
 (define MOD (+ 1 (expt 10 9)))
 
-;; Function to compute number of ways to express n as the sum of xth powers of unique positive integers
 (define (numberOfWays n x)
   (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
-  (define init-dp (make-vector (+ n 1) 0))
-  (vector-set! init-dp 0 1)
-  
-  (define (update-dp dp base)
-    (define current-power (expt base x))
-    (for/fold ([dp dp]) ([i (in-range n (- current-power 1) -1)])
-      (define new-val (modulo (+ (vector-ref dp i) (vector-ref dp (- i current-power))) MOD))
-      (vector-set! dp i new-val)
-      dp))
 
-  (define final-dp 
-    (for/fold ([dp init-dp]) ([base (in-range 1 (+ max-base 1))])
-      (update-dp dp base)))
-  
-  (vector-ref final-dp n))
+  ;; Helper function to recursively compute the number of ways
+  (define (compute-ways n x current-base)
+    (cond
+      [(= n 0) 1]
+      [(or (< n 0) (> current-base max-base)) 0]
+      [else
+       (define current-power (expt current-base x))
+       (modulo (+ (compute-ways (- n current-power) x (add1 current-base))
+                  (compute-ways n x (add1 current-base)))
+               MOD)]))
+
+  (compute-ways n x 1))
 
 ;; Example usages
 (numberOfWays 10 2)  ;; Output: 1

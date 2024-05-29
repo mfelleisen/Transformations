@@ -21,16 +21,15 @@
 ;; 1 <= n, m <= 100
 ;; 1 <= nums1[i], nums2[i] <= 100
 (define (findIntersectionValues nums1 nums2)
-  (define (count-occurrences set lst)
-    (count (lambda (x) (set-member? set x)) lst))
-  
-  (define set-nums1 (list->set nums1))
-  (define set-nums2 (list->set nums2))
+  (define set-nums1 (set (list->set nums1)))
+  (define set-nums2 (set (list->set nums2)))
   
   (define intersection (set-intersect set-nums1 set-nums2))
   
-  (list (count-occurrences intersection nums1)
-        (count-occurrences intersection nums2)))
+  (define count1 (for/sum ([x nums1]) (if (set-member? intersection x) 1 0)))
+  (define count2 (for/sum ([x nums2]) (if (set-member? intersection x) 1 0)))
+  
+  (list count1 count2))
 
 ;; Example usage:
 (displayln (findIntersectionValues '(4 3 2 3 1) '(2 2 5 2 3 6)))  ; Output: '(3 4)

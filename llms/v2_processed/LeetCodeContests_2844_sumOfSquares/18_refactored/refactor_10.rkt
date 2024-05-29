@@ -19,15 +19,14 @@
 (define (sumOfSquares nums)
   (define n (length nums))
   (define (square x) (* x x))
-  (define (special? i) (zero? (remainder n i)))
-  (define (element i) (list-ref nums (sub1 i)))
-
-  (for/sum ([i (in-range 1 (add1 n))] #:when (special? i))
-    (square (element i))))
+  
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (zero? (remainder n i)))
+    (square (list-ref nums (sub1 i)))))
 
 ;; Example usage:
-(sumOfSquares '(1 2 3 4))   ; Output: 21
-(sumOfSquares '(2 7 1 19 18 3))   ; Output: 63
+;; (sumOfSquares [1 2 3 4]) ; Output: 21
+;; (sumOfSquares [2 7 1 19 18 3]) ; Output: 63
 
 (require rackunit)
 

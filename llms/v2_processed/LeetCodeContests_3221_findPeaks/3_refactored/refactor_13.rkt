@@ -22,20 +22,14 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  (define (is-peak? prev curr next)
-    (and (> curr prev) (> curr next)))
-  
-  (define (find-peaks-helper lst idx acc)
-    (match lst
-      [(list (cons prev (cons curr (cons next rest))))
-       (if (is-peak? prev curr next)
-           (find-peaks-helper (cons curr (cons next rest)) (+ idx 1) (cons idx acc))
-           (find-peaks-helper (cons curr (cons next rest)) (+ idx 1) acc))]
-      [_ (reverse acc)]))
-  
-  (if (< (length mountain) 3)
-      '()
-      (find-peaks-helper mountain 1 '())))
+  (define len (length mountain))
+  (cond
+    [(< len 3) '()]
+    [else
+     (for/list ([i (in-range 1 (- len 1))]
+                #:when (and (> (list-ref mountain i) (list-ref mountain (- i 1)))
+                            (> (list-ref mountain i) (list-ref mountain (+ i 1)))))
+       i)]))
 
 ;; Example usage:
 ;; (findPeaks '(1 4 3 8 5))  ; Output: '(1 3)

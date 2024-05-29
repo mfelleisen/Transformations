@@ -33,23 +33,20 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus as 10^9 + 7.
-  
-  (define (next-candidate start target)
-    (if (or (= start target) (< start 0))
-        (+ start 1)
-        start))
 
-  (define (build-beautiful-nums start n target)
-    (let loop ([current start] [nums '()] [count 0])
-      (if (= count n)
-          nums
-          (let ([next (next-candidate current target)])
-            (loop (add1 next) (cons next nums) (add1 count))))))
+  ;; Helper function to build the beautiful array using accumulators
+  (define (build-beautiful-nums nums candidate count)
+    (cond
+      [(= count n) (reverse nums)]
+      [(for/and ([num (in-list nums)]) (not (= (+ num candidate) target)))
+       (build-beautiful-nums (cons candidate nums) (+ candidate 1) (+ count 1))]
+      [else
+       (build-beautiful-nums nums (+ candidate 1) count)]))
 
-  ;; Generate the beautiful array starting with an empty list and candidate 1.
-  (define beautiful-nums (build-beautiful-nums 1 n target))
-  
-  ;; Calculate the sum of the beautiful array modulo MOD.
+  ;; Generate the beautiful array starting with an empty list and candidate 1
+  (define beautiful-nums (build-beautiful-nums '() 1 0))
+
+  ;; Calculate the sum of the beautiful array modulo MOD
   (modulo (foldl + 0 beautiful-nums) MOD))
 
 ;; Example test cases

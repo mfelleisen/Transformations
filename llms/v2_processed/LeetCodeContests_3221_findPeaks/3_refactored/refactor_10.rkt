@@ -22,20 +22,16 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  (define (is-peak? lst idx)
-    (and (> (list-ref lst idx) (list-ref lst (sub1 idx)))
-         (> (list-ref lst idx) (list-ref lst (add1 idx)))))
-
-  (define (find-peaks-helper lst idx peaks)
-    (if (>= idx (- (length lst) 1))
-        (reverse peaks)
-        (if (is-peak? lst idx)
-            (find-peaks-helper lst (add1 idx) (cons idx peaks))
-            (find-peaks-helper lst (add1 idx) peaks))))
-
-  (if (< (length mountain) 3)
-      '()
-      (find-peaks-helper mountain 1 '())))
+  ;; Helper function to determine if the element at index i is a peak
+  (define (peak? i)
+    (and (> (list-ref mountain i) (list-ref mountain (sub1 i)))
+         (> (list-ref mountain i) (list-ref mountain (add1 i)))))
+  
+  ;; Generate a list of indices from 1 to (length mountain - 2)
+  (define indices (range 1 (sub1 (length mountain))))
+  
+  ;; Filter the indices to find the peaks
+  (filter peak? indices))
 
 ;; Example usage:
 ;; (findPeaks '(1 4 3 8 5))  ; Output: '(1 3)

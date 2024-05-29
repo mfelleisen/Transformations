@@ -15,28 +15,23 @@
 ;; It can be proven that there is no k-avoiding array with a sum less than 3.
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
-(define (violates-k-avoiding? used-numbers current-number k)
-  (and (set-member? used-numbers (- k current-number))
-       (not (= current-number (- k current-number)))))
-
-;; Recursive helper function to build the k-avoiding array and calculate the sum
-(define (build-and-sum used-numbers current-number count total-sum n k)
-  (if (= count n)  ;; Base case: if we've added enough numbers, return the sum
-      total-sum
-      (if (or (violates-k-avoiding? used-numbers current-number k)  ;; Check k-avoiding condition
-              (set-member? used-numbers current-number))  ;; Check uniqueness
-          (build-and-sum used-numbers (+ current-number 1) count total-sum n k)  ;; Skip current number
-          (build-and-sum (set-add used-numbers current-number)  ;; Add current number to set
-                         (+ current-number 1)
-                         (+ count 1)
-                         (+ total-sum current-number)
-                         n k))))  ;; Add to sum and recurse
-
 (define (minimumSum n k)
-  ;; This function calculates the minimum possible sum of a k-avoiding array of length n.
-  ;; A k-avoiding array does not have any pair of distinct elements that sum to k.
-  ;; Start the recursive process with an empty set, starting number 1, count 0, and sum 0
-  (build-and-sum (set) 1 0 0 n k))
+  ;; Helper function to build a k-avoiding array and calculate its sum
+  (define (build-and-sum current-number count used-numbers total-sum)
+    (cond
+      [(= count n) total-sum]  ;; Base case: if we've added enough numbers, return the sum
+      [(or (set-member? used-numbers current-number) 
+           (set-member? used-numbers (- k current-number)) 
+           (= current-number (- k current-number)))
+       (build-and-sum (+ current-number 1) count used-numbers total-sum)] ;; Skip current number
+      [else
+       (build-and-sum (+ current-number 1)
+                      (+ count 1)
+                      (set-add used-numbers current-number)
+                      (+ total-sum current-number))]))  ;; Add to sum and recurse
+
+  ;; Start the recursive process with starting number 1, count 0, an empty set, and sum 0
+  (build-and-sum 1 0 (set) 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

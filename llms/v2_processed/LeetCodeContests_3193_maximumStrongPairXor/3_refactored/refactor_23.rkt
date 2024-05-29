@@ -26,21 +26,25 @@
 (define (maximumStrongPairXor nums)
   ;; This function finds the maximum XOR value out of all possible strong pairs in the array nums.
   ;; A strong pair (x, y) satisfies the condition: |x - y| <= min(x, y)
+  
   (define (strong-pair? x y)
     ;; Helper function to check if pair (x, y) is a strong pair.
     (<= (abs (- x y)) (min x y)))
   
-  ;; Generate all pairs from nums, check if they are strong pairs, and compute their XOR.
-  (for*/fold ([max-xor 0])  ;; Fold over all pairs with initial max-xor as 0
-    ([i nums]
-     [j nums]
-     #:when (strong-pair? i j))  ;; Only consider strong pairs
-    (max max-xor (bitwise-xor i j))))  ;; Update max-xor with the XOR of the current pair
+  (define (max-xor pairs)
+    (for/fold ([max-xor 0]) ([x (in-list pairs)])
+      (define (iter ys)
+        (for/fold ([max-xor max-xor]) ([y (in-list ys)] #:when (strong-pair? x y))
+          (max max-xor (bitwise-xor x y))))
+      (iter pairs)))
+  
+  ;; Compute the maximum XOR for all pairs in nums
+  (max-xor nums))
 
 ;; Examples
-(maximumStrongPairXor '(1 2 3 4 5))  ;; Output: 7
-(maximumStrongPairXor '(10 100))     ;; Output: 0
-(maximumStrongPairXor '(5 6 25 30))  ;; Output: 7
+(displayln (maximumStrongPairXor '(1 2 3 4 5)))  ;; Output: 7
+(displayln (maximumStrongPairXor '(10 100)))     ;; Output: 0
+(displayln (maximumStrongPairXor '(5 6 25 30)))  ;; Output: 7
 
 (require rackunit)
 

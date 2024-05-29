@@ -19,20 +19,20 @@
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
   (define initial-balance 100)
+  (define lower-bound (* 10 (quotient purchaseAmount 10)))
+  (define upper-bound (+ lower-bound 10))
   
-  (define (round-to-nearest-10 amount)
-    (let* ((lower-bound (* 10 (quotient amount 10)))
-           (upper-bound (+ lower-bound 10)))
-      (if (<= (- upper-bound amount) (- amount lower-bound))
-          upper-bound
-          lower-bound)))
+  (define rounded-amount
+    (if (<= (- upper-bound purchaseAmount) (- purchaseAmount lower-bound))
+        upper-bound
+        lower-bound))
   
-  (define rounded-amount (round-to-nearest-10 purchaseAmount))
   (- initial-balance rounded-amount))
 
-;; The function `accountBalanceAfterPurchase` is now more idiomatic with the following improvements:
-;; - Use of helper function `round-to-nearest-10` to encapsulate the rounding logic.
-;; - Avoids mutation by using `let*` for local bindings within the helper function.
+;; The function accountBalanceAfterPurchase uses idiomatic Racket features such as
+;; defining local variables (initial-balance, lower-bound, upper-bound, rounded-amount) and
+;; using conditional expressions to determine values. It avoids mutation by using define
+;; for variable bindings and pure functions for calculations.
 
 (require rackunit)
 

@@ -25,14 +25,14 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 0 <= nums[i], k <= 105
 (define (maximumBeauty nums k)
-  (define (count-frequencies nums k)
-    (for/fold ([freq-map (hash)] #:result freq-map)
-              ([num nums])
-      (for/fold ([fm freq-map] #:result fm)
-                ([possible-value (in-range (- num k) (+ num k 1))])
-        (hash-update fm possible-value add1 0))))
+  (define (range->seq start end)
+    (build-list (add1 (- end start)) (λ (i) (+ start i))))
   
-  (define freq-map (count-frequencies nums k))
+  (define freq-map
+    (for/fold ([map (hash)]) ([num (in-list nums)])
+      (for/fold ([map map]) ([possible-value (in-list (range->seq (- num k) (+ num k)))])
+        (hash-update map possible-value add1 0))))
+  
   (apply max (hash-values freq-map)))
 
 ;; Example usage

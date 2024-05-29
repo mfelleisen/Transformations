@@ -28,32 +28,26 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
-  ;; Helper function to check if a subarray starting at index `l` is valid
-  (define (is-valid-subarray l r)
-    (and (even? (list-ref nums l))
-         (<= (list-ref nums l) threshold)
-         (<= (list-ref nums r) threshold)
-         (for/and ([i (in-range l r)])
-           (not (= (modulo (list-ref nums i) 2)
-                   (modulo (list-ref nums (+ i 1)) 2))))))
-
-  ;; Helper function to find the length of the longest valid subarray starting at index `l`
+  (define (even? x) (= (modulo x 2) 0))
+  (define (under-threshold? x) (<= x threshold))
+  
+  ;; Helper function to find the length of the subarray starting at index `l`
   (define (find-length l)
-    (let loop ([r l] [max-len 0])
-      (if (and (< r (length nums))
-               (<= (list-ref nums r) threshold)
-               (or (= l r)
-                   (not (= (modulo (list-ref nums r) 2)
-                           (modulo (list-ref nums (- r 1)) 2)))))
-          (loop (+ r 1) (+ max-len 1))
-          max-len)))
-
-  ;; Main function logic to find the maximum length of any valid subarray
-  (for/fold ([max-len 0])
-            ([l (in-range (length nums))]
-             #:when (and (even? (list-ref nums l))
-                         (<= (list-ref nums l) threshold)))
-    (max max-len (find-length l))))
+    (for/fold ([r (add1 l)] [current-length 1] #:result current-length)
+              ([i (in-range (add1 l) (length nums))])
+      (define current (list-ref nums i))
+      (define previous (list-ref nums (sub1 i)))
+      (if (and (under-threshold? current)
+               (not (= (modulo previous 2) (modulo current 2))))
+          (values (add1 r) (add1 current-length))
+          (values r current-length))))
+  
+  ;; Iterate over each possible starting index and calculate the maximum length
+  (for/fold ([max-length 0] #:result max-length)
+            ([i (in-range (length nums))]
+             #:when (and (even? (list-ref nums i))
+                         (under-threshold? (list-ref nums i))))
+    (max max-length (find-length i))))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3

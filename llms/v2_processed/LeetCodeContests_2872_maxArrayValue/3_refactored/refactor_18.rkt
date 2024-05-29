@@ -26,15 +26,11 @@
   ;; This function simulates the merging of elements in the array
   ;; from right to left, combining elements when the left one is less than or equal to the right one.
   (define (merge-right-to-left lst)
-    (foldr (lambda (current acc)
-             (match acc
-               [(cons acc-first acc-rest)
-                (if (<= current acc-first)
-                    (cons (+ current acc-first) acc-rest)
-                    (cons current acc))]
-               [_ (list current)]))
-           '()
-           lst))
+    (for/fold ([acc '()]) ([current (in-list (reverse lst))])
+      (if (and (not (null? acc)) (<= current (car acc)))
+          (cons (+ current (car acc)) (cdr acc))
+          (cons current acc))))
+
   ;; The largest element after all possible merges is the maximum of the resulting list.
   (apply max (merge-right-to-left nums)))
 

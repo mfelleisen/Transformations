@@ -19,14 +19,15 @@
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
   (define initial-balance 100)
-  (define nearest-multiple
-    (let* ([modulus (modulo purchaseAmount 10)]
-           [lower-bound (* (quotient purchaseAmount 10) 10)]
-           [upper-bound (+ lower-bound 10)])
-      (if (<= modulus 5)
-          lower-bound
-          upper-bound)))
-  (- initial-balance nearest-multiple))
+  
+  (define rounded-amount
+    (match (remainder purchaseAmount 10)
+      [res
+       (if (<= res 5)
+           (* (quotient purchaseAmount 10) 10)
+           (* (+ (quotient purchaseAmount 10) 1) 10))]))
+
+  (- initial-balance rounded-amount))
 
 ;; Example usage:
 ;; (accountBalanceAfterPurchase 9)  ; Output: 90

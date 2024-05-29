@@ -34,19 +34,20 @@
 (define (minimumPossibleSum n target)
   ;; Define the modulo constant as per the problem statement
   (define MOD (+ (expt 10 9) 7))
-  
+
   ;; Helper function to generate the beautiful array
-  (define (generate-beautiful-array n target)
-    (let loop ([nums '()] [candidate 1] [count 0])
-      (cond
-        [(= count n) (reverse nums)]
-        [(not (ormap (λ (num) (= (+ num candidate) target)) nums))
-         (loop (cons candidate nums) (add1 candidate) (add1 count))]
-        [else
-         (loop nums (add1 candidate) count)])))
-  
+  (define (build-beautiful-array n target)
+    (define (helper i count acc)
+      (if (= count n)
+          acc
+          (if (ormap (lambda (num) (= (+ num i) target)) acc)
+              (helper (+ i 1) count acc)
+              (helper (+ i 1) (+ count 1) (cons i acc)))))
+    (helper 1 0 '()))
+
   ;; Calculate the sum of the beautiful array and take modulo MOD
-  (modulo (apply + (generate-beautiful-array n target)) MOD))
+  (modulo (apply + (build-beautiful-array n target))
+          MOD))
 
 ;; Example test cases
 (minimumPossibleSum 2 3)   ; Expected: 4 (nums = [1, 3])

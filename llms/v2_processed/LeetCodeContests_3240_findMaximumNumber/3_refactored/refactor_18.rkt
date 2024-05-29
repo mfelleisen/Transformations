@@ -28,34 +28,35 @@
 ;; Example 2:
 ;; Input: k = 7, x = 2
 ;; Output: 9
-;; Explanation: Since x is equal to 2, we should just check eventh bits.
+;; Explanation: Since x is equal to 2, we should just check even bits.
 ;; The second bit of binary representation of numbers 2 and 3 is a set bit. So the sum of their prices is 2.
 ;; The second bit of binary representation of numbers 6 and 7 is a set bit. So the sum of their prices is 2.
 ;; The fourth bit of binary representation of numbers 8 and 9 is a set bit but their second bit is not. So the sum of their prices is 2.
-;; Numbers 1, 4, and 5 don't have set bits in their eventh bits in their binary representation. So the sum of their prices is 0.
+;; Numbers 1, 4, and 5 don't have set bits in their even bits in their binary representation. So the sum of their prices is 0.
 ;; The second and the fourth bit of the binary representation of the number 10 are a set bit. So its price is 2.
 ;; The sum of the prices of the first 9 numbers is 6.
 ;; Because the sum of the prices of the first 10 numbers is 8, the answer is 9.
 ;; Constraints:
 ;; 1 <= k <= 1015
 ;; 1 <= x <= 8
+
 (define (findMaximumNumber k x)
-  (define (calculate-price num)
-    (define bin-rep (number->string num 2))
-    (for/fold ([price 0])
+  ;; Helper function to calculate the price of a number based on its binary representation
+  (define (calculate-price num x)
+    (define bin-rep (number->string num 2))  ; Convert number to binary string
+    (for/fold ([price 0])  ; Accumulate the price using a fold
               ([i (in-range (string-length bin-rep))]
-               #:when (and (= (modulo (+ i 1) x) 0)
-                          (char=? (string-ref bin-rep (- (string-length bin-rep) i 1)) #\1)))
-      (add1 price)))
+               #:when (and (= (modulo (+ i 1) x) 0)  ; Check if the position is a multiple of x
+                          (char=? (string-ref bin-rep (- (string-length bin-rep) i 1)) #\1)))  ; Check if the bit is set
+      (add1 price)))  ; Increment the price if conditions are met
 
   (define (helper num current-sum)
-    (let* ([price (calculate-price num)]
-           [new-sum (+ current-sum price)])
-      (if (> new-sum k)
-          (- num 1)
-          (helper (add1 num) new-sum))))
-
-  (helper 1 0))
+    (let* ([price (calculate-price num x)]  ; Calculate price for current number
+           [new-sum (+ current-sum price)])  ; Update the sum
+      (if (> new-sum k)  ; Check if the sum exceeds k
+          (- num 1)  ; Return the previous number
+          (helper (add1 num) new-sum))))  ; Recurse with the next number and updated sum
+  (helper 1 0))  ; Start recursion with initial number 1 and sum 0
 
 ;; Example use cases
 (findMaximumNumber 9 1)  ; Output: 6

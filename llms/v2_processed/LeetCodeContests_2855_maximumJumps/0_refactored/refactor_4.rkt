@@ -2,31 +2,42 @@
 
 (provide (rename-out [maximumJumps max-jump]))
 
+;; You are given a 0-indexed array nums of n integers and an integer target.
+;; You are initially positioned at index 0. In one step, you can jump from index i to any index j such that:
+;;  * 0 <= i < j < n
+;;  * -target <= nums[j] - nums[i] <= target
+;; Return the maximum number of jumps you can make to reach index n - 1.
+;; If there is no way to reach index n - 1, return -1.
+
 (define (maximumJumps nums target)
   (define n (length nums))
-
-  ;; Helper function to determine if a jump is valid
+  
+  ;; Helper function to check if a jump from index i to j is valid
   (define (can-jump? i j)
     (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
-
-  ;; Helper function to update the dp list recursively
-  (define (update-dp dp i)
-    (if (= (list-ref dp i) -inf.0)
-        dp
-        (for/fold ([dp dp]) ([j (in-range (add1 i) n)])
-          (if (can-jump? i j)
-              (list-set dp j (max (list-ref dp j) (add1 (list-ref dp i))))
-              dp))))
-
-  ;; Initialize the DP list with -inf.0, except the first element which is 0
-  (define dp (cons 0 (make-list (sub1 n) -inf.0)))
-
-  ;; Update dp for each index
-  (define final-dp (for/fold ([dp dp]) ([i (in-range n)])
-                    (update-dp dp i)))
-
-  ;; Check the last element of dp; if it's still -inf.0, return -1, otherwise return its value
-  (if (= (last final-dp) -inf.0) -1 (last final-dp)))
+  
+  ;; Recursive function with memoization
+  (define memo-table (make-hash))
+  
+  (define (memoize i result)
+    (hash-set! memo-table i result)
+    result)
+  
+  (define (dp i)
+    (cond
+      [(= i (sub1 n)) 0]  ; Base case: reaching the last element
+      [(hash-ref memo-table i #f)]  ; Return memoized result if exists
+      [else
+       (define max-jumps
+         (for/fold ([max-jumps -1]) ([j (in-range (add1 i) n)])
+           (if (can-jump? i j)
+               (max max-jumps (add1 (dp j)))
+               max-jumps)))
+       (memoize i max-jumps)]))
+  
+  ;; Start the recursion from the first index
+  (define result (dp 0))
+  (if (= result -1) -1 result))
 
 ;; Examples
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

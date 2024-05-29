@@ -27,15 +27,12 @@
   (define upper-limit (expt 2 n)) ; Calculate the upper limit as 2^n
   
   ;; Compute the product (a XOR x) * (b XOR x) for each x from 0 to upper-limit - 1
-  (define (xor-product x) (* (bitwise-xor a x) (bitwise-xor b x)))
+  (define (xor-product x) 
+    (modulo (* (bitwise-xor a x) (bitwise-xor b x)) MOD))
   
-  ;; Find the maximum product among all computed products
-  (define max-product
-    (for/fold ([max-prod 0]) ([x (in-range upper-limit)])
-      (max max-prod (xor-product x))))
-  
-  ;; Return the maximum product modulo MOD
-  (modulo max-product MOD))
+  ;; Find the maximum product among all computed products using fold
+  (for/fold ([max-product 0]) ([x (in-range upper-limit)])
+    (max max-product (xor-product x))))
 
 ;; Example usage:
 (maximumXorProduct 12 5 4) ; Output: 98

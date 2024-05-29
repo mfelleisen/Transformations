@@ -25,37 +25,29 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  ;; Sort the list in ascending order
-  (define sorted-nums (sort nums <))
-  
-  ;; Helper function to split the list into groups of 3
-  (define (split-into-groups lst)
-    (if (empty? lst)
-        '()
-        (let ([group (take lst 3)]
-              [remaining (drop lst 3)])
-          (if (< (length group) 3)
-              '()
-              (cons group (split-into-groups remaining))))))
-  
-  ;; Split the sorted list into groups of 3
-  (define groups (split-into-groups sorted-nums))
-  
-  ;; Check if each group satisfies the condition
-  (define (group-valid? group)
+  (define (valid-group? group k)
     (<= (- (last group) (first group)) k))
   
-  ;; Filter out invalid groups
-  (define valid-groups (filter group-valid? groups))
+  (define (group-elements sorted-nums k)
+    (for/fold ([result '()] [remaining sorted-nums])
+              ([group (in-slice remaining 0 3)])
+      (if (valid-group? group k)
+          (values (cons group result) (drop remaining 3))
+          (values '() remaining))))
   
-  ;; If any group was invalid, return empty list
-  (if (= (length valid-groups) (quotient (length nums) 3))
-      valid-groups
+  (define sorted-nums (sort nums <))
+  (define-values (result remaining) (group-elements sorted-nums k))
+  (if (null? remaining)
+      (reverse result)
       '()))
 
-;; Example usage:
-(divideArray '(1 3 4 8 7 9 3 5 1) 2) ;; => '((1 1 3) (3 4 5) (7 8 9))
-(divideArray '(1 3 3 2 7 3) 3) ;; => '()
+;; Helper function to access elements of a list by index
+(define (first lst) (car lst))
+(define (last lst) (car (reverse lst)))
+
+;; Helper function to iterate over slices of a list
+(define (in-slice lst start end)
+  (take (drop lst start) (- end start)))
 
 (require rackunit)
 

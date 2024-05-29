@@ -20,17 +20,19 @@
 ;; Constraints:
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
-(define (hasTrailingZeros nums) ;; contract  hasTrailingZeros/c
-  (define (has-trailing-zero? x)
-    (= (bitwise-and x 1) 0))
-
-  (define (combine-and-check nums)
-    (for*/or ([x (in-list nums)]
-              [y (in-list nums)]
-              #:when (not (eq? x y)))
-      (has-trailing-zero? (bitwise-ior x y))))
-
-  (combine-and-check nums))
+(define (hasTrailingZeros nums)
+  ;; Check if any pair of elements in nums has a bitwise OR with trailing zeros
+  (let loop ((remaining nums))
+    (cond
+      ;; If there are fewer than 2 elements left, it's not possible to find a pair
+      [(< (length remaining) 2) #f]
+      ;; Otherwise, check pairs with the first element and recursively check the rest
+      [else
+       (let* ([first (first remaining)]
+              [rest (rest remaining)]
+              ;; Check if any pair (first, y) has a bitwise OR with trailing zeros
+              [found (ormap (lambda (y) (= (bitwise-and (bitwise-ior first y) 1) 0)) rest)])
+         (or found (loop rest)))])))
 
 ;; Example usage:
 (hasTrailingZeros '(1 2 3 4 5))  ; Output: #true

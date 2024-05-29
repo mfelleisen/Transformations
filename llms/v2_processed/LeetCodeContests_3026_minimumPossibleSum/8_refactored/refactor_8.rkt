@@ -34,16 +34,22 @@
 (define (minimumPossibleSum n target)
   ;; Define the modulo constant as per the problem statement
   (define MOD (+ (expt 10 9) 7))
-  
-  (define (build-beautiful-array count candidate acc sum)
-    (cond
-      [(= count n) (modulo sum MOD)]
-      [(not (ormap (λ (num) (= (+ num candidate) target)) acc))
-       (build-beautiful-array (add1 count) (add1 candidate) (cons candidate acc) (+ sum candidate))]
-      [else
-       (build-beautiful-array count (add1 candidate) acc sum)]))
 
-  (build-beautiful-array 0 1 '() 0))
+  ;; Helper function to check if a candidate would keep the array beautiful
+  (define (can-use? candidate nums)
+    (not (ormap (λ (num) (= (+ num candidate) target))
+                nums)))
+
+  ;; Recursive helper function to build the beautiful array
+  (define (build-beautiful-array nums candidate remaining)
+    (if (= remaining 0)
+        nums
+        (if (can-use? candidate nums)
+            (build-beautiful-array (cons candidate nums) (+ candidate 1) (- remaining 1))
+            (build-beautiful-array nums (+ candidate 1) remaining))))
+
+  ;; Calculate the sum of the beautiful array and take modulo MOD
+  (modulo (apply + (build-beautiful-array '() 1 n)) MOD))
 
 ;; Example test cases
 (minimumPossibleSum 2 3)   ; Expected: 4 (nums = [1, 3])

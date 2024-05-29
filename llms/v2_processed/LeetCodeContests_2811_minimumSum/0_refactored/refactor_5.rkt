@@ -16,17 +16,28 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function to generate the k-avoiding array sum
-  (define (k-avoiding-sum i used-numbers remaining-n sum)
+  ;; Helper function to recursively find the minimum sum of a k-avoiding array
+  (define (k-avoiding-sum used-numbers current-number count total-sum)
     (cond
-      [(zero? remaining-n) sum]
-      [(or (not (set-member? used-numbers (- k i))) (= i (- k i)))
-       (k-avoiding-sum (add1 i) (set-add used-numbers i) (sub1 remaining-n) (+ sum i))]
+      ;; Base case: if we have added enough numbers, return the sum
+      [(= count n) total-sum]
+      ;; Recursive case: decide whether to include current number or not
+      [(or (not (set-member? used-numbers (- k current-number)))
+           (= current-number (- k current-number)))
+       ;; If it's safe to add current_number, do so and recurse
+       (k-avoiding-sum (set-add used-numbers current-number)
+                       (+ current-number 1)
+                       (+ count 1)
+                       (+ total-sum current-number))]
+      ;; Otherwise, skip this number and recurse without adding it
       [else
-       (k-avoiding-sum (add1 i) used-numbers remaining-n sum)]))
+       (k-avoiding-sum used-numbers
+                       (+ current-number 1)
+                       count
+                       total-sum)]))
 
   ;; Start the recursive helper with initial conditions
-  (k-avoiding-sum 1 (set) n 0))
+  (k-avoiding-sum (set) 1 0 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

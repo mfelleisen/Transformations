@@ -18,14 +18,17 @@
 ;;  * 0 <= xi, yi <= 106
 ;;  * 0 <= k <= 100
 (define (countPairs coordinates k)
-  ;; Define a helper function to calculate the XOR-based distance between two points
+  ;; This function counts the number of valid pairs (i, j) such that the distance between points i and j is exactly k.
   (define (calculate-distance p1 p2)
-    (+ (bitwise-xor (first p1) (first p2)) (bitwise-xor (second p1) (second p2))))
-
-  ;; Use for*/sum to iterate over all pairs (i, j) where i < j
-  (for*/sum ([i (in-range (length coordinates))]
-             [j (in-range (add1 i) (length coordinates))]
-             #:when (= k (calculate-distance (list-ref coordinates i) (list-ref coordinates j))))
+    ;; This helper function calculates the XOR-based distance between two points
+    (match-define (list x1 y1) p1)
+    (match-define (list x2 y2) p2)
+    (+ (bitwise-xor x1 x2) (bitwise-xor y1 y2)))
+  
+  ;; Use `for/sum` with `in-indexed` to avoid direct indexing
+  (for/sum ([(i p1) (in-indexed coordinates)]
+            [(j p2) (in-indexed coordinates)]
+            #:when (and (> j i) (= k (calculate-distance p1 p2))))
     1))
 
 ;; Example usage:

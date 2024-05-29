@@ -28,26 +28,25 @@
 ;;  * The input is generated such that if team a is stronger than team b, team b is not stronger than team a.
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion n edges)
-  ;; Create a list to keep track of the number of incoming edges for each team
+  ;; Create a list of in-degrees for each team
   (define in-degrees (make-vector n 0))
 
-  ;; Count the in-degrees for each node
-  (for-each (lambda (edge)
-              (match-define (list _ to) edge)
-              (vector-set! in-degrees to
-                           (+ 1 (vector-ref in-degrees to))))
-            edges)
+  ;; Update in-degrees based on edges
+  (for ([edge edges])
+    (define target (second edge))
+    (vector-set! in-degrees target
+                 (add1 (vector-ref in-degrees target))))
 
-  ;; Find the nodes with zero in-degrees
-  (define zero-in-degree
-    (filter (lambda (i) (= (vector-ref in-degrees i) 0))
-            (range n)))
+  ;; Collect all teams with zero in-degrees
+  (define zero-in-degree-teams
+    (for/list ([i (in-range n)]
+               #:when (zero? (vector-ref in-degrees i)))
+      i))
 
-  ;; If there is exactly one team with zero in-degrees, that's our champion
-  (if (= (length zero-in-degree) 1)
-      (first zero-in-degree)
-      ;; If there are no teams or more than one with zero in-degrees, return -1
-      -1))
+  ;; Determine the champion
+  (match zero-in-degree-teams
+    [(list team) team]
+    [_ -1]))
 
 ;; Example usage:
 (findChampion 3 '((0 1) (1 2)))  ;; Output: 0

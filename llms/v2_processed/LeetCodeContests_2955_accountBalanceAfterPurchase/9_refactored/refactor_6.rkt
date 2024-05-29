@@ -19,20 +19,15 @@
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
   (define initial-balance 100)
+  (define lower-bound (* 10 (quotient purchaseAmount 10)))
+  (define upper-bound (+ lower-bound 10))
   
-  (define (nearest-multiple-of-10 amount)
-    (let* ([lower-bound (* 10 (quotient amount 10))]
-           [upper-bound (+ lower-bound 10)])
-      (if (< (- amount lower-bound) (- upper-bound amount))
-          lower-bound
-          upper-bound)))
-  
-  (define rounded-amount (nearest-multiple-of-10 purchaseAmount))
+  (define rounded-amount
+    (if (<= (- upper-bound purchaseAmount) (- purchaseAmount lower-bound))
+        upper-bound
+        lower-bound))
   
   (- initial-balance rounded-amount))
-
-;; The function `accountBalanceAfterPurchase` now uses higher-order functions and more idiomatic constructs.
-;; `nearest-multiple-of-10` is a helper function encapsulating the logic to find the nearest multiple of 10.
 
 (require rackunit)
 

@@ -30,43 +30,35 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  (define n (length nums1))
-
-  ;; Helper function to calculate the max length of non-decreasing subarray
-  (define (calculate-max-length nums1 nums2)
-    (define max-len 1)
-
-    (define (update-lengths lengths1 lengths2 i)
-      (define curr1 (list-ref nums1 i))
-      (define curr2 (list-ref nums2 i))
-      (define prev1 (list-ref nums1 (sub1 i)))
-      (define prev2 (list-ref nums2 (sub1 i)))
-
-      ;; Calculate new lengths
-      (define new-len1 (max (if (>= curr1 prev1) (+ (vector-ref lengths1 (sub1 i)) 1) 1)
-                            (if (>= curr1 prev2) (+ (vector-ref lengths2 (sub1 i)) 1) 1)))
-      (define new-len2 (max (if (>= curr2 prev1) (+ (vector-ref lengths1 (sub1 i)) 1) 1)
-                            (if (>= curr2 prev2) (+ (vector-ref lengths2 (sub1 i)) 1) 1)))
-
-      ;; Update vectors with new lengths
-      (vector-set! lengths1 i new-len1)
-      (vector-set! lengths2 i new-len2)
-
-      ;; Update max length
-      (set! max-len (max max-len new-len1 new-len2)))
-
-    ;; Initialize dp arrays with all elements as 1 since each element alone is a non-decreasing subarray
-    (define lengths1 (make-vector n 1))
-    (define lengths2 (make-vector n 1))
-
-    ;; Iterate over the indices starting from 1 to n-1
-    (for ([i (in-range 1 n)])
-      (update-lengths lengths1 lengths2 i))
-
+  ;; Helper function to calculate the maximum non-decreasing subarray length
+  (define (max-length-helper n1 n2)
+    (define-values (dp1 dp2 max-len)
+      (for/fold ([dp1 (list 1)]
+                 [dp2 (list 1)]
+                 [max-len 1])
+                ([i (in-range 1 (length n1))])
+        (define current-max-len max-len)
+        (define new-dp1
+          (max (if (>= (list-ref n1 i) (list-ref n1 (- i 1)))
+                   (+ 1 (first dp1))
+                   1)
+               (if (>= (list-ref n1 i) (list-ref n2 (- i 1)))
+                   (+ 1 (first dp2))
+                   1)))
+        (define new-dp2
+          (max (if (>= (list-ref n2 i) (list-ref n1 (- i 1)))
+                   (+ 1 (first dp1))
+                   1)
+               (if (>= (list-ref n2 i) (list-ref n2 (- i 1)))
+                   (+ 1 (first dp2))
+                   1)))
+        (values (cons new-dp1 dp1)
+                (cons new-dp2 dp2)
+                (max current-max-len new-dp1 new-dp2))))
     max-len)
 
-  ;; Calculate and return the maximum length of non-decreasing subarray
-  (calculate-max-length nums1 nums2))
+  ;; Calculate the maximum non-decreasing subarray length
+  (max-length-helper nums1 nums2))
 
 ;; Example usage
 (maxNonDecreasingLength '(2 3 1) '(1 2 1))  ; Output: 2

@@ -17,27 +17,26 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function to determine if a number can be added to the k-avoiding array
+  ;; Helper function to check if a number can be added without violating the k-avoiding property
   (define (can-add? used-numbers current-number)
-    (or (not (set-member? used-numbers (- k current-number)))
-        (= current-number (- k current-number))))
-  
-  ;; Recursive function to build the k-avoiding array and calculate its sum
+    (not (set-member? used-numbers (- k current-number))))
+
+  ;; Recursive helper function to build the k-avoiding array and calculate its sum
   (define (helper used-numbers current-number count total-sum)
     (cond
       [(= count n) total-sum]
       [(can-add? used-numbers current-number)
        (helper (set-add used-numbers current-number)
-               (+ current-number 1)
-               (+ count 1)
+               (add1 current-number)
+               (add1 count)
                (+ total-sum current-number))]
       [else
        (helper used-numbers
-               (+ current-number 1)
+               (add1 current-number)
                count
                total-sum)]))
-  
-  ;; Start recursion with an empty set of used numbers, starting number 1, count 0, and total sum 0
+
+  ;; Start the recursion with an empty set for used numbers, starting number 1, count 0, and total sum 0
   (helper (set) 1 0 0))
 
 ;; Example usage:

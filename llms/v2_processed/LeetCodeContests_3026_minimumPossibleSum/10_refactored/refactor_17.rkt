@@ -33,19 +33,24 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus as 10^9 + 7.
-  
-  ;; Helper function to generate a beautiful array
-  (define (generate-beautiful n target)
-    (define (helper count candidate sum)
-      (if (= count n)
-          sum
-          (if (or (> (* 2 candidate) target) (= candidate target))
-              (helper (add1 count) (add1 candidate) (+ sum candidate))
-              (helper count (add1 candidate) sum))))
-    (helper 0 1 0))
 
-  ;; Calculate the sum of the beautiful array modulo MOD.
-  (modulo (generate-beautiful n target) MOD))
+  ;; Helper function to generate a list of the first `count` natural numbers
+  ;; that do not sum up to `target` with any other element in the list.
+  (define (generate-beautiful-nums count target)
+    (define (helper nums candidate)
+      (if (= (length nums) count)
+          nums
+          (if (for/and ([num (in-list nums)])
+                (not (= (+ num candidate) target)))
+              (helper (cons candidate nums) (+ candidate 1))
+              (helper nums (+ candidate 1)))))
+    (helper '() 1))
+
+  ;; Generate the beautiful array
+  (define beautiful-nums (generate-beautiful-nums n target))
+
+  ;; Calculate the sum of the beautiful array modulo MOD
+  (modulo (foldl + 0 beautiful-nums) MOD))
 
 ;; Example test cases
 (displayln (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

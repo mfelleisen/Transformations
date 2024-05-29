@@ -31,17 +31,19 @@
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
 (define (getWordsInLongestSubsequence n words groups)
-  (define (helper i last-group subsequence)
-    (if (= i n)
-        (reverse subsequence)
-        (let ([current-group (list-ref groups i)]
-              [current-word (list-ref words i)])
-          (if (not (= current-group last-group))
-              (helper (add1 i) current-group (cons current-word subsequence))
-              (helper (add1 i) last-group subsequence)))))
-  (if (= n 0)
+  (define (filter-alternate-groups words groups)
+    (define-values (result _)
+      (for/fold ([result '()] [last-group (first groups)]) ([i (in-range 1 n)])
+        (define current-group (list-ref groups i))
+        (define current-word (list-ref words i))
+        (if (not (= current-group last-group))
+            (values (cons current-word result) current-group)
+            (values result last-group))))
+    (reverse (cons (first words) result)))
+
+  (if (zero? n)
       '()
-      (helper 1 (first groups) (list (first words)))))
+      (filter-alternate-groups words groups)))
 
 ;; Example usage:
 (define n 4)

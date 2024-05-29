@@ -23,21 +23,22 @@
 ;; 0 <= a, b < 250
 ;; 0 <= n <= 50
 (define (maximumXorProduct a b n)
-  (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
-  (define upper-limit (expt 2 n))  ; Calculate the upper limit as 2^n
-
-  ;; Helper function to calculate the product for a given x
+  (define MOD (+ (expt 10 9) 7))
+  (define upper-limit (expt 2 n))
+  
   (define (xor-product x)
     (modulo (* (bitwise-xor a x) (bitwise-xor b x)) MOD))
   
-  ;; Generate a sequence of x values and find the maximum product
-  (for/fold ([max-product 0]) ([x (in-range upper-limit)])
-    (max max-product (xor-product x))))
+  (define max-product
+    (for/fold ([max-val 0])
+              ([x (in-range upper-limit)])
+      (max max-val (xor-product x))))
+  
+  max-product)
 
-;; Example usage:
-(maximumXorProduct 12 5 4)  ; Output: 98
-(maximumXorProduct 6 7 5)   ; Output: 930
-(maximumXorProduct 1 6 3)   ; Output: 12
+;; The function now uses for/fold to iterate over the range of x values, maintaining immutability and avoiding explicit loops.
+;; It calculates the maximum product of (a XOR x) * (b XOR x) for all x in the range [0, 2^n),
+;; then returns this maximum modulo 10^9 + 7.
 
 (require rackunit)
 

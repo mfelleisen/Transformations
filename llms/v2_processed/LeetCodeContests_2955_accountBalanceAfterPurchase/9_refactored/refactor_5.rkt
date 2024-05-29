@@ -21,19 +21,22 @@
   ;; Define the initial balance.
   (define initial-balance 100)
   
-  ;; Calculate the nearest multiple of 10, rounding up or down as needed.
+  ;; Calculate the rounded amount to the nearest multiple of 10.
   (define rounded-amount
-    (let* ((remainder (remainder purchaseAmount 10))
-           (adjustment (if (>= remainder 5) (- 10 remainder) (- remainder))))
-      (- purchaseAmount adjustment)))
+    (let* ((lower-bound (* 10 (quotient purchaseAmount 10)))
+           (upper-bound (+ lower-bound 10)))
+      (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
+          lower-bound
+          upper-bound)))
   
   ;; Calculate and return the new balance after the purchase.
   (- initial-balance rounded-amount))
 
 ;; The function accountBalanceAfterPurchase uses idiomatic Racket features such as
-;; defining local variables (initial-balance, rounded-amount) and
-;; using let* for intermediate calculations. It avoids mutation by using define
+;; defining local variables (initial-balance, lower-bound, upper-bound, rounded-amount) and
+;; using conditional expressions to determine values. It avoids mutation by using define
 ;; for variable bindings and pure functions for calculations.
+
 
 (require rackunit)
 

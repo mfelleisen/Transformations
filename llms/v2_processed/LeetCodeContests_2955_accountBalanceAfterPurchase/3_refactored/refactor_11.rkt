@@ -21,10 +21,10 @@
   ;; Define the initial balance
   (define initial-balance 100)
   
-  ;; Calculate the rounded amount directly using built-in rounding functions
+  ;; Calculate the rounded amount to the nearest multiple of 10
   (define rounded-amount
-    (let* ((lower-bound (* (quotient purchaseAmount 10) 10))
-           (upper-bound (+ lower-bound 10)))
+    (let ([lower-bound (* (quotient purchaseAmount 10) 10)]
+          [upper-bound (+ (* (quotient purchaseAmount 10) 10) 10)])
       (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
           lower-bound
           upper-bound)))

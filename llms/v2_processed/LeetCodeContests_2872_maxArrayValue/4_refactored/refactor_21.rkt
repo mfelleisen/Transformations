@@ -23,15 +23,10 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Helper function to process the list from right to left using an accumulator
+  ;; Helper function to combine elements from the end of the list
   (define (combine-nums lst)
-    (foldr (lambda (x acc)
-             (if (<= x acc)
-                 (+ x acc)
-                 (max x acc)))
-           0
-           lst))
-  
+    (for/fold ([result 0]) ([x (in-list (reverse lst))])
+      (max x (+ result x))))
   (combine-nums nums))
 
 ;; Example usage:

@@ -16,17 +16,16 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function to generate a k-avoiding sequence starting from 1
-  (define (generate-sequence acc current count)
-    (if (= count n)
-        (reverse acc)
-        (if (or (not (member (- k current) acc))
-                (= current (- k current)))
-            (generate-sequence (cons current acc) (+ current 1) (+ count 1))
-            (generate-sequence acc (+ current 1) count))))
+  (define (helper used current count total)
+    (cond
+      [(= count n) total]
+      [(or (not (set-member? used (- k current)))
+           (= current (- k current)))
+       (helper (set-add used current) (+ current 1) (+ count 1) (+ total current))]
+      [else
+       (helper used (+ current 1) count total)]))
 
-  ;; Generate the k-avoiding sequence and sum it
-  (apply + (generate-sequence '() 1 0)))
+  (helper (set) 1 0 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ;; Output: 18

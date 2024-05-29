@@ -28,37 +28,23 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
-  ;; Helper function to calculate the sum of squares of distinct counts for subarrays starting at a given index
-  (define (sum-from-start lst)
-    (let loop ([lst lst] [seen (hash)] [total 0])
-      (match lst
-        [(cons x rest)
-         (hash-set! seen x (add1 (hash-ref seen x 0)))
-         (loop rest seen (+ total (sqr (hash-count seen))))]
-        [else total])))
-  
-  ;; Calculate the sum of squares of distinct counts for all subarrays
-  (for/fold ([total-sum 0]) ([i (in-list nums)])
-    (+ total-sum (sum-from-start (drop nums (index-of nums i))))))
+  ;; Helper function to calculate the sum of squares of distinct counts for a given subarray starting at index `start`.
+  (define (sum-from-start start)
+    (define (loop end seen total-sum)
+      (if (>= end (length nums))
+          total-sum
+          (let ([num (list-ref nums end)]
+                [new-seen (set-add seen (list-ref nums end))])
+            (loop (+ end 1) new-seen (+ total-sum (sqr (set-count new-seen)))))))
+    (loop start (set) 0))
 
-;; Helper function to add 1 to a value or default to 1 if not found
-(define (add1 x) (+ x 1))
+  ;; Calculate the total sum of squares of distinct counts for all subarrays.
+  (for/fold ([total-sum 0]) ([start (in-range (length nums))])
+    (+ total-sum (sum-from-start start))))
 
-;; Helper function to get the index of an element in a list
-(define (index-of lst elem)
-  (define (loop lst elem idx)
-    (cond
-      [(null? lst) -1]
-      [(equal? (car lst) elem) idx]
-      [else (loop (cdr lst) elem (+ idx 1))]))
-  (loop lst elem 0))
-
-;; Helper function to drop the first n elements of a list
-(define (drop lst n)
-  (if (zero? n)
-      lst
-      (drop (cdr lst) (- n 1))))
-
+;; Example usage:
+(sumCounts '(1 2 1))  ; Output: 15
+(sumCounts '(1 1))    ; Output: 3
 
 (require rackunit)
 

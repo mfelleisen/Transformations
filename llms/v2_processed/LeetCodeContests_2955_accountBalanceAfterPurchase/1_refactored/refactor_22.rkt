@@ -19,17 +19,16 @@
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
   (define initial-balance 100)
-  (define rounded-amount 
-    (let* ([lower-bound (* (quotient purchaseAmount 10) 10)]
-           [upper-bound (+ lower-bound 10)])
-      (if (<= (- upper-bound purchaseAmount)
-              (- purchaseAmount lower-bound))
-          upper-bound
-          lower-bound)))
+  (define rounded-amount
+    (match (* 10 (quotient (+ purchaseAmount 5) 10))
+      [0 purchaseAmount]
+      [_ (max (* 10 (quotient purchaseAmount 10))
+              (* 10 (add1 (quotient purchaseAmount 10))))]))
   (- initial-balance rounded-amount))
 
-;; The function is now defined and can be used to calculate the account balance after a purchase
-;; with the amount rounded to the nearest (or largest in case of a tie) multiple of 10.
+;; Example usage:
+;; (accountBalanceAfterPurchase 9)  ;; Output: 90
+;; (accountBalanceAfterPurchase 15) ;; Output: 80
 
 (require rackunit)
 

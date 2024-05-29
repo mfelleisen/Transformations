@@ -24,30 +24,27 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus
 
-  ;; Helper function to compute the number of ways recursively
-  (define (compute-ways current n x memo)
-    (cond
-      [(zero? n) 1]
-      [(or (< n 0) (zero? current)) 0]
-      [else
-       (let ([key (cons current n)])
-         (hash-ref memo key
-                   (lambda ()
-                     (let* ([current-power (expt current x)]
-                            [result (modulo (+ (compute-ways (sub1 current) n x memo)
-                                               (compute-ways (sub1 current) (- n current-power) x memo))
-                                            MOD)])
-                       (hash-set! memo key result)
-                       result))))]))
-
-  ;; Create a memoization table
-  (define memo (make-hash))
+  ;; Helper function to calculate the number of ways using dynamic programming
+  (define (dp base-power dp-list)
+    (for/fold ([dp-list dp-list]) ([i (in-range n (- base-power 1) -1)])
+      (define new-val (modulo (+ (list-ref dp-list i)
+                                 (list-ref dp-list (- i base-power)))
+                              MOD))
+      (list-set dp-list i new-val)))
 
   ;; Calculate the maximum base such that base^x <= n
   (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
 
-  ;; Compute the number of ways
-  (compute-ways max-base n x memo))
+  ;; Initialize dp list with zeros and set dp[0] to 1
+  (define dp-list (build-list (+ n 1) (λ (i) (if (zero? i) 1 0))))
+
+  ;; Iterate over each possible base and update dp
+  (for ([base (in-range 1 (+ max-base 1))])
+    (define base-power (expt base x))
+    (set! dp-list (dp base-power dp-list)))
+
+  ;; Return the number of ways to express n
+  (list-ref dp-list n))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

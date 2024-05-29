@@ -36,28 +36,29 @@
 (define (maxNonDecreasingLength nums1 nums2)
   (define n (length nums1))
   
-  (define (update-dp dp current prev-val)
-    (if (>= current prev-val)
-        (+ dp 1)
+  ;; Helper function to update dp values
+  (define (update-dp current prev dp)
+    (if (>= current prev)
+        (add1 dp)
         1))
+  
+  ;; Main function to iterate and compute max length
+  (define (iterate idx dp1 dp2 max-len)
+    (if (>= idx n)
+        max-len
+        (let* ([current1 (list-ref nums1 idx)]
+               [current2 (list-ref nums2 idx)]
+               [prev1 (list-ref nums1 (sub1 idx))]
+               [prev2 (list-ref nums2 (sub1 idx))]
+               [new-dp1 (max (update-dp current1 prev1 (vector-ref dp1 (sub1 idx)))
+                             (update-dp current1 prev2 (vector-ref dp2 (sub1 idx))))]
+               [new-dp2 (max (update-dp current2 prev1 (vector-ref dp1 (sub1 idx)))
+                             (update-dp current2 prev2 (vector-ref dp2 (sub1 idx))))]
+               [new-max-len (max max-len new-dp1 new-dp2)])
+          (iterate (add1 idx) (vector-set! dp1 idx new-dp1) (vector-set! dp2 idx new-dp2) new-max-len))))
+  
+  (iterate 1 (make-vector n 1) (make-vector n 1) 1))
 
-  (define (max-lengths prev1 prev2)
-    (for/fold ([dp1 1] [dp2 1] [max-len 1] #:result max-len)
-              ([i (in-range 1 n)])
-      (define current1 (list-ref nums1 i))
-      (define current2 (list-ref nums2 i))
-      (define new-dp1 (max (update-dp dp1 current1 prev1)
-                           (update-dp dp2 current1 prev2)))
-      (define new-dp2 (max (update-dp dp1 current2 prev1)
-                           (update-dp dp2 current2 prev2)))
-      (values new-dp1 new-dp2 (max max-len new-dp1 new-dp2))))
-
-  (max-lengths (first nums1) (first nums2)))
-
-;; Test cases
-(maxNonDecreasingLength '(2 3 1) '(1 2 1))  ; Output: 2
-(maxNonDecreasingLength '(1 3 2 1) '(2 2 3 4))  ; Output: 4
-(maxNonDecreasingLength '(1 1) '(2 2))  ; Output: 2
 
 (require rackunit)
 

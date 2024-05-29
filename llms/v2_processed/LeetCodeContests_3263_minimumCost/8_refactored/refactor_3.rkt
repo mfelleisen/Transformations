@@ -25,16 +25,27 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
+  ;; Helper function to get the element at index i or a large number if out of bounds
+  (define (safe-ref lst i)
+    (if (and (>= i 0) (< i (length lst))) 
+        (list-ref lst i)
+        +inf.0))
+
   (define n (length nums))
-  (cond
-    [(= n 3) (apply + nums)]
-    [else
-     (define (cost i j)
-       (+ (first nums) (list-ref nums i) (list-ref nums j)))
-     (for*/fold ([min-cost +inf.0])
-                ([i (in-range 1 (- n 1))]
-                 [j (in-range (+ i 1) n)])
-       (min min-cost (cost i j)))]))
+  
+  ;; Function to find the minimum cost of dividing nums into 3 contiguous subarrays
+  (define (find-min-cost lst)
+    (for*/fold ([min-cost +inf.0])
+               ([i (in-range 1 (- n 2))]
+                [j (in-range (+ i 1) (- n 1))])
+      (let ([cost (+ (safe-ref lst 0) 
+                     (safe-ref lst i) 
+                     (safe-ref lst j))])
+        (min min-cost cost))))
+  
+  (if (= n 3)
+      (apply + nums)
+      (find-min-cost nums)))
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

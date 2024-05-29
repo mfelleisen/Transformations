@@ -25,23 +25,23 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Helper function to calculate the cost of dividing the list into 3 contiguous subarrays.
-  (define (calc-cost i j)
-    (+ (list-ref nums 0) (list-ref nums i) (list-ref nums j)))
+  ;; Helper function to calculate the cost of dividing nums into 3 contiguous subarrays
+  (define (calculate-cost i j)
+    (+ (first nums) (list-ref nums i) (list-ref nums j)))
 
-  ;; Generate all possible combinations of indices i and j for the subarrays.
+  ;; Generate all possible combinations of i and j indices
   (define combinations
     (for*/list ([i (in-range 1 (- (length nums) 1))]
                 [j (in-range (+ i 1) (length nums))])
-      (calc-cost i j)))
+      (calculate-cost i j)))
 
-  ;; Find and return the minimum cost.
+  ;; Find and return the minimum cost from all combinations
   (apply min combinations))
 
-;; Examples
-(minimumCost '(1 2 3 12))  ; => 6
-(minimumCost '(5 4 3))     ; => 12
-(minimumCost '(10 3 1 1))  ; => 12
+;; Test cases
+(minimumCost '(1 2 3 12))  ;; => 6
+(minimumCost '(5 4 3))     ;; => 12
+(minimumCost '(10 3 1 1))  ;; => 12
 
 (require rackunit)
 

@@ -26,19 +26,22 @@
 ;;  * 0 <= nums[i] < 231
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
+  ;; Define the maximum number of bits to consider (up to 31 bits for 32-bit integers)
   (define max-bits 31)
-
-  (define (bit-count nums i)
-    (count (λ (num) (not (zero? (bitwise-and num (expt 2 i))))) nums))
-
+  
+  ;; Helper function to count how many numbers have the ith bit set
+  (define (count-set-bits i)
+    (count (lambda (num) (not (zero? (bitwise-and num (arithmetic-shift 1 i)))))
+           nums))
+  
+  ;; Construct the result by checking each bit position
   (define (construct-result i)
-    (if (= i max-bits)
-        0
-        (let ([bit-count (bit-count nums i)])
-          (if (>= bit-count k)
-              (bitwise-ior (expt 2 i) (construct-result (add1 i)))
-              (construct-result (add1 i))))))
-
+    (for/fold ([result 0]) ([i (in-range max-bits)])
+      (if (>= (count-set-bits i) k)
+          (bitwise-ior result (arithmetic-shift 1 i))
+          result)))
+  
+  ;; Start the construction of the result from the 0th bit
   (construct-result 0))
 
 ;; Example usage:

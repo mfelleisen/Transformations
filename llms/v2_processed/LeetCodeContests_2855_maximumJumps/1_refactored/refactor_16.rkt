@@ -33,33 +33,27 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  ;; Helper function to check if a jump is valid
-  (define (valid-jump? a b)
-    (<= (abs (- b a)) target))
-
-  ;; Helper function to calculate the maximum jumps from a given index
-  (define (calc-max-jumps nums target start-index)
-    (let loop ([i start-index] [dp (make-vector (length nums) -inf.0)])
-      (cond
-        [(>= i (length nums)) dp]
-        [(= i 0) 
-         (vector-set! dp i 0)
-         (loop (add1 i) dp)]
-        [else
-         (for ([j (in-range 0 i)])
-           (when (and (valid-jump? (list-ref nums j) (list-ref nums i)) 
-                      (not (= (vector-ref dp j) -inf.0)))
-             (vector-set! dp i (max (vector-ref dp i) (add1 (vector-ref dp j))))))
-         (loop (add1 i) dp)])))
-
-  ;; Get the dp vector after processing all indices
-  (define dp (calc-max-jumps nums target 0))
-
-  ;; Check the value at the last index to determine if it's reachable
-  (let ([result (vector-ref dp (sub1 (length nums)))])
-    (if (= result -inf.0)
-        -1
-        result)))
+  ;; A helper function to determine if the jump from index i to index j is valid
+  (define (valid-jump? i j)
+    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
+  
+  ;; Recursive helper function to calculate the maximum number of jumps
+  (define (max-jumps-from i memo)
+    (if (hash-has-key? memo i)
+        (hash-ref memo i)
+        (let loop ([j (+ i 1)] [max-jumps -1])
+          (cond
+            [(= j (length nums)) (hash-set! memo i max-jumps) max-jumps]
+            [(valid-jump? i j)
+             (let ([next-jumps (max-jumps-from j memo)])
+               (loop (+ j 1) (max max-jumps (if (>= next-jumps 0) (+ next-jumps 1) -1))))]
+            [else (loop (+ j 1) max-jumps)]))))
+  
+  ;; Initialize memoization hash table
+  (define memo (make-hash))
+  
+  ;; Start the recursion from the first index
+  (max-jumps-from 0 memo))
 
 ;; Examples:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

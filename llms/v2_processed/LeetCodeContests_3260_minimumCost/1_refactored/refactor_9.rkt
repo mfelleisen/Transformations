@@ -29,27 +29,32 @@
 (define (minimumCost nums k dist)
   (define n (length nums))
 
-  (define (valid-partition? indices)
-    (<= (- (last indices) (second indices)) dist))
-
+  ;; Helper function to calculate the cost based on the current indices
   (define (calculate-cost indices)
-    (apply + (map (lambda (i) (list-ref nums i)) indices)))
+    (apply + (map (λ (i) (list-ref nums i)) indices)))
 
+  ;; Helper function to find the minimum cost using DFS
   (define (dfs start-index depth current-indices min-cost)
     (if (= depth k)
-        (if (valid-partition? current-indices)
+        (if (<= (- (last current-indices) (second current-indices)) dist)
             (min min-cost (calculate-cost current-indices))
             min-cost)
-        (let ([next-start-limit (- n (- k depth))])
-          (for/fold ([min-cost min-cost])
-                    ([next-start (in-range (+ start-index 1) (+ next-start-limit 1))])
-            (dfs next-start (+ depth 1) (append current-indices (list next-start)) min-cost)))))
+        (let loop ([next-start (+ start-index 1)]
+                   [next-start-limit (- n (- k depth))]
+                   [min-cost min-cost])
+          (if (> next-start next-start-limit)
+              min-cost
+              (loop (+ next-start 1)
+                    next-start-limit
+                    (dfs next-start
+                         (+ depth 1)
+                         (append current-indices (list next-start))
+                         min-cost))))))
 
-  (if (= k 1)
-      (first nums)
-      (for/fold ([min-cost +inf.0])
-                ([first-end (in-range 1 (+ (- n k) 2))])
-        (dfs first-end 2 (list 0 first-end) min-cost))))
+  ;; Main loop to start the DFS process
+  (for/fold ([min-cost +inf.0])
+            ([first-end (in-range 1 (+ (- n k) 2))])
+    (dfs first-end 2 (list 0 first-end) min-cost)))
 
 ;; Example usage
 (minimumCost '(1 3 2 6 4 2) 3 3)  ; Output: 5

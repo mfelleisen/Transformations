@@ -21,22 +21,29 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  (define (max-rect acc dim)
-    (let* ((length (first dim))
-           (width (second dim))
-           (diagonal-squared (+ (* length length) (* width width)))
-           (area (* length width))
-           (max-diagonal (first acc))
-           (max-area (second acc)))
-      (if (or (> diagonal-squared max-diagonal)
-              (and (= diagonal-squared max-diagonal) (> area max-area)))
-          (list diagonal-squared area)
-          acc)))
-  (second (foldl max-rect '(0 0) dimensions)))
+  (define (diagonal-squared length width)
+    (+ (* length length) (* width width)))
 
-;; Example usage
-(areaOfMaxDiagonal '((9 3) (8 6))) ;; should return 48
-(areaOfMaxDiagonal '((3 4) (4 3))) ;; should return 12
+  (define (max-rectangle acc dim)
+    (match-define (list length width) dim)
+    (define current-diagonal (diagonal-squared length width))
+    (define current-area (* length width))
+    (match-define (list max-diagonal max-area) acc)
+    (if (or (> current-diagonal max-diagonal)
+            (and (= current-diagonal max-diagonal) (> current-area max-area)))
+        (list current-diagonal current-area)
+        acc))
+
+  (define result
+    (foldl max-rectangle
+           '(0 0)
+           dimensions))
+
+  (second result))
+
+;; Example usage:
+(areaOfMaxDiagonal '((9 3) (8 6))) ;; => 48
+(areaOfMaxDiagonal '((3 4) (4 3))) ;; => 12
 
 (require rackunit)
 

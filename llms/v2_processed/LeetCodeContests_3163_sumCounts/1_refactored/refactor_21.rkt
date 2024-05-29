@@ -28,27 +28,22 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
-  ;; Helper function to compute the sum of squares of distinct counts for each subarray starting at index i
-  (define (sum-from-i i nums)
-    (let loop ([j i] [seen (set)] [total 0])
-      (if (>= j (length nums))
-          total
-          (let* ([elem (list-ref nums j)]
-                 [new-seen (set-add seen elem)]
-                 [distinct-count (set-count new-seen)]
-                 [new-total (+ total (sqr distinct-count))])
-            (loop (add1 j) new-seen new-total)))))
+  (define (squares-sum start end seen acc)
+    (if (>= start end)
+        acc
+        (let loop ([i start] [distincts seen] [total acc])
+          (if (>= i end)
+              total
+              (let* ([elem (list-ref nums i)]
+                     [new-seen (set-add distincts elem)]
+                     [distinct-count (set-count new-seen)]
+                     [new-total (+ total (sqr distinct-count))])
+                (loop (+ i 1) new-seen new-total))))))
 
-  ;; Sum over all starting indices
-  (for/sum ([i (in-range (length nums))])
-    (sum-from-i i nums)))
+  (define n (length nums))
+  (for/sum ([i (in-range n)])
+    (squares-sum i n (set) 0)))
 
-;; Helper function to increment the count of an element in a hash
-(define (add1 x) (+ x 1))
-
-;; Examples
-(sumCounts '(1 2 1)) ;; Output: 15
-(sumCounts '(1 1))   ;; Output: 3
 
 (require rackunit)
 

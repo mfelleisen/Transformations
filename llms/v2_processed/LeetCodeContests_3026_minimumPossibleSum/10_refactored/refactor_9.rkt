@@ -34,19 +34,24 @@
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus as 10^9 + 7.
   
-  ;; Helper function to generate a beautiful array and its sum.
-  (define (generate-beautiful-array n target)
-    (define (helper k acc sum)
-      (cond
-        [(= (length acc) n) sum]
-        [(or (empty? acc) (not (member (- target k) acc)))
-         (helper (+ k 1) (cons k acc) (+ sum k))]
-        [else
-         (helper (+ k 1) acc sum)]))
-    (helper 1 '() 0))
+  ;; Helper function to check if a candidate can be used in the beautiful array.
+  (define (not-sum-to-target x lst)
+    (for/and ([y lst]) (not (= (+ x y) target))))
+  
+  ;; Generate the beautiful array using a recursive helper.
+  (define (build-beautiful-nums lst candidate count)
+    (cond
+      [(= count n) lst]
+      [(not-sum-to-target candidate lst)
+       (build-beautiful-nums (cons candidate lst) (add1 candidate) (add1 count))]
+      [else
+       (build-beautiful-nums lst (add1 candidate) count)]))
 
+  ;; Generate the beautiful array starting with an empty list and candidate 1.
+  (define beautiful-nums (build-beautiful-nums '() 1 0))
+  
   ;; Calculate the sum of the beautiful array modulo MOD.
-  (modulo (generate-beautiful-array n target) MOD))
+  (modulo (apply + beautiful-nums) MOD))
 
 ;; Example test cases
 (displayln (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

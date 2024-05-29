@@ -23,15 +23,12 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Use a fold to combine elements from the end of the list to the beginning.
-  (define (combine-nums lst)
-    (let fold-helper ([lst (reverse lst)] [acc 0])
-      (match lst
-        [(cons x xs)
-         (if (<= x acc)
-             (fold-helper xs (+ x acc))
-             (fold-helper xs (max x acc)))]
-        [_ acc])))
+  ;; Helper function to accumulate the maximum possible value
+  (define (combine-nums nums)
+    (for/fold ([acc 0]) ([num (in-list (reverse nums))])
+      (if (<= num acc)
+          (+ num acc)
+          num)))
   (combine-nums nums))
 
 ;; Example usage:

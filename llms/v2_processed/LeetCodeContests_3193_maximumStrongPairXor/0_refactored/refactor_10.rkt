@@ -28,18 +28,17 @@
   (define (strong-pair? x y)
     ;; A helper function to determine if a pair (x, y) is a strong pair.
     (<= (abs (- x y)) (min x y)))
-
-  ;; Generate all possible pairs and compute their XOR if they are strong pairs.
-  (define pairs-xors
-    (for*/list ([x (in-list nums)]
-                [y (in-list nums)]
-                #:when (strong-pair? x y))
-      (bitwise-xor x y)))
+  
+  (define (max-xor acc x)
+    ;; A helper function to compute the maximum XOR for a given x in the accumulator acc.
+    (for/fold ([acc acc]) ([y (in-list nums)])
+      (if (strong-pair? x y)
+          (max acc (bitwise-xor x y))
+          acc)))
 
   ;; Compute the maximum XOR value from all strong pairs, or 0 if no strong pairs exist.
-  (if (null? pairs-xors)
-      0
-      (apply max pairs-xors)))
+  (for/fold ([max-xor-value 0]) ([x (in-list nums)])
+    (max max-xor-value (max-xor 0 x))))
 
 ;; Examples
 (maximumStrongPairXor '(1 2 3 4 5))  ; Output: 7

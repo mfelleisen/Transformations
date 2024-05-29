@@ -22,24 +22,22 @@
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
   (define len (length nums))
-  ;; Check if the length of nums is less than k
-  (if (< len k)
-      0  ; Return 0 if no subarray of length k is possible
-      (let loop ([i 0] [max-sum 0] [current-window (take nums k)])
-        (cond
-          ;; When index i exceeds the length of nums minus k, return the max-sum found
-          [(>= i (- len k)) max-sum]
-          ;; Otherwise, process the current window
-          [else
-           (let* ([distinct-count (length (remove-duplicates current-window))]
-                  [window-sum (apply + current-window)]
-                  [next-window (if (= i (- len k))
-                                   '()  ; No next window if at the end
-                                   (append (rest current-window) (list (list-ref nums (+ i k)))))]
-                  [valid-window? (>= distinct-count m)])
-             (loop (add1 i)
-                   (if valid-window? (max max-sum window-sum) max-sum)
-                   next-window))]))))
+  
+  ;; Helper function to calculate the sum of a subarray
+  (define (subarray-sum arr start len)
+    (apply + (take (drop arr start) len)))
+  
+  ;; Helper function to check if a subarray has at least m distinct elements
+  (define (has-m-distinct-elements? arr start len m)
+    (>= (length (remove-duplicates (take (drop arr start) len))) m))
+  
+  ;; Iterate over each possible subarray of length k
+  (for/fold ([max-sum 0])
+            ([i (in-range (- len (sub1 k)))])
+    (define subarr (take (drop nums i) k))
+    (if (has-m-distinct-elements? nums i k m)
+        (max max-sum (subarray-sum nums i k))
+        max-sum)))
 
 ;; Example usage
 (maxSum '(2 6 7 3 1 7) 3 4)  ; Output: 18

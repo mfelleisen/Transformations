@@ -20,19 +20,23 @@
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))
-
-  ;; Helper function to compute the number of ways recursively
-  (define (compute-ways n current base)
-    (cond
-      [(= n 0) 1]
-      [(or (< n 0) (> (expt base x) n)) 0]
-      [else
-       (modulo (+ (compute-ways n (- base 1) (+ 1 base))
-                  (compute-ways (- n (expt base x)) (- base 1) (+ 1 base)))
-               MOD)]))
-
-  ;; Start the computation from base 1
-  (compute-ways n n 1))
+  
+  ;; Initialize dp vector with 0s and set dp[0] to 1
+  (define dp (build-vector (add1 n) (λ (i) (if (zero? i) 1 0))))
+  
+  ;; Compute the maximum base such that base^x <= n
+  (define max-base (inexact->exact (floor (expt n (/ 1.0 x)))))
+  
+  ;; Iterate over each possible base and update dp values
+  (for ([base (in-range 1 (add1 max-base))])
+    (define current-power (expt base x))
+    (for/fold ([dp dp]) ([i (in-range n (sub1 current-power) -1)])
+      (define new-value (modulo (+ (vector-ref dp i) (vector-ref dp (- i current-power))) MOD))
+      (vector-set! dp i new-value)
+      dp))
+  
+  ;; Return the number of ways to express n
+  (vector-ref dp n))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

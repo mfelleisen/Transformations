@@ -22,33 +22,34 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  ;; Helper function to compute the parity of a number
-  (define (parity n)
-    (modulo n 2))
+  ;; Auxiliary function to compute the parity of a number
+  (define (parity n) (modulo n 2))
   
-  (define n (length nums))
+  ;; Define the recursive function with memoization for dynamic programming
+  (define memo-table (make-hash))
   
-  ;; Auxiliary function to recursively calculate the maximum score
-  (define (max-score-helper i dp)
-    (if (= i n)
-        (apply max dp)
-        (let* ((current (list-ref nums i))
-               (current-parity (parity current))
-               (new-dp (for/fold ([dp dp]) ([j (in-range (add1 i) n)])
-                         (let* ((next (list-ref nums j))
-                                (next-parity (parity next))
-                                (score (+ (list-ref dp i) next))
-                                (adjusted-score (if (not (= current-parity next-parity))
-                                                    (- score x)
-                                                    score)))
-                           (if (> adjusted-score (list-ref dp j))
-                               (list-set dp j adjusted-score)
-                               dp)))))
-          (max-score-helper (add1 i) new-dp))))
+  (define (memoize index score)
+    (hash-set! memo-table index score)
+    score)
   
-  ;; Initialize the dp list with negative infinity except the first element
-  (let ((initial-dp (cons (first nums) (make-list (sub1 n) -inf.0))))
-    (max-score-helper 0 initial-dp)))
+  (define (dp i)
+    (or (hash-ref memo-table i #f)
+        (memoize i
+                 (if (>= i (length nums))
+                     -inf.0
+                     (let loop ([j (add1 i)] [max-score (list-ref nums i)])
+                       (if (>= j (length nums))
+                           max-score
+                           (let* ([current-score (dp j)]
+                                  [transition-score (+ (list-ref nums i) current-score)]
+                                  [penalized-score (if (not (= (parity (list-ref nums i)) (parity (list-ref nums j))))
+                                                      (- transition-score x)
+                                                      transition-score)])
+                             (loop (add1 j) (max max-score penalized-score)))))))))
+  
+  ;; Start the computation from index 0
+  (define initial-score (list-ref nums 0))
+  (+ initial-score (dp 1)))
 
 ;; Example cases
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

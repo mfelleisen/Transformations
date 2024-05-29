@@ -23,13 +23,16 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Define a helper function to process the list from the end to the beginning.
-  (define (combine-nums lst)
-    (for/fold ([acc 0]) ([num (in-list (reverse lst))])
-      (if (<= num acc)
-          (+ num acc)
-          num)))
-  (combine-nums nums))
+  ;; Helper function to combine elements recursively from the end to the beginning
+  (define (combine-nums nums acc)
+    (match nums
+      [(list) acc]
+      [(cons x xs)
+       (if (<= x acc)
+           (combine-nums xs (+ x acc))
+           (combine-nums xs x))]))
+  ;; Start the combination process from the end of the list
+  (combine-nums (reverse nums) 0))
 
 ;; Example usage:
 (maxArrayValue '(2 3 7 9 3))  ; Output: 21

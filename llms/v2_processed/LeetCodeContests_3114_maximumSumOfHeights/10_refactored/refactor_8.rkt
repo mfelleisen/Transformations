@@ -35,24 +35,33 @@
 ;;  * 1 <= n == maxHeights <= 103
 ;;  * 1 <= maxHeights[i] <= 109
 (define (maximumSumOfHeights maxHeights)
-  ;; Helper function to calculate the maximum sum with a fixed peak position
+  ;; Function to calculate the maximum sum with a fixed peak position
   (define (calculate-max-sum-with-peak peak)
-    (let* ((n (length maxHeights))
-           ;; Compute the heights array from the peak
-           (heights (build-list n
-                                (lambda (i)
-                                  (cond
-                                    [(= i peak) (list-ref maxHeights i)]
-                                    [(< i peak)
-                                     (min (list-ref maxHeights i)
-                                          (if (= i 0)
-                                              (list-ref maxHeights i)
-                                              (list-ref maxHeights (sub1 i))))]
-                                    [else
-                                     (min (list-ref maxHeights i)
-                                          (list-ref maxHeights (sub1 i)))])))))
-      ;; Calculate the sum of the heights array
-      (apply + heights)))
+    (define n (length maxHeights))
+    (define heights (build-vector n (λ (i) 0)))
+    
+    ;; Set the peak height
+    (define (set-peak heights peak)
+      (vector-set! heights peak (list-ref maxHeights peak))
+      heights)
+    
+    ;; Expand to the left of the peak
+    (define (expand-left heights peak)
+      (for/fold ([heights heights]) ([i (in-range (sub1 peak) -1 -1)])
+        (vector-set! heights i (min (list-ref maxHeights i) (vector-ref heights (add1 i))))
+        heights))
+    
+    ;; Expand to the right of the peak
+    (define (expand-right heights peak)
+      (for/fold ([heights heights]) ([i (in-range (add1 peak) n)])
+        (vector-set! heights i (min (list-ref maxHeights i) (vector-ref heights (sub1 i))))
+        heights))
+    
+    ;; Calculate the sum of the heights array
+    (define (sum-heights heights)
+      (apply + (vector->list heights)))
+    
+    (sum-heights (expand-right (expand-left (set-peak heights peak) peak) peak)))
   
   ;; Try every position as a peak and find the maximum sum
   (define (find-max-sum n)

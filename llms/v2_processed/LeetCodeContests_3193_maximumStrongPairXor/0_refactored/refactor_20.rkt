@@ -29,14 +29,15 @@
     ;; A helper function to determine if a pair (x, y) is a strong pair.
     (<= (abs (- x y)) (min x y)))
   
-  (define (max-xor acc x)
-    (for/fold ([acc acc]) ([y (in-list nums)])
+  (define (xor-max acc x)
+    ;; A helper function to compute the max XOR for element x with rest of the elements in the list
+    (for/fold ([max-xor acc]) ([y nums])
       (if (strong-pair? x y)
-          (max acc (bitwise-xor x y))
-          acc)))
+          (max max-xor (bitwise-xor x y))
+          max-xor)))
   
-  (for/fold ([max-xor-val 0]) ([x (in-list nums)])
-    (max-xor max-xor-val x)))
+  ;; Compute the maximum XOR value from all strong pairs, or 0 if no strong pairs exist.
+  (foldl xor-max 0 nums))
 
 ;; Examples
 (maximumStrongPairXor '(1 2 3 4 5))  ; Output: 7

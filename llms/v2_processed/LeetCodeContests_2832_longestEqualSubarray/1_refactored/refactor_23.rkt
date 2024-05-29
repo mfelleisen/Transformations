@@ -23,34 +23,28 @@
 ;;  * 1 <= nums[i] <= nums.length
 ;;  * 0 <= k <= nums.length
 (define (longestEqualSubarray nums k)
-  ;; Helper function to update frequency counts immutably
+  ;; Helper function to update frequency counts
   (define (update-counts counts num increment)
-    (hash-update counts num (lambda (v) (+ v increment)) 0))
-
-  ;; Initialize variables for tracking the sliding window
-  (define (loop right (left 0) (count (make-hash)) (max-length 0))
-    (if (= right (length nums))
+    (hash-update counts num (λ (v) (+ v increment)) 0))
+  
+  ;; Sliding window approach with two pointers
+  (define (slide-window right left count max-freq max-length)
+    (if (>= right (length nums))
         max-length
         (let* ((num (list-ref nums right))
                (new-count (update-counts count num 1))
-               (max-freq (apply max (hash-values new-count)))
-               (window-length (+ 1 (- right left)))
-               (new-left (if (> (- window-length max-freq) k)
-                             (+ left 1)
-                             left))
-               (adjusted-count (if (> (- window-length max-freq) k)
-                                   (update-counts new-count (list-ref nums left) -1)
-                                   new-count)))
-          (loop (+ right 1)
-                new-left
-                adjusted-count
-                (max max-length (- window-length (- window-length max-freq)))))))
+               (new-max-freq (apply max (hash-values new-count))))
+          (if (> (- (+ 1 (- right left)) new-max-freq) k)
+              ;; Shrink window if necessary
+              (let ((left-num (list-ref nums left))
+                    (new-count (update-counts new-count (list-ref nums left) -1)))
+                (slide-window right (+ left 1) new-count new-max-freq max-length))
+              ;; Expand window
+              (slide-window (+ right 1) left new-count new-max-freq
+                            (max max-length (+ 1 (- right left))))))))
+  
+  (slide-window 0 0 (hash) 0 0))
 
-  (loop 0))
-
-;; Example usage:
-;; (longestEqualSubarray '(1 3 2 3 1 3) 3)
-;; Output: 3
 
 (require rackunit)
 

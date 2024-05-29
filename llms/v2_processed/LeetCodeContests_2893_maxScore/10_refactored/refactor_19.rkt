@@ -22,20 +22,31 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  ;; Helper function to calculate the parity of a number
-  (define (parity n) (modulo n 2))
+  ;; Helper function to compute the parity of a number
+  (define (parity n)
+    (modulo n 2))
   
-  ;; Using for/fold to iterate over the list and accumulate the scores
-  (define-values (best-odd best-even)
-    (for/fold ([best-odd -inf.0] [best-even -inf.0]) ([num (in-list nums)])
-      (let* ([current-odd (if (even? num) (- best-odd x) best-odd)]
-             [current-even (if (odd? num) (- best-even x) best-even)]
-             [new-odd (if (odd? num) (+ num (max 0 current-odd)) -inf.0)]
-             [new-even (if (even? num) (+ num (max 0 current-even)) -inf.0)])
-        (values (max best-odd new-odd) (max best-even new-even)))))
+  ;; Initialize the memoization table as a hash
+  (define memo-table (make-hash))
   
-  ;; The final answer is the maximum value between best-odd and best-even
-  (max best-odd best-even))
+  ;; Define the recursive function with memoization
+  (define (max-score-from i)
+    (hash-ref! memo-table i
+      (lambda ()
+        (if (>= i (length nums))
+            0
+            (let* ((current (list-ref nums i))
+                   (scores
+                    (for/list ([j (in-range (add1 i) (length nums))])
+                      (let ((next (list-ref nums j))
+                            (score (max-score-from j)))
+                        (if (= (parity current) (parity next))
+                            (+ next score)
+                            (- (+ next score) x))))))
+              (max 0 (+ current (apply max 0 scores))))))))
+  
+  ;; Start the computation from the first position
+  (max-score-from 0))
 
 ;; Example cases
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

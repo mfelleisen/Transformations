@@ -21,23 +21,26 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  ;; Use foldl to iterate through the list of dimensions to find the rectangle with the longest diagonal or largest area if diagonals are equal
-  (define-values (max-diagonal max-area)
-    (for/fold ([max-diagonal 0] [max-area 0]) ([dim (in-list dimensions)])
-      (define length (first dim))     ;; Extract the length from the current dimension
-      (define width (second dim))    ;; Extract the width from the current dimension
-      (define diagonal-squared (+ (* length length) (* width width)))  ;; Calculate the square of the diagonal
-      (define area (* length width)) ;; Calculate the area of the rectangle
-      ;; Check if the current diagonal is longer, or if it's the same length and the area is larger
-      (if (or (> diagonal-squared max-diagonal)
-              (and (= diagonal-squared max-diagonal) (> area max-area)))
-          (values diagonal-squared area) ;; Update the accumulator with new max diagonal and area
-          (values max-diagonal max-area)))) ;; Keep the old accumulator if no update is needed
-  max-area) ;; Return the area of the rectangle with the longest diagonal
+  ;; Function to calculate the squared value of the diagonal
+  (define (diagonal-squared length width)
+    (+ (* length length) (* width width)))
 
-;; Example usage
-(areaOfMaxDiagonal '((9 3) (8 6))) ;; Output: 48
-(areaOfMaxDiagonal '((3 4) (4 3))) ;; Output: 12
+  ;; Fold over dimensions to find the max diagonal and corresponding area
+  (define-values (max-diagonal max-area)
+    (for/fold ([max-diagonal 0]
+               [max-area 0])
+              ([dim (in-list dimensions)])
+      (match-define (list length width) dim)
+      (define current-diagonal (diagonal-squared length width))
+      (define current-area (* length width))
+      (if (or (> current-diagonal max-diagonal)
+              (and (= current-diagonal max-diagonal)
+                   (> current-area max-area)))
+          (values current-diagonal current-area)
+          (values max-diagonal max-area))))
+
+  ;; Return the maximum area found
+  max-area)
 
 (require rackunit)
 

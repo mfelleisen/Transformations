@@ -25,19 +25,18 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  (define (cost i j)
-    (+ (first nums)
-       (list-ref nums i)
-       (list-ref nums j)))
-
   (define n (length nums))
-
-  (if (= n 3)
-      (apply + nums)
-      (for*/fold ([min-cost +inf.0])
-                 ([i (in-range 1 (- n 1))]
-                  [j (in-range (+ i 1) n)])
-        (min min-cost (cost i j)))))
+  (cond
+    ;; If there are exactly 3 elements, return the sum of all elements
+    [(= n 3) (apply + nums)]
+    ;; Otherwise, calculate the minimum cost of dividing the list into 3 contiguous subarrays
+    [else
+     (define (subarray-cost i j)
+       (+ (first nums) (list-ref nums i) (list-ref nums j)))
+     (for*/fold ([min-cost +inf.0])
+                ([i (in-range 1 (- n 1))]
+                 [j (in-range (+ i 1) n)])
+       (min min-cost (subarray-cost i j)))]))
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

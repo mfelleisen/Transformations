@@ -22,6 +22,9 @@
 (define (theMaximumAchievableX num t)
   (+ num (* 2 t)))
 
+;; Examples:
+(theMaximumAchievableX 4 1)  ;; => 6
+(theMaximumAchievableX 3 2)  ;; => 7
 
 (require rackunit)
 

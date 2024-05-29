@@ -23,10 +23,8 @@
 ;;  * 1 <= n == hours.length <= 50
 ;;  * 0 <= hours[i], target <= 105
 (define (numberOfEmployeesWhoMetTarget hours target)
-  ;; This function calculates the number of employees who have met or exceeded the target working hours.
-  ;; It uses the `count` function to directly count the elements that satisfy the condition.
-  
-  (count (λ (hour) (>= hour target)) hours))
+  ;; Use `filter` to count the number of employees meeting the target
+  (length (filter (λ (hour) (>= hour target)) hours)))
 
 ;; Example use cases
 (displayln (numberOfEmployeesWhoMetTarget '(0 1 2 3 4) 2))  ; Output: 3

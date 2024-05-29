@@ -23,28 +23,28 @@
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
   (define n (length nums))
-  
-  ;; Helper function to check if a list is sorted
-  (define (sorted? lst)
-    (andmap (lambda (i) (<= (list-ref lst i) (list-ref lst (+ i 1))))
-            (range 0 (- (length lst) 1))))
-  
-  ;; Helper function to right shift a list by k positions
-  (define (right-shift lst k)
-    (append (drop-right lst k) (take-right lst k)))
-  
-  ;; Check each possible shift value from 0 to n-1
-  (for/or ([k (in-range n)])
-    (if (sorted? (right-shift nums k))
-        (modulo k n)
-        #f))
-  ;; If no valid shift is found, return -1
-  (if (sorted? nums) 0 -1))
+  (define sorted-nums (sort nums <))
 
-;; Example usage
-(minimumRightShifts '(3 4 5 1 2))  ; Output: 2
-(minimumRightShifts '(1 3 5))      ; Output: 0
-(minimumRightShifts '(2 1 4))      ; Output: -1
+  ;; Helper function to check if the array can be sorted with a given shift
+  (define (valid-shift? start)
+    (andmap (λ (i)
+              (= (list-ref nums (modulo (+ start i) n))
+                 (list-ref sorted-nums i)))
+            (range n)))
+
+  ;; Find the valid shift, if any
+  (define (find-shift)
+    (for/first ([start (in-range n)]
+                #:when (valid-shift? start))
+      (modulo (- n start) n)))
+
+  (define result (find-shift))
+  (if result result -1))
+
+;; Examples
+(displayln (minimumRightShifts '(3 4 5 1 2))) ; Output: 2
+(displayln (minimumRightShifts '(1 3 5))) ; Output: 0
+(displayln (minimumRightShifts '(2 1 4))) ; Output: -1
 
 (require rackunit)
 

@@ -22,18 +22,19 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (minOperations nums)
-  ;; Calculate the frequency of each number in the list
-  (define freqs (for/fold ([table (hash)]) ([num (in-list nums)])
-                  (hash-update table num add1 0)))
+  ;; Compute the frequency of each element in the list
+  (define freqs (for/fold ([freqs (hash)])
+                         ([num (in-list nums)])
+                  (hash-update freqs num add1 0)))
 
-  ;; Function to calculate the minimum operations for a given frequency
+  ;; Calculate the minimum operations required for a given frequency
   (define (calc-ops freq)
     (match (remainder freq 3)
       [0 (quotient freq 3)]
       [1 (if (>= freq 4) (+ 2 (quotient (- freq 4) 3)) -1)]
       [2 (if (>= freq 2) (+ 1 (quotient (- freq 2) 3)) -1)]))
 
-  ;; Calculate total operations or determine impossibility
+  ;; Sum up the required operations, or return -1 if impossible
   (define ops (map calc-ops (hash-values freqs)))
   (if (member -1 ops)
       -1

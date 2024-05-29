@@ -24,25 +24,30 @@
 (define (minimumRightShifts nums)
   (define n (length nums))
   
-  ;; Check if the list is already sorted
-  (define (sorted? lst)
-    (andmap (lambda (pair) (<= (first pair) (second pair)))
-            (map list lst (rest lst))))
-  
-  ;; Rotate the list right by one position
-  (define (rotate-right lst)
-    (if (empty? lst) 
-        lst 
-        (cons (last lst) (take lst (sub1 (length lst))))))
+  ;; If the list has only one element, it is already sorted
+  (if (= n 1)
+      0
+      (let ([sorted-nums (sort nums <)])  ; Sort the list in ascending order
+        
+        ;; Helper function to check if a given shift is valid
+        (define (valid-shift? start)
+          (for/and ([i (in-range n)])
+            (= (list-ref nums (modulo (+ start i) n))
+               (list-ref sorted-nums i))))
+        
+        ;; Find the minimum valid shift if it exists
+        (define (find-min-shift)
+          (for/first ([start (in-range n)]
+                      #:when (valid-shift? start))
+            (modulo (- n start) n)))
+        
+        ;; Return the result or -1 if no valid shift found
+        (or (find-min-shift) -1))))
 
-  ;; Try all rotations and check if any result in a sorted list
-  (define (try-rotations lst count)
-    (cond
-      [(sorted? lst) count]
-      [(= count n) -1]
-      [else (try-rotations (rotate-right lst) (add1 count))]))
-
-  (try-rotations nums 0))
+;; Test cases
+(minimumRightShifts '(3 4 5 1 2)) ;=> 2
+(minimumRightShifts '(1 3 5)) ;=> 0
+(minimumRightShifts '(2 1 4)) ;=> -1
 
 (require rackunit)
 

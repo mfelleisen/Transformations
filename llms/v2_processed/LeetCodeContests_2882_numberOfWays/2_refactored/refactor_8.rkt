@@ -23,25 +23,28 @@
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus
-
-  ;; Helper function to calculate power
-  (define (expt-mod b e m)
-    (remainder (expt b e) m))
-
-  ;; Initialize a vector to store the number of ways to express each number up to n using xth powers
-  (define dp (build-vector (+ n 1) (λ (i) (if (= i 0) 1 0))))
-
+  
+  (define (exponentiation a b)
+    (inexact->exact (expt a b)))
+  
   ;; Calculate the maximum base such that base^x <= n
   (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
-
-  ;; Iterate over each possible base and update dp
-  (for* ([base (in-range 1 (+ max-base 1))]
-         [i (in-range n (- (expt base x) 1) -1)])
-    (define current-power (expt-mod base x MOD))
-    (vector-set! dp i (modulo (+ (vector-ref dp i) (vector-ref dp (- i current-power))) MOD)))
-
-  ;; Return the number of ways to express n
-  (vector-ref dp n))
+  
+  ;; Recursively calculate the number of ways
+  (define (ways total base)
+    (cond
+      [(zero? total) 1]
+      [(or (< total 0) (zero? base)) 0]
+      [else
+       (let* ([power (exponentiation base x)]
+              [without (ways total (- base 1))]
+              [with (if (>= total power)
+                        (ways (- total power) (- base 1))
+                        0)])
+         (modulo (+ without with) MOD))]))
+  
+  ;; Get the number of ways to express n using xth powers
+  (ways n max-base))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

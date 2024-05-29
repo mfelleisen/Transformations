@@ -16,13 +16,17 @@
 ;; Constraints:
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
-(define (sumOfSquares nums) ;; contract  sos/c
-  (define n (length nums))
+(define (sumOfSquares nums)
   (define (square x) (* x x))
-
+  (define n (length nums))
+  (define (special? i) (zero? (remainder n i)))
+  
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (remainder n i)))
+            #:when (special? i))
     (square (list-ref nums (sub1 i)))))
+
+;; The function sumOfSquares now accepts a list of numbers and returns the sum of the squares of all special elements.
+
 
 (require rackunit)
 

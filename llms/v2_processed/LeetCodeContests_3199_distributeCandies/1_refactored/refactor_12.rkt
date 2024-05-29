@@ -14,22 +14,19 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Use a list comprehension to generate all possible distributions of candies among 3 children,
-  ;; and filter those that are valid based on the limit constraint.
+  ;; Calculate the total number of ways to distribute n candies among 3 children
+  ;; such that no child gets more than limit candies.
+  
+  ;; Helper function to check if the distribution (a, b, c) is valid under the limit constraint.
   (define (valid-distribution? a b c)
-    ;; Check if the distribution (a, b, c) is valid under the limit constraint.
     (and (<= a limit) (<= b limit) (<= c limit)))
   
-  (define (count-distributions)
-    ;; Use a list comprehension to generate all possible distributions of candies.
-    (for*/sum ((a (in-range (add1 (min n limit))))
-               (b (in-range (add1 (min (- n a) limit))))
-               (c (in-range (add1 (min (- n a b) limit))))
-               #:when (and (= n (+ a b c)) (valid-distribution? a b c)))
-      1))
-  
-  ;; Return the count of valid distributions.
-  (count-distributions))
+  ;; Count all valid distributions using nested loops implemented as list comprehensions.
+  (for*/sum ([a (in-range (add1 (min n limit)))]
+             [b (in-range (add1 (min (- n a) limit)))]
+             [c (in-range (add1 (min (- n a b) limit)))]
+             #:when (= n (+ a b c)))
+    1))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

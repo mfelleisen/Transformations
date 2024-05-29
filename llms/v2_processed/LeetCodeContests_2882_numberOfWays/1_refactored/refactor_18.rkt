@@ -21,26 +21,18 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
 
-  ;; Helper function to calculate the number of ways using memoization
-  (define (ways n x k)
-    (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
-    (define memo (make-hash))
+  ;; Recursive function to calculate the number of ways
+  (define (ways n current)
+    (cond
+      [(= n 0) 1] ; Base case: one way to sum up to zero using no numbers
+      [(or (< n 0) (> (expt current x) n)) 0] ; No valid ways if n is negative or current power is greater than n
+      [else
+       (modulo (+ (ways (- n (expt current x)) (+ current 1))
+                  (ways n (+ current 1)))
+               MOD)]))
 
-    ;; Recursive function with memoization
-    (define (count-ways target current-base)
-      (cond
-        [(= target 0) 1]
-        [(or (< target 0) (> current-base max-base)) 0]
-        [else
-         (hash-ref! memo (cons target current-base)
-                    (lambda ()
-                      (modulo (+ (count-ways (- target (expt current-base x)) (add1 current-base))
-                                 (count-ways target (add1 current-base)))
-                              MOD)))]))
-
-    (count-ways n 1))
-
-  (ways n x 1))
+  ;; Start the recursive calculation from 1
+  (ways n 1))
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

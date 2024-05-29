@@ -19,12 +19,16 @@
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
   (define initial-balance 100)
-  (define rounded-amount
+
+  ;; Calculate the rounded amount directly
+  (define rounded-amount 
     (let* ([lower-bound (* (quotient purchaseAmount 10) 10)]
            [upper-bound (+ lower-bound 10)])
-      (if (<= (- upper-bound purchaseAmount) (- purchaseAmount lower-bound))
-          upper-bound
-          lower-bound)))
+      (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
+          lower-bound
+          upper-bound)))
+
+  ;; Return the new balance after subtracting the rounded amount
   (- initial-balance rounded-amount))
 
 ;; The function is now defined and can be used to calculate the account balance after a purchase

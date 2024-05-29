@@ -32,23 +32,24 @@
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
 (define (getWordsInLongestSubsequence n words groups)
-  (define (loop words groups last-group)
-    (cond
-      [(empty? words) '()]
-      [(not (= (first groups) last-group))
-       (cons (first words) (loop (rest words) (rest groups) (first groups)))]
-      [else (loop (rest words) (rest groups) last-group)]))
+  (define (select-subsequence idx last-group acc)
+    (if (= idx n)
+        (reverse acc)
+        (let ([current-group (list-ref groups idx)]
+              [current-word (list-ref words idx)])
+          (if (not (= current-group last-group))
+              (select-subsequence (add1 idx) current-group (cons current-word acc))
+              (select-subsequence (add1 idx) last-group acc)))))
 
-  (if (zero? n)
+  (if (= n 0)
       '()
-      (loop (rest words) (rest groups) (first groups))))
+      (select-subsequence 1 (first groups) (list (first words)))))
 
 ;; Example usage:
 (define n 4)
 (define words '("a" "b" "c" "d"))
 (define groups '(1 0 1 1))
 (getWordsInLongestSubsequence n words groups) ; Output: '("a" "b" "c")
-
 
 (require rackunit)
 

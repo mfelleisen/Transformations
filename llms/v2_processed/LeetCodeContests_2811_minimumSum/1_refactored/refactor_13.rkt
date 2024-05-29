@@ -18,21 +18,19 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
+  ;; Helper function to check if adding a number would violate the k-avoiding property.
   (define (violates-k-avoiding? num used)
-    (set-member? used (- k num)))
-
+    (and (set-member? used (- k num)) (not (= num (- k num)))))
+  
+  ;; Iterative function to build the k-avoiding array and calculate its sum.
   (define (build-k-avoiding count current used sum)
-    (cond
-      [(= count n) sum]
-      [(or (violates-k-avoiding? current used)
-           (set-member? used current))
-       (build-k-avoiding count (add1 current) used sum)]
-      [else
-       (build-k-avoiding (add1 count)
-                         (add1 current)
-                         (set-add used current)
-                         (+ sum current))]))
+    (if (= count n)
+        sum
+        (if (or (violates-k-avoiding? current used) (set-member? used current))
+            (build-k-avoiding count (+ current 1) used sum)
+            (build-k-avoiding (+ count 1) (+ current 1) (set-add used current) (+ sum current)))))
 
+  ;; Start the process with count 0, current number 1, an empty set for used numbers, and sum 0.
   (build-k-avoiding 0 1 (set) 0))
 
 ;; Example usage (not part of the function definition):

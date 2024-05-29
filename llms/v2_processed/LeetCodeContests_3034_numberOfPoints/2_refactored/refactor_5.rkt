@@ -15,10 +15,16 @@
 ;;  * nums[i].length == 2
 ;;  * 1 <= starti <= endi <= 100
 (define (numberOfPoints nums)
-  ;; Generate a set of all points covered by the cars
+  ;; Helper function to generate a set of points from start to end (inclusive)
+  (define (points-from-range start end)
+    (for/set ([i (in-range start (add1 end))]) i))
+
+  ;; Use foldr to accumulate all points covered by cars into a single set
   (define covered-points
-    (for/fold ([acc (set)]) ([range (in-list nums)])
-      (set-union acc (for/set ([i (in-range (first range) (add1 (second range)))]) i))))
+    (foldr (lambda (range acc)
+             (set-union acc (apply points-from-range range)))
+           (set)
+           nums))
 
   ;; Return the size of the set, which represents the number of unique points covered
   (set-count covered-points))

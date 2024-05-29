@@ -32,18 +32,24 @@
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
 (define (getWordsInLongestSubsequence n words groups)
-  (define (helper idx prev-group acc)
-    (if (>= idx n)
-        (reverse acc)
-        (let ([current-group (list-ref groups idx)]
-              [current-word (list-ref words idx)])
-          (if (not (= current-group prev-group))
-              (helper (add1 idx) current-group (cons current-word acc))
-              (helper (add1 idx) prev-group acc)))))
+  ;; Define a helper function to traverse the list of words and groups
+  (define (traverse current last-group acc)
+    (match current
+      ;; If we reach the end of the list, return the accumulated subsequence
+      [(list) (reverse acc)]
+      ;; Otherwise, destructure the current word and group, and the rest of the list
+      [(cons (list word group) rest)
+       (if (= group last-group)
+           ;; If the current group is the same as the last group, skip this word
+           (traverse rest last-group acc)
+           ;; Otherwise, add the current word to the subsequence and update the last group
+           (traverse rest group (cons word acc)))]))
 
-  (if (zero? n)
-      '()
-      (helper 1 (first groups) (list (first words)))))
+  ;; Start the traversal with the first word and group
+  (match words
+    [(list) '()]
+    [(cons word rest)
+     (traverse (map list rest (cdr groups)) (car groups) (list word))]))
 
 ;; Example usage:
 (define n 4)

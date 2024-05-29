@@ -27,27 +27,40 @@
 ;;  * 3 <= nums.length <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
-  ;; Helper function to find valid left and right minimums for a given j
-  (define (find-mountain j)
-    (define current (list-ref nums j))
-    (define left-min (for/fold ([min-left +inf.0]) ([i (in-range j)])
-                       (let ([val (list-ref nums i)])
-                         (if (< val current) (min min-left val) min-left))))
-    (define right-min (for/fold ([min-right +inf.0]) ([i (in-range (add1 j) (length nums))])
-                        (let ([val (list-ref nums i)])
-                          (if (< val current) (min min-right val) min-right))))
-    (if (and (< left-min +inf.0) (< right-min +inf.0))
-        (+ left-min current right-min)
-        #f))
+  ;; Helper function to find the valid minimum left value for a given index j
+  (define (min-left nums j)
+    (for/fold ([min-l +inf.0]) ([i (in-range j)])
+      (let ([current (list-ref nums i)]
+            [mid (list-ref nums j)])
+        (if (< current mid)
+            (min min-l current)
+            min-l))))
 
-  ;; Iterate over possible j values and find the minimum sum
-  (define min-sum
-    (for/fold ([min-sum +inf.0]) ([j (in-range 1 (sub1 (length nums)))])
-      (let ([mountain-sum (find-mountain j)])
-        (if mountain-sum (min min-sum mountain-sum) min-sum))))
+  ;; Helper function to find the valid minimum right value for a given index j
+  (define (min-right nums j)
+    (for/fold ([min-r +inf.0]) ([i (in-range (+ j 1) (length nums))])
+      (let ([current (list-ref nums i)]
+            [mid (list-ref nums j)])
+        (if (< current mid)
+            (min min-r current)
+            min-r))))
 
-  ;; Return the result
-  (if (< min-sum +inf.0) min-sum -1))
+  ;; Main function logic
+  (define (find-minimum-sum nums)
+    (define-values (min-sum found)
+      (for/fold ([min-sum +inf.0] [found #f]) ([j (in-range 1 (- (length nums) 1))])
+        (define mid (list-ref nums j))
+        (define left-min (min-left nums j))
+        (define right-min (min-right nums j))
+        (if (and (< left-min +inf.0) (< right-min +inf.0))
+            (values (min min-sum (+ left-min mid right-min)) #t)
+            (values min-sum found))))
+    (if found min-sum -1))
+
+  ;; Check for the length of nums and call the main function
+  (if (< (length nums) 3)
+      -1
+      (find-minimum-sum nums)))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ; Output: 9

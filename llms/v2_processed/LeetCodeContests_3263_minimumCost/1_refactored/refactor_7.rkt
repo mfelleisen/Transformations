@@ -26,14 +26,11 @@
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
   (define n (length nums))
-  (cond
-    [(= n 3) (apply + nums)]
-    [else
-     (define (cost i j) (+ (first nums) (list-ref nums i) (list-ref nums j)))
-     (for*/fold ([min-cost +inf.0]) 
-                ([i (in-range 1 (- n 1))] 
-                 [j (in-range (+ i 1) n)])
-       (min min-cost (cost i j)))]))
+  (define (costs nums)
+    (for*/list ([i (in-range 1 (- n 1))]
+                [j (in-range (+ i 1) n)])
+      (+ (first nums) (list-ref nums i) (list-ref nums j))))
+  (apply min (costs nums)))
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

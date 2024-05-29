@@ -18,34 +18,17 @@
 ;;  * 0 <= xi, yi <= 106
 ;;  * 0 <= k <= 100
 (define (countPairs coordinates k)
-  ;; Function to calculate the bitwise XOR distance between two points
+  ;; Helper function to calculate the XOR distance between two points
   (define (xor-distance p1 p2)
     (+ (bitwise-xor (first p1) (first p2))
        (bitwise-xor (second p1) (second p2))))
-  
-  ;; Use a hash table to count the occurrences of each coordinate
-  (define coord-counts (make-hash))
-  
-  ;; Populate the hash table with the frequency of each coordinate
-  (for-each (lambda (coord)
-              (hash-update! coord-counts coord add1 0))
-            coordinates)
-  
-  ;; Iterate over each unique pair of coordinates and count valid pairs
-  (define valid-pair-count
-    (for/sum ([coord1 (hash-keys coord-counts)]
-              [coord2 (hash-keys coord-counts)]
-              #:when (and (<= (hash-ref coord-counts coord1) (hash-ref coord-counts coord2))
-                          (= (xor-distance coord1 coord2) k)))
-      (if (equal? coord1 coord2)
-          ;; Special case for same coordinates: count combinations (n choose 2)
-          (let ([count (hash-ref coord-counts coord1)])
-            (quotient (* count (- count 1)) 2))
-          ;; For different coordinates, count all combinations
-          (* (hash-ref coord-counts coord1)
-             (hash-ref coord-counts coord2)))))
-  
-  valid-pair-count)
+
+  ;; Traverse the list and count pairs with the required XOR distance
+  (for/fold ([count 0]) ([i (in-naturals)] [p1 (in-list coordinates)])
+    (for/fold ([c count]) ([p2 (in-list (drop coordinates (add1 i)))])
+      (if (= (xor-distance p1 p2) k)
+          (add1 c)
+          c))))
 
 ;; Example usage:
 (countPairs '((1 2) (4 2) (1 3) (5 2)) 5)  ; Output: 2

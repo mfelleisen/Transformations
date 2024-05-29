@@ -22,33 +22,31 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
-  ;; Helper function to check if a list is sorted
-  (define (sorted? lst)
-    (andmap (lambda (pair) (<= (car pair) (cdr pair)))
-            (map list lst (rest lst))))
-  
-  ;; Calculate the length of the list
   (define n (length nums))
-  
-  ;; Generate all possible right shifts of the list
-  (define (right-shifts lst)
-    (for/list ([i (in-range n)])
-      (append (drop lst i) (take lst i))))
-  
-  ;; Find the first valid shift that results in a sorted list
-  (define (find-valid-shift shifts)
-    (for/first ([shift shifts] #:when (sorted? shift))
-      (modulo (- n (index-of shifts shift)) n)))
-  
-  ;; Main logic
-  (if (sorted? nums)
-      0
-      (or (find-valid-shift (right-shifts nums)) -1)))
+  (define sorted-nums (sort nums <))
 
-;; Helper function to find the index of an element in a list
-(define (index-of lst elem)
-  (for/first ([x lst] [i (in-naturals)] #:when (equal? x elem))
-    i))
+  (define (is-sorted? lst)
+    (andmap (lambda (i) (<= (list-ref lst i) (list-ref lst (add1 i))))
+            (range 0 (sub1 (length lst)))))
+
+  (define (shift lst k)
+    (append (drop lst k) (take lst k)))
+
+  (define (find-shift lst sorted k)
+    (if (is-sorted? (shift lst k))
+        k
+        (if (= k n)
+            -1
+            (find-shift lst sorted (add1 k)))))
+
+  (if (is-sorted? nums)
+      0
+      (find-shift nums sorted-nums 1)))
+
+;; Example usage
+(minimumRightShifts '(3 4 5 1 2)) ; Output: 2
+(minimumRightShifts '(1 3 5))     ; Output: 0
+(minimumRightShifts '(2 1 4))     ; Output: -1
 
 (require rackunit)
 

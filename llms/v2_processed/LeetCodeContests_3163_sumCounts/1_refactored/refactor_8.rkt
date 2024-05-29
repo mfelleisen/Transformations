@@ -28,7 +28,7 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
-  ;; Auxiliary function to calculate the sum of squares of distinct counts for subarrays starting at index i
+  ;; Function to calculate the sum of squares of distinct counts for all subarrays starting at index i
   (define (sum-from-i i)
     (let loop ([j i] [seen (set)] [total 0])
       (if (= j (length nums))
@@ -43,9 +43,9 @@
   (for/sum ([i (in-range (length nums))])
     (sum-from-i i)))
 
-;; Example usage:
-(sumCounts '(1 2 1)) ;; Output: 15
-(sumCounts '(1 1))   ;; Output: 3
+;; Examples
+(sumCounts '(1 2 1))  ; => 15
+(sumCounts '(1 1))    ; => 3
 
 (require rackunit)
 

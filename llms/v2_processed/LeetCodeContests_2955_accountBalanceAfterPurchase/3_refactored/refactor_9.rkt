@@ -20,15 +20,15 @@
 (define (accountBalanceAfterPurchase purchaseAmount)
   ;; Define the initial balance
   (define initial-balance 100)
-  ;; Calculate the rounded amount
+  
+  ;; Calculate the rounded amount using a more idiomatic approach
   (define rounded-amount
-    (let* ([lower-bound (* (quotient purchaseAmount 10) 10)]
-           [upper-bound (+ lower-bound 10)]
-           [lower-diff (- purchaseAmount lower-bound)]
-           [upper-diff (- upper-bound purchaseAmount)])
-      (if (< lower-diff upper-diff)
-          lower-bound
-          upper-bound)))
+    (match (modulo purchaseAmount 10)
+      [5 (ceiling (/ purchaseAmount 10))]
+      [n (if (< n 5)
+             (* 10 (quotient purchaseAmount 10))
+             (* 10 (ceiling (/ purchaseAmount 10))))]))
+  
   ;; Calculate and return the new balance after the purchase
   (- initial-balance rounded-amount))
 

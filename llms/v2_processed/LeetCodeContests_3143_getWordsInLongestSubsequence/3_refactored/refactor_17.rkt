@@ -31,35 +31,27 @@
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
 (define (getWordsInLongestSubsequence n words groups)
-  (define (group-differs? prev curr)
-    (not (= prev curr)))
-  
-  (define (next-different-group-index start groups)
-    (let loop ([i start])
-      (cond
-        [(>= i n) '()]  ; End of list
-        [(group-differs? (list-ref groups (sub1 i)) (list-ref groups i)) (cons i (loop (add1 i)))]
-        [else (loop (add1 i))])))
+  ;; Helper function to process subsequence
+  (define (process-subsequence words groups)
+    (define-values (result _)
+      (for/fold ([acc '()] [last-group (first groups)]) ([i (in-range 1 n)])
+        (define current-group (list-ref groups i))
+        (define current-word (list-ref words i))
+        (if (not (= current-group last-group))
+            (values (cons current-word acc) current-group)
+            (values acc last-group))))
+    (reverse (cons (first words) result)))
 
-  (define (build-subsequence words indices)
-    (map (λ (i) (list-ref words i)) indices))
-
-  (define subsequence-indices
-    (foldl (λ (i acc)
-             (if (or (null? acc) (group-differs? (list-ref groups (last acc)) (list-ref groups i)))
-                 (append acc (list i))
-                 acc))
-           '()
-           (range n)))
-
-  (build-subsequence words subsequence-indices))
+  ;; Edge case: If n is 0, return an empty list
+  (if (= n 0)
+      '()
+      (process-subsequence words groups)))
 
 ;; Example usage:
 (define n 4)
 (define words '("a" "b" "c" "d"))
 (define groups '(1 0 1 1))
 (getWordsInLongestSubsequence n words groups)  ; Output: '("a" "b" "c")
-
 
 (require rackunit)
 

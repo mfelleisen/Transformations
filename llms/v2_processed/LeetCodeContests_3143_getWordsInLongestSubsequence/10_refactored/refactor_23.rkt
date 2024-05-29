@@ -31,15 +31,20 @@
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
 (define (getWordsInLongestSubsequence n words groups)
-  (define (aux idx last-group acc)
-    (if (>= idx n)
-        (reverse acc)
-        (let ([current-word (list-ref words idx)]
-              [current-group (list-ref groups idx)])
-          (if (not (= current-group last-group))
-              (aux (add1 idx) current-group (cons current-word acc))
-              (aux (add1 idx) last-group acc)))))
-  (aux 1 (first groups) (list (first words))))
+  ;; Helper function to traverse the list and find the longest subsequence
+  (define (find-subsequence words groups)
+    (for/fold ([subseq '()]
+               [last-group (first groups)])
+              ([current-word (in-list (rest words))]
+               [current-group (in-list (rest groups))])
+      (if (not (= current-group last-group))
+          (values (append subseq (list current-word)) current-group)
+          (values subseq last-group))))
+  
+  ;; Return the subsequence starting with the first word
+  (if (zero? n)
+      '()
+      (find-subsequence words groups)))
 
 ;; Example usage:
 (define n 4)

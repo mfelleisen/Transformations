@@ -30,32 +30,31 @@
 ;;  * 0 <= coordinates[i][1] < n
 ;;  * It is guaranteed that coordinates contains pairwise distinct coordinates.
 (define (countBlackBlocks m n coordinates)
-  ;; Initialize a hash to store the count of black cells in each potential 2x2 block's top-left corner.
+  ;; Helper function to update the block count
+  (define (update-block-count block-count x y)
+    (for ([dx (in-list (list -1 0))]
+          [dy (in-list (list -1 0))]
+          #:when (and (<= 0 (+ x dx) (- m 2))
+                      (<= 0 (+ y dy) (- n 2))))
+      (hash-update! block-count (cons (+ x dx) (+ y dy)) add1 0)))
+
+  ;; Create a hash table to count black cells in each potential 2x2 block's top-left corner.
   (define block-count (make-hash))
 
-  ;; Update the block counts for each coordinate.
-  (for-each
-    (lambda (coord)
-      (define x (first coord))
-      (define y (second coord))
-      ;; Helper function to update the block count for a specific top-left corner.
-      (define (update-block i j)
-        (hash-update! block-count (cons i j) add1 0))
-      ;; Check and update all possible 2x2 blocks that the cell (x, y) can be a part of.
-      (when (> x 0) (when (> y 0) (update-block (- x 1) (- y 1))))
-      (when (> x 0) (when (< y (- n 1)) (update-block (- x 1) y)))
-      (when (< x (- m 1)) (when (> y 0) (update-block x (- y 1))))
-      (when (< x (- m 1)) (when (< y (- n 1)) (update-block x y))))
-    coordinates)
+  ;; Iterate over each coordinate and update the block counts.
+  (for-each (λ (coord)
+              (define x (first coord))
+              (define y (second coord))
+              (update-block-count block-count x y))
+            coordinates)
 
-  ;; Initialize a vector to store counts of blocks with 0, 1, 2, 3, and 4 black cells.
+  ;; Initialize a list to store counts of blocks with 0, 1, 2, 3, and 4 black cells.
   (define result (make-vector 5 0))
 
   ;; Count blocks by number of black cells they contain.
-  (for-each
-    (lambda (count)
-      (vector-set! result count (add1 (vector-ref result count))))
-    (hash-values block-count))
+  (hash-for-each block-count
+                 (λ (key value)
+                   (vector-set! result value (add1 (vector-ref result value)))))
 
   ;; Calculate the total number of 2x2 blocks in the grid.
   (define total-blocks (* (- m 1) (- n 1)))

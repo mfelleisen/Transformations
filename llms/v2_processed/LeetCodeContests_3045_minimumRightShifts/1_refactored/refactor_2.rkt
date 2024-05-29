@@ -24,19 +24,24 @@
 (define (minimumRightShifts nums)
   (define n (length nums))
   
-  (define sorted-nums (sort nums <))
+  (define (sorted? lst)
+    (andmap (lambda (p) (<= (first p) (second p)))
+            (map list lst (rest lst))))
   
-  (define (find-valid-shift start)
-    (for/first ([i (in-range n)])
-      (and (equal? (list-ref nums (modulo (+ start i) n))
-                   (list-ref sorted-nums i))
-           (modulo (- n start) n))))
+  (define (try-shift k)
+    (define rotated (append (drop nums (- n k)) (take nums (- n k))))
+    (if (sorted? rotated)
+        k
+        #f))
   
-  (define (check-all-starts)
-    (for/first ([start (in-range n)])
-      (find-valid-shift start)))
+  (define result
+    (for/first ([k (in-range n)])
+      (try-shift k)))
   
-  (or (check-all-starts) -1))
+  (if result
+      result
+      -1))
+
 
 (require rackunit)
 

@@ -33,22 +33,23 @@
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
 
-  ;; Helper function to generate the next number to be added to the array
-  (define (next-valid-num seen candidate)
-    (if (ormap (lambda (num) (= (+ num candidate) target)) seen)
-        (next-valid-num seen (+ candidate 1))
-        candidate))
+  ;; Helper function to calculate the sum of the first m natural numbers
+  (define (sum-of-numbers m)
+    (quotient (* m (+ m 1)) 2))
 
-  ;; Recursive function to build the beautiful array
-  (define (build-beautiful-nums seen candidate count sum)
-    (if (= count n)
-        sum
-        (let* ([next (next-valid-num seen candidate)]
-               [new-sum (+ sum next)])
-          (build-beautiful-nums (cons next seen) (+ next 1) (+ count 1) new-sum))))
+  ;; Calculate the largest k such that k < target / 2
+  (define k (quotient (sub1 target) 2))
 
-  ;; Compute the sum of the beautiful array and take modulo
-  (modulo (build-beautiful-nums '() 1 0 0) MOD))
+  ;; Calculate the total sum
+  (define total-sum
+    (if (<= n k)
+        (sum-of-numbers n)
+        (+ (sum-of-numbers k)
+           (sum-of-numbers (- n k))
+           (* k (- n k)))))
+
+  ;; Return the total sum modulo MOD
+  (modulo total-sum MOD))
 
 ;; Example test cases
 (minimumPossibleSum 2 3)   ; Output: 4

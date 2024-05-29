@@ -26,25 +26,23 @@
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion grid)
   ;; Determine the potential champion by iterating through teams
-  (define (find-potential-champion n)
-    (let iter ([i 1] [potential-champion 0])
-      (if (= i n)
-          potential-champion
-          (iter (add1 i)
-                (if (= (vector-ref (vector-ref grid potential-champion) i) 1)
-                    potential-champion
-                    i)))))
+  (define (find-potential-champion grid)
+    (for/fold ([champion 0]) ([i (in-range 1 (vector-length grid))])
+      (if (positive? (vector-ref (vector-ref grid champion) i))
+          champion
+          i)))
 
   ;; Verify that the potential champion is indeed the champion
-  (define (verify-champion potential-champion n)
-    (for/or ([j (in-range n)])
+  (define (verify-champion grid potential-champion)
+    (for/or ([j (in-range (vector-length grid))])
       (and (not (= j potential-champion))
-           (= (vector-ref (vector-ref grid j) potential-champion) 1))))
+           (positive? (vector-ref (vector-ref grid j) potential-champion)))
+      #false))
 
   ;; Main function body
   (let* ((n (vector-length grid))
-         (potential-champion (find-potential-champion n)))
-    (if (verify-champion potential-champion n)
+         (potential-champion (find-potential-champion grid)))
+    (if (verify-champion grid potential-champion)
         -1
         potential-champion)))
 

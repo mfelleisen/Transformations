@@ -18,9 +18,10 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (remainder n i)))
-    (sqr (list-ref nums (sub1 i)))))
+  (for/fold ([sum 0]) ([i (in-range 1 (add1 n))])
+    (if (zero? (modulo n i))
+        (+ sum (sqr (list-ref nums (sub1 i))))
+        sum)))
 
 (require rackunit)
 

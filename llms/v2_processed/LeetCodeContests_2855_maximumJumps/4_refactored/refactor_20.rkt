@@ -35,18 +35,22 @@
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
   (define n (length nums))
-  (define okay? (lambda (i j) (<= (abs (- (list-ref nums j) (list-ref nums i))) target)))
+  (define dp (make-vector n -inf.0))
+  (define (abs-diff a b) (abs (- a b)))
 
-  (define (find-max-jumps idx)
-    (cond
-      [(>= idx (sub1 n)) -1]
-      [else
-       (for/fold ([max-jump -1])
-                 ([j (in-range (add1 idx) n)]
-                  #:when (okay? idx j))
-         (max max-jump (add1 (find-max-jumps j))))]))
+  (define (update-dp i j)
+    (when (<= (abs-diff (list-ref nums j) (list-ref nums i)) target)
+      (vector-set! dp j (max (vector-ref dp j) (add1 (vector-ref dp i))))))
 
-  (if (<= (find-max-jumps 0) 0) -1 (find-max-jumps 0)))
+  (for ([i (in-range n)])
+    (when (not (= (vector-ref dp i) -inf.0))
+      (for ([j (in-range (add1 i) n)])
+        (update-dp i j))))
+
+  (let ([last-jump (vector-ref dp (sub1 n))])
+    (if (= last-jump -inf.0)
+        -1
+        last-jump)))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

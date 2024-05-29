@@ -23,16 +23,15 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; This function simulates the combination of elements from the end of the list
-  ;; to the beginning, effectively folding the list into a single maximum value.
+  ;; Helper function to recursively combine elements from the end of the list
   (define (combine-nums lst acc)
-    (if (null? lst)
-        acc
-        (let ((current (car lst))
-              (remaining (cdr lst)))
-          (if (<= current acc)
-              (combine-nums remaining (+ current acc))
-              (combine-nums remaining current)))))
+    (match lst
+      [(list) acc] ;; If the list is empty, return the accumulated value
+      [(list x) (max x acc)] ;; If only one element left, return the max of the element and the accumulator
+      [(list x xs ...) ;; Otherwise, proceed with combination
+       (let ((new-acc (if (<= x acc) (+ x acc) x)))
+         (combine-nums xs new-acc))])) ;; Recursively combine the rest of the list
+  ;; Start the combination process from the full list with initial accumulator 0
   (combine-nums (reverse nums) 0))
 
 ;; Example usage:

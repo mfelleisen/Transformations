@@ -8,29 +8,56 @@
 ;;  * -target <= nums[j] - nums[i] <= target
 ;; Return the maximum number of jumps you can make to reach index n - 1.
 ;; If there is no way to reach index n - 1, return -1.
+;; Example 1:
+;; Input: nums = [1,3,6,4,1,2], target = 2
+;; Output: 3
+;; Explanation: To go from index 0 to index n - 1 with the maximum number of jumps, you can perform the following jumping sequence:
+;; - Jump from index 0 to index 1.
+;; - Jump from index 1 to index 3.
+;; - Jump from index 3 to index 5.
+;; It can be proven that there is no other jumping sequence that goes from 0 to n - 1 with more than 3 jumps. Hence, the answer is 3.
+;; Example 2:
+;; Input: nums = [1,3,6,4,1,2], target = 3
+;; Output: 5
+;; Explanation: To go from index 0 to index n - 1 with the maximum number of jumps, you can perform the following jumping sequence:
+;; - Jump from index 0 to index 1.
+;; - Jump from index 1 to index 2.
+;; - Jump from index 2 to index 3.
+;; - Jump from index 3 to index 4.
+;; - Jump from index 4 to index 5.
+;; It can be proven that there is no other jumping sequence that goes from 0 to n - 1 with more than 5 jumps. Hence, the answer is 5.
+;; Example 3:
+;; Input: nums = [1,3,6,4,1,2], target = 0
+;; Output: -1
+;; Explanation: It can be proven that there is no jumping sequence that goes from 0 to n - 1. Hence, the answer is -1.
+;; Constraints:
+;;  * 2 <= nums.length == n <= 1000
+;;  * -109 <= nums[i] <= 109
+;;  * 0 <= target <= 2 * 109
 
 (define (maximumJumps nums target)
   ;; Define the length of the nums list
   (define n (length nums))
   
-  ;; Helper function to check if a jump from i to j is valid
-  (define (valid-jump? i j)
-    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
+  ;; Initialize the DP list with negative infinity, except the first element which is 0
+  (define dp (cons 0 (make-list (sub1 n) -inf.0)))
   
-  ;; Recursive function to calculate the maximum jumps from a given index
-  (define (max-jumps-from idx)
-    (define (helper current max-jumps)
-      (if (>= current n)
-          max-jumps
-          (let ([next-max (if (valid-jump? idx current)
-                              (max max-jumps (+ 1 (max-jumps-from current)))
-                              max-jumps)])
-            (helper (+ current 1) next-max))))
-    (helper (+ idx 1) 0))
+  ;; Helper function to update the dp list based on the current index i and target
+  (define (update-dp i dp)
+    (if (= (list-ref dp i) -inf.0)
+        dp  ;; If current dp[i] is -inf, no update is needed
+        ;; Otherwise, update dp for each j from i+1 to n-1
+        (for/fold ([dp dp]) ([j (in-range (add1 i) n)])
+          (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
+              (list-set dp j (max (list-ref dp j) (add1 (list-ref dp i))))
+              dp))))
   
-  ;; Start from index 0 and calculate the maximum jumps
-  (let ([result (max-jumps-from 0)])
-    (if (<= result 0) -1 result)))
+  ;; Update dp for each index from 0 to n-1
+  (define final-dp (for/fold ([dp dp]) ([i (in-range n)])
+                    (update-dp i dp)))
+  
+  ;; Check the last element of dp; if it's still -inf, return -1, otherwise return its value
+  (if (= (last final-dp) -inf.0) -1 (last final-dp)))
 
 ;; Examples
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

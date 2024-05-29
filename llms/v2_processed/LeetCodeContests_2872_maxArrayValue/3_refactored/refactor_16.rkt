@@ -27,12 +27,10 @@
   ;; from right to left, combining elements when the left one is less than or equal to the right one.
   (define (merge-right-to-left lst)
     (for/fold ([acc '()]) ([current (in-list lst)])
-      (match acc
-        ['() (list current)]
-        [(cons first rest)
-         (if (<= current first)
-             (cons (+ current first) rest)
-             (cons current acc))])))
+      (cond
+        [(and (not (empty? acc)) (<= current (first acc)))
+         (cons (+ current (first acc)) (rest acc))]
+        [else (cons current acc)])))
   ;; The largest element after all possible merges is the maximum of the resulting list.
   (apply max (merge-right-to-left nums)))
 

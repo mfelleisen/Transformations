@@ -27,20 +27,15 @@
 (define (minimumCost nums)
   (define n (length nums))
   
-  ;; Helper function to calculate the possible splits
-  (define (calculate-min-cost nums n)
-    (for*/fold ([min-cost +inf.0])
-               ([i (in-range 1 (- n 1))]
-                [j (in-range (+ i 1) n)])
-      (let ([cost (+ (first nums)
-                     (list-ref nums i)
-                     (list-ref nums j))])
-        (min min-cost cost))))
-  
-  ;; Determine the minimum cost based on the number of elements
+  ;; When the array has exactly 3 elements, the cost is simply the sum of all elements
   (if (= n 3)
       (apply + nums)
-      (calculate-min-cost nums n)))
+      ;; Otherwise, find the minimum cost by examining possible splits
+      (for*/fold ([min-cost +inf.0])
+                 ([i (in-range 1 (- n 1))]
+                  [j (in-range (+ i 1) n)]
+                  #:when (< j n))
+        (min min-cost (+ (first nums) (list-ref nums i) (list-ref nums j))))))
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

@@ -22,30 +22,21 @@
 ;;  * 1 <= n <= 300
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
-  (define MOD (+ (expt 10 9) 7))  ; Define the modulus
+  (define MOD (+ (expt 10 9) 7))
 
-  ;; Define a helper function for modular addition
-  (define (mod-add a b)
-    (modulo (+ a b) MOD))
+  ;; Helper function to calculate the number of ways using recursion with memoization
+  (define (ways n i)
+    (if (zero? n)
+        1
+        (if (or (zero? i) (< n 0))
+            0
+            (let ([power (expt i x)])
+              (modulo (+ (ways n (- i 1))
+                         (ways (- n power) (- i 1)))
+                      MOD)))))
 
-  ;; Initialize a list to store the number of ways to express each number up to n
-  ;; using xth powers. Start with one way to make 0 (use no numbers).
-  (define dp (make-vector (+ n 1) 0))
-  (vector-set! dp 0 1)
-
-  ;; Calculate the maximum base such that base^x <= n
-  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
-
-  ;; Iterate over each possible base and update dp
-  (for ([base (in-range 1 (+ max-base 1))])
-    (define current-power (expt base x))
-    ;; Update dp values from n down to current-power
-    (for ([i (in-range n (- current-power 1) -1)])
-      (vector-set! dp i (mod-add (vector-ref dp i)
-                                 (vector-ref dp (- i current-power))))))
-
-  ;; Return the number of ways to express n
-  (vector-ref dp n))
+  (define max-base (inexact->exact (floor (expt n (/ 1.0 x)))))
+  (ways n max-base))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

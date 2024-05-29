@@ -18,9 +18,17 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
+  (define (special? i)
+    (zero? (remainder n i)))
+  (define (square x) (* x x))
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (remainder n i)))
-    (sqr (list-ref nums (sub1 i)))))
+            #:when (special? i))
+    (square (list-ref nums (sub1 i)))))
+
+;; This version uses helper functions to make the code more readable and idiomatic:
+;; - `special?` checks if an index `i` is a divisor of `n`.
+;; - `square` computes the square of a number.
+;; - `for/sum` iterates over the range from 1 to `n` and sums the squares of the special elements.
 
 (require rackunit)
 

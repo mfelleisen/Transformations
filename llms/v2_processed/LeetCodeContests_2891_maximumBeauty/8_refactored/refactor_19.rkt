@@ -25,23 +25,19 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 0 <= nums[i], k <= 105
 (define (maximumBeauty nums k)
-  ;; Helper function to generate the range of possible values for each number
-  (define (range-for num k)
-    (for/list ([i (in-range (- num k) (+ num k 1))])
-      i))
+  ;; Create a list of all possible values for each number within the range [num-k, num+k]
+  (define possible-values
+    (for*/list ([num nums]
+                [val (in-range (- num k) (+ num k 1))])
+      val))
   
-  ;; Generate all possible values for each number and flatten the list
-  (define all-possible-values
-    (apply append (map (λ (num) (range-for num k)) nums)))
-  
-  ;; Count the frequency of each possible value using a hash table
-  (define freq-map
-    (for/fold ([ht (make-hash)]) ([val all-possible-values])
-      (hash-update! ht val add1 0)
-      ht))
-  
-  ;; The result is the maximum frequency found in the hash table
-  (apply max (hash-values freq-map)))
+  ;; Count the frequency of each possible value and find the maximum frequency
+  (define frequencies
+    (for/fold ([freq (hash)]) ([val possible-values])
+      (hash-update freq val add1 0)))
+
+  ;; The result is the maximum frequency found in the hash table, which corresponds to the maximum beauty
+  (apply max (hash-values frequencies)))
 
 ;; Example usage
 (maximumBeauty '(4 6 1 2) 2)  ;; Output: 3

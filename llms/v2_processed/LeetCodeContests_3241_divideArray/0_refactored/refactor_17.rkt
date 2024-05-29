@@ -25,29 +25,30 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (define (group-of-three? group)
-    (<= (- (third group) (first group)) k))
-
-  (define (divide-helper sorted-nums)
-    (cond
-      [(< (length sorted-nums) 3) '()]  ; If fewer than 3 elements are left, return empty
-      [else
-       (let ([group (take sorted-nums 3)])  ; Take the first three elements
-         (if (group-of-three? group)  ; Check the condition
-             (cons group (divide-helper (drop sorted-nums 3)))  ; Continue with the rest
-             '()))]))  ; If condition fails, return empty
-
-  (let ([sorted-nums (sort nums <)])  ; Sort the list in ascending order
-    (divide-helper sorted-nums)))
+  ;; Sort the list in ascending order
+  (define sorted-nums (sort nums <))
+  
+  ;; Helper function to divide the list into groups of three
+  (define (divide-into-groups lst)
+    (if (empty? lst)
+        '()
+        (let ([group (take lst 3)])
+          (if (<= (- (last group) (first group)) k)
+              (cons group (divide-into-groups (drop lst 3)))
+              '()))))
+  
+  ;; Check if the division is possible and return the appropriate result
+  (let ([result (divide-into-groups sorted-nums)])
+    (if (= (length result) (/ (length nums) 3))
+        result
+        '())))
 
 ;; Helper functions to access elements of a list by index
 (define (first lst) (car lst))
 (define (second lst) (cadr lst))
 (define (third lst) (caddr lst))
+(define (last lst) (car (reverse lst)))
 
-;; Example usage
-(divideArray '(1 3 4 8 7 9 3 5 1) 2)  ; => '((1 1 3) (3 4 5) (7 8 9))
-(divideArray '(1 3 3 2 7 3) 3)        ; => '()
 
 (require rackunit)
 

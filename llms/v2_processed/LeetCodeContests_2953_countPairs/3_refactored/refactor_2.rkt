@@ -19,10 +19,13 @@
 ;;  * 0 <= k <= 100
 (define (countPairs coordinates k)
   (define (calculate-distance p1 p2)
-    (+ (bitwise-xor (first p1) (first p2)) (bitwise-xor (second p1) (second p2))))
+    ;; This helper function calculates the XOR-based distance between two points
+    (+ (bitwise-xor (first p1) (first p2)) 
+       (bitwise-xor (second p1) (second p2))))
 
-  (for*/sum ([i (in-naturals)]
-             [j (in-naturals (add1 i) (length coordinates))]
+  ;; Use a nested loop to iterate over all pairs (i, j) where i < j
+  (for*/sum ([i (in-range (length coordinates))]
+             [j (in-range (add1 i) (length coordinates))]
              #:when (= k (calculate-distance (list-ref coordinates i) (list-ref coordinates j))))
     1))
 

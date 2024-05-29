@@ -26,27 +26,25 @@
   (define (parity n)
     (modulo n 2))
   
-  ;; Define an inner function to process the scores recursively
-  (define (process-scores i prev-score prev-parity max-scores)
-    (if (= i (length nums))
-        max-scores
-        (let* ((current-num (list-ref nums i))
-               (current-parity (parity current-num))
-               (current-score (if (= prev-parity current-parity)
-                                  (+ prev-score current-num)
-                                  (- (+ prev-score current-num) x))))
-          (process-scores (add1 i)
-                          current-score
-                          current-parity
-                          (cons current-score max-scores)))))
+  ;; Initialize the dp vector with the first element and -inf for the rest
+  (define dp (make-vector (length nums) -inf.0))
+  (vector-set! dp 0 (first nums))
+
+  ;; Define a helper function to update the dp vector
+  (define (update-dp i dp)
+    (for ([j (in-range (add1 i) (length nums))])
+      (define current-score (+ (vector-ref dp i) (list-ref nums j)))
+      (when (not (= (parity (list-ref nums i)) (parity (list-ref nums j))))
+        (set! current-score (- current-score x)))
+      (when (> current-score (vector-ref dp j))
+        (vector-set! dp j current-score))))
+
+  ;; Traverse each index i and update dp accordingly
+  (for ([i (in-range (length nums))])
+    (update-dp i dp))
   
-  ;; Start processing from index 1 with initial score and parity from nums[0]
-  (define initial-score (first nums))
-  (define initial-parity (parity initial-score))
-  (define scores (process-scores 1 initial-score initial-parity (list initial-score)))
-  
-  ;; The final answer is the maximum value in the scores list
-  (apply max scores))
+  ;; Return the maximum value in the dp vector
+  (apply max (vector->list dp)))
 
 ;; Example cases
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

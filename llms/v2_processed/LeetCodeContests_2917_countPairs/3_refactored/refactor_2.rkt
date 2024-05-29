@@ -27,21 +27,22 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * -50 <= nums[i], target <= 50
 (define (countPairs nums target)
-  (define (pair-sum-less-than-target? i j)
-    (< (+ (list-ref nums i) (list-ref nums j)) target))
+  ;; Helper function to count pairs
+  (define (count-pairs-helper nums target count i)
+    (if (empty? nums)
+        count
+        (let ([current (first nums)]
+              [rest (rest nums)])
+          (count-pairs-helper rest target
+                              (+ count (for/sum ([x rest])
+                                         (if (< (+ current x) target) 1 0)))
+                              (add1 i)))))
+  ;; Start the recursive helper function
+  (count-pairs-helper nums target 0 0))
 
-  (length
-   (for*/list ([i (in-range (length nums))]
-               [j (in-range (add1 i) (length nums))]
-               #:when (pair-sum-less-than-target? i j))
-     (list i j))))
-
-;; The function `countPairs` takes a list `nums` and an integer `target`.
-;; It uses `for*/list` to generate all pairs (i, j) where i < j
-;; and the sum of `nums[i]` and `nums[j]` is less than `target`.
-;; The `#:when` clause filters pairs based on the predicate `pair-sum-less-than-target?`.
-;; Finally, `length` returns the number of such pairs.
-
+;; Example usage:
+(countPairs '(-1 1 2 3 1) 2) ; Expected output: 3
+(countPairs '(-6 2 5 -2 -7 -1 3) -2) ; Expected output: 10
 
 (require rackunit)
 

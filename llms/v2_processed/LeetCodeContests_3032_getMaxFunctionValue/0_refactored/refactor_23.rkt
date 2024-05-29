@@ -28,21 +28,18 @@
 ;;  * 0 <= receiver[i] <= n - 1
 ;;  * 1 <= k <= 1010
 (define (getMaxFunctionValue receiver k)
-  ;; Calculate the maximum value of the function f(x) for all starting players x
   (define n (length receiver))
 
-  ;; Helper function to compute f(x) for a given starting player x
   (define (calculate-f-value start)
-    (define (next-id current-id) (list-ref receiver current-id))
-    (define (f-sum current-id passes f-value)
+    (define (calculate-next-value current-id f-value passes)
       (if (= passes k)
           f-value
-          (let ([next (next-id current-id)])
-            (f-sum next (add1 passes) (+ f-value next)))))
-    (f-sum start 0 start))
+          (let ([next-id (list-ref receiver current-id)]
+                [next-f-value (+ f-value (list-ref receiver current-id))])
+            (calculate-next-value next-id next-f-value (add1 passes)))))
+    (calculate-next-value start start 0))
 
-  ;; Find the maximum f(x) for all starting players from 0 to n-1
-  (apply max (map calculate-f-value (range n))))
+  (apply max (for/list ([i (in-range n)]) (calculate-f-value i))))
 
 ;; Example tests
 (getMaxFunctionValue '(2 0 1) 4)  ; Output: 6

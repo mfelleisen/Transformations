@@ -25,23 +25,33 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Helper function to calculate cost of split and update minimum cost
-  (define (calculate-cost first second third)
-    (+ first second third))
+  ;; Helper function to compute the cost of dividing the list into 3 contiguous subarrays
+  (define (compute-cost i j)
+    (+ (list-ref nums 0)
+       (list-ref nums i)
+       (list-ref nums j)))
 
-  ;; Generate all possible splits and calculate costs
-  (define splits
-    (for*/list ([i (in-range 1 (- (length nums) 1))]
-                [j (in-range (+ i 1) (length nums))])
-      (calculate-cost (list-ref nums 0) (list-ref nums i) (list-ref nums j))))
+  ;; Helper function to generate possible indices for subarray divisions
+  (define (generate-indices n)
+    (for*/list ([i (in-range 1 (- n 1))]
+                [j (in-range (+ i 1) n)])
+      (list i j)))
 
-  ;; Find the minimum cost among all possible splits
-  (apply min splits))
+  ;; Main function logic to find the minimum cost
+  (define (find-min-cost indices)
+    (for/fold ([min-cost +inf.0]) ([idx indices])
+      (let ([cost (apply compute-cost idx)])
+        (min min-cost cost))))
 
-;; Example usage:
-(minimumCost '(1 2 3 12)) ; => 6
-(minimumCost '(5 4 3)) ; => 12
-(minimumCost '(10 3 1 1)) ; => 12
+  ;; Check for the base case where the array length is exactly 3
+  (if (= (length nums) 3)
+      (apply + nums)
+      (find-min-cost (generate-indices (length nums)))))
+
+;; Examples:
+(minimumCost '(1 2 3 12)) ;; Output: 6
+(minimumCost '(5 4 3)) ;; Output: 12
+(minimumCost '(10 3 1 1)) ;; Output: 12
 
 (require rackunit)
 

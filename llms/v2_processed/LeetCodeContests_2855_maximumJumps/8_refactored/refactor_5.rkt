@@ -35,24 +35,25 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
+  ;; Get the length of the nums list
   (define n (length nums))
-
-  ;; Helper function to update the dp values
-  (define (update-dp dp i)
-    (define current-val (list-ref dp i))
-    (if (= current-val -inf.0)
-        dp
-        (for/fold ([dp dp])
-                  ([j (in-range (add1 i) n)]
-                   #:when (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
-          (define new-val (max (list-ref dp j) (add1 current-val)))
-          (list-set dp j new-val))))
   
-  ;; Initialize dp list with negative infinity and set the first index to 0
+  ;; Define a helper function to update dp values based on the current index i
+  (define (update-dp i dp)
+    (if (not (= (list-ref dp i) -inf.0))  ;; Only proceed if the current index is reachable
+        (for/fold ([dp dp]) ([j (in-range (add1 i) n)])
+          (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
+              (list-set dp j (max (list-ref dp j) (add1 (list-ref dp i))))
+              dp))
+        dp))
+
+  ;; Initialize the dp list with negative infinity for all indices except the first one set to 0
   (define dp (cons 0 (make-list (sub1 n) -inf.0)))
 
-  ;; Fold over the range to update dp values
-  (define final-dp (for/fold ([dp dp]) ([i (in-range n)]) (update-dp dp i)))
+  ;; Process each index to update dp values
+  (define final-dp
+    (for/fold ([dp dp]) ([i (in-range n)])
+      (update-dp i dp)))
 
   ;; Check the value at the last index to determine if the end is reachable
   (define final-value (list-ref final-dp (sub1 n)))

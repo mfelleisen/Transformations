@@ -2,22 +2,23 @@
 
 (define MOD (+ 1 (expt 10 9)))
 
+;; Function to compute number of ways to express n as the sum of xth powers of unique positive integers
 (define (numberOfWays n x)
-  (define max-base (floor (expt n (/ 1 x))))
-
-  ;; Compute the powers of each base up to max-base
-  (define powers (map (λ (base) (expt base x)) (range 1 (add1 max-base))))
-
-  ;; Use a helper function with an accumulator for dynamic programming
-  (define (dp n powers)
-    (for/fold ([dp (cons 1 (make-list n 0))]) ;; Initialize dp with 1 at index 0
-              ([power powers])
-      (for/fold ([dp dp]) ([i (in-range n (- power 1) -1)])
-        (let ([new-val (modulo (+ (list-ref dp i) (list-ref dp (- i power))) MOD)])
-          (list-set dp i new-val)))))
-
-  ;; Compute the number of ways using the dp function
-  (list-ref (dp n powers) n))
+  ;; Helper function to compute the number of ways using dynamic programming
+  (define (dp n x)
+    (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
+    (define initial-dp (cons 1 (make-list n 0)))
+    
+    ;; Fold over the possible bases to compute the dp values
+    (for/fold ([dp initial-dp]) ([base (in-range 1 (+ max-base 1))])
+      (define current-power (expt base x))
+      ;; Update dp values from n down to current_power
+      (for/fold ([dp dp]) ([i (in-range n (- current-power 1) -1)])
+        (let ([new-value (modulo (+ (list-ref dp i) (list-ref dp (- i current-power))) MOD)])
+          (list-set dp i new-value)))))
+    
+  ;; Retrieve the final result from the dp list
+  (list-ref (dp n x) n))
 
 ;; Example usages
 (numberOfWays 10 2)  ;; Output: 1

@@ -14,13 +14,14 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Generate all valid candy distributions for three children and count them
+  ;; Use a higher-order function to generate and count valid distributions.
   (define (valid-distributions)
-    (for*/sum ([a (in-range (add1 (min n limit)))]
-               [b (in-range (add1 (min (- n a) limit)))]
-               #:when (<= (- n a b) limit))
-      1))  ; Count each valid distribution
-  
+    (for*/sum ([a (in-range (add1 (min n limit)))]    ; a ranges from 0 to min(n, limit)
+               [b (in-range (add1 (min (- n a) limit)))]  ; b ranges from 0 to min(n-a, limit)
+               #:when (<= (- n a b) limit))  ; Ensure the third child's candies do not exceed the limit
+      1))  ; Each valid distribution contributes 1 to the sum
+
+  ;; Return the count of valid distributions
   (valid-distributions))
 
 ;; Example usage:

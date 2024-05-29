@@ -23,14 +23,16 @@
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
   ;; Helper function to determine if the element at index i is a peak.
-  (define (is-peak? i)
-    (let ([current (list-ref mountain i)]
-          [prev (list-ref mountain (sub1 i))]
-          [next (list-ref mountain (add1 i))])
-      (and (> current prev) (> current next))))
+  (define (is-peak i left x right)
+    (and (> x left) (> x right)))
   
-  ;; Generate a list of indices from 1 to second last element index and filter peaks.
-  (filter is-peak? (range 1 (sub1 (length mountain)))))
+  ;; Traverse the list with an accumulator to collect peaks indices.
+  (for/fold ([result '()] [prev (first mountain)] [curr (second mountain)] #:result (reverse result))
+            ([next (in-list (rest (rest mountain)))]
+             [i (in-naturals 1)])
+    (if (is-peak i prev curr next)
+        (values (cons i result) curr next)
+        (values result curr next))))
 
 ;; Example usage:
 ;; (findPeaks '(1 4 3 8 5))  ; This should return '(1 3)

@@ -28,24 +28,27 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
-  ;; Helper function to calculate sum of squares of distinct counts for subarrays starting at index i
-  (define (sum-from-start i nums)
-    (define (loop j seen total)
-      (if (>= j (length nums))
-          total
-          (let* ((current-element (list-ref nums j))
-                 (updated-seen (set-add seen current-element))
-                 (distinct-count (set-count updated-seen)))
-            (loop (+ j 1) updated-seen (+ total (* distinct-count distinct-count))))))
-    (loop i (set) 0))
+  ;; This function calculates the sum of the squares of distinct counts of all subarrays of nums.
+  (define (distinct-counts-sum lst)
+    (define seen (set))
+    (for/sum ([x lst])
+      (set! seen (set-add seen x))
+      (sqr (set-count seen))))
   
-  ;; Sum the results of sum-from-start for each starting index in the array
-  (for/fold ([total-sum 0]) ([i (in-range (length nums))])
-    (+ total-sum (sum-from-start i nums))))
+  (for/sum ([suffix (in-suffix nums)])
+    (distinct-counts-sum suffix)))
 
-;; Example usage:
-(sumCounts '(1 2 1)) ;; Output: 15
-(sumCounts '(1 1))   ;; Output: 3
+;; Helper function to generate suffixes of a list
+(define (in-suffix lst)
+  (define (suffix-helper lst)
+    (if (null? lst)
+        '()
+        (cons lst (suffix-helper (cdr lst)))))
+  (suffix-helper lst))
+
+;; Test cases
+(sumCounts '(1 2 1)) ; => 15
+(sumCounts '(1 1))   ; => 3
 
 (require rackunit)
 

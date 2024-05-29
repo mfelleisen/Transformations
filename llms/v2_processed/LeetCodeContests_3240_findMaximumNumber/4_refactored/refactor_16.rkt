@@ -31,20 +31,20 @@
 (define (findMaximumNumber k x)
   ;; Helper function to calculate the price of a number based on its binary representation
   (define (price-of num)
-    (let* ((bin-rep (number->string num 2))  ; Convert number to binary string
-           (indices (build-list (string-length bin-rep) values)))  ; Create a list of indices
-      (for/sum ([i indices])
-        (if (and (= (modulo (+ i 1) x) 0)  ; Check if position (1-indexed) is multiple of x
-                 (char=? (string-ref bin-rep (- (string-length bin-rep) i 1)) #\1))  ; Check if bit is set
-            1
-            0))))
+    (define bin-rep (number->string num 2))  ; Convert number to binary string
+    (define len (string-length bin-rep))  ; Length of the binary representation
+    (for/sum ([i (in-range len)])
+      (if (and (= (modulo (+ i 1) x) 0)  ; Check if position (1-indexed) is multiple of x
+               (char=? (string-ref bin-rep (- len i 1)) #\1))  ; Check if bit is set
+          1
+          0)))
 
-  ;; Recursive helper function to find the maximum number
+  ;; Tail-recursive helper function to find the maximum number
   (define (find-max num current-sum)
-    (let ((new-price (price-of num)))
-      (if (> (+ current-sum new-price) k)  ; Check if adding the new price exceeds k
-          (- num 1)  ; Return the previous number
-          (find-max (+ num 1) (+ current-sum new-price)))))  ; Recurse with incremented number and updated sum
+    (define new-price (price-of num))
+    (if (> (+ current-sum new-price) k)  ; Check if adding the new price exceeds k
+        (- num 1)  ; Return the previous number
+        (find-max (+ num 1) (+ current-sum new-price))))  ; Recurse with incremented number and updated sum
 
   ;; Start the recursive search from number 1 with an initial sum of 0
   (find-max 1 0))

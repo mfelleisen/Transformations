@@ -16,12 +16,12 @@
 ;; Constraints:
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
-(define (sumOfSquares nums)
+(define (sumOfSquares nums) ;; contract sumOfSquares/c
   (define n (length nums))
+  (define (special? i) (zero? (modulo n i)))
   (define (square x) (* x x))
-
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (modulo n i)))
+            #:when (special? i))
     (square (list-ref nums (sub1 i)))))
 
 ;; Example usage:

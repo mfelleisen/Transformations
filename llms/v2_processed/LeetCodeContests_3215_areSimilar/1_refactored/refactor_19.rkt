@@ -25,39 +25,46 @@
 ;; 1 <= mat[i][j] <= 25
 ;; 1 <= k <= 50
 (define (areSimilar mat k)
-  ;; Helper function to perform right cyclic shift
-  (define (right-shift row k)
+  ;; Helper function to perform cyclic shifts
+  (define (cyclic-shift row shifts direction)
     (define len (length row))
-    (define shifts (modulo k len))
-    (append (take-right row shifts) (drop-right row shifts)))
+    (define effective-shifts (modulo shifts len))
+    (define split-index (if (eq? direction 'right)
+                            (- len effective-shifts)
+                            effective-shifts))
+    (append (drop row split-index) (take row split-index)))
 
-  ;; Helper function to perform left cyclic shift
-  (define (left-shift row k)
-    (define len (length row))
-    (define shifts (modulo k len))
-    (append (drop row shifts) (take row shifts)))
-  
+  ;; Function to apply appropriate shift depending on the row index
+  (define (process-row idx row)
+    (if (even? idx)
+        (cyclic-shift row k 'left)
+        (cyclic-shift row k 'right)))
+
   ;; Transform the matrix by applying shifts
   (define transformed-mat
-    (map-indexed
-     (lambda (row idx)
-       (if (even? idx)
-           (left-shift row k)
-           (right-shift row k)))
-     mat))
+    (map-indexed process-row mat))
   
   ;; Compare initial and final matrices
   (equal? mat transformed-mat))
 
-;; The function `map-indexed` using `for/list` and `in-indexed`
+;; The function `map-indexed` is not built-in in Racket, so we define it using `map` and `in-indexed`
 (define (map-indexed f lst)
-  (for/list ([item lst] [idx (in-naturals)])
-    (f item idx)))
+  (for/list ([item lst]
+             [idx (in-naturals)])
+    (f idx item)))
 
-;; Test cases
-(areSimilar '((1 2 1 2) (5 5 5 5) (6 3 6 3)) 2) ;; should return #true
-(areSimilar '((2 2) (2 2)) 3) ;; should return #true
-(areSimilar '((1 2)) 1) ;; should return #false
+;; Example usage
+(define mat1 '((1 2 1 2) (5 5 5 5) (6 3 6 3)))
+(define k1 2)
+(areSimilar mat1 k1) ;; Expected output: #t
+
+(define mat2 '((2 2) (2 2)))
+(define k2 3)
+(areSimilar mat2 k2) ;; Expected output: #t
+
+(define mat3 '((1 2)))
+(define k3 1)
+(areSimilar mat3 k3) ;; Expected output: #f
 
 (require rackunit)
 

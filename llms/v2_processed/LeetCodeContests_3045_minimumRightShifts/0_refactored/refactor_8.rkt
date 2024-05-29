@@ -23,22 +23,18 @@
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
   (define n (length nums))
+  
   (define sorted-nums (sort nums <))
 
-  (define (is-valid-shift start)
-    (andmap
-     (λ (i)
-       (= (list-ref nums (modulo (+ start i) n))
-          (list-ref sorted-nums i)))
-     (range n)))
+  ;; Helper function to check if a given shift aligns nums with sorted-nums
+  (define (is-valid-shift k)
+    (for/and ([i (in-range n)])
+      (= (list-ref nums (modulo (+ k i) n))
+         (list-ref sorted-nums i))))
 
-  (define (find-shift start)
-    (cond
-      [(= start n) -1]
-      [(is-valid-shift start) (modulo (- n start) n)]
-      [else (find-shift (+ start 1))]))
-
-  (find-shift 0))
+  ;; Find the minimum shift that aligns nums with sorted-nums
+  (for/first ([k (in-range n)] #:when (is-valid-shift k))
+    (modulo (- n k) n) -1))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2

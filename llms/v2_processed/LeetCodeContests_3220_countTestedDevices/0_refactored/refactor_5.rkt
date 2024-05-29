@@ -30,18 +30,18 @@
 ;; 1 <= n == batteryPercentages.length <= 100 
 ;; 0 <= batteryPercentages[i] <= 100
 (define (countTestedDevices batteryPercentages)
-  ;; Helper function to simulate the testing and battery reduction process.
-  (define (test-devices lst tested-count delta)
-    (match lst
-      [(list) tested-count]  ; If the list is empty, return the count of tested devices.
-      [(cons first rest)
-       (if (> (- first delta) 0)
-           ;; If the device is tested, reduce the battery of subsequent devices and increment the tested count.
-           (test-devices rest (add1 tested-count) (add1 delta))
-           ;; If the device is not tested, just proceed to the next device.
-           (test-devices rest tested-count delta))]))
+  ;; A helper function to simulate the testing and battery reduction process.
+  (define (test-devices lst)
+    (define-values (count _)
+      (for/fold ([tested-count 0] [delta 0])
+                ([x (in-list lst)])
+        (if (> (- x delta) 0)
+            (values (add1 tested-count) (add1 delta))
+            (values tested-count delta))))
+    count)
+
   ;; Start the recursive testing process with the full list and an initial count of 0.
-  (test-devices batteryPercentages 0 0))
+  (test-devices batteryPercentages))
 
 ;; Example usage:
 (countTestedDevices '(1 1 2 1 3))  ; Output: 3

@@ -18,9 +18,17 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
+  (define (is-divisor? i) (zero? (modulo n i)))
+  (define (special-square i) (sqr (list-ref nums (sub1 i))))
+  
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (remainder n i)))
-    (sqr (list-ref nums (sub1 i)))))
+            #:when (is-divisor? i))
+    (special-square i)))
+
+;; The function uses `for/sum` to iterate over indices from 1 to n and sum the squares of
+;; elements at indices that are divisors of n.
+;; `is-divisor?` is a helper function to check if i is a divisor of n.
+;; `special-square` is a helper function to compute the square of the special element at index i-1 (0-based index).
 
 (require rackunit)
 

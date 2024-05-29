@@ -21,18 +21,21 @@
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (hasTrailingZeros nums)
-  ;; Define a helper function to check if a number has trailing zeros
+  ;; Check if any combination of two different elements from `nums`
+  ;; has a bitwise OR result with at least one trailing zero.
+  
+  ;; Define a helper function to check if a number has at least one trailing zero
   (define (has-trailing-zero? x)
-    (even? x))
-
-  ;; Use a nested loop with for*/list to generate all pairs of numbers
-  ;; and check if their bitwise OR has at least one trailing zero
-  (ormap (lambda (pair)
-           (has-trailing-zero? (bitwise-ior (first pair) (second pair))))
-         (for*/list ([i (in-list nums)]
-                     [j (in-list nums)]
-                     #:when (not (eq? i j)))
-           (list i j))))
+    (zero? (bitwise-and x 1)))
+  
+  ;; Use nested `for` loops to generate all combinations of two different elements from `nums`
+  ;; and check if any combination has at least one trailing zero
+  (for/first ([i (in-list nums)]
+              [j (in-list nums)]
+              #:when (not (= i j))
+              #:when (has-trailing-zero? (bitwise-ior i j)))
+    #t)
+  #f)
 
 ;; Example usage:
 (hasTrailingZeros '(1 2 3 4 5))  ; Output: #t

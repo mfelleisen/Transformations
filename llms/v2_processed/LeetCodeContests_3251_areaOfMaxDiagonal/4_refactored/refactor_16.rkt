@@ -28,34 +28,30 @@
   ;; Define a function to calculate the area of a rectangle.
   (define (area length width)
     (* length width))
-  
-  ;; Use fold to iterate through the list and find the rectangle with the maximum diagonal or area.
-  (define (update-max-values dim acc)
-    (let* ((length (first dim))
-           (width (second dim))
-           (current-diagonal (diagonal-squared length width))
-           (current-area (area length width))
-           (max-diagonal (first acc))
-           (max-area (second acc)))
-      (cond
-        ;; Check if current diagonal is greater than the max diagonal found so far
-        ((> current-diagonal max-diagonal)
-         (list current-diagonal current-area))
-        ;; If diagonals are the same, check if the current area is greater than the max area found so far
-        ((and (= current-diagonal max-diagonal) (> current-area max-area))
-         (list max-diagonal current-area))
-        ;; Otherwise, keep the previous maximums
-        (else
-         acc))))
 
-  ;; Initial accumulator with 0 for diagonal and 0 for area
-  (define initial-acc (list 0 0))
+  ;; Find the rectangle with the maximum diagonal (squared) and, in case of ties, the maximum area.
+  (define (max-rect a b)
+    (match-define (list l1 w1) a)
+    (match-define (list l2 w2) b)
+    (define d1 (diagonal-squared l1 w1))
+    (define d2 (diagonal-squared l2 w2))
+    (define a1 (area l1 w1))
+    (define a2 (area l2 w2))
+    (cond
+      [(> d1 d2) a]
+      [(< d1 d2) b]
+      [else (if (> a1 a2) a b)]))
 
-  ;; Fold over the dimensions to find the maximum diagonal and area
-  (define result (foldl update-max-values initial-acc dimensions))
+  ;; Fold the list with the max-rect comparison function.
+  (define (find-max-rect rects)
+    (foldl max-rect (first rects) (rest rects)))
 
-  ;; Extract the maximum area from the result
-  (second result))
+  ;; Extract the area from the rectangle with the maximum diagonal.
+  (define (extract-area rect)
+    (match rect
+      [(list l w) (area l w)]))
+
+  (extract-area (find-max-rect dimensions)))
 
 ;; Example usage:
 (areaOfMaxDiagonal '((9 3) (8 6)))  ;; Output: 48

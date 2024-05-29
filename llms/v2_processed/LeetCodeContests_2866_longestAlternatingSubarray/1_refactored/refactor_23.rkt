@@ -28,37 +28,28 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
-  ;; Helper function to check if a number is even.
-  (define (even? x)
-    (= (modulo x 2) 0))
+  ;; Check if a number is even
+  (define (even? num)
+    (= (modulo num 2) 0))
 
-  ;; Helper function to determine if two numbers have alternating parity.
+  ;; Check if two numbers alternate in parity
   (define (alternating-parity? a b)
     (not (= (modulo a 2) (modulo b 2))))
 
-  ;; Fold over the list to find the longest alternating subarray.
-  (define (find-longest lst)
-    (let loop ([lst lst] [max-length 0] [current-length 0] [last-num #f])
-      (match lst
-        [(cons x xs)
-         (cond
-           ;; If x is greater than the threshold, reset the current length.
-           [(> x threshold)
-            (loop xs max-length 0 #f)]
-           ;; If the current number is even and the last number was #f (start of a new subarray)
-           ;; or the current number alternates parity with the last number,
-           ;; increment the current length.
-           [(or (and (even? x) (not last-num))
-                (and last-num (alternating-parity? last-num x)))
-            (loop xs (max max-length (add1 current-length)) (add1 current-length) x)]
-           ;; Otherwise, reset the current length.
-           [else
-            (loop xs max-length 0 #f)])]
-        [_ max-length])))
+  ;; Main logic to find the longest alternating subarray
+  (define (find-max-length nums)
+    (for/fold ([max-length 0]) ([i (in-list nums)] [next (in-list (append (rest nums) '(100)))])
+      (if (and (<= i threshold)
+               (even? i))
+          (let loop ([r (rest nums)] [current-length 1] [prev i])
+            (if (and (not (empty? r))
+                     (<= (first r) threshold)
+                     (alternating-parity? prev (first r)))
+                (loop (rest r) (+ current-length 1) (first r))
+                (max max-length current-length)))
+          max-length)))
 
-  ;; Filter the input list to only include numbers less than or equal to the threshold,
-  ;; then find the longest alternating subarray.
-  (find-longest (filter (λ (x) (<= x threshold)) nums)))
+  (find-max-length nums))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3

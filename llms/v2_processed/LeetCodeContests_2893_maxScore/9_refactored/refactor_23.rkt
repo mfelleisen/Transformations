@@ -22,27 +22,31 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  (define n (length nums))
-
-  (define (parity n) (modulo n 2))
-
-  (define (max-score-aux i prev-score prev-parity dp)
-    (if (>= i n)
-        (apply max prev-score (vector->list dp))
-        (let* ([current-num (list-ref nums i)]
-               [current-parity (parity current-num)]
-               [score-without-penalty (+ prev-score current-num)]
-               [score-with-penalty (- score-without-penalty x)]
-               [max-score (if (= prev-parity current-parity)
-                              score-without-penalty
-                              score-with-penalty)]
-               [best-score (max (vector-ref dp i) max-score)])
-          (vector-set! dp i best-score)
-          (max-score-aux (+ i 1) best-score current-parity dp))))
-
-  (define dp (make-vector n -inf.0))
-  (vector-set! dp 0 (first nums))
-  (max-score-aux 1 (first nums) (parity (first nums)) dp))
+  ;; Define a helper function to calculate the score with penalty if needed
+  (define (score-with-penalty current-score next-score current-val next-val)
+    (if (not (= (modulo current-val 2) (modulo next-val 2)))
+        (- (+ current-score next-score) x)
+        (+ current-score next-score)))
+  
+  ;; Use a hash table to store the maximum scores for each position
+  (define dp (make-hash))
+  (hash-set! dp 0 (first nums))
+  
+  ;; Define a function to update the dp hash table
+  (define (update-dp i)
+    (for ([j (in-range (add1 i) (length nums))])
+      (let* ([current-val (list-ref nums i)]
+             [next-val (list-ref nums j)]
+             [current-score (hash-ref dp i 0)]
+             [new-score (score-with-penalty current-score next-val current-val next-val)])
+        (hash-update! dp j (lambda (old-score) (max old-score new-score)) new-score))))
+  
+  ;; Iterate over each position to fill the dp hash table
+  (for ([i (in-range (length nums))])
+    (update-dp i))
+  
+  ;; Return the maximum score from the dp hash table
+  (apply max (hash-values dp)))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

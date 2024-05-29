@@ -27,26 +27,26 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  ;; Helper function to find the minimum absolute difference
-  ;; with at least x indices apart using accumulators.
-  (let loop ([i 0] [min-diff +inf.0])
-    (if (>= i (- (length nums) x))
-        ;; If index i reaches the limit where it cannot have a pair x indices apart, return the result.
-        min-diff
-        (let inner-loop ([j (+ i x)] [current-min-diff min-diff])
-          ;; Inner loop to compare the element at index i with elements at least x indices apart.
-          (if (>= j (length nums))
-              ;; If j exceeds the length of the array, continue with the next i.
-              (loop (add1 i) current-min-diff)
-              (let* ((diff (abs (- (list-ref nums i) (list-ref nums j))))
-                     ;; Calculate the absolute difference.
-                     (new-min (min diff current-min-diff)))
-                ;; Update the minimum difference if the current difference is smaller.
-                (if (zero? new-min)
-                    ;; If the difference is zero, return immediately as it is the smallest possible difference.
-                    0
-                    (inner-loop (add1 j) new-min))))))))
+  (define n (length nums))
+  (define initial-seen (set (take nums x)))
 
+  (define (update-seen seen i)
+    (if (< i n)
+        (set-add (set-remove seen (list-ref nums (- i x))) (list-ref nums i))
+        seen))
+
+  (define (calculate-min-diff seen i min-diff)
+    (if (>= i n)
+        min-diff
+        (let* ((current-num (list-ref nums i))
+               (closest (for/fold ([closest +inf.0])
+                                   ([num (in-set seen)])
+                             (min closest (abs (- current-num num))))))
+          (calculate-min-diff (update-seen seen (add1 i))
+                              (add1 i)
+                              (min min-diff closest)))))
+
+  (calculate-min-diff initial-seen x +inf.0))
 
 (require rackunit)
 

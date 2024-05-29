@@ -18,23 +18,19 @@
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
-  ;; Define the initial balance
   (define initial-balance 100)
-  
-  ;; Compute the rounded amount
+  (define lower-bound (* (quotient purchaseAmount 10) 10))
+  (define upper-bound (+ lower-bound 10))
   (define rounded-amount
-    (let* ((lower-bound (* (quotient purchaseAmount 10) 10))
-           (upper-bound (+ lower-bound 10)))
-      (if (<= (- upper-bound purchaseAmount) (- purchaseAmount lower-bound))
-          upper-bound
-          lower-bound)))
-  
-  ;; Calculate the new balance
+    (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
+        lower-bound
+        upper-bound))
   (- initial-balance rounded-amount))
 
 ;; Example usage:
 ;; (accountBalanceAfterPurchase 9)  ; Output: 90
 ;; (accountBalanceAfterPurchase 15) ; Output: 80
+
 
 (require rackunit)
 

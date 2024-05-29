@@ -25,19 +25,24 @@
 (define (maxArrayValue nums)
   ;; This function simulates the operation of combining elements from right to left
   ;; to maximize the largest possible value.
-  (define (combine-nums lst)
-    ;; Fold the list from the right, combining elements as per the given rules
-    (foldr (lambda (current acc)
-             (if (and (pair? acc) (<= current (car acc)))
-                 ;; If current element is less than or equal to the first element of accumulator,
-                 ;; combine them into one element and continue
-                 (cons (+ current (car acc)) (cdr acc))
-                 ;; Otherwise, just add the current element to the front of accumulator
-                 (cons current acc)))
-           '()  ;; Start with an empty list as the accumulator
-           lst))
+  
+  ;; Recursive helper function to combine elements
+  (define (combine-nums lst acc)
+    (match lst
+      ;; If the list is empty, return the accumulator
+      ['() acc]
+      ;; If the current element is less than or equal to the first element of accumulator,
+      ;; combine them into one element and continue
+      [(cons current rest)
+       (match acc
+         ['() (combine-nums rest (list current))]
+         [(cons first rest-acc)
+          (if (<= current first)
+              (combine-nums rest (cons (+ current first) rest-acc))
+              (combine-nums rest (cons current acc)))])]))
+
   ;; Return the maximum value from the combined list
-  (apply max (combine-nums nums)))
+  (apply max (combine-nums nums '())))
 
 ;; Example usage:
 (displayln (maxArrayValue '(2 3 7 9 3)))  ;; Output: 21

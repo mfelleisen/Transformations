@@ -18,19 +18,24 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function to check if a number is valid in the k-avoiding array.
-  (define (valid? num used)
-    (not (set-member? used (- k num))))
-  
-  ;; Recursive function to build the k-avoiding array and calculate the sum.
-  (define (build-array count current used sum)
-    (if (= count n)
-        sum
-        (if (valid? current used)
-            (build-array (+ count 1) (+ current 1) (set-add used current) (+ sum current))
-            (build-array count (+ current 1) used sum))))
-  
-  (build-array 0 1 (set) 0))
+  (define (sum-seq seq)
+    (for/sum ([x seq]) x))
+
+  (define (avoid-seq n k)
+    (define (is-valid? num used)
+      (not (or (set-member? used num)
+               (set-member? used (- k num)))))
+
+    (define (find-seq count current used seq)
+      (if (= count n)
+          (reverse seq)
+          (if (is-valid? current used)
+              (find-seq (+ count 1) (+ current 1) (set-add used current) (cons current seq))
+              (find-seq count (+ current 1) used seq))))
+
+    (find-seq 0 1 (set) '()))
+
+  (sum-seq (avoid-seq n k)))
 
 ;; Example usage (not part of the function definition):
 ;; (minimumSum 5 4)  ;; Should return 18

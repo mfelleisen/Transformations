@@ -22,11 +22,10 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (minOperations nums)
-  ;; Calculate the frequency of each number
-  (define counts (for/fold ([h (hash)]) ([num (in-list nums)])
-                   (hash-update h num add1 0)))
+  (define counts (for/fold ([h (hash)])
+                  ([num (in-list nums)])
+    (hash-update h num add1 0)))
 
-  ;; Function to calculate the minimum operations for a given frequency
   (define (calculate-ops freq)
     (match (modulo freq 3)
       [0 (/ freq 3)]
@@ -37,12 +36,14 @@
              (+ (/ (- freq 2) 3) 1)
              -1)]))
 
-  ;; Calculate the total operations required, or determine if impossible
-  (for/fold ([acc 0]) ([freq (in-list (hash-values counts))])
-    (if (= acc -1)
-        -1
-        (let ([op (calculate-ops freq)])
-          (if (= op -1) -1 (+ acc op))))))
+  (define ops (for/fold ([acc 0])
+                      ([freq (in-list (hash-values counts))])
+                (if (= acc -1)
+                    -1
+                    (let ([op (calculate-ops freq)])
+                      (if (= op -1) -1 (+ acc op))))))
+
+  ops)
 
 ;; Example usage:
 (minOperations '(2 3 3 2 2 4 2 3 4))  ;; Output: 4

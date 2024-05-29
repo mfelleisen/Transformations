@@ -19,16 +19,25 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  ;; Helper function to simulate the game recursively
-  (define (game-helper nums acc)
+  ;; Helper function to remove the first occurrence of an element from a list
+  (define (remove-first elem lst)
+    (cond
+      [(null? lst) '()]
+      [(= elem (car lst)) (cdr lst)]
+      [else (cons (car lst) (remove-first elem (cdr lst)))]))
+
+  ;; Main recursive loop to simulate the game
+  (define (game-loop nums acc)
     (if (null? nums)
         (reverse acc)
         (let* ([sorted-nums (sort nums <)]
-               [alice (first sorted-nums)]
-               [bob (second sorted-nums)]
-               [remaining-nums (drop sorted-nums 2)])
-          (game-helper remaining-nums (cons alice (cons bob acc))))))
-  (game-helper nums '()))
+               [min1 (first sorted-nums)]
+               [nums1 (remove-first min1 nums)]
+               [min2 (first (sort nums1 <))]
+               [nums2 (remove-first min2 nums1)])
+          (game-loop nums2 (cons min1 (cons min2 acc))))))
+
+  (game-loop nums '()))
 
 ;; Example usage:
 (numberGame '(5 4 2 3))  ; Output: '(3 2 5 4)

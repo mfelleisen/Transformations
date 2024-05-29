@@ -23,20 +23,21 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Use a right-to-left fold to combine elements, leveraging accumulators
-  (define (combine lst)
-    (foldr (lambda (current acc)
-             (match acc
+  ;; This function uses right fold to simulate the described operations,
+  ;; combining elements from right to left if they meet the condition.
+  (define (fold-nums lst)
+    (foldr (lambda (current combined)
+             (match combined
                [(cons first rest)
                 (if (<= current first)
                     (cons (+ current first) rest)
-                    (cons current acc))]
+                    (cons current combined))]
                [else
-                (cons current acc)]))
+                (cons current combined)]))
            '()
            lst))
-  ;; Find the maximum value in the resulting list
-  (apply max (combine nums)))
+  ;; The largest value in the folded list is the result.
+  (apply max (fold-nums nums)))
 
 ;; Example usage:
 (maxArrayValue '(2 3 7 9 3))  ; Output: 21

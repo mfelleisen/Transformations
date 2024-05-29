@@ -14,17 +14,26 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Helper function to calculate the number of ways to distribute the remaining candies
-  ;; among the remaining children, considering the limit.
-  (define (count-ways remaining limit)
-    (for*/sum ([a (in-range 0 (add1 (min remaining limit)))]
-               [b (in-range 0 (add1 (min (- remaining a) limit)))])
-      (define c (- remaining a b))
-      (if (<= c limit) 1 0)))
-
-  ;; Calculate the number of ways to distribute `n` candies among 3 children
+  ;; Function to calculate the number of ways to distribute `n` candies among 3 children
   ;; such that no child receives more than `limit` candies.
-  (count-ways n limit))
+  (define (count-ways a b c)
+    (if (and (<= a limit) (<= b limit) (<= c limit))
+        1
+        0))
+  
+  (define (inner-loop a b)
+    (if (> b (min (- n a) limit))
+        0
+        (+ (count-ways a b (- n a b))
+           (inner-loop a (add1 b)))))
+  
+  (define (outer-loop a)
+    (if (> a (min n limit))
+        0
+        (+ (inner-loop a 0)
+           (outer-loop (add1 a)))))
+  
+  (outer-loop 0))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

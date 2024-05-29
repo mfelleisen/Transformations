@@ -25,10 +25,6 @@
   ;; This results in x = num + 2 * t.
   (+ num (* 2 t)))
 
-;; Example usage:
-(theMaximumAchievableX 4 1) ;; Output: 6
-(theMaximumAchievableX 3 2) ;; Output: 7
-
 (require rackunit)
 
 

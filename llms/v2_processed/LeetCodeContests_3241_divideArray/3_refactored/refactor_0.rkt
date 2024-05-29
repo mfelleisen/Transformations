@@ -22,27 +22,29 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
+  ;; Helper function to check if a group meets the condition
   (define (valid-group? group)
-    (<= (- (apply max group) (apply min group)) k))
+    (<= (- (last group) (first group)) k))
 
-  (define (partition nums)
-    (let loop ([nums (sort nums <)] [result '()])
-      (match nums
-        [(list) (reverse result)]
-        [(list-rest a b c rest)
-         (if (valid-group? (list a b c))
-             (loop rest (cons (list a b c) result))
-             '())]
-        [_ '()]))) ;; In case the list length is not a multiple of 3
+  ;; Helper function to partition the list into groups of 3 and validate them
+  (define (partition-and-validate sorted-nums)
+    (for/fold ([result '()] #:result (reverse result))
+              ([group (in-list (partition-all 3 sorted-nums))])
+      (if (valid-group? group)
+          (cons group result)
+          (values '()))))
 
-  (if (= (remainder (length nums) 3) 0)
-      (partition nums)
-      '()))
+  ;; Main body
+  (let ([sorted-nums (sort nums <)])
+    (if (= (remainder (length nums) 3) 0)
+        (partition-and-validate sorted-nums)
+        '())))
 
-;; Examples
-(display (divideArray '(1 3 4 8 7 9 3 5 1) 2)) ;; Output: '((1 1 3) (3 4 5) (7 8 9))
-(newline)
-(display (divideArray '(1 3 3 2 7 3) 3)) ;; Output: '()
+;; Helper function to partition the list into sublists of given size
+(define (partition-all size lst)
+  (if (empty? lst)
+      '()
+      (cons (take lst size) (partition-all size (drop lst size)))))
 
 (require rackunit)
 

@@ -19,20 +19,18 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  ;; First, sort the list to simplify the process of finding the minimum elements
+  ;; Function to simulate the game between Alice and Bob where they alternately pick the minimum element from nums
+  ;; and append it to a result list, with Bob's choices first.
   (define sorted-nums (sort nums <))
-
-  ;; Function to simulate the game between Alice and Bob
-  (define (game sorted remaining)
-    (if (empty? sorted)
-        (reverse remaining)
-        (let* ([alice-choice (first sorted)]
-               [bob-choice (second sorted)]
-               [rest-choices (drop sorted 2)])
-          (game rest-choices (cons alice-choice (cons bob-choice remaining))))))
-
-  ;; Start the game with the sorted list and an empty result list
-  (game sorted-nums '()))
+  
+  (define (play-game lst)
+    (if (empty? lst)
+        '()
+        (let ((alice-choice (first lst))
+              (bob-choice (first (rest lst))))
+          (cons bob-choice (cons alice-choice (play-game (rest (rest lst))))))))
+  
+  (play-game sorted-nums))
 
 ;; Example usage:
 (numberGame '(5 4 2 3)) ;; Output: '(3 2 5 4)

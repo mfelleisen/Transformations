@@ -28,36 +28,37 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  ;; Calculate the length of the input lists
   (define n (length nums1))
 
-  ;; Helper function to update the DP values and max length
-  (define (update-dp dp1 dp2 nums1 nums2 i)
-    (define prev-i (sub1 i))
-    (define curr1 (list-ref nums1 i))
-    (define curr2 (list-ref nums2 i))
-    (define prev1 (list-ref nums1 prev-i))
-    (define prev2 (list-ref nums2 prev-i))
-    (define new-dp1 (max (if (>= curr1 prev1) (+ 1 (vector-ref dp1 prev-i)) 1)
-                         (if (>= curr1 prev2) (+ 1 (vector-ref dp2 prev-i)) 1)))
-    (define new-dp2 (max (if (>= curr2 prev1) (+ 1 (vector-ref dp1 prev-i)) 1)
-                         (if (>= curr2 prev2) (+ 1 (vector-ref dp2 prev-i)) 1)))
-    (vector-set! dp1 i new-dp1)
-    (vector-set! dp2 i new-dp2)
-    (max new-dp1 new-dp2))
+  ;; Helper function to get the value from a list with a default for out-of-bounds
+  (define (safe-list-ref lst i)
+    (if (and (>= i 0) (< i n))
+        (list-ref lst i)
+        -inf.0))
 
-  ;; Initialize dp arrays to store the maximum non-decreasing subarray lengths
-  (define dp1 (make-vector n 1))
-  (define dp2 (make-vector n 1))
+  ;; Recursive function to calculate the maximum non-decreasing length
+  (define (helper i prev1 prev2)
+    (cond
+      [(= i n) 0]
+      [else
+       (define val1 (safe-list-ref nums1 i))
+       (define val2 (safe-list-ref nums2 i))
+       (define with-val1 
+         (if (or (= prev1 -inf.0) (<= prev1 val1))
+             (+ 1 (helper (+ i 1) val1 prev2))
+             0))
+       (define with-val2 
+         (if (or (= prev2 -inf.0) (<= prev2 val2))
+             (+ 1 (helper (+ i 1) prev1 val2))
+             0))
+       (max with-val1 with-val2)]))
 
-  ;; Iterate through each element starting from the second one
-  (for/fold ([max-len 1]) ([i (in-range 1 n)])
-    (max max-len (update-dp dp1 dp2 nums1 nums2 i))))
+  (helper 0 -inf.0 -inf.0))
 
-;; Example usage:
-(maxNonDecreasingLength '(2 3 1) '(1 2 1)) ;; -> 2
-(maxNonDecreasingLength '(1 3 2 1) '(2 2 3 4)) ;; -> 4
-(maxNonDecreasingLength '(1 1) '(2 2)) ;; -> 2
+;; Example usage
+(maxNonDecreasingLength '(2 3 1) '(1 2 1)) ;; Output: 2
+(maxNonDecreasingLength '(1 3 2 1) '(2 2 3 4)) ;; Output: 4
+(maxNonDecreasingLength '(1 1) '(2 2)) ;; Output: 2
 
 (require rackunit)
 

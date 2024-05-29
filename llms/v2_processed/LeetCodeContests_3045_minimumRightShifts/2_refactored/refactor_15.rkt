@@ -22,29 +22,29 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
-  (define n (length nums))
-  (define sorted-nums (sort nums <))
+  ;; Check if the list is already sorted
+  (define (sorted? lst)
+    (andmap (lambda (i) (<= (list-ref lst i) (list-ref lst (add1 i))))
+            (range (- (length lst) 1))))
 
-  ;; Helper function to check if the list is sorted after `shift` right shifts
-  (define (is-sorted-after-shifts? shift)
-    (for/and ([i (in-range n)])
-      (= (list-ref nums (modulo (+ shift i) n))
-         (list-ref sorted-nums i))))
+  ;; Helper function to check if rotating the list by k shifts results in a sorted list
+  (define (valid-shift? k)
+    (sorted? (append (drop nums k) (take nums k))))
 
-  ;; Find the minimum number of shifts needed to sort the list
-  (define (find-shifts i)
+  ;; Find the minimum number of right shifts required to sort the list
+  (define (find-min-shifts k)
     (cond
-      [(>= i n) -1]
-      [(is-sorted-after-shifts? i) i]
-      [else (find-shifts (add1 i))]))
+      [(>= k (length nums)) -1]
+      [(valid-shift? k) k]
+      [else (find-min-shifts (add1 k))]))
 
-  ;; Start finding from the first index
-  (find-shifts 0))
+  ;; Start the search from 0 shifts
+  (find-min-shifts 0))
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2
-(minimumRightShifts '(1 3 5))      ;; Output: 0
-(minimumRightShifts '(2 1 4))      ;; Output: -1
+(minimumRightShifts '(1 3 5))       ;; Output: 0
+(minimumRightShifts '(2 1 4))       ;; Output: -1
 
 (require rackunit)
 

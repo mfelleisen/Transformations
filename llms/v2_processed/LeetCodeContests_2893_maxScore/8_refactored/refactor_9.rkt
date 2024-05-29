@@ -22,37 +22,29 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  ;; Helper function to calculate the score for a given index
-  (define (calculate-score dp i j)
-    (let* ((current-score (+ (hash-ref dp i -inf.0) (list-ref nums j)))
-           (current-num (list-ref nums i))
-           (next-num (list-ref nums j)))
-      ;; Apply penalty if parities differ
-      (if (not (= (modulo current-num 2) (modulo next-num 2)))
-          (- current-score x)
-          current-score)))
-
-  ;; Main recursive function to fill the dp hash
-  (define (fill-dp i dp)
-    (if (>= i (length nums))
-        dp
-        (let ((updated-dp (foldl (lambda (j acc)
-                                   (hash-update acc j
-                                                (lambda (val)
-                                                  (max val (calculate-score dp i j)))
-                                                (calculate-score dp i j)))
-                                 dp
-                                 (range (add1 i) (length nums)))))
-          (fill-dp (add1 i) updated-dp))))
+  (define n (length nums))
   
-  ;; Initialize the dp hash with the first score
-  (define initial-dp (hash 0 (first nums)))
+  ;; Initialize dp with the first element's score and set the rest to -inf
+  (define dp (cons (first nums) (make-list (sub1 n) -inf.0)))
   
-  ;; Fill the dp hash
-  (define final-dp (fill-dp 0 initial-dp))
+  ;; Define a helper function to update the dp list
+  (define (update-dp i dp)
+    (foldl
+     (lambda (j dp)
+       (let* ((current-score (+ (list-ref dp i) (list-ref nums j)))
+              (penalized-score (if (not (= (modulo (list-ref nums i) 2)
+                                           (modulo (list-ref nums j) 2)))
+                                   (- current-score x)
+                                   current-score)))
+         (list-set dp j (max (list-ref dp j) penalized-score))))
+     dp
+     (range (add1 i) n)))
   
-  ;; Return the maximum value from the dp hash
-  (apply max (hash-values final-dp)))
+  ;; Update dp for each index using foldl
+  (define final-dp (foldl (lambda (i dp) (update-dp i dp)) dp (range n)))
+  
+  ;; Return the maximum value from the dp list
+  (apply max final-dp))
 
 ;; Example cases
 (displayln (maxScore '(2 3 6 1 9 2) 5))  ;; Output: 13

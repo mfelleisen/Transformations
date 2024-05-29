@@ -17,19 +17,19 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
-  ;; Calculate the length of the input list
   (define n (length nums))
-  ;; Use for/sum to calculate the sum of the squares of all special elements
-  (for/sum ([i (in-indexed (in-list nums))] 
-            [index (in-range 1 (add1 n))])
-    (if (zero? (remainder n index))
-        (sqr i)
-        0)))
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (zero? (remainder n i)))
+    (sqr (list-ref nums (sub1 i)))))
 
-;; The function uses `for/sum` to iterate over the elements and their indices.
-;; The indices are generated using `in-range 1 (add1 n)` to cover the range from 1 to n.
-;; For each element and its corresponding index, it checks if the index divides n without a remainder.
-;; If true, it squares the element and includes it in the sum, otherwise, it contributes 0 to the sum.
+;; The function uses `for/sum` which is a looping construct that sums the result of each iteration.
+;; `list-ref` is used to access elements of the list using 0-based indexing.
+;; `sqr` is a function that computes the square of a number.
+;; `remainder` is used to check divisibility.
+
+;; Example usage:
+(sumOfSquares '(1 2 3 4)) ; Output: 21
+(sumOfSquares '(2 7 1 19 18 3)) ; Output: 63
 
 (require rackunit)
 

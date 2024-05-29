@@ -21,15 +21,15 @@
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (hasTrailingZeros nums)
-  ;; Check if there's any pair of elements in `nums` whose bitwise OR has at least one trailing zero
-  (define (has-trailing-zero? x y)
-    (even? (bitwise-ior x y)))
+  ;; Check if there exists a pair of elements in `nums` whose bitwise OR has at least one trailing zero.
+  (define (trailing-zero? n) (even? n))
 
-  ;; Use `for/or` to iterate through all pairs and check if any pair satisfies the condition
-  (for/or ([i (in-list nums)]
-           [j (in-list nums)]
-           #:when (not (eq? i j)))
-    (has-trailing-zero? i j)))
+  (define (combinations lst)
+    (for*/list ([i (in-list lst)]
+                [j (in-list (drop lst (add1 (index-of lst i))))])
+      (bitwise-ior i j)))
+
+  (ormap trailing-zero? (combinations nums)))
 
 ;; Example usage:
 (hasTrailingZeros '(1 2 3 4 5))  ; Output: #t

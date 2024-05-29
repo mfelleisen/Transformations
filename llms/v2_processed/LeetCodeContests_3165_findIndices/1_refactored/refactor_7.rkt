@@ -39,22 +39,23 @@
     (and (>= (abs (- i j)) indexDifference)
          (>= (abs (- (list-ref nums i) (list-ref nums j))) valueDifference)))
 
-  ;; Using for*/first to find the first valid pair or return #f if none found
-  (define result
-    (for*/first ([i (in-indexed nums)]
-                 [j (in-indexed nums)]
-                 #:when (valid-pair? i j))
-      (list i j)))
+  ;; Iterate over all pairs (i, j) using for*/first to find the first valid pair
+  (for*/first ([i (in-indexed nums)]
+               [j (in-indexed nums)]
+               #:when (valid-pair? (car i) (car j)))
+    (list (car i) (car j))))
 
-  ;; Check if a valid pair was found, if not return '(-1 -1)
-  (if result
-      result
-      '(-1 -1)))
+(define (in-indexed lst)
+  (in-naturals (length lst)))
+
+;; Check if a valid pair was found, if not return [-1, -1]
+(define (main nums indexDifference valueDifference)
+  (or (findIndices nums indexDifference valueDifference) '(-1 -1)))
 
 ;; Example usage:
-;; (findIndices '(5 1 4 1) 2 4) should return '(0 3)
-;; (findIndices '(2 1) 0 0) should return '(0 0)
-;; (findIndices '(1 2 3) 2 4) should return '(-1 -1)
+;; (main '(5 1 4 1) 2 4) should return '(0 3)
+;; (main '(2 1) 0 0) should return '(0 0)
+;; (main '(1 2 3) 2 4) should return '(-1 -1)
 
 (require rackunit)
 

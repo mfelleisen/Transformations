@@ -27,29 +27,42 @@
 ;;  * 3 <= nums.length <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
-  (define n (length nums))
-  (define +inf +inf.0)
-
-  ;; Helper function to find the minimum value in a list that is less than a given value
-  (define (find-min-less-than lst val)
-    (for/fold ([min-val +inf]) ([x lst] #:when (< x val))
-      (min min-val x)))
-
-  ;; Function to find the minimum possible sum of a mountain triplet
-  (define (find-minimum-mountain-sum nums)
-    (for/fold ([min-sum +inf]) ([j (in-range 1 (- n 1))])
-      (define peak (list-ref nums j))
-      (define left-min (find-min-less-than (take nums j) peak))
-      (define right-min (find-min-less-than (drop nums (+ j 1)) peak))
-      (if (and (not (= left-min +inf))
-               (not (= right-min +inf)))
-          (min min-sum (+ left-min peak right-min))
-          min-sum)))
-
-  (if (< n 3)
+  ;; Check if the length of nums is less than 3, if so return -1
+  (if (< (length nums) 3)
       -1
-      (let ([min-sum (find-minimum-mountain-sum nums)])
-        (if (= min-sum +inf)
+      ;; Otherwise, proceed to find the mountain triplet with the minimum sum
+      (let ([n (length nums)]
+            [inf +inf.0])
+        ;; Function to compute the minimum values on the left and right of each peak
+        (define (compute-mins)
+          (for/fold ([left-m (make-vector n inf)]
+                     [right-m (make-vector n inf)])
+                    ([j (in-range 1 (- n 1))])
+            (vector-set! left-m j (for/fold ([min-left inf]) ([i (in-range 0 j)])
+                                (if (< (list-ref nums i) (list-ref nums j))
+                                    (min min-left (list-ref nums i))
+                                    min-left)))
+            (vector-set! right-m j (for/fold ([min-right inf]) ([k (in-range (+ j 1) n)])
+                                (if (< (list-ref nums k) (list-ref nums j))
+                                    (min min-right (list-ref nums k))
+                                    min-right)))
+            (values left-m right-m)))
+        
+        ;; Get the minimum values on the left and right of each peak
+        (define-values (left-min right-min) (compute-mins))
+        
+        ;; Find the minimum sum of any valid mountain triplet
+        (define min-sum
+          (for/fold ([min-sum inf]) ([j (in-range 1 (- n 1))])
+            (let ([current-peak (list-ref nums j)]
+                  [left-val (vector-ref left-min j)]
+                  [right-val (vector-ref right-min j)])
+              (if (and (< left-val inf) (< right-val inf))
+                  (min min-sum (+ left-val current-peak right-val))
+                  min-sum))))
+        
+        ;; Return the result, if no valid mountain was found return -1
+        (if (= min-sum inf)
             -1
             min-sum))))
 

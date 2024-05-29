@@ -14,12 +14,16 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  (define (valid-candy-distributions)
-    (for*/sum ([a (in-range (add1 (min n limit)))]
+  ;; Helper function to check if a distribution is valid
+  (define (valid-dist? a b)
+    (<= (- n a b) limit))
+
+  ;; Use a comprehension to iterate over possible candy distributions
+  (length
+   (for*/list ([a (in-range (add1 (min n limit)))]
                [b (in-range (add1 (min (- n a) limit)))]
-               #:when (<= (- n a b) limit))
-      1))
-  (valid-candy-distributions))
+               #:when (valid-dist? a b))
+     (list a b (- n a b)))))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

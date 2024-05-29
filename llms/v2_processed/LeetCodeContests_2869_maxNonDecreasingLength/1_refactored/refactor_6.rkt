@@ -28,28 +28,38 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  ;; Calculate the length of the input lists
   (define n (length nums1))
-  
-  ;; Helper function to determine the length of the longest non-decreasing subarray ending at each position
-  (define (helper nums1 nums2)
-    (for/fold ([prev1 1] [prev2 1] [max-len 1] #:result max-len)
-              ([i (in-range 1 n)])
-      (define new1 1)
-      (define new2 1)
-      (when (>= (list-ref nums1 i) (list-ref nums1 (sub1 i)))
-        (set! new1 (+ 1 prev1)))
-      (when (>= (list-ref nums1 i) (list-ref nums2 (sub1 i)))
-        (set! new1 (max new1 (+ 1 prev2))))
-      (when (>= (list-ref nums2 i) (list-ref nums1 (sub1 i)))
-        (set! new2 (+ 1 prev1)))
-      (when (>= (list-ref nums2 i) (list-ref nums2 (sub1 i)))
-        (set! new2 (max new2 (+ 1 prev2))))
-      (values new1 new2 (max max-len new1 new2))))
-  
-  ;; Calculate the maximum length of non-decreasing subarray possible
-  (helper nums1 nums2))
 
+  ;; Helper function to update the dp values
+  (define (update-dp i dp1 dp2 nums1 nums2)
+    (let ([prev-i (sub1 i)])
+      (values
+       (max (vector-ref dp1 i)
+            (if (>= (list-ref nums1 i) (list-ref nums1 prev-i))
+                (+ 1 (vector-ref dp1 prev-i))
+                1)
+            (if (>= (list-ref nums1 i) (list-ref nums2 prev-i))
+                (+ 1 (vector-ref dp2 prev-i))
+                1))
+       (max (vector-ref dp2 i)
+            (if (>= (list-ref nums2 i) (list-ref nums1 prev-i))
+                (+ 1 (vector-ref dp1 prev-i))
+                1)
+            (if (>= (list-ref nums2 i) (list-ref nums2 prev-i))
+                (+ 1 (vector-ref dp2 prev-i))
+                1)))))
+
+  (define-values (dp1 dp2 max-len)
+    (for/fold ([dp1 (make-vector n 1)]
+               [dp2 (make-vector n 1)]
+               [max-len 1])
+              ([i (in-range 1 n)])
+      (define-values (new-dp1 new-dp2) (update-dp i dp1 dp2 nums1 nums2))
+      (vector-set! dp1 i new-dp1)
+      (vector-set! dp2 i new-dp2)
+      (values dp1 dp2 (max max-len new-dp1 new-dp2))))
+
+  max-len)
 
 (require rackunit)
 

@@ -18,19 +18,21 @@
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
+  ;; Define the initial balance
   (define initial-balance 100)
   
-  (define (round-to-nearest-10 n)
-    (let* ([lower-bound (* (quotient n 10) 10)]
+  ;; Calculate the nearest multiple of 10, preferring the larger multiple in case of a tie
+  (define rounded-amount
+    (let* ([lower-bound (* (quotient purchaseAmount 10) 10)]
            [upper-bound (+ lower-bound 10)]
-           [lower-diff (- n lower-bound)]
-           [upper-diff (- upper-bound n)])
-      (if (< lower-diff upper-diff)
-          lower-bound
-          upper-bound)))
+           [lower-diff (- purchaseAmount lower-bound)]
+           [upper-diff (- upper-bound purchaseAmount)])
+      (if (<= lower-diff upper-diff)
+          upper-bound
+          lower-bound)))
   
-  (let ([rounded-amount (round-to-nearest-10 purchaseAmount)])
-    (- initial-balance rounded-amount)))
+  ;; Calculate the new balance by subtracting the rounded amount from the initial balance
+  (- initial-balance rounded-amount))
 
 ;; The function is now ready to be used to calculate the account balance after a purchase given a purchase amount.
 

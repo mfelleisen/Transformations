@@ -28,27 +28,25 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 100
 (define (sumCounts nums)
-  ;; Helper function to compute the sum of squares of distinct counts for subarrays starting at index `i`
-  (define (sum-from-i i seen total)
-    (if (null? i)
-        total
-        (let* ([elem (first i)]
-               [new-seen (set-add seen elem)]
-               [distinct-count (set-count new-seen)]
-               [new-total (+ total (sqr distinct-count))])
-          (sum-from-i (rest i) new-seen new-total))))
+  ;; Helper function to increment the count of an element in a hash
+  (define (add1 x) (+ x 1))
 
-  ;; Compute the sum of squares of distinct counts for all subarrays
-  (for/sum ([i (in-list (inits nums))])
-    (sum-from-i i (set) 0)))
+  ;; Function to calculate the sum of squares of distinct counts for all subarrays starting at index i
+  (define (sum-from-i i nums)
+    (let loop ([j i] [seen (hash)] [total 0])
+      (if (>= j (length nums))
+          total
+          (let* ([elem (list-ref nums j)]
+                 [new-seen (hash-update seen elem add1 0)]
+                 [distinct-count (hash-count new-seen)]
+                 [new-total (+ total (sqr distinct-count))])
+            (loop (+ j 1) new-seen new-total)))))
 
-;; Helper function to get all suffixes of a list
-(define (inits lst)
-  (if (null? lst)
-      '()
-      (cons lst (inits (rest lst)))))
+  ;; Sum over all starting indices
+  (for/sum ([i (in-range (length nums))])
+    (sum-from-i i nums)))
 
-;; Examples
+;; Example usage:
 (sumCounts '(1 2 1)) ;; => 15
 (sumCounts '(1 1))   ;; => 3
 

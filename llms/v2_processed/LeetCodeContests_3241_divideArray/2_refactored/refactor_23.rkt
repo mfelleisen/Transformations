@@ -22,21 +22,27 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (define (make-triplets sorted-nums)
-    (define (aux lst acc)
-      (cond
-        [(empty? lst) (reverse acc)]
-        [else
-         (define triplet (take lst 3))
-         (if (and (= 3 (length triplet))
-                  (<= (- (last triplet) (first triplet)) k))
-             (aux (drop lst 3) (cons triplet acc))
-             '())]))  ; Return empty list if the condition is not met
-    (aux sorted-nums '()))
+  ;; Check if the length of nums is a multiple of 3
+  (when (zero? (modulo (length nums) 3))
+    (define sorted-nums (sort nums <))
+    ;; Inner function to process the sorted list
+    (define (loop remaining sublists)
+      (match remaining
+        ;; If no remaining elements, return the reversed sublists
+        [(list) (reverse sublists)]
+        ;; If less than 3 elements, it means partitioning is not possible
+        [(list _ ...) '()]
+        ;; If there are at least 3 elements, take the first three
+        [(list a b c more ...)
+         (if (<= (- c a) k)
+             (loop more (cons (list a b c) sublists))
+             '())]))
+    ;; Start processing from the sorted nums
+    (loop sorted-nums '())))
 
-  (if (not (= 0 (remainder (length nums) 3)))
-      '()  ; Return an empty list if nums length is not a multiple of 3
-      (make-triplets (sort nums <))))  ; Sort the list in ascending order
+;; Example usage:
+(divideArray '(1 3 4 8 7 9 3 5 1) 2) ; => '((1 1 3) (3 4 5) (7 8 9))
+(divideArray '(1 3 3 2 7 3) 3)       ; => '()
 
 (require rackunit)
 

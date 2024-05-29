@@ -22,11 +22,11 @@
 ;; Constraints:
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
-(define (maxArrayValue nums)
-  ;; This function simulates the merging of elements in the array from right to left,
-  ;; combining elements when the left one is less than or equal to the right one.
+(define (maxArrayValue nums) ;; contract  maxArrayValue/c
+  ;; This function simulates the merging of elements in the array
+  ;; from right to left, combining elements when the left one is less than or equal to the right one.
   (define (merge-right-to-left lst)
-    (for/fold ([acc '()]) ([current (in-list (reverse lst))])
+    (for/fold ([acc '()]) ([current (in-list lst)])
       (if (and (not (null? acc)) (<= current (car acc)))
           (cons (+ current (car acc)) (cdr acc))
           (cons current acc))))

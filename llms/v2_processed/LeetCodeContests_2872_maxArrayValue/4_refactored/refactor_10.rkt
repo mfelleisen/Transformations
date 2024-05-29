@@ -23,13 +23,15 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; Using foldr to combine elements from right to left
-  (define (combine acc current)
-    (if (<= current acc)
-        (+ current acc)
-        current))
-  ;; Fold the list from right to left
-  (foldr combine 0 nums))
+  ;; Fold the list from right to left to accumulate the largest possible value.
+  (define (combine-nums lst)
+    (foldr (lambda (x acc)
+             (if (<= x acc)
+                 (+ x acc)
+                 x))
+           0
+           lst))
+  (combine-nums nums))
 
 ;; Example usage:
 (maxArrayValue '(2 3 7 9 3))  ; Output: 21

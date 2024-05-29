@@ -33,32 +33,24 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  ;; Helper function to determine if a jump is valid
-  (define (valid-jump? a b) (<= (abs (- a b)) target))
+  ;; Define a helper function to determine if a jump is valid
+  (define (valid-jump? x y)
+    (<= (abs (- y x)) target))
   
-  ;; Recursive function to find the maximum jumps from a given index
-  (define (max-jumps-from idx max-jumps)
-    (if (>= idx (length nums))
-        -1
-        (let ([current-val (list-ref nums idx)])
-          (for/fold ([best -1]) ([next-idx (in-range (add1 idx) (length nums))])
-            (let ([next-val (list-ref nums next-idx)])
-              (if (and (valid-jump? current-val next-val)
-                       (>= (vector-ref max-jumps idx) 0))
-                  (let ([jumps (+ 1 (vector-ref max-jumps idx))])
-                    (vector-set! max-jumps next-idx (max (vector-ref max-jumps next-idx) jumps))
-                    (max best jumps))
-                  best))))))
-
-  (define n (length nums))
-  (define max-jumps (make-vector n -1))
-  (vector-set! max-jumps 0 0)
+  ;; Define a recursive function that calculates the maximum jumps
+  (define (max-jumps-from i)
+    (let loop ([j (+ i 1)]
+               [max-jumps -1])
+      (cond
+        [(>= j (length nums)) max-jumps]
+        [(valid-jump? (list-ref nums i) (list-ref nums j))
+         => (lambda (new-jumps)
+              (loop (add1 j) (max max-jumps (add1 (max-jumps-from j)))))]
+        [else (loop (add1 j) max-jumps)])))
   
-  (for ([i (in-range n)])
-    (max-jumps-from i max-jumps))
-  
-  (let ([result (vector-ref max-jumps (sub1 n))])
-    (if (>= result 0) result -1)))
+  ;; Calculate the maximum jumps from the start position
+  (let ([result (max-jumps-from 0)])
+    (if (= result -1) -1 result)))
 
 ;; Examples:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

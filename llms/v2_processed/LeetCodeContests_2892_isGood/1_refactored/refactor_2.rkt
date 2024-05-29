@@ -24,23 +24,20 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= num[i] <= 200
 (define (isGood nums)
-  (define n (apply max nums))
-  (define expected-length (+ n 1))
-  (define frequency (make-hash))
-
-  ;; Populate the frequency hash table with counts of each number in nums
-  (for ([num nums])
-    (hash-update! frequency num add1 0))
-
-  ;; Helper function to check the frequency of numbers from 1 to n
-  (define (check-frequency)
-    (and (for/and ([i (in-range 1 n)])
-           (= (hash-ref frequency i 0) 1))
-         (= (hash-ref frequency n 0) 2)))
-
-  ;; Check if the length matches and the frequency is correct
-  (and (= (length nums) expected-length)
-       (check-frequency)))
+  ;; Determine if the given list nums is a "good" array.
+  (define n (apply max nums))  ; Find the maximum element which acts as 'n'
+  
+  ;; Create a frequency count of elements in nums
+  (define count 
+    (for/fold ([dict (make-immutable-hash)])
+              ([num (in-list nums)])
+      (dict-set dict num (add1 (dict-ref dict num 0)))))
+  
+  ;; Check if the array meets the "good" criteria
+  (and (= (length nums) (+ n 1))  ; Ensure the length of nums is exactly n + 1
+       (for/and ([i (in-range 1 n)])  ; Check if every integer from 1 to n-1 appears exactly once
+         (= (dict-ref count i 0) 1))
+       (= (dict-ref count n 0) 2)))  ; Check if n appears exactly twice
 
 ;; Example usage:
 (displayln (isGood '(2 1 3)))  ; Output: #f

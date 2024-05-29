@@ -27,19 +27,27 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * -50 <= nums[i], target <= 50
 (define (countPairs nums target)
-  ;; Helper function to check if a pair (i, j) is valid
-  (define (valid-pair? i j)
-    (< (+ i j) target))
+  ;; Function to count pairs (i, j) where nums[i] + nums[j] < target and i < j
+  (define n (length nums))  ; Get the length of the list nums
   
-  ;; Helper function to calculate valid pairs from a list
-  (define (count-valid-pairs lst)
-    (for*/sum ([i (in-list lst)]
-               [j (in-list (cdr (member i lst)))]
-               #:when (valid-pair? i j))
-      1))
-
-  ;; Call the helper function with the list of nums
-  (count-valid-pairs nums))
+  ;; Helper function to check if the sum of nums[i] and nums[j] is less than target
+  (define (valid-pair? i j)
+    (< (+ (list-ref nums i) (list-ref nums j)) target))
+  
+  ;; Generate all pairs of indices (i, j) where i < j
+  (define all-pairs 
+    (for*/list ([i (in-range n)]
+                [j (in-range (add1 i) n)])
+      (list i j)))
+  
+  ;; Filter pairs to keep only those that are valid
+  (define valid-pairs
+    (filter (lambda (pair)
+              (apply valid-pair? pair))
+            all-pairs))
+  
+  ;; Return the count of valid pairs
+  (length valid-pairs))
 
 ;; Example usage:
 (countPairs '(-1 1 2 3 1) 2)  ; Output: 3

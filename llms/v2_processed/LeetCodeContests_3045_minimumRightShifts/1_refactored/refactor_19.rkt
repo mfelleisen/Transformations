@@ -23,26 +23,22 @@
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
   (define n (length nums))
+  (define sorted-nums (sort nums <))
 
-  (define (is-sorted? lst)
-    (andmap (lambda (pair) (<= (car pair) (cdr pair)))
-            (map cons lst (rest lst))))
+  (define (is-sorted-from? start)
+    (for/or ([i (in-range n)])
+      (not (= (list-ref nums (modulo (+ start i) n))
+              (list-ref sorted-nums i)))))
 
-  (define (valid-shift-count start)
-    (let ([shifted (append (drop nums start) (take nums start))])
-      (if (is-sorted? shifted)
-          (modulo (- n start) n)
-          #f)))
+  (define (find-valid-shift)
+    (for/first ([start (in-range n)]
+                #:when (not (is-sorted-from? start)))
+      (modulo (- n start) n)))
 
-  (define (find-min-shift start)
-    (or (valid-shift-count start)
-        (if (< start (sub1 n))
-            (find-min-shift (add1 start))
-            -1)))
+  (cond
+    [(= n 1) 0]
+    [else (find-valid-shift (or (find-valid-shift) -1))]))
 
-  (if (= n 1)
-      0
-      (find-min-shift 0)))
 
 (require rackunit)
 

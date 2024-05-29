@@ -27,10 +27,11 @@
   ;; Determine if the array is a "good" array, meaning it is a permutation of
   ;; the base array [1, 2, ..., n - 1, n, n] where n is the maximum element in nums.
   (define n (apply max nums))  ; Find the maximum element in the list
-  (define counts (for/fold ([dict (make-immutable-hash)])
-                            ([num (in-list nums)])
-                   (dict-update dict num add1 0)))
+  (define counts (for/fold ([dict (make-immutable-hash)]) ([num (in-list nums)])
+                    (dict-update dict num add1 0)))  ; Create a frequency dictionary
+
   (define expected-length (+ n 1))  ; Calculate the expected length of nums
+
   (and (= (hash-ref counts n 0) 2)  ; Check if 'n' appears exactly twice
        (for/and ([i (in-range 1 n)])  ; Check if all numbers from 1 to n-1 appear exactly once
          (= (hash-ref counts i 0) 1))

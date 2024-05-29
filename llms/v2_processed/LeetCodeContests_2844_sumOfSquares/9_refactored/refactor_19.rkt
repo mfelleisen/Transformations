@@ -17,12 +17,14 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
+  ;; Calculate the length of the list nums
   (define n (length nums))
+  ;; Define a function to square a number
   (define (square x) (* x x))
-
+  ;; Filter the indices that are divisors of n and compute the sum of their squares
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (modulo n i)))
-    (square (list-ref nums (sub1 i)))))
+            #:when (zero? (modulo n i))) ; Check if i is a divisor of n
+    (square (list-ref nums (sub1 i))))) ; Square the (i-1)th element (since list-ref is 0-indexed)
 
 ;; Example usage:
 (sumOfSquares '(1 2 3 4)) ; Output: 21

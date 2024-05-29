@@ -20,21 +20,28 @@
 ;;  * 1 <= nums[i] <= 1000
 ;;  * 1 <= target <= 1000
 (define (lengthOfLongestSubsequence nums target)
-  ;; Use a hash table to store the sums and their maximum subsequence lengths
-  (define dp (hash 0 0))  ; Initialize with base case: sum 0 with length 0
-
-  ;; Iterate over each number in the list
+  ;; Helper function to update the dp hash table
+  (define (update-dp dp num)
+    (define temp-dp (make-hash))
+    (for ([key (in-hash-keys dp)])
+      (define length (hash-ref dp key))
+      (define new-sum (+ key num))
+      (when (<= new-sum target)
+        (hash-update! temp-dp new-sum (lambda (old-length) (max old-length (+ length 1))) (+ length 1))))
+    (for ([key (in-hash-keys temp-dp)])
+      (hash-update! dp key (lambda (old) (max old (hash-ref temp-dp key))) (hash-ref temp-dp key)))
+    dp)
+  
+  ;; Initialize the dp hash table with base case: sum 0 with length 0
+  (define dp (make-hash '((0 . 0))))
+  
+  ;; Process each number in nums
   (for ([num nums])
-    ;; Update the dp table for each current sum and length
-    (set! dp (for/fold ([new-dp dp])
-              ([(s length) (in-hash dp)])
-              (define new-sum (+ s num))
-              (if (<= new-sum target)
-                  (hash-set new-dp new-sum (max (hash-ref new-dp new-sum 0) (+ length 1)))
-                  new-dp))))
-
+    (set! dp (update-dp dp num)))
+  
   ;; Check if target sum is achieved and return the corresponding length
-  (hash-ref dp target -1))
+  (let ([result (hash-ref dp target #f)])
+    (if result result -1)))
 
 ;; Example usage
 (lengthOfLongestSubsequence '(1 2 3 4 5) 9)  ; Output: 3

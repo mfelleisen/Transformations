@@ -20,26 +20,31 @@
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))
+  
+  ;; Function to calculate the number of ways using memoization
+  (define (ways n x)
+    (define memo-table (make-hash))
 
-  ;; Helper function to compute the maximum base such that base^x <= n
-  (define (max-base n x)
-    (inexact->exact (floor (expt n (/ 1.0 x)))))
+    (define (memoize key val)
+      (hash-set! memo-table key val)
+      val)
 
-  ;; Helper function to compute number of ways using memoization
-  (define (compute-ways n x)
-    (define dp (make-vector (add1 n) 0))
-    (vector-set! dp 0 1)
-    (for ([base (in-range 1 (add1 (max-base n x)))])
-      (define current-power (expt base x))
-      (for ([i (in-range n (sub1 current-power) -1)])
-        (vector-set! dp i
-                     (modulo (+ (vector-ref dp i)
-                                (vector-ref dp (- i current-power)))
-                             MOD))))
-    dp)
+    (define (dp n base)
+      (cond
+        [(= n 0) 1] ;; Base case: There's one way to sum up to zero.
+        [(or (< n 0) (> (expt base x) n)) 0] ;; No way if n becomes negative or base^x exceeds n.
+        [else
+         (or (hash-ref memo-table (list n base) #f)
+             (memoize (list n base)
+                      (modulo (+ (dp n (+ base 1))
+                                 (dp (- n (expt base x)) (+ base 1)))
+                              MOD)))]))
 
-  ;; Compute and return the result
-  (vector-ref (compute-ways n x) n))
+    ;; Start from base 1
+    (dp n 1))
+  
+  ;; Call the ways function with initial parameters
+  (ways n x))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

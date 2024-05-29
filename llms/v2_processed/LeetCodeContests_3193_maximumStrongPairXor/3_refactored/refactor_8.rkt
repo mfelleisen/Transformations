@@ -29,16 +29,13 @@
   (define (strong-pair? x y)
     ;; Helper function to check if pair (x, y) is a strong pair.
     (<= (abs (- x y)) (min x y)))
-  
-  (define (pairwise-xor nums)
-    ;; Generates all pairs from nums, checks if they are strong pairs, and computes their XOR.
-    (for*/fold ([max-xor 0])  ;; Fold over all pairs with initial max-xor as 0
-      ([i (in-list nums)]
-       [j (in-list nums)]
-       #:when (strong-pair? i j))  ;; Only consider strong pairs
-      (max max-xor (bitwise-xor i j))))  ;; Update max-xor with the XOR of the current pair
-  
-  (pairwise-xor nums))  ;; Call the internal function to compute the result
+
+  ;; Generate all pairs from nums, check if they are strong pairs, and compute their XOR.
+  (for*/fold ([max-xor 0])
+             ([i (in-list nums)]
+              [j (in-list nums)]
+              #:when (strong-pair? i j))
+    (max max-xor (bitwise-xor i j))))
 
 ;; Examples
 (maximumStrongPairXor '(1 2 3 4 5))  ;; Output: 7

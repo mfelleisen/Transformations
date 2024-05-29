@@ -18,25 +18,26 @@
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
+  ;; Define the initial balance.
   (define initial-balance 100)
-
-  ;; Calculate the nearest multiple of 10, favoring the larger multiple in case of a tie.
+  
+  ;; Calculate the rounded amount to the nearest multiple of 10.
   (define rounded-amount
-    (let ([lower-bound (* 10 (quotient purchaseAmount 10))]
-          [upper-bound (+ (* 10 (quotient purchaseAmount 10)) 10)])
-      (if (<= (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
-          lower-bound
-          upper-bound)))
-
-  ;; Return the remaining balance after the purchase.
+    (match purchaseAmount
+      [(? (λ (x) (<= x 4))) (* 10 (quotient purchaseAmount 10))]
+      [_ (* 10 (add1 (quotient purchaseAmount 10)))]))
+  
+  ;; Calculate and return the new balance after the purchase.
   (- initial-balance rounded-amount))
 
-;; Examples to test the function
-;; Example 1:
-(accountBalanceAfterPurchase 9) ;; Output: 90
+;; Explanation:
+;; This version of the function uses pattern matching with `match` to determine 
+;; the rounded amount. The match patterns compare the `purchaseAmount` directly 
+;; and decide whether to round it down or up based on the value.
 
-;; Example 2:
-(accountBalanceAfterPurchase 15) ;; Output: 80
+;; Examples:
+(displayln (accountBalanceAfterPurchase 9))  ;; Output: 90
+(displayln (accountBalanceAfterPurchase 15)) ;; Output: 80
 
 (require rackunit)
 

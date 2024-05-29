@@ -28,27 +28,38 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  ;; Define a helper function to compute max length given a comparison function
-  (define (compute-max-length nums1 nums2)
-    (for/fold ([max-len 1] [prev1 (first nums1)] [prev2 (first nums2)] [dp1 1] [dp2 1])
-              ([i (in-range 1 (length nums1))])
-      (define current1 (list-ref nums1 i))
-      (define current2 (list-ref nums2 i))
-      ;; Update dp1 and dp2 based on the comparison of current and previous elements
-      (define new-dp1
-        (max (if (>= current1 prev1) (+ dp1 1) 1)
-             (if (>= current1 prev2) (+ dp2 1) 1)))
-      (define new-dp2
-        (max (if (>= current2 prev1) (+ dp1 1) 1)
-             (if (>= current2 prev2) (+ dp2 1) 1)))
-      (values (max max-len new-dp1 new-dp2) current1 current2 new-dp1 new-dp2)))
+  (define n (length nums1))
   
-  ;; Compute the maximum non-decreasing length using the helper function
-  (define (max-len1) (compute-max-length nums1 nums2))
-  (define (max-len2) (compute-max-length nums2 nums1))
+  ;; Helper function to update dp arrays and find maximum length
+  (define (update-dp-and-max dp1 dp2 max-len i)
+    (define prev1 (vector-ref dp1 (- i 1)))
+    (define prev2 (vector-ref dp2 (- i 1)))
+    (define num1-i (list-ref nums1 i))
+    (define num2-i (list-ref nums2 i))
+    (define num1-prev (list-ref nums1 (- i 1)))
+    (define num2-prev (list-ref nums2 (- i 1)))
+    
+    ;; Update dp1[i]
+    (define new-dp1 (max (if (>= num1-i num1-prev) (+ 1 prev1) 1)
+                         (if (>= num1-i num2-prev) (+ 1 prev2) 1)))
+    (vector-set! dp1 i new-dp1)
+    
+    ;; Update dp2[i]
+    (define new-dp2 (max (if (>= num2-i num1-prev) (+ 1 prev1) 1)
+                         (if (>= num2-i num2-prev) (+ 1 prev2) 1)))
+    (vector-set! dp2 i new-dp2)
+    
+    ;; Update the maximum length found so far
+    (max max-len new-dp1 new-dp2))
   
-  ;; Return the maximum of the two possible lengths
-  (max max-len1 max-len2))
+  ;; Initialize dp arrays and max-len
+  (define dp1 (make-vector n 1))
+  (define dp2 (make-vector n 1))
+  (define max-len 1)
+  
+  ;; Iterate through each element starting from the second one
+  (for/fold ([max-len max-len]) ([i (in-range 1 n)])
+    (update-dp-and-max dp1 dp2 max-len i)))
 
 
 (require rackunit)

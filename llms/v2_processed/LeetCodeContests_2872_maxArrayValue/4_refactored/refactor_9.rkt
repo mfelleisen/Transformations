@@ -23,13 +23,12 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (maxArrayValue nums)
-  ;; This function simulates the combination of elements from the end of the list
-  ;; to the beginning, effectively folding the list into a single maximum value.
+  ;; Use a right fold to combine elements from the end of the list
   (define (combine-nums lst)
-    (foldr (lambda (x acc)
-             (if (<= x acc)
-                 (+ x acc)
-                 x))
+    (foldr (lambda (current acc)
+             (if (<= current acc)
+                 (+ current acc)
+                 current))
            0
            lst))
   (combine-nums nums))

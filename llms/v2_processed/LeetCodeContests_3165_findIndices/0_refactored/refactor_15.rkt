@@ -31,27 +31,31 @@
 ;;  * 0 <= indexDifference <= 100
 ;;  * 0 <= valueDifference <= 50
 (define (findIndices nums indexDifference valueDifference)
+  ;; Define a helper function to check the conditions for indices i and j
   (define (valid-pair? i j)
-    (and (>= (abs (- i j)) indexDifference)
-         (>= (abs (- (list-ref nums i) (list-ref nums j))) valueDifference)))
-
-  (define (search-pairs pairs)
-    (cond
-      [(empty? pairs) '(-1 -1)]
-      [(valid-pair? (first (first pairs)) (second (first pairs))) (first pairs)]
-      [else (search-pairs (rest pairs))]))
-
-  (define indices
-    (for*/list ([i (in-range (length nums))]
-                [j (in-range (length nums))])
+    (and (>= (abs (- i j)) indexDifference)  ;; Check index difference condition
+         (>= (abs (- (vector-ref nums i) (vector-ref nums j))) valueDifference))) ;; Check value difference condition
+  
+  ;; Generate all pairs of indices (i, j) from 0 to (length nums - 1)
+  (define n (vector-length nums))
+  (define pairs 
+    (for*/list ([i (in-range n)]
+                [j (in-range n)]
+                #:when (valid-pair? i j))
       (list i j)))
 
-  (search-pairs indices))
+  ;; Return the first valid pair found, or [-1, -1] if none is found
+  (if (empty? pairs)
+      (list -1 -1)
+      (first pairs)))
 
-;; The function `findIndices` generates all pairs of indices (i, j) from 0 to (length nums - 1).
-;; It checks each pair to see if they satisfy the conditions specified by `indexDifference` and `valueDifference`.
-;; The first pair that satisfies the conditions is returned. If no such pair exists, `[-1, -1]` is returned.
+;; Convert the input list to a vector for more idiomatic indexing
+(define nums (vector 5 1 4 1))
+(define indexDifference 2)
+(define valueDifference 4)
 
+;; Example usage
+(findIndices nums indexDifference valueDifference)  ;; Output: '(0 3)
 
 (require rackunit)
 

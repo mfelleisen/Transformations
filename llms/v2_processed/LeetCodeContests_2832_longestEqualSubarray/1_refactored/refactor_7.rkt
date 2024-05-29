@@ -23,27 +23,26 @@
 ;;  * 1 <= nums[i] <= nums.length
 ;;  * 0 <= k <= nums.length
 (define (longestEqualSubarray nums k)
+  ;; Helper function to update frequency counts
   (define (update-counts counts num increment)
     (hash-update counts num (lambda (v) (+ v increment)) 0))
+  
+  ;; Sliding window approach to find the longest equal subarray
+  (define (find-max-length nums k)
+    (define (loop right left max-length count)
+      (if (< right (length nums))
+          (let* ((num (list-ref nums right))
+                 (new-count (update-counts count num 1))
+                 (max-freq (apply max (hash-values new-count)))
+                 (window-length (+ 1 (- right left))))
+            (if (> (- window-length max-freq) k)
+                (let ((left-num (list-ref nums left)))
+                  (loop right (+ left 1) max-length (update-counts new-count left-num -1)))
+                (loop (+ right 1) left (max max-length window-length) new-count)))
+          max-length))
+    (loop 0 0 0 (make-hash)))
 
-  (define (sliding-window nums k)
-    (define-values (max-length left count) (values 0 0 (make-hash)))
-    (for/fold ([max-length max-length] [left left] [count count]) 
-              ([right (in-indexed nums)])
-      (define count (update-counts count (cdr right) 1))
-      (define max-freq (apply max (hash-values count)))
-      (define window-length (+ 1 (- (car right) left)))
-      (if (> (- window-length max-freq) k)
-          (let ([count (update-counts count (list-ref nums left) -1)])
-            (values (max max-length (- window-length (- window-length max-freq)))
-                    (+ left 1)
-                    count))
-          (values (max max-length (- window-length (- window-length max-freq)))
-                  left
-                  count))))
-
-  (sliding-window nums k))
-
+  (find-max-length nums k))
 
 (require rackunit)
 

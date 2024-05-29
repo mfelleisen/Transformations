@@ -26,23 +26,32 @@
   
   (define sorted-nums (sort nums <))
   
-  (define (check-shift start)
-    (andmap
-     (lambda (i)
-       (= (list-ref nums (modulo (+ start i) n))
-          (list-ref sorted-nums i)))
-     (range n)))
+  ;; Function to check if the list is sorted
+  (define (sorted? lst)
+    (andmap (lambda (pair) (<= (car pair) (cdr pair)))
+            (map list lst (rest lst))))
   
-  (define (find-shift start)
-    (if (= start n)
-        -1
-        (if (check-shift start)
-            (modulo (- n start) n)
-            (find-shift (+ start 1)))))
+  ;; Function to generate all rotations of a list
+  (define (rotations lst)
+    (for/list ([i (in-range n)])
+      (append (drop lst i) (take lst i))))
   
-  (if (= n 1)
-      0
-      (find-shift 0)))
+  ;; Find the first rotation that matches the sorted list
+  (define matching-rotation
+    (for/first ([rot (in-list (rotations nums))]
+                #:when (sorted? rot))
+      rot))
+  
+  (if matching-rotation
+      (modulo (- n (index-of nums (first matching-rotation))) n)
+      -1))
+
+;; Helper function to find the index of an element in a list
+(define (index-of lst elem)
+  (for/first ([x lst]
+              [i (in-naturals)]
+              #:when (equal? x elem))
+    i))
 
 (require rackunit)
 

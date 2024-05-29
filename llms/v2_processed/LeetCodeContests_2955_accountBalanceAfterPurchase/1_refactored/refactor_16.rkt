@@ -20,13 +20,9 @@
 (define (accountBalanceAfterPurchase purchaseAmount)
   (define initial-balance 100)
   (define rounded-amount
-    (let* ([lower-bound (* (quotient purchaseAmount 10) 10)]
-           [upper-bound (+ lower-bound 10)]
-           [diff-lower (- purchaseAmount lower-bound)]
-           [diff-upper (- upper-bound purchaseAmount)])
-      (if (< diff-lower diff-upper)
-          lower-bound
-          upper-bound)))
+    (match (modulo purchaseAmount 10)
+      [(or 0 1 2 3 4) (* (quotient purchaseAmount 10) 10)]
+      [_ (* (add1 (quotient purchaseAmount 10)) 10)]))
   (- initial-balance rounded-amount))
 
 (require rackunit)

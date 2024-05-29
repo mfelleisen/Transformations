@@ -27,25 +27,27 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  ;; Define an auxiliary function to find the minimum absolute difference
-  ;; with at least x indices apart using recursion and accumulators.
-  (define (find-min-diff i current-min)
-    (if (>= i (- (length nums) x))
-        current-min
-        (let loop ((j (+ i x)) (min-diff current-min))
-          (if (>= j (length nums))
-              (find-min-diff (+ i 1) min-diff)
-              (let* ((diff (abs (- (list-ref nums i) (list-ref nums j))))
-                     (new-min (min diff min-diff)))
-                (if (zero? new-min)
-                    0
-                    (loop (+ j 1) new-min)))))))
+  ;; Define a helper function to find the minimum absolute difference given a sorted list.
+  (define (min-diff-in-sorted-list sorted-nums)
+    (for/fold ([min-diff +inf.0])
+              ([i (in-range (- (length sorted-nums) 1))])
+      (min min-diff (abs (- (list-ref sorted-nums i) (list-ref sorted-nums (+ i 1)))))))
 
-  ;; Start the recursive process with the initial index and the infinite initial minimum difference.
+  ;; Main function to find the minimum absolute difference with at least x indices apart.
+  (define (find-min-diff i min-diff)
+    (if (>= i (- (length nums) x))
+        min-diff
+        (let ([left (take (drop nums i) x)]
+              [right (drop (drop nums i) x)])
+          (find-min-diff (+ i 1)
+                         (min min-diff
+                              (min-diff-in-sorted-list (sort (append left right) <)))))))
+
+  ;; Start with the first index and an initial minimum difference of infinity.
   (find-min-diff 0 +inf.0))
 
-;; Examples for testing
-(minAbsoluteDifference '(4 3 2 4) 2)   ;; Output: 0
+;; Example usage:
+(minAbsoluteDifference '(4 3 2 4) 2)  ;; Output: 0
 (minAbsoluteDifference '(5 3 2 10 15) 1)  ;; Output: 1
 (minAbsoluteDifference '(1 2 3 4) 3)  ;; Output: 3
 

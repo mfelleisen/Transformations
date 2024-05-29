@@ -22,18 +22,31 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  (define n (length nums))
-  (define dp (make-vector n -inf.0))
-  (vector-set! dp 0 (first nums))
+  ;; Define a helper function to calculate the maximum score.
+  (define (max-score-helper nums x dp idx max-so-far)
+    (if (empty? nums)
+        max-so-far
+        (let* ([current (first nums)]
+               [new-max-so-far (if (= idx 0)
+                                  current
+                                  (max max-so-far
+                                       (+ (vector-ref dp (sub1 idx))
+                                          current
+                                          (if (not (= (modulo current 2)
+                                                      (modulo (vector-ref dp (sub1 idx)) 2)))
+                                              (- x)
+                                              0))))])
+          (vector-set! dp idx new-max-so-far)
+          (max-score-helper (rest nums) x dp (add1 idx) new-max-so-far))))
   
-  (for/fold ([result (vector-ref dp 0)])
-            ([i (in-range 1 n)])
-    (for ([j (in-range i)])
-      (let ([current-score (+ (vector-ref dp j) (list-ref nums i))])
-        (when (not (= (modulo (list-ref nums j) 2) (modulo (list-ref nums i) 2)))
-          (set! current-score (- current-score x)))
-        (vector-set! dp i (max (vector-ref dp i) current-score))))
-    (max result (vector-ref dp i))))
+  ;; Initialize the dp vector with the length of nums and -inf values.
+  (define dp (make-vector (length nums) -inf.0))
+  
+  ;; Start the helper function with the initial values.
+  (max-score-helper nums x dp 0 -inf.0)
+  
+  ;; Return the maximum value from the dp vector.
+  (apply max (vector->list dp)))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

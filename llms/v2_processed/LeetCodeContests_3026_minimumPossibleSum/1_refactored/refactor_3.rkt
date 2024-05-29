@@ -32,21 +32,18 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
-  
-  ;; Helper function to check if adding a candidate to nums would maintain the beautiful array condition
-  (define (can-use? nums candidate)
-    (not (ormap (lambda (num) (= (+ num candidate) target)) nums)))
-  
-  ;; Recursive function to construct the nums list
-  (define (construct-nums nums candidate)
+
+  ;; Helper function to construct the nums list
+  (define (construct-nums n target candidate nums)
     (if (= (length nums) n)
         nums
-        (if (can-use? nums candidate)
-            (construct-nums (cons candidate nums) (+ candidate 1))
-            (construct-nums nums (+ candidate 1)))))
-  
+        (if (ormap (lambda (num) (= (+ num candidate) target)) nums)
+            (construct-nums n target (+ candidate 1) nums)
+            (construct-nums n target (+ candidate 1) (cons candidate nums)))))
+
   ;; Calculate the sum of the beautiful array mod MOD
-  (modulo (apply + (construct-nums '() 1)) MOD))
+  (define beautiful-nums (construct-nums n target 1 '()))
+  (modulo (apply + beautiful-nums) MOD))
 
 ;; Example test cases
 (display (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])
@@ -55,7 +52,6 @@
 (newline)
 (display (minimumPossibleSum 1 1))   ; Expected: 1 (nums = [1])
 (newline)
-
 
 (require rackunit)
 

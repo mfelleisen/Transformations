@@ -28,12 +28,10 @@
   (define (combine-reverse lst)
     (foldl (lambda (current acc)
              (match acc
-               [(cons acc-first acc-rest)
-                (if (<= current acc-first)
-                    (cons (+ current acc-first) acc-rest)
-                    (cons current acc))]
-               [else
-                (cons current acc)]))
+               [(cons first rest) (if (<= current first)
+                                      (cons (+ current first) rest)
+                                      (cons current acc))]
+               [_ (cons current acc)]))
            '()
            lst))
   ;; The largest element after all possible combinations is found.

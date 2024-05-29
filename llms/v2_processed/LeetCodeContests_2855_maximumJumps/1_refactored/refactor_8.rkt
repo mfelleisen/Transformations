@@ -33,35 +33,30 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
-  ;; Helper function to compute the maximum jumps recursively
-  (define (max-jumps-from i memo)
-    (cond
-      ;; If we reach the last index, return 0 jumps
-      [(= i (sub1 (length nums))) 0]
-      ;; If the value is already computed, return it
-      [(hash-has-key? memo i) (hash-ref memo i)]
-      ;; Otherwise, compute the maximum jumps from index i
-      [else
-       (let loop ([j (+ i 1)] [max-jumps -inf.0])
-         (cond
-           ;; If we have checked all subsequent indices, memoize and return the result
-           [(= j (length nums))
-            (hash-set! memo i max-jumps)
-            max-jumps]
-           ;; If the jump from i to j is within the target range, compute the jumps
-           [(<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-            (loop (add1 j) (max max-jumps (add1 (max-jumps-from j memo))))]
-           ;; Otherwise, skip to the next index
-           [else (loop (add1 j) max-jumps)]))]))
-
-  ;; Initialize memoization hash table
-  (define memo (make-hash))
-
-  ;; Compute the maximum jumps from index 0
-  (define result (max-jumps-from 0 memo))
-
-  ;; Return the result, or -1 if no valid jumps were found
-  (if (= result -inf.0) -1 result))
+  ;; Helper function to determine if a jump is valid
+  (define (valid-jump? i j)
+    (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
+  
+  ;; Recursive function to find the maximum number of jumps
+  (define (max-jumps i memo)
+    (if (= i (sub1 (length nums)))
+        0
+        (if (hash-has-key? memo i)
+            (hash-ref memo i)
+            (let loop ([j (add1 i)] [best -1])
+              (if (>= j (length nums))
+                  (begin
+                    (hash-set! memo i best)
+                    best)
+                  (if (valid-jump? i j)
+                      (let ([jumps (max-jumps j memo)])
+                        (loop (add1 j) (max best (if (= jumps -1) -1 (add1 jumps)))))
+                      (loop (add1 j) best)))))))
+  
+  (let ([result (max-jumps 0 (make-hash))])
+    (if (= result -1)
+        -1
+        result)))
 
 ;; Examples:
 (maximumJumps '(1 3 6 4 1 2) 2)  ;; Output: 3

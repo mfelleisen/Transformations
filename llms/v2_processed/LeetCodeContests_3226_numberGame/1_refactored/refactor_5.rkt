@@ -19,12 +19,20 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  (define (helper sorted-nums acc)
-    (match sorted-nums
-      [(list) (reverse acc)]
-      [(list x y more ...) (helper more (cons y (cons x acc)))]))
+  ;; Sort the input list to facilitate picking the minimum elements
+  (define sorted-nums (sort nums <))
 
-  (helper (sort nums <) '()))
+  ;; Function to simulate the game between Alice and Bob
+  (define (play sorted-nums acc)
+    (match sorted-nums
+      ;; If the list is empty, return the accumulated result
+      [(list) (reverse acc)]
+      ;; If the list has elements, simulate the rounds
+      [(list-rest a b rest)
+       (play rest (cons a (cons b acc)))]))
+
+  ;; Start the game with the sorted list and an empty accumulator
+  (play sorted-nums '()))
 
 ;; Example usage:
 (numberGame '(5 4 2 3)) ;; Output: '(3 2 5 4)

@@ -24,14 +24,14 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= num[i] <= 200
 (define (isGood nums)
-  ;; Calculate the maximum number in nums
-  (define n (apply max nums))
+  (define n (apply max nums))  ; Find the maximum element in nums, which is 'n'
+  (define counts (for/fold ([counts (hash)]) ([num (in-list nums)])
+                   (hash-update counts num (lambda (old) (+ old 1)) 1)))  ; Create a hash table of counts for each number
   
-  ;; Generate the base array for comparison
-  (define base (append (range 1 n) (list n n)))
-  
-  ;; Check if nums is a permutation of base
-  (equal? (sort nums <) (sort base <)))
+  ;; Check if all integers from 1 to n-1 are present exactly once, and n is present exactly twice
+  (and (for/and ([i (in-range 1 n)]) (= (hash-ref counts i 0) 1))  ; All numbers from 1 to n-1 should appear once
+       (= (hash-ref counts n 0) 2)  ; n should appear exactly twice
+       (= (add1 n) (length nums))))  ; The length of nums must be n + 1
 
 ;; Example usage:
 (displayln (isGood '(2 1 3)))  ; Output: #f

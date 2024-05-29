@@ -37,31 +37,26 @@
 (define (maximumSumOfHeights maxHeights)
   (define n (length maxHeights))
   
-  ;; Helper function to calculate the maximum sum with a fixed peak position
-  (define (calculate-max-sum-with-peak peak)
-    ;; Create left and right heights extending from the peak
-    (define left-heights
-      (for/list ([i (in-range peak -1 -1)]
-                 [prev (in-list (reverse (take maxHeights peak)))])
-        (min (list-ref maxHeights i) prev)))
-    (define right-heights
-      (for/list ([i (in-range (add1 peak) n)]
-                 [prev (in-list (drop maxHeights (add1 peak)))])
-        (min (list-ref maxHeights i) prev)))
-
-    ;; Combine left-heights, peak height, and right-heights
-    (define heights (append (reverse left-heights) (list (list-ref maxHeights peak)) right-heights))
-
-    ;; Calculate the sum of the heights list
-    (apply + heights))
+  (define (build-mountain peak)
+    (define heights (make-vector n 0))
+    (define peak-height (list-ref maxHeights peak))
+    (vector-set! heights peak peak-height)
+    
+    (for ([i (in-range (sub1 peak) -1 -1)])
+      (define left-height (min (vector-ref heights (add1 i)) (list-ref maxHeights i)))
+      (vector-set! heights i left-height))
+    
+    (for ([i (in-range (add1 peak) n)])
+      (define right-height (min (vector-ref heights (sub1 i)) (list-ref maxHeights i)))
+      (vector-set! heights i right-height))
+    
+    (apply + (vector->list heights)))
   
-  ;; Try every position as a peak and compute the maximum sum
-  (define (find-max-sum)
-    (apply max (for/list ([i (in-range n)])
-                 (calculate-max-sum-with-peak i))))
+  (define (max-sum)
+    (for/list ([i (in-range n)])
+      (build-mountain i)))
   
-  ;; Return the maximum sum of all possible beautiful configurations
-  (find-max-sum))
+  (apply max (max-sum)))
 
 ;; Example usage
 (maximumSumOfHeights '(5 3 4 1 1))  ; Output: 13

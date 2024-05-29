@@ -21,16 +21,17 @@
 ;; 1 <= n, m <= 100
 ;; 1 <= nums1[i], nums2[i] <= 100
 (define (findIntersectionValues nums1 nums2)
-  (define set-nums1 (set nums1))
+  ;; Helper function to count the number of elements in lst1 that are present in set2
+  (define (count-intersections lst1 set2)
+    (for/sum ([x (in-list lst1)])
+      (if (set-member? set2 x) 1 0)))
+
+  ;; Convert nums2 to a set for efficient membership checking
   (define set-nums2 (set nums2))
-  (define intersection (set-intersect set-nums1 set-nums2))
   
-  (define (count-in-set nums intersection)
-    (for/sum ([x nums])
-      (if (set-member? intersection x) 1 0)))
-  
-  (list (count-in-set nums1 intersection) 
-        (count-in-set nums2 intersection)))
+  ;; Compute the counts for both lists
+  (list (count-intersections nums1 set-nums2)
+        (count-intersections nums2 (set nums1))))
 
 ;; Example usage:
 (findIntersectionValues '(4 3 2 3 1) '(2 2 5 2 3 6))  ; Output: '(3 4)

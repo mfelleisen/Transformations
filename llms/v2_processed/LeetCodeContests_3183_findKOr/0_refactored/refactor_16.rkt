@@ -27,21 +27,24 @@
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
   (define max-bits 31)
-  
-  ;; Helper function to determine if a bit is set in at least k numbers
-  (define (bit-set-in-k-or-more? i)
-    (>= (count (lambda (num) (not (zero? (bitwise-and num (arithmetic-shift 1 i)))))
-               nums)
-        k))
-  
-  ;; Construct the result by folding over bit positions
-  (define result
-    (for/fold ([acc 0]) ([i (in-range max-bits)])
-      (if (bit-set-in-k-or-more? i)
-          (bitwise-ior acc (arithmetic-shift 1 i))
-          acc)))
-  
-  result)
+
+  ;; Helper function to check if the ith bit is set in a number
+  (define (bit-set? num i)
+    (not (zero? (bitwise-and num (arithmetic-shift 1 i)))))
+
+  ;; Helper function to count the number of elements in nums that have the ith bit set
+  (define (count-set-bits i)
+    (for/sum ([num (in-list nums)])
+      (if (bit-set? num i) 1 0)))
+
+  ;; Construct the result by checking each bit position
+  (define (construct-result)
+    (for/fold ([result 0]) ([i (in-range max-bits)])
+      (if (>= (count-set-bits i) k)
+          (bitwise-ior result (arithmetic-shift 1 i))
+          result)))
+
+  (construct-result))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)  ;; Output: 9

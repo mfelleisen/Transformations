@@ -16,20 +16,25 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  (define (construct-k-avoiding used-numbers current-number count total-sum)
-    (cond
-      [(= count n) total-sum]
-      [(or (not (set-member? used-numbers (- k current-number)))
-           (= current-number (- k current-number)))
-       (construct-k-avoiding (set-add used-numbers current-number)
-                             (+ current-number 1)
-                             (+ count 1)
-                             (+ total-sum current-number))]
-      [else
-       (construct-k-avoiding used-numbers
-                             (+ current-number 1)
-                             count
-                             total-sum)]))
+  (define (next-valid nums current-number)
+    (if (or (not (set-member? nums (- k current-number)))
+            (= current-number (- k current-number)))
+        (set-add nums current-number)
+        nums))
+
+  (define (construct-k-avoiding nums current-number count total-sum)
+    (if (= count n)
+        total-sum
+        (let ([new-nums (next-valid nums current-number)])
+          (if (set-member? new-nums current-number)
+              (construct-k-avoiding new-nums
+                                    (+ current-number 1)
+                                    (+ count 1)
+                                    (+ total-sum current-number))
+              (construct-k-avoiding nums
+                                    (+ current-number 1)
+                                    count
+                                    total-sum)))))
 
   (construct-k-avoiding (set) 1 0 0))
 

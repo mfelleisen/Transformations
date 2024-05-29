@@ -28,29 +28,32 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
-  ;; Predicate to check if a number is within the threshold and alternates with the previous modulo
-  (define (valid? prev-mod num)
-    (and (<= num threshold)
-         (not (= (modulo num 2) prev-mod))))
-  
-  ;; Fold over the list to find the maximum alternating subarray length
-  (define (find-max-length nums)
-    (for/fold ([max-len 0] [cur-len 0] [prev-mod 1])
-              ([num (in-list nums)])
-      (if (and (= (modulo num 2) 0) (<= num threshold))
-          (for/fold ([max-len max-len] [cur-len 1] [prev-mod (modulo num 2)])
-                    ([num (in-list (cdr (member num nums)))])
-            (if (valid? prev-mod num)
-                (values (max max-len (add1 cur-len)) (add1 cur-len) (modulo num 2))
-                (values max-len cur-len prev-mod)))
-          (values max-len cur-len prev-mod))))
+  (define (valid-start? index)
+    ;; Check if the starting element is even and within the threshold
+    (and (even? (list-ref nums index))
+         (<= (list-ref nums index) threshold)))
 
-  ;; Start the search for the maximum alternating subarray length
-  (find-max-length nums))
+  (define (max-subarray-length starting-index)
+    ;; Calculate the maximum subarray length starting from a given index
+    (let loop ([current-index (+ starting-index 1)]
+               [current-length 1]
+               [last-modulo (modulo (list-ref nums starting-index) 2)])
+      (if (and (< current-index (length nums))
+               (<= (list-ref nums current-index) threshold)
+               (not (= (modulo (list-ref nums current-index) 2) last-modulo)))
+          (loop (+ current-index 1)
+                (+ current-length 1)
+                (modulo (list-ref nums current-index) 2))
+          current-length)))
+
+  (for/fold ([max-length 0]) ([i (in-range (length nums))])
+    (if (valid-start? i)
+        (max max-length (max-subarray-length i))
+        max-length)))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3
-(longestAlternatingSubarray '(1 2) 2)       ; Output: 1
+(longestAlternatingSubarray '(1 2) 2)      ; Output: 1
 (longestAlternatingSubarray '(2 3 4 5) 4)  ; Output: 3
 
 (require rackunit)

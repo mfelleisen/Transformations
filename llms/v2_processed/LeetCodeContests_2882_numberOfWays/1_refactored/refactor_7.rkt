@@ -21,27 +21,27 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
 
-  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))  ; Calculate the maximum base
+  ;; Define a function to calculate the number of ways using dynamic programming
+  (define (calculate-ways n x)
+    (define max-base (inexact->exact (floor (expt n (/ 1 x)))))  ; Calculate the maximum base
 
-  ;; Helper function to compute number of ways using memoization
-  (define (ways target current-base memo)
-    (cond
-      [(zero? target) 1]
-      [(or (< target 0) (> current-base max-base)) 0]
-      [(hash-has-key? memo (list target current-base)) 
-       (hash-ref memo (list target current-base))]
-      [else
-       (define result (modulo (+ (ways (- target (expt current-base x)) (+ 1 current-base) memo)
-                                 (ways target (+ 1 current-base) memo))
-                              MOD))
-       (hash-set! memo (list target current-base) result)
-       result]))
+    ;; Initialize a dp vector where dp[i] will represent the number of ways to sum up to i
+    (define dp (make-vector (+ n 1) 0))
+    (vector-set! dp 0 1)  ; Base case: one way to sum up to zero using no numbers
 
-  ;; Initialize memoization hash table
-  (define memo (make-hash))
+    ;; Iterate over each base and update the dp vector
+    (for ([base (in-range 1 (+ max-base 1))])
+      (define current-power (expt base x))  ; Calculate the current power of the base
+      ;; Update dp vector entries from n down to current-power
+      (for ([i (in-range n (- current-power 1) -1)])
+        (vector-set! dp i
+                     (modulo (+ (vector-ref dp i)
+                                (vector-ref dp (- i current-power)))
+                             MOD))))
+    dp)  ; Return the dp vector
 
-  ;; Start the recursion from the target n and base 1
-  (ways n 1 memo))
+  ;; Use the dynamic programming result to get the number of ways for n
+  (vector-ref (calculate-ways n x) n))
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

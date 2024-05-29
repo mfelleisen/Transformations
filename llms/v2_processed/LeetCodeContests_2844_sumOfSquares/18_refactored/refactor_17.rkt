@@ -17,13 +17,21 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
-  (define n (length nums))
+  ;; Define a function to square a number
   (define (square x) (* x x))
-  (define (special? i) (zero? (remainder n i)))
-  
-  (for/sum ([i (in-range 1 (add1 n))]
-            #:when (special? i))
-    (square (list-ref nums (sub1 i)))))
+  ;; Calculate the length of the nums list
+  (define n (length nums))
+  ;; Generate a list of indices from 1 to n
+  (define indices (range 1 (add1 n)))
+  ;; Filter indices that are divisors of n and map to their corresponding squared nums elements
+  (define special-squared 
+    (for/list ([i (in-list indices)]
+               #:when (zero? (remainder n i)))
+      (square (list-ref nums (sub1 i)))))
+  ;; Sum the squared values
+  (apply + special-squared))
+
+;; The function sumOfSquares now accepts a list of numbers and returns the sum of the squares of all special elements.
 
 (require rackunit)
 

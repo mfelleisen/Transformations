@@ -24,9 +24,10 @@
 ;;  * 1 <= n == hours.length <= 50
 ;;  * 0 <= hours[i], target <= 105
 (define (numberOfEmployeesWhoMetTarget hours target)
-  ;; Use the 'for/sum' function to count employees who worked at least 'target' hours.
-  ;; The 'for/sum' function iterates through each element and sums up 1 for each element that meets the condition.
-  (for/sum ([hour hours] #:when (>= hour target)) 1))
+  (define (meets-target? hour)
+    (>= hour target))
+  
+  (length (filter meets-target? hours)))
 
 ;; Example use cases:
 ;; (numberOfEmployeesWhoMetTarget '(0 1 2 3 4) 2) returns 3

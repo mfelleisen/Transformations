@@ -22,27 +22,25 @@
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
   ;; Define a helper function to calculate the square of the diagonal length and the area of a rectangle.
-  (define (diagonal-squared length width)
+  (define (calculate-diagonal-squared length width)
     (+ (* length length) (* width width)))
 
-  (define (area length width)
+  (define (calculate-area length width)
     (* length width))
 
-  ;; Use `for/fold` to traverse the list once and determine the rectangle with the longest diagonal or maximum area.
+  ;; Use fold to traverse the list once and determine the rectangle with the longest diagonal or maximum area.
   (define-values (max-diagonal max-area)
     (for/fold ([max-diagonal 0]
                [max-area 0])
               ([dim (in-list dimensions)])
-      (define length (first dim))
-      (define width (second dim))
-      (define diag-sq (diagonal-squared length width))
-      (define ar (area length width))
-      (if (or (> diag-sq max-diagonal)
-              (and (= diag-sq max-diagonal) (> ar max-area)))
-          (values diag-sq ar)
+      (match-define (list length width) dim)
+      (define diagonal-squared (calculate-diagonal-squared length width))
+      (define area (calculate-area length width))
+      (if (or (> diagonal-squared max-diagonal)
+              (and (= diagonal-squared max-diagonal) (> area max-area)))
+          (values diagonal-squared area)
           (values max-diagonal max-area))))
-
-  ;; Return the area of the rectangle with the longest diagonal or maximum area.
+  ;; Return the area of the rectangle with the longest diagonal.
   max-area)
 
 ;; Example usage:

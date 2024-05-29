@@ -21,20 +21,25 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  (let ([n (length nums)])
-    (if (< n k)
-        0
-        (let loop ([i 0] [current-sum (apply + (take nums k))] [max-sum 0])
-          (if (> i (- n k))
-              max-sum
-              (let* ([window (take (drop nums i) k)]
-                     [distinct-count (length (remove-duplicates window))]
-                     [is-valid (>= distinct-count m)]
-                     [new-max-sum (if is-valid (max max-sum current-sum) max-sum)]
-                     [next-sum (if (< (+ i k) n)
-                                 (+ current-sum (- (list-ref nums (+ i k)) (list-ref nums i)))
-                                 current-sum)])
-                (loop (+ i 1) next-sum new-max-sum)))))))
+  (define (subarray-sum subarr)
+    (apply + subarr))
+  
+  (define (distinct-count subarr)
+    (length (remove-duplicates subarr)))
+  
+  (define (valid-subarray? subarr)
+    (>= (distinct-count subarr) m))
+  
+  (define (sliding-window-max-sum nums m k)
+    (for/fold ([max-sum 0] [window (take nums k)] [i 0])
+              ([next (drop nums k)])
+      (if (valid-subarray? window)
+          (values (max max-sum (subarray-sum window)) (append (rest window) (list next)) (add1 i))
+          (values max-sum (append (rest window) (list next)) (add1 i)))))
+
+  (if (< (length nums) k)
+      0
+      (sliding-window-max-sum nums m k)))
 
 ;; Example usage:
 (maxSum '(2 6 7 3 1 7) 3 4)  ; Output: 18

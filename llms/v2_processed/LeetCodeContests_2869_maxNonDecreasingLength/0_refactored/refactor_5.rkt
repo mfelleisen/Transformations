@@ -30,36 +30,35 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  ;; Get the length of the input lists
   (define n (length nums1))
-  
-  ;; Recursive function with memoization
-  (define memo (make-hash))
 
-  (define (max-length i prev1 prev2)
-    (cond
-      [(= i n) 0]
-      [else
-       (hash-ref! memo (list i prev1 prev2)
-                  (lambda ()
-                    (define current1 (list-ref nums1 i))
-                    (define current2 (list-ref nums2 i))
-                    (max 
-                     (if (>= current1 prev1)
-                         (+ 1 (max-length (+ i 1) current1 prev2))
-                         0)
-                     (if (>= current2 prev2)
-                         (+ 1 (max-length (+ i 1) prev1 current2))
-                         0)
-                     (max-length (+ i 1) prev1 prev2))))]))
+  (define (update-max-length i prev1 prev2 current1 current2)
+    (values
+     (if (>= current1 prev1) (add1 i) 1)
+     (if (>= current1 prev2) (add1 i) 1)
+     (if (>= current2 prev1) (add1 i) 1)
+     (if (>= current2 prev2) (add1 i) 1)))
 
-  (max (max-length 0 -inf.0 -inf.0)
-       (max-length 0 -inf.0 -inf.0)))
+  (define (max-in-list lst)
+    (apply max lst))
 
-;; Example usage
-(displayln (maxNonDecreasingLength '(2 3 1) '(1 2 1)))  ; Output: 2
-(displayln (maxNonDecreasingLength '(1 3 2 1) '(2 2 3 4)))  ; Output: 4
-(displayln (maxNonDecreasingLength '(1 1) '(2 2)))  ; Output: 2
+  (define (calculate-max-lengths nums1 nums2)
+    (for/fold
+        ([dp1 1] [dp2 1] [max-len 1])
+        ([i (in-range 1 n)])
+      (define prev1 (list-ref nums1 (sub1 i)))
+      (define prev2 (list-ref nums2 (sub1 i)))
+      (define current1 (list-ref nums1 i))
+      (define current2 (list-ref nums2 i))
+      (define-values (new-dp1 new-dp2 new-dp3 new-dp4)
+        (update-max-length (max dp1 dp2) prev1 prev2 current1 current2))
+      (values (max new-dp1 new-dp2)
+              (max new-dp3 new-dp4)
+              (max max-len new-dp1 new-dp2 new-dp3 new-dp4))))
+
+  (define-values (dp1 dp2 max-len)
+    (calculate-max-lengths nums1 nums2))
+  max-len)
 
 (require rackunit)
 

@@ -23,22 +23,30 @@
 ;;  * nums contains distinct integers.
 (define (minimumRightShifts nums)
   (define n (length nums))
-  (define sorted-nums (sort nums <))
+  ;; Check if the list is already sorted
+  (define (sorted? l)
+    (apply <= l))
   
-  (define (try-shift start)
-    (define shifted (append (drop nums start) (take nums start)))
-    (if (equal? shifted sorted-nums)
-        start
-        (if (= start n)
-            -1
-            (try-shift (add1 start)))))
-  
-  (try-shift 0))
+  (define (shifts lst i)
+    ;; Perform a right shift
+    (append (drop lst i) (take lst i)))
+
+  ;; Try to find the number of shifts to sort the list
+  (define (find-shifts i)
+    (cond
+      [(>= i n) -1] ;; If no valid shift is found, return -1
+      [(sorted? (shifts nums i)) i] ;; If the list is sorted, return the number of shifts
+      [else (find-shifts (add1 i))])) ;; Recurse with the next shift
+
+  ;; If the list has one element, it's already sorted
+  (if (<= n 1) 
+      0
+      (find-shifts 0))) ;; Start finding from the first shift
 
 ;; Examples to test the function
 (minimumRightShifts '(3 4 5 1 2))  ;; Output: 2
-(minimumRightShifts '(1 3 5))       ;; Output: 0
-(minimumRightShifts '(2 1 4))       ;; Output: -1
+(minimumRightShifts '(1 3 5))      ;; Output: 0
+(minimumRightShifts '(2 1 4))      ;; Output: -1
 
 (require rackunit)
 

@@ -29,32 +29,33 @@
 ;;  * 0 <= coordinates[i][1] < n
 ;;  * It is guaranteed that coordinates contains pairwise distinct coordinates.
 (define (countBlackBlocks m n coordinates)
-  ;; A helper function to update the count of black cells in a block
+  ;; Create a hash table to count black cells affecting each potential 2x2 block
   (define (update-block-count block-count x y)
     (for ([dx (in-list '(-1 0))] [dy (in-list '(-1 0))])
-      (let ([bx (+ x dx)] [by (+ y dy)])
-        (when (and (<= 0 bx (- m 2)) (<= 0 by (- n 2)))
-          (hash-update! block-count (list bx by) add1 0)))))
+      (let ([nx (+ x dx)] [ny (+ y dy)])
+        (when (and (>= nx 0) (>= ny 0) (< nx (- m 1)) (< ny (- n 1)))
+          (hash-update! block-count (list nx ny) add1 0)))))
 
-  ;; Count the number of black cells in each potential 2x2 block
   (define block-count (make-hash))
-  (for-each (λ (coord)
-              (define x (first coord))
-              (define y (second coord))
-              (update-block-count block-count x y))
-            coordinates)
+  
+  ;; Populate block-count by iterating over each black cell coordinate
+  (for ([coord coordinates])
+    (match-define (list x y) coord)
+    (update-block-count block-count x y))
 
-  ;; Initialize the result list with counts of blocks having 0-4 black cells
+  ;; Initialize result array for counts of blocks with 0, 1, 2, 3, and 4 black cells
   (define result (make-vector 5 0))
-
+  
   ;; Count how many blocks have specific counts of black cells
-  (for ([count (in-hash-values block-count)])
+  (for ([count (hash-values block-count)])
     (vector-set! result count (add1 (vector-ref result count))))
-
-  ;; Calculate the number of blocks with 0 black cells
+  
+  ;; Calculate the total number of potential 2x2 blocks
   (define total-blocks (* (- m 1) (- n 1)))
-  (vector-set! result 0 (- total-blocks (apply + (cdr (vector->list result)))))
-
+  
+  ;; Compute the number of blocks with 0 black cells
+  (vector-set! result 0 (- total-blocks (for/sum ([i (in-range 1 5)]) (vector-ref result i))))
+  
   ;; Convert vector to list for final output
   (vector->list result))
 

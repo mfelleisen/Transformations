@@ -4,22 +4,21 @@
 ;; and the given position x.
 (define (calculate-price num x)
   (define bin-rep (number->string num 2))  ; Convert number to binary string
-  (define len (string-length bin-rep))
-  (for/fold ([price 0])
-            ([i (in-range len)]
-             #:when (and (= (modulo (+ i 1) x) 0)
-                        (char=? (string-ref bin-rep (- len i 1)) #\1)))  ; Check if the bit is set
+  (for/fold ([price 0])  ; Accumulate the price using a fold
+            ([i (in-range (string-length bin-rep))]
+             #:when (and (= (modulo (+ i 1) x) 0)  ; Check if the position is a multiple of x
+                        (char=? (string-ref bin-rep (- (string-length bin-rep) i 1)) #\1)))  ; Check if the bit is set
     (add1 price)))  ; Increment the price if conditions are met
 
 ;; Find the maximum number such that the sum of prices from 1 to that number
 ;; does not exceed k.
 (define (findMaximumNumber k x)
   (define (helper num current-sum)
-    (define price (calculate-price num x))  ; Calculate price for current number
-    (define new-sum (+ current-sum price))  ; Update the sum
-    (if (> new-sum k)  ; Check if the sum exceeds k
-        (sub1 num)  ; Return the previous number
-        (helper (add1 num) new-sum)))  ; Recurse with the next number and updated sum
+    (let* ([price (calculate-price num x)]  ; Calculate price for current number
+           [new-sum (+ current-sum price)])  ; Update the sum
+      (if (> new-sum k)  ; Check if the sum exceeds k
+          (- num 1)  ; Return the previous number
+          (helper (add1 num) new-sum))))  ; Recurse with the next number and updated sum
   (helper 1 0))  ; Start recursion with initial number 1 and sum 0
 
 ;; Example use cases

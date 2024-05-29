@@ -1,0 +1,157 @@
+#lang racket
+
+;; Function to check if a number is prime
+(define (is-prime? num)
+  ;; Check for non-prime conditions
+  (cond
+    [(<= num 1) #f]  ;; Numbers <= 1 are not prime
+    [(<= num 3) #t]  ;; 2 and 3 are prime numbers
+    [(zero? (remainder num 2)) #f]  ;; Even numbers > 2 are not prime
+    [(zero? (remainder num 3)) #f]  ;; Multiples of 3 > 3 are not prime
+    [else
+     ;; Check for divisibility from 5 onward, skipping even numbers
+     (let loop ([i 5])
+       (cond
+         [(> (* i i) num) #t]  ;; No divisors found, num is prime
+         [(zero? (remainder num i)) #f]  ;; Divisible by i, not prime
+         [(zero? (remainder num (+ i 2))) #f]  ;; Divisible by i+2, not prime
+         [else (loop (+ i 6))]))]))  ;; Check next potential prime factors
+
+;; Function to find prime pairs that add up to n
+;;     You are given an integer n. We say that two integers x and y form a prime number pair if:
+;; * 1 <= x <= y <= n
+;; * x + y == n
+;; * x and y are prime numbers
+;;     Return the 2D sorted list of prime number pairs [xi, yi]. The list should be sorted in increasing order of xi. If there are no prime number pairs at all, return an empty array.
+;;     Note: A prime number is a natural number greater than 1 with only two factors, itself and 1.
+;;     Example 1:
+;;     Input: n = 10
+;;     Output: [[3,7],[5,5]]
+;;     Explanation: In this example, there are two prime pairs that satisfy the criteria.
+;;     These pairs are [3,7] and [5,5], and we return them in the sorted order as described in the problem statement.
+;;     Example 2:
+;;     Input: n = 2
+;;     Output: []
+;;     Explanation: We can show that there is no prime number pair that gives a sum of 2, so we return an empty array.
+;;     Constraints:
+;; * 1 <= n <= 106
+(define (findPrimePairs n)
+  ;; Generate list of primes up to n
+  (define primes (filter is-prime? (range 1 (add1 n))))
+  ;; Find all pairs (x, y) such that x + y = n and both x and y are prime
+  (for*/list ([x primes] [y primes] #:when (and (<= x y) (= (+ x y) n)))
+    (list x y)))
+
+;; Example usage:
+(findPrimePairs 10)  ;; Output: '((3 7) (5 5))
+(findPrimePairs 2)   ;; Output: '()
+
+(require rackunit)
+
+
+(define (test-humaneval) 
+
+  (let (( candidate findPrimePairs))
+    (check-within (candidate 10) (list (list 3 7) (list 5 5)) 0.001)
+    (check-within (candidate 2) (list ) 0.001)
+    (check-within (candidate 1) (list ) 0.001)
+    (check-within (candidate 3) (list ) 0.001)
+    (check-within (candidate 4) (list (list 2 2)) 0.001)
+    (check-within (candidate 5) (list (list 2 3)) 0.001)
+    (check-within (candidate 6) (list (list 3 3)) 0.001)
+    (check-within (candidate 7) (list (list 2 5)) 0.001)
+    (check-within (candidate 8) (list (list 3 5)) 0.001)
+    (check-within (candidate 9) (list (list 2 7)) 0.001)
+    (check-within (candidate 11) (list ) 0.001)
+    (check-within (candidate 12) (list (list 5 7)) 0.001)
+    (check-within (candidate 13) (list (list 2 11)) 0.001)
+    (check-within (candidate 14) (list (list 3 11) (list 7 7)) 0.001)
+    (check-within (candidate 15) (list (list 2 13)) 0.001)
+    (check-within (candidate 16) (list (list 3 13) (list 5 11)) 0.001)
+    (check-within (candidate 17) (list ) 0.001)
+    (check-within (candidate 18) (list (list 5 13) (list 7 11)) 0.001)
+    (check-within (candidate 19) (list (list 2 17)) 0.001)
+    (check-within (candidate 20) (list (list 3 17) (list 7 13)) 0.001)
+    (check-within (candidate 21) (list (list 2 19)) 0.001)
+    (check-within (candidate 22) (list (list 3 19) (list 5 17) (list 11 11)) 0.001)
+    (check-within (candidate 23) (list ) 0.001)
+    (check-within (candidate 24) (list (list 5 19) (list 7 17) (list 11 13)) 0.001)
+    (check-within (candidate 25) (list (list 2 23)) 0.001)
+    (check-within (candidate 26) (list (list 3 23) (list 7 19) (list 13 13)) 0.001)
+    (check-within (candidate 27) (list ) 0.001)
+    (check-within (candidate 28) (list (list 5 23) (list 11 17)) 0.001)
+    (check-within (candidate 29) (list ) 0.001)
+    (check-within (candidate 30) (list (list 7 23) (list 11 19) (list 13 17)) 0.001)
+    (check-within (candidate 31) (list (list 2 29)) 0.001)
+    (check-within (candidate 32) (list (list 3 29) (list 13 19)) 0.001)
+    (check-within (candidate 33) (list (list 2 31)) 0.001)
+    (check-within (candidate 34) (list (list 3 31) (list 5 29) (list 11 23) (list 17 17)) 0.001)
+    (check-within (candidate 35) (list ) 0.001)
+    (check-within (candidate 36) (list (list 5 31) (list 7 29) (list 13 23) (list 17 19)) 0.001)
+    (check-within (candidate 37) (list ) 0.001)
+    (check-within (candidate 38) (list (list 7 31) (list 19 19)) 0.001)
+    (check-within (candidate 39) (list (list 2 37)) 0.001)
+    (check-within (candidate 40) (list (list 3 37) (list 11 29) (list 17 23)) 0.001)
+    (check-within (candidate 41) (list ) 0.001)
+    (check-within (candidate 42) (list (list 5 37) (list 11 31) (list 13 29) (list 19 23)) 0.001)
+    (check-within (candidate 43) (list (list 2 41)) 0.001)
+    (check-within (candidate 44) (list (list 3 41) (list 7 37) (list 13 31)) 0.001)
+    (check-within (candidate 45) (list (list 2 43)) 0.001)
+    (check-within (candidate 46) (list (list 3 43) (list 5 41) (list 17 29) (list 23 23)) 0.001)
+    (check-within (candidate 47) (list ) 0.001)
+    (check-within (candidate 48) (list (list 5 43) (list 7 41) (list 11 37) (list 17 31) (list 19 29)) 0.001)
+    (check-within (candidate 49) (list (list 2 47)) 0.001)
+    (check-within (candidate 50) (list (list 3 47) (list 7 43) (list 13 37) (list 19 31)) 0.001)
+    (check-within (candidate 51) (list ) 0.001)
+    (check-within (candidate 52) (list (list 5 47) (list 11 41) (list 23 29)) 0.001)
+    (check-within (candidate 53) (list ) 0.001)
+    (check-within (candidate 54) (list (list 7 47) (list 11 43) (list 13 41) (list 17 37) (list 23 31)) 0.001)
+    (check-within (candidate 55) (list (list 2 53)) 0.001)
+    (check-within (candidate 56) (list (list 3 53) (list 13 43) (list 19 37)) 0.001)
+    (check-within (candidate 57) (list ) 0.001)
+    (check-within (candidate 58) (list (list 5 53) (list 11 47) (list 17 41) (list 29 29)) 0.001)
+    (check-within (candidate 59) (list ) 0.001)
+    (check-within (candidate 60) (list (list 7 53) (list 13 47) (list 17 43) (list 19 41) (list 23 37) (list 29 31)) 0.001)
+    (check-within (candidate 61) (list (list 2 59)) 0.001)
+    (check-within (candidate 62) (list (list 3 59) (list 19 43) (list 31 31)) 0.001)
+    (check-within (candidate 63) (list (list 2 61)) 0.001)
+    (check-within (candidate 64) (list (list 3 61) (list 5 59) (list 11 53) (list 17 47) (list 23 41)) 0.001)
+    (check-within (candidate 65) (list ) 0.001)
+    (check-within (candidate 66) (list (list 5 61) (list 7 59) (list 13 53) (list 19 47) (list 23 43) (list 29 37)) 0.001)
+    (check-within (candidate 67) (list ) 0.001)
+    (check-within (candidate 68) (list (list 7 61) (list 31 37)) 0.001)
+    (check-within (candidate 69) (list (list 2 67)) 0.001)
+    (check-within (candidate 70) (list (list 3 67) (list 11 59) (list 17 53) (list 23 47) (list 29 41)) 0.001)
+    (check-within (candidate 71) (list ) 0.001)
+    (check-within (candidate 72) (list (list 5 67) (list 11 61) (list 13 59) (list 19 53) (list 29 43) (list 31 41)) 0.001)
+    (check-within (candidate 73) (list (list 2 71)) 0.001)
+    (check-within (candidate 74) (list (list 3 71) (list 7 67) (list 13 61) (list 31 43) (list 37 37)) 0.001)
+    (check-within (candidate 75) (list (list 2 73)) 0.001)
+    (check-within (candidate 76) (list (list 3 73) (list 5 71) (list 17 59) (list 23 53) (list 29 47)) 0.001)
+    (check-within (candidate 77) (list ) 0.001)
+    (check-within (candidate 78) (list (list 5 73) (list 7 71) (list 11 67) (list 17 61) (list 19 59) (list 31 47) (list 37 41)) 0.001)
+    (check-within (candidate 79) (list ) 0.001)
+    (check-within (candidate 80) (list (list 7 73) (list 13 67) (list 19 61) (list 37 43)) 0.001)
+    (check-within (candidate 81) (list (list 2 79)) 0.001)
+    (check-within (candidate 82) (list (list 3 79) (list 11 71) (list 23 59) (list 29 53) (list 41 41)) 0.001)
+    (check-within (candidate 83) (list ) 0.001)
+    (check-within (candidate 84) (list (list 5 79) (list 11 73) (list 13 71) (list 17 67) (list 23 61) (list 31 53) (list 37 47) (list 41 43)) 0.001)
+    (check-within (candidate 85) (list (list 2 83)) 0.001)
+    (check-within (candidate 86) (list (list 3 83) (list 7 79) (list 13 73) (list 19 67) (list 43 43)) 0.001)
+    (check-within (candidate 87) (list ) 0.001)
+    (check-within (candidate 88) (list (list 5 83) (list 17 71) (list 29 59) (list 41 47)) 0.001)
+    (check-within (candidate 89) (list ) 0.001)
+    (check-within (candidate 90) (list (list 7 83) (list 11 79) (list 17 73) (list 19 71) (list 23 67) (list 29 61) (list 31 59) (list 37 53) (list 43 47)) 0.001)
+    (check-within (candidate 91) (list (list 2 89)) 0.001)
+    (check-within (candidate 92) (list (list 3 89) (list 13 79) (list 19 73) (list 31 61)) 0.001)
+    (check-within (candidate 93) (list ) 0.001)
+    (check-within (candidate 94) (list (list 5 89) (list 11 83) (list 23 71) (list 41 53) (list 47 47)) 0.001)
+    (check-within (candidate 95) (list ) 0.001)
+    (check-within (candidate 96) (list (list 7 89) (list 13 83) (list 17 79) (list 23 73) (list 29 67) (list 37 59) (list 43 53)) 0.001)
+    (check-within (candidate 97) (list ) 0.001)
+    (check-within (candidate 98) (list (list 19 79) (list 31 67) (list 37 61)) 0.001)
+    (check-within (candidate 99) (list (list 2 97)) 0.001)
+    (check-within (candidate 100) (list (list 3 97) (list 11 89) (list 17 83) (list 29 71) (list 41 59) (list 47 53)) 0.001)
+))
+
+(test-humaneval)

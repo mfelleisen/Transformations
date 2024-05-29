@@ -25,14 +25,16 @@
   (define (triplet-value i j k)
     (* (- i j) k))
   
-  (define (max-triplet-value nums)
-    (for/fold ([max-val 0])
-              ([i (in-list nums)] 
-               [j (in-list (cdr nums))] 
-               [k (in-list (cddr nums))])
-      (max max-val (triplet-value i j k))))
+  (define triplets
+    (for*/list ([i nums]
+                [j (in-list (rest nums))]
+                [k (in-list (rest (rest nums)))]
+                #:when (< i j k))
+      (triplet-value i j k)))
   
-  (max-triplet-value nums))
+  (if (empty? triplets)
+      0
+      (apply max 0 triplets)))
 
 ;; Example usage
 (maximumTripletValue '(12 6 1 2 7))  ; Output: 77

@@ -21,28 +21,31 @@
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
 (define (areaOfMaxDiagonal dimensions)
-  (define (diagonal-squared l w)
-    (+ (* l l) (* w w)))
-  
-  (define (process-dimension max-diag max-area dim)
-    (match-define (list l w) dim)
-    (let* ((diag (diagonal-squared l w))
-           (area (* l w)))
-      (if (or (> diag max-diag)
-              (and (= diag max-diag) (> area max-area)))
-          (values diag area)
-          (values max-diag max-area))))
-  
-  (define-values (max-diag max-area)
-    (for/fold ([max-diag 0] [max-area 0])
-              ([dim (in-list dimensions)])
-      (process-dimension max-diag max-area dim)))
-  
-  max-area)
+  (define (diagonal-squared length width)
+    (+ (* length length) (* width width)))
 
-;; Example usage:
-;; (areaOfMaxDiagonal '((9 3) (8 6)))  ; => 48
-;; (areaOfMaxDiagonal '((3 4) (4 3)))  ; => 12
+  (define (better-dimensions dim1 dim2)
+    (match-define (list length1 width1) dim1)
+    (match-define (list length2 width2) dim2)
+    (define diag1 (diagonal-squared length1 width1))
+    (define diag2 (diagonal-squared length2 width2))
+    (define area1 (* length1 width1))
+    (define area2 (* length2 width2))
+    (cond
+      [(> diag1 diag2) dim1]
+      [(> diag2 diag1) dim2]
+      [else (if (> area1 area2) dim1 dim2)]))
+
+  (define (calc-best-dimensions dims)
+    (foldl better-dimensions (first dims) (rest dims)))
+
+  (define best-dimensions (calc-best-dimensions dimensions))
+  (* (first best-dimensions) (second best-dimensions)))
+
+;; Test cases
+(areaOfMaxDiagonal '((9 3) (8 6))) ;; Output: 48
+(areaOfMaxDiagonal '((3 4) (4 3))) ;; Output: 12
+(areaOfMaxDiagonal '((1 1) (2 2) (3 1))) ;; Output: 2
 
 (require rackunit)
 

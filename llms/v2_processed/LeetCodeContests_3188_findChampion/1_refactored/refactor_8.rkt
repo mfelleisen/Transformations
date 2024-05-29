@@ -25,30 +25,26 @@
 ;;  * For all i, j that i != j, grid[i][j] != grid[j][i].
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion grid)
-  ;; Helper function to determine if team a is stronger than team b
-  (define (stronger? a b)
-    (list-ref (list-ref grid a) b))
+  (define n (length grid))
 
   ;; Determine the potential champion by iterating through teams
   (define (find-potential-champion n)
-    (for/fold ([potential-champion 0])
-              ([i (in-range 1 n)])
-      (if (stronger? potential-champion i)
+    (for/fold ([potential-champion 0]) ([i (in-range 1 n)])
+      (if (list-ref (list-ref grid potential-champion) i)
           potential-champion
           i)))
 
   ;; Verify that the potential champion is indeed the champion
   (define (verify-champion potential-champion n)
-    (for/and ([j (in-range n)]
-              #:when (not (= j potential-champion)))
-      (not (stronger? j potential-champion))))
+    (for/or ([j (in-range n)])
+      (and (not (= j potential-champion))
+           (list-ref (list-ref grid j) potential-champion))))
 
   ;; Main function body
-  (let* ([n (length grid)]
-         [potential-champion (find-potential-champion n)])
-    (if (verify-champion potential-champion n)
-        potential-champion
-        -1)))
+  (define potential-champion (find-potential-champion n))
+  (if (verify-champion potential-champion n)
+      -1
+      potential-champion))
 
 ;; Example Usage
 (displayln (findChampion '((0 1) (0 0))))  ; Output: 0

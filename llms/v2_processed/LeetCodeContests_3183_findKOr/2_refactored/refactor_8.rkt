@@ -26,19 +26,22 @@
 ;;  * 0 <= nums[i] < 231
 ;;  * 1 <= k <= nums.length
 (define (findKOr nums k)
-  ;; Calculate the K-or by examining each bit position up to 31 (since 2^31 is the max for 32-bit integers)
+  ;; Define a helper function to count how many numbers have a particular bit set
+  (define (count-bit-set nums bit)
+    (for/sum ([num (in-list nums)])
+      (if (not (zero? (bitwise-and num bit))) 1 0)))
+  
+  ;; Calculate the K-or by examining each bit position up to 31
   (for/fold ([result 0]) ([i (in-range 31)])
-    (let* ([bit (arithmetic-shift 1 i)]
-           [count (count (λ (num) (positive? (bitwise-and num bit))) nums)])
-      ;; If at least k numbers have the ith bit set, include this bit in the result
-      (if (>= count k)
-          (bitwise-ior result bit)
-          result))))
+    (define bit (arithmetic-shift 1 i))
+    (if (>= (count-bit-set nums bit) k)
+        (bitwise-ior result bit)
+        result)))
 
 ;; Example usage:
 (findKOr '(7 12 9 8 9 15) 4)  ; Output: 9
-(findKOr '(2 12 1 11 4 5) 6)   ; Output: 0
-(findKOr '(10 8 5 9 11 6 8) 1)  ; Output: 15
+(findKOr '(2 12 1 11 4 5) 6)  ; Output: 0
+(findKOr '(10 8 5 9 11 6 8) 1) ; Output: 15
 
 (require rackunit)
 

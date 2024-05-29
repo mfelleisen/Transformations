@@ -19,23 +19,14 @@
 ;; 1 <= nums[i] <= 100
 ;; nums.length % 2 == 0
 (define (numberGame nums)
-  ;; Helper function to perform a single round of the game
-  (define (play-round nums)
-    (define sorted-nums (sort nums <))
-    (define alice-choice (first sorted-nums))
-    (define bob-choice (second sorted-nums))
-    (define new-nums (drop sorted-nums 2))
-    (values new-nums (list bob-choice alice-choice)))
-
-  ;; Recursive function to simulate the game
   (define (game-loop remaining-nums result)
-    (if (empty? remaining-nums)
-        (reverse result) ; Reverse the result at the end to avoid appending in reverse order
-        (call-with-values (lambda () (play-round remaining-nums))
-          (lambda (new-nums choices)
-            (game-loop new-nums (append choices result))))))
+    (match remaining-nums
+      ['() result]
+      [_ (define sorted-nums (sort remaining-nums <))
+         (define alice-choice (first sorted-nums))
+         (define bob-choice (second sorted-nums))
+         (game-loop (drop sorted-nums 2) (append result (list bob-choice alice-choice)))]))
 
-  ;; Initiate the game loop with the input list and an empty result list
   (game-loop nums '()))
 
 ;; Example usage:

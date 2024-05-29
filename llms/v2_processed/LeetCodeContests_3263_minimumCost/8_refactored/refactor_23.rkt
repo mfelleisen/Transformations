@@ -25,23 +25,29 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Helper function to calculate the cost of splitting nums at indices i and j
-  (define (split-cost nums i j)
-    (+ (first nums) (list-ref nums i) (list-ref nums j)))
-
+  ;; Function to calculate the minimum cost of dividing the list into 3 contiguous subarrays
   (define n (length nums))
 
-  (cond
-    ;; If nums has exactly 3 elements, the cost is the sum of all elements
-    [(= n 3) (apply + nums)]
+  ;; Helper function to calculate the cost
+  (define (calculate-cost i j)
+    (+ (list-ref nums 0)
+       (list-ref nums i)
+       (list-ref nums j)))
 
-    ;; Otherwise, find the minimum cost by trying all valid splits
-    [else
-     (for*/fold ([min-cost +inf.0])
-                ([i (in-range 1 (- n 1))]
-                 [j (in-range (+ i 1) n)]
-                 #:when (< i j))
-       (min min-cost (split-cost nums i j)))]))
+  ;; Generate all valid pairs (i, j) where 1 <= i < j < n
+  (define valid-pairs
+    (for*/list ([i (in-range 1 (- n 1))]
+                [j (in-range (+ i 1) n)])
+      (list i j)))
+
+  ;; Find the minimum cost from all valid pairs
+  (define min-cost
+    (for/fold ([min-cost +inf.0]) ([pair valid-pairs])
+      (define i (first pair))
+      (define j (second pair))
+      (min min-cost (calculate-cost i j))))
+
+  min-cost)
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

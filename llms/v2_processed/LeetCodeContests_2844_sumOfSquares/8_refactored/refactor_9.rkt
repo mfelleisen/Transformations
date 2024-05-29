@@ -18,14 +18,12 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  (define indices (filter (λ (i) (zero? (remainder n i))) (range 1 (add1 n))))
-  (for/sum ([i (in-list indices)])
-    (let ([val (list-ref nums (sub1 i))])
-      (* val val))))
-
-;; Here are the example tests:
-(sumOfSquares '(1 2 3 4))  ;; Expected output: 21
-(sumOfSquares '(2 7 1 19 18 3))  ;; Expected output: 63
+  (define (special-sum i sum)
+    (if (zero? (remainder n i))
+        (+ sum (sqr (list-ref nums (sub1 i))))
+        sum))
+  (for/fold ([sum 0]) ([i (in-range 1 (add1 n))])
+    (special-sum i sum)))
 
 (require rackunit)
 

@@ -22,31 +22,34 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (minOperations nums)
-  ;; Count the occurrences of each number
+  ;; Count the occurrences of each number using a hash table
   (define counts (for/fold ([h (hash)]) ([num (in-list nums)])
                    (hash-update h num add1 0)))
 
   ;; Function to calculate the minimum operations for a given frequency
   (define (calculate-ops freq)
-    (cond [(= (modulo freq 3) 0) 
-           (/ freq 3)]
-          [(= (modulo freq 3) 1)
-           (if (>= freq 4)
-               (+ (/ (- freq 4) 3) 2)
-               -1)]
-          [(= (modulo freq 3) 2)
-           (if (>= freq 2)
-               (+ (/ (- freq 2) 3) 1)
-               -1)]))
+    (match (modulo freq 3)
+      [0 (/ freq 3)]
+      [1 (if (>= freq 4)
+             (+ (/ (- freq 4) 3) 2)
+             -1)]
+      [2 (if (>= freq 2)
+             (+ (/ (- freq 2) 3) 1)
+             -1)]))
 
   ;; Calculate the total operations required, or determine if impossible
-  (for/fold ([acc 0]) ([freq (in-list (hash-values counts))] #:break (= acc -1))
-    (let ([op (calculate-ops freq)])
-      (if (= op -1) -1 (+ acc op)))))
+  (define ops
+    (for/fold ([acc 0]) ([freq (in-hash-values counts)])
+      (if (= acc -1)
+          -1
+          (let ([op (calculate-ops freq)])
+            (if (= op -1) -1 (+ acc op))))))
+
+  ops)
 
 ;; Example usage:
 (minOperations '(2 3 3 2 2 4 2 3 4))  ;; Output: 4
-(minOperations '(2 1 2 2 3 3))        ;; Output: -1
+(minOperations '(2 1 2 2 3 3))       ;; Output: -1
 
 (require rackunit)
 

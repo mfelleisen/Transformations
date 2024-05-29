@@ -39,29 +39,16 @@
 ;;  * 0 <= nums[i] <= 109
 ;;  * 0 <= k <= 109
 (define (minIncrementOperations nums k)
-  ;; Helper function to process each window of size 3
-  (define (process-windows nums)
-    (for/fold ([increments 0]) ([i (in-range (- (length nums) 2))])
-      (let* ((current-window (list-ref nums i))
-             (max-in-window (apply max current-window))
-             (needed (if (< max-in-window k) (- k max-in-window) 0)))
-        (+ increments needed))))
+  ;; Helper function to calculate the required increments for a given subarray
+  (define (needed-increments subarray)
+    (let ((max-val (apply max subarray)))
+      (max 0 (- k max-val))))
 
-  ;; Helper function to update the current window by adding the required increment
-  (define (update-window nums i needed)
-    (for/list ([j (in-range i (+ i 3))])
-      (min (+ (list-ref nums j) needed) (list-ref nums j))))
-
-  ;; Transform nums into a list of windows of size 3
-  (define windows
-    (for/list ([i (in-range 0 (- (length nums) 2))])
-      (take (drop nums i) 3)))
-
-  ;; Process the windows and update the nums list with the required increments
-  (define increments
-    (process-windows windows))
-
-  increments)
+  ;; Traverse the list of nums with a sliding window approach
+  (for/fold ([total-increments 0]) ([i (in-range (- (length nums) 2))])
+    (let ((current-window (take (drop nums i) 3))
+          (increments (needed-increments (take (drop nums i) 3))))
+      (+ total-increments increments))))
 
 ;; Example usage:
 (minIncrementOperations '(2 3 0 0 2) 4)  ;; Output: 3

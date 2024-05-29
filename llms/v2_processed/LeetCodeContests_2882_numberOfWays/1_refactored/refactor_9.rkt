@@ -20,20 +20,22 @@
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
+  
+  ;; Helper function to compute the number of ways using memoization
+  (define (ways n base)
+    (cond
+      [(= n 0) 1]  ; Base case: one way to sum up to zero
+      [(or (< n 0) (= base 0)) 0]  ; No ways if n is negative or base is zero
+      [else
+       (let* ([current-power (expt base x)]  ; Calculate the current power of the base
+              [include (ways (- n current-power) (- base 1))]  ; Include the current base
+              [exclude (ways n (- base 1))])  ; Exclude the current base
+         (modulo (+ include exclude) MOD))]))  ; Sum the ways and apply modulo
+
   (define max-base (inexact->exact (floor (expt n (/ 1 x)))))  ; Calculate the maximum base
 
-  ;; Helper function to recursively calculate the number of ways
-  (define (ways sum base)
-    (cond
-      [(= sum 0) 1]  ; Base case: one way to sum up to zero
-      [(or (< sum 0) (> base max-base)) 0]  ; If sum is negative or base is out of bounds, no way
-      [else
-       (modulo
-        (+ (ways (- sum (expt base x)) (+ base 1))  ; Include current base
-           (ways sum (+ base 1)))  ; Exclude current base
-        MOD)]))  ; Use modulo to handle large numbers
-
-  (ways n 1))  ; Start the recursion with the original number and base 1
+  ;; Compute the number of ways to express n using bases from 1 to max-base
+  (ways n max-base))
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

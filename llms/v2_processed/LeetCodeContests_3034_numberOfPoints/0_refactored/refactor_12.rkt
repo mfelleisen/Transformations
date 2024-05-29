@@ -15,17 +15,18 @@
 ;;  * nums[i].length == 2
 ;;  * 1 <= starti <= endi <= 100
 (define (numberOfPoints nums)
-  ;; Generate a set of points for each car and then compute the union of all sets.
-  (define ranges
-    (for/fold ([result (set)])
-              ([interval (in-list nums)])
-      (define (range-set start end)
-        (for/set ([i (in-range start (add1 end))])
-          i))
-      (set-union result (range-set (first interval) (second interval)))))
+  ;; Function to generate the set of integer points covered by cars on a number line.
+  (define (range->set start end)
+    ;; Generates a set of integers from start to end (inclusive).
+    (for/set ([i (in-range start (add1 end))])
+      i))
   
-  ;; Return the number of unique points.
-  (set-count ranges))
+  ;; Generate a set of points for each car and combine them into a single set.
+  (define all-points
+    (apply set-union (map (lambda (pair) (range->set (first pair) (second pair))) nums)))
+  
+  ;; Return the count of unique points.
+  (set-count all-points))
 
 ;; Example usage:
 ;; (numberOfPoints '((3 6) (1 5) (4 7)))  ; Should return 7

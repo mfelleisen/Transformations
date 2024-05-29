@@ -30,29 +30,24 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  ;; Helper function to compute the maximum length of non-decreasing subarray
-  (define (compute-max-length n1 n2)
-    (for/fold ([dp1 1] [dp2 1] [max-len 1])
-              ([i (in-range 1 (length n1))])
-      (let* ([c1 (list-ref n1 i)]
-             [c2 (list-ref n2 i)]
-             [p1 (list-ref n1 (sub1 i))]
-             [p2 (list-ref n2 (sub1 i))]
-             [new-dp1 (max (if (>= c1 p1) (+ dp1 1) 1)
-                           (if (>= c1 p2) (+ dp2 1) 1))]
-             [new-dp2 (max (if (>= c2 p1) (+ dp1 1) 1)
-                           (if (>= c2 p2) (+ dp2 1) 1))]
-             [new-max-len (max max-len new-dp1 new-dp2)])
-        (values new-dp1 new-dp2 new-max-len))))
-  
-  ;; Compute and return the maximum length
-  (define-values (dp1 dp2 max-len) (compute-max-length nums1 nums2))
-  max-len)
+  ;; Helper function to update the dp vector based on the previous index
+  (define (update-dp dp i j prev1 prev2)
+    (max (vector-ref dp i)
+         (if (>= (list-ref nums1 j) prev1) (+ (vector-ref dp i) 1) 1)
+         (if (>= (list-ref nums2 j) prev2) (+ (vector-ref dp i) 1) 1)))
 
-;; Example usage:
-(maxNonDecreasingLength '(1 3 2 1) '(2 2 3 4)) ;; Output: 4
-(maxNonDecreasingLength '(1 1) '(2 2)) ;; Output: 2
-(maxNonDecreasingLength '(2 3 1) '(1 2 1)) ;; Output: 2
+  ;; Initialize dp vectors to store maximum lengths
+  (define dp1 (make-vector (length nums1) 1))
+  (define dp2 (make-vector (length nums2) 1))
+
+  ;; Traverse through the list and update dp vectors
+  (for ([i (in-range 1 (length nums1))])
+    (vector-set! dp1 i (update-dp dp1 (sub1 i) i (list-ref nums1 (sub1 i)) (list-ref nums2 (sub1 i))))
+    (vector-set! dp2 i (update-dp dp2 (sub1 i) i (list-ref nums2 (sub1 i)) (list-ref nums1 (sub1 i)))))
+
+  ;; Return the maximum length of the non-decreasing subarray
+  (apply max (append (vector->list dp1) (vector->list dp2))))
+
 
 (require rackunit)
 

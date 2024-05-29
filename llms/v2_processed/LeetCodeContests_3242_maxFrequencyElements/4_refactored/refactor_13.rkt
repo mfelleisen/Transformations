@@ -17,24 +17,23 @@
 ;; 1 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (maxFrequencyElements nums)
-  ;; Helper function to count the frequency of each element in the list
-  (define (count-frequencies lst)
-    (for/fold ([freq-hash (hash)]) ([num lst])
+  (define frequencies
+    (for/fold ([freq-hash (hash)])
+              ([num (in-list nums)])
       (hash-update freq-hash num add1 0)))
 
-  ;; Count the frequency of each element
-  (define frequency (count-frequencies nums))
+  (define max-freq
+    (apply max (hash-values frequencies)))
 
-  ;; Find the maximum frequency in the hash table
-  (define max-freq (apply max (hash-values frequency)))
+  (for/fold ([count 0])
+            ([freq (in-hash-values frequencies)])
+    (if (= freq max-freq)
+        (+ count freq)
+        count)))
 
-  ;; Calculate the total count of elements with the maximum frequency
-  (for/sum ([pair (in-hash frequency)]
-            #:when (= (cdr pair) max-freq))
-    (cdr pair)))
-
-;; The function `maxFrequencyElements` remains the same in terms of behavior but is refactored
-;; to use idiomatic Racket constructs like `for/fold` and `for/sum` for a more functional style.
+;; Example usage:
+;; (maxFrequencyElements '(1 2 2 3 1 4))  ; => 4
+;; (maxFrequencyElements '(1 2 3 4 5))    ; => 5
 
 (require rackunit)
 

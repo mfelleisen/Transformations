@@ -30,32 +30,39 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  ;; Get the length of the input lists
+  ;; Helper function to calculate the maximum of two numbers
+  (define (max2 a b) (if (> a b) a b))
+  
+  ;; Define the length of the input lists
   (define n (length nums1))
   
-  ;; Helper function to calculate max length ending with an element
-  ;; from either nums1 or nums2 at index i
-  (define (max-length-at i prev1 prev2)
-    (define val1 (list-ref nums1 i))
-    (define val2 (list-ref nums2 i))
-    (define max1 (if (>= val1 prev1) (+ 1 (first prev1)) 1))
-    (define max2 (if (>= val1 prev2) (+ 1 (second prev1)) max1))
-    (define max3 (if (>= val2 prev1) (+ 1 (first prev2)) 1))
-    (define max4 (if (>= val2 prev2) (+ 1 (second prev2)) max3))
-    (values (max max1 max2) (max max3 max4)))
-
-  ;; Fold over the indices to calculate the maximum length
-  (define (iterate i prev1 prev2 max-len)
-    (if (= i n)
+  ;; Initialize accumulators for the maximum lengths
+  (define max-len 1)
+  
+  ;; Recursive helper function to calculate the dp values
+  (define (calc-dp i dp1-prev dp2-prev)
+    (if (>= i n)
         max-len
-        (call-with-values
-          (lambda () (max-length-at i prev1 prev2))
-          (lambda (curr1 curr2)
-            (iterate (+ i 1) (cons curr1 curr2) (max max-len curr1 curr2))))))
+        (let* ([num1 (list-ref nums1 i)]
+               [num2 (list-ref nums2 i)]
+               [dp1 (if (or (>= num1 (list-ref nums1 (sub1 i))) (>= num1 (list-ref nums2 (sub1 i))))
+                        (max2 (if (>= num1 (list-ref nums1 (sub1 i))) (+ dp1-prev 1) 1)
+                              (if (>= num1 (list-ref nums2 (sub1 i))) (+ dp2-prev 1) 1))
+                        1)]
+               [dp2 (if (or (>= num2 (list-ref nums1 (sub1 i))) (>= num2 (list-ref nums2 (sub1 i))))
+                        (max2 (if (>= num2 (list-ref nums1 (sub1 i))) (+ dp1-prev 1) 1)
+                              (if (>= num2 (list-ref nums2 (sub1 i))) (+ dp2-prev 1) 1))
+                        1)])
+          (set! max-len (max2 max-len (max2 dp1 dp2)))
+          (calc-dp (add1 i) dp1 dp2))))
+  
+  ;; Start the recursion from index 1
+  (calc-dp 1 1 1))
 
-  ;; Start the iteration with initial values
-  (iterate 1 (cons 1 1) 1))
-
+;; Example usage
+(define nums1 '(1 3 2 1))
+(define nums2 '(2 2 3 4))
+(maxNonDecreasingLength nums1 nums2)  ; => 4
 
 (require rackunit)
 

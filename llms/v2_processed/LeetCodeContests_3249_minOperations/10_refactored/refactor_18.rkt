@@ -30,18 +30,21 @@
 ;; 0 <= k <= 106
 (define (minOperations nums k)
   ;; Calculate the XOR of all elements in nums
-  (define current-xor
-    (foldl bitwise-xor 0 nums))
+  (define (xor-all elements)
+    (foldl bitwise-xor 0 elements))
   
-  ;; XOR with k to determine differing bits
-  (define xor-with-k (bitwise-xor current-xor k))
+  ;; Calculate the number of 1 bits in a number (Hamming weight)
+  (define (count-bits n)
+    (define (helper n acc)
+      (if (= n 0)
+          acc
+          (helper (arithmetic-shift n -1) (+ acc (bitwise-and n 1)))))
+    (helper n 0))
+
+  ;; Calculate the current XOR of all elements and XOR with k
+  (define xor-with-k (bitwise-xor (xor-all nums) k))
   
   ;; Count the number of differing bits (each '1' in xor-with-k requires one flip)
-  (define (count-bits n)
-    (if (= n 0)
-        0
-        (+ (bitwise-and n 1) (count-bits (arithmetic-shift n -1)))))
-  
   (count-bits xor-with-k))
 
 ;; Example usage

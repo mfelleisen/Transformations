@@ -24,17 +24,20 @@
   (define n (length nums))
   (if (< n k)
       0
-      (let loop ([i 0] [max-sum 0] [current-window (take nums k)] [distinct-count (length (remove-duplicates (take nums k)))] [window-sum (apply + (take nums k))])
-        (if (= i (- n k))
-            (if (>= distinct-count m)
-                (max max-sum window-sum)
-                max-sum)
-            (let* ([new-sum (- (+ window-sum (list-ref nums (+ i k))) (list-ref nums i))]
-                   [new-window (cons (list-ref nums (+ i k)) (cdr current-window))]
-                   [new-distinct-count (length (remove-duplicates new-window))]
-                   [valid? (>= new-distinct-count m)]
-                   [new-max-sum (if valid? (max max-sum new-sum) max-sum)])
-              (loop (+ i 1) new-max-sum new-window new-distinct-count new-sum))))))
+      (let loop ([i 0] [current-max 0] [current-window (take nums k)])
+        (cond
+          [(>= i (- n k)) current-max]
+          [else
+           (define distinct-count (length (remove-duplicates current-window)))
+           (define window-sum (apply + current-window))
+           (define next-window (if (= i (- n k))
+                                   '()
+                                   (append (drop current-window 1)
+                                           (list (list-ref nums (+ i k))))))
+           (define new-max (if (>= distinct-count m)
+                               (max current-max window-sum)
+                               current-max))
+           (loop (+ i 1) new-max next-window)]))))
 
 ;; Example usage:
 (maxSum '(2 6 7 3 1 7) 3 4)  ; Output: 18

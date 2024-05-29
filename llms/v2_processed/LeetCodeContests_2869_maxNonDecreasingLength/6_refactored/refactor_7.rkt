@@ -35,21 +35,27 @@
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
   (define n (length nums1))
-  (define (max-nd-length n1 n2)
-    (for/fold ([max-len 1]
-               [prev1 (first n1)]
-               [prev2 (first n2)]
-               [dp1 1]
-               [dp2 1])
-              ([x1 (rest n1)] [x2 (rest n2)])
-      (define new-dp1
-        (max (if (>= x1 prev1) (+ dp1 1) 1)
-             (if (>= x1 prev2) (+ dp2 1) 1)))
-      (define new-dp2
-        (max (if (>= x2 prev1) (+ dp1 1) 1)
-             (if (>= x2 prev2) (+ dp2 1) 1)))
-      (values (max max-len new-dp1 new-dp2) x1 x2 new-dp1 new-dp2)))
-  (max-nd-length nums1 nums2))
+  ;; Recursive helper function with accumulators for dp1, dp2, and max-len
+  (define (helper i dp1 dp2 max-len)
+    (if (= i n)
+        max-len
+        (let* ([num1 (list-ref nums1 i)]
+               [num2 (list-ref nums2 i)]
+               [prev-num1 (list-ref nums1 (- i 1))]
+               [prev-num2 (list-ref nums2 (- i 1))]
+               [dp1-val (max (if (>= num1 prev-num1) (+ (vector-ref dp1 (- i 1)) 1) 1)
+                             (if (>= num1 prev-num2) (+ (vector-ref dp2 (- i 1)) 1) 1))]
+               [dp2-val (max (if (>= num2 prev-num1) (+ (vector-ref dp1 (- i 1)) 1) 1)
+                             (if (>= num2 prev-num2) (+ (vector-ref dp2 (- i 1)) 1) 1))])
+          (vector-set! dp1 i dp1-val)
+          (vector-set! dp2 i dp2-val)
+          (helper (+ i 1) dp1 dp2 (max max-len dp1-val dp2-val)))))
+  ;; Initialize dp vectors and start the recursive helper
+  (helper 1
+          (vector 1 (make-vector (sub1 n) 1))
+          (vector 1 (make-vector (sub1 n) 1))
+          1))
+
 
 (require rackunit)
 

@@ -31,27 +31,23 @@
 ;;  * 1 <= n <= 109
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
-  (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
-  
-  ;; Function to create a sequence of beautiful numbers
-  (define (beautiful-sequence n target)
-    (define (next-valid k seen)
-      (if (set-member? seen (- target k))
-          (next-valid (add1 k) seen)
-          (values k (set-add seen k))))
-    
-    (define (generate seq k seen)
-      (if (= (length seq) n)
-          seq
-          (call-with-values
-              (lambda () (next-valid k seen))
-            (lambda (k next-seen)
-              (generate (cons k seq) (add1 k) next-seen)))))
-    
-    (reverse (generate '() 1 (set))))
+  (define MOD (add1 (expt 10 9)))
+
+  ;; Helper function to find the next valid number to add
+  (define (next-valid nums candidate)
+    (if (ormap (λ (num) (= (+ num candidate) target)) nums)
+        (next-valid nums (+ candidate 1))
+        candidate))
+
+  ;; Recursive function to construct the nums list
+  (define (construct-nums nums candidate count)
+    (if (= count 0)
+        nums
+        (let ([valid (next-valid nums candidate)])
+          (construct-nums (cons valid nums) (+ valid 1) (- count 1)))))
 
   ;; Calculate the sum of the beautiful array mod MOD
-  (modulo (apply + (beautiful-sequence n target)) MOD))
+  (modulo (apply + (construct-nums '() 1 n)) MOD))
 
 ;; Example test cases
 (display (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

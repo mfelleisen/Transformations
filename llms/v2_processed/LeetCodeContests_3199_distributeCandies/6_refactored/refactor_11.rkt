@@ -14,8 +14,10 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  (for/sum ([a (in-range (add1 (min n limit)))])
-    (for/sum ([b (in-range (add1 (min (- n a) limit)))])
+  ;; Function to calculate the number of ways to distribute `n` candies among 3 children
+  ;; such that no child receives more than `limit` candies.
+  (for/sum ([a (in-range (min n limit 1))])
+    (for/sum ([b (in-range (min (- n a) limit 1))])
       (define c (- n a b))
       (if (<= c limit) 1 0))))
 

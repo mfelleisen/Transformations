@@ -39,27 +39,17 @@
 ;;  * 0 <= nums[i] <= 109
 ;;  * 0 <= k <= 109
 (define (minIncrementOperations nums k)
-  ;; Define a local helper function to process each window of size 3
-  (define (process-window nums index increments)
-    (if (>= index (- (length nums) 2))
-        increments  ;; If we've reached the end of the list, return the total increments
-        (let* ((current-window (take (drop nums index) 3))  ;; Extract the window of size 3
-               (max-in-window (apply max current-window))
-               (needed (if (< max-in-window k) (- k max-in-window) 0)))
-          ;; Recursively process the next window, adding needed increments to each element of the current window
-          (process-window (update-window nums index needed) (+ index 1) (+ increments needed)))))
-  
-  ;; Helper function to update the current window by adding the required increment
-  (define (update-window nums index increment)
-    (if (= increment 0)
-        nums  ;; If no increment needed, return the list as is
-        (let ((updated-first (+ (list-ref nums index) increment))
-              (updated-second (+ (list-ref nums (+ index 1)) increment))
-              (updated-third (+ (list-ref nums (+ index 2)) increment)))
-          (list-set (list-set (list-set nums index updated-first) (+ index 1) updated-second) (+ index 2) updated-third))))
-  
-  ;; Start the recursive processing from the first index
-  (process-window nums 0 0))
+  ;; Helper function to calculate the increments needed for a subarray.
+  (define (needed-increments subarray k)
+    (define max-in-window (apply max subarray))
+    (max 0 (- k max-in-window)))
+
+  ;; Traverse the list with a sliding window of size 3 and accumulate the total increments.
+  (for/fold ([total-increments 0]) 
+            ([i (in-range (- (length nums) 2))])
+    (define current-window (take (drop nums i) 3))
+    (define needed (needed-increments current-window k))
+    (+ total-increments needed)))
 
 ;; Example usage:
 (minIncrementOperations '(2 3 0 0 2) 4)  ;; Output: 3

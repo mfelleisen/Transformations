@@ -23,22 +23,15 @@
 (define (hasTrailingZeros nums)
   ;; This function checks if it is possible to select two or more elements from the list `nums`
   ;; such that their bitwise OR results in a number with at least one trailing zero.
-  (define (bitwise-or-has-trailing-zero? x y)
+  (define (trailing-zero? x y)
     ;; Helper function to check if the bitwise OR of x and y has a trailing zero.
     (zero? (bitwise-and (bitwise-ior x y) 1)))
   
-  ;; Generate all combinations of two different elements from `nums`
-  ;; and check if any combination satisfies the condition of having a trailing zero.
-  (letrec ([comb (lambda (lst n)
-                   (if (= n 0)
-                       '(())
-                       (append-map (lambda (x)
-                                     (map (lambda (rest) (cons x rest))
-                                          (comb (cdr (member x lst)) (- n 1))))
-                                   lst)))])
-    (ormap (lambda (pair)
-             (bitwise-or-has-trailing-zero? (first pair) (second pair)))
-           (comb nums 2))))
+  ;; Use for/or to check if any pair of elements in the list satisfies the condition.
+  (for/or ([x (in-list nums)]
+           [y (in-list nums)]
+           #:when (< x y)) ;; Ensure we only check each pair once
+    (trailing-zero? x y)))
 
 ;; Example usage:
 (displayln (hasTrailingZeros '(1 2 3 4 5)))  ; Output: #t

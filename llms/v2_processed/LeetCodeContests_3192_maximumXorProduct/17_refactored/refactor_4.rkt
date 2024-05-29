@@ -28,24 +28,15 @@
   
   ;; Define the upper limit as 2^n.
   (define upper-limit (expt 2 n))
-  
-  ;; Generate a sequence of all possible x values from 0 to 2^n - 1.
-  (define x-values (in-range upper-limit))
-  
-  ;; Calculate the maximum product using a fold operation over the sequence of x-values.
+
+  ;; Calculate the maximum product using a fold operation over the range of x-values.
   (define max-product
-    (for/fold ([max-p 0]) ([x x-values])
-      ;; Calculate the product for the current x.
-      (define product (* (bitwise-xor a x) (bitwise-xor b x)))
-      ;; Update the maximum product found so far.
-      (max max-p product)))
+    (for/fold ([max-p 0]) ([x (in-range upper-limit)])
+      (let ((product (* (bitwise-xor a x) (bitwise-xor b x))))
+        (max max-p product))))
   
   ;; Return the maximum product modulo MOD.
   (remainder max-product MOD))
-
-;; The function leverages Racket's functional programming capabilities by using higher-order functions like `for/fold`
-;; to iterate over the sequence of x-values, calculate the XOR and product, and keep track of the maximum product found.
-;; This approach avoids mutation and maintains immutability.
 
 (require rackunit)
 

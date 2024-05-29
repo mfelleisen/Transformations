@@ -21,20 +21,19 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
 
-  ;; Create a helper function to calculate the power and update the dp hash
-  (define (update-dp dp base-power)
-    (for/fold ([dp dp]) ([i (in-range n base-power -1)])
-      (hash-update dp i
-                   (lambda (val)
-                     (modulo (+ val (hash-ref dp (- i base-power) 0)) MOD))
-                   0)))
+  (define max-base (floor (expt n (/ 1 x))))  ; Calculate the maximum base
 
-  ;; Main function logic
-  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))  ; Calculate the maximum base
-  (define base-powers (map (lambda (base) (expt base x)) (range 1 (add1 max-base))))
-  (define dp (for/fold ([dp (hash 0 1)]) ([base-power base-powers])
-               (update-dp dp base-power)))
-  (hash-ref dp n 0))
+  ;; A recursive helper function to count the number of ways
+  (define (count-ways remaining base)
+    (cond
+      [(= remaining 0) 1]  ; Base case: one way to sum up to zero using no numbers
+      [(or (< remaining 0) (> base max-base)) 0]  ; If remaining is negative or base exceeds max-base, no way
+      [else
+       (modulo (+ (count-ways (- remaining (expt base x)) (+ base 1))  ; Include current base
+                  (count-ways remaining (+ base 1)))  ; Exclude current base
+               MOD)]))
+
+  (count-ways n 1))  ; Start the recursion with the full number and base 1
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

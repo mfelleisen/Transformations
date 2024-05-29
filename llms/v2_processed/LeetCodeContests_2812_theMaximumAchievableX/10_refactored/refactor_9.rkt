@@ -23,6 +23,7 @@
   ;; The function calculates the maximum achievable number x
   ;; starting from a given number `num` with up to `t` operations allowed.
   ;; Each operation can either increase or decrease `x` by 1 while doing the opposite to `num`.
+  ;; The maximum achievable x is obtained by increasing x by t and decreasing num by t.
   ;; This results in x = num + 2 * t.
   (+ num (* 2 t)))
 

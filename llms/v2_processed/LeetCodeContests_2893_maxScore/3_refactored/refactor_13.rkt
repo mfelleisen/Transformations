@@ -22,33 +22,27 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
+  ;; Helper function to check if two numbers have different parities
+  (define (diff-parity? a b)
+    (not (= (modulo a 2) (modulo b 2))))
+
+  ;; Helper function to update the dp vector
+  (define (update-dp dp i j)
+    (define new-score
+      (let ([score (+ (vector-ref dp i) (list-ref nums j))]
+            [penalty (if (diff-parity? (list-ref nums i) (list-ref nums j)) x 0)])
+        (- score penalty)))
+    (vector-set! dp j (max (vector-ref dp j) new-score)))
+
   (define n (length nums))
-  
-  ;; Function to compute the score update based on current and next index values
-  (define (compute-new-score current-score curr next)
-    (let* ((next-score (+ current-score next))
-           (penalty (if (not (= (modulo curr 2) (modulo next 2))) x 0)))
-      (- next-score penalty)))
-  
-  ;; Define a helper function to update dp using an accumulator
-  (define (update-dp dp i)
-    (for/fold ([dp dp])
-              ([j (in-range (add1 i) n)])
-      (let ([new-score (compute-new-score (list-ref dp i) (list-ref nums i) (list-ref nums j))])
-        (if (> new-score (list-ref dp j))
-            (list-set dp j new-score)
-            dp))))
-  
-  ;; Initialize dp list with the first element of nums and the rest as negative infinity
-  (define dp (cons (first nums) (make-list (sub1 n) -inf.0)))
-  
-  ;; Compute the dp values iteratively
-  (define final-dp (for/fold ([dp dp])
-                            ([i (in-range n)])
-                      (update-dp dp i)))
-  
-  ;; Return the maximum value from the final dp list
-  (apply max final-dp))
+  (define dp (make-vector n -inf.0))
+  (vector-set! dp 0 (first nums))
+
+  (for ([i (in-range n)])
+    (for ([j (in-range (add1 i) n)])
+      (update-dp dp i j)))
+
+  (apply max (vector->list dp)))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ; Output: 13

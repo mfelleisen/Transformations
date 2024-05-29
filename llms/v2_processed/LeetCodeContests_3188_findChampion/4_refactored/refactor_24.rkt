@@ -25,29 +25,33 @@
 ;;  * For all i, j that i != j, grid[i][j] != grid[j][i].
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion grid)
-  (define n (length grid))
+  (define n (vector-length grid))  ; Get the number of teams
+
+  ;; Helper function to check if team i is stronger than team j
   (define (is-stronger? i j)
-    (= (list-ref (list-ref grid i) j) 1))
-  
+    (= (vector-ref (vector-ref grid i) j) 1))
+
+  ;; Iteratively find the potential champion
   (define (find-potential-champion)
     (for/fold ([potential-champion 0]) ([i (in-range 1 n)])
       (if (is-stronger? potential-champion i)
           potential-champion
           i)))
-  
+
   (define potential-champion (find-potential-champion))
-  
+
+  ;; Verify that no other team is stronger than the candidate
   (define (verify-champion candidate)
     (not (for/or ([j (in-range n)] #:when (not (= j candidate)))
            (is-stronger? j candidate))))
-  
+
   (if (verify-champion potential-champion)
-      potential-champion
-      -1))
+      potential-champion  ; Otherwise, return the potential champion
+      -1))  ; If any team is stronger than the potential champion, return -1
 
 ;; Example Usage
-(findChampion '((0 1) (0 0)))  ; Output: 0
-(findChampion '((0 0 1) (1 0 1) (0 0 0)))  ; Output: 1
+(findChampion (vector (vector 0 1) (vector 0 0)))  ; Output: 0
+(findChampion (vector (vector 0 0 1) (vector 1 0 1) (vector 0 0 0)))  ; Output: 1
 
 (require rackunit)
 

@@ -28,36 +28,29 @@
 ;;  * 1 <= nums[i] <= 50
 (define (minimumSum nums)
   (define len (length nums))
-  (define +inf +inf.0)
-  
-  ;; Helper function to find the minimum value in the list that satisfies a given predicate
-  (define (find-min pred lst)
-    (for/fold ([min-val +inf]) ([x (in-list lst)])
-      (if (pred x) (min min-val x) min-val)))
-  
-  (define (find-min-left current left-nums)
-    (find-min (λ (x) (< x current)) left-nums))
-  
-  (define (find-min-right current right-nums)
-    (find-min (λ (x) (< x current)) right-nums))
-  
-  ;; Loop through each possible j and find the minimum sum of the mountain triplet
-  (define (loop-j j min-sum found)
-    (if (< j (- len 1))
-        (let* ((current (list-ref nums j))
-               (left-nums (take nums j))
-               (right-nums (drop nums (+ j 1)))
-               (left-min (find-min-left current left-nums))
-               (right-min (find-min-right current right-nums)))
-          (if (and (< left-min +inf) (< right-min +inf))
-              (loop-j (+ j 1) (min min-sum (+ left-min current right-min)) #t)
-              (loop-j (+ j 1) min-sum found)))
-        (if found min-sum -1)))
-  
-  ;; Start looping from index 1 with initial min-sum as +inf and found as #f
   (if (< len 3)
-      -1
-      (loop-j 1 +inf #f)))
+      -1  ; If less than 3 elements, no mountain triplet can exist
+      (let loop-j ([j 1] [min-sum +inf.0] [found? #f])
+        (cond
+          [(>= j (- len 1))
+           (if found? min-sum -1)]
+          [else
+           (define current (list-ref nums j))
+           (define left-min
+             (for/fold ([min-val +inf.0]) ([i (in-range 0 j)])
+               (let ([left-val (list-ref nums i)])
+                 (if (< left-val current)
+                     (min min-val left-val)
+                     min-val))))
+           (define right-min
+             (for/fold ([min-val +inf.0]) ([k (in-range (+ j 1) len)])
+               (let ([right-val (list-ref nums k)])
+                 (if (< right-val current)
+                     (min min-val right-val)
+                     min-val))))
+           (if (and (< left-min +inf.0) (< right-min +inf.0))
+               (loop-j (+ j 1) (min min-sum (+ left-min current right-min)) #t)
+               (loop-j (+ j 1) min-sum found?))]))))
 
 ;; Example usages
 (minimumSum '(8 6 1 5 3))  ; Output: 9

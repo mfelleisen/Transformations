@@ -36,30 +36,35 @@
 ;;  * 1 <= n == maxHeights <= 103
 ;;  * 1 <= maxHeights[i] <= 109
 (define (maximumSumOfHeights maxHeights)
-  (define n (length maxHeights))
-
-  ;; Helper function to create the heights vector with a fixed peak
-  (define (heights-with-peak peak)
+  ;; Function to calculate the max sum with a fixed peak position
+  (define (calculate-max-sum-with-peak peak maxHeights)
+    (define n (length maxHeights))
     (define heights (make-vector n 0))
-    (vector-set! heights peak (list-ref maxHeights peak))
     
-    ;; Fill to the left of the peak
-    (for ([i (in-range (sub1 peak) -1 -1)])
-      (vector-set! heights i (min (list-ref maxHeights i) (vector-ref heights (add1 i)))))
+    (define (set-peak idx)
+      (vector-set! heights idx (list-ref maxHeights idx)))
     
-    ;; Fill to the right of the peak
-    (for ([i (in-range (add1 peak) n)])
-      (vector-set! heights i (min (list-ref maxHeights i) (vector-ref heights (sub1 i)))))
+    (define (expand-left peak)
+      (for ([i (in-range (- peak 1) -1 -1)])
+        (vector-set! heights i (min (list-ref maxHeights i) 
+                                    (vector-ref heights (add1 i))))))
     
-    heights)
+    (define (expand-right peak)
+      (for ([i (in-range (+ peak 1) n)])
+        (vector-set! heights i (min (list-ref maxHeights i) 
+                                    (vector-ref heights (- i 1))))))
+    
+    (define (sum-heights)
+      (apply + (vector->list heights)))
 
-  ;; Function to calculate the sum of the heights
-  (define (sum-heights heights)
-    (apply + (vector->list heights)))
+    (set-peak peak)
+    (expand-left peak)
+    (expand-right peak)
+    (sum-heights))
   
-  ;; Try each position as a peak and find the maximum sum
-  (for/fold ([max-sum 0]) ([i (in-range n)])
-    (max max-sum (sum-heights (heights-with-peak i)))))
+  ;; Try every position as a peak and find the maximum sum
+  (for/fold ([max-sum 0]) ([i (in-range (length maxHeights))])
+    (max max-sum (calculate-max-sum-with-peak i maxHeights))))
 
 ;; Example usage
 (maximumSumOfHeights '(5 3 4 1 1))  ; Output: 13

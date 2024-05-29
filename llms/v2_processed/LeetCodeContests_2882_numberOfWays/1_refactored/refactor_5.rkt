@@ -20,25 +20,23 @@
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
+  
+  ;; Create a memoization table
+  (define memo (make-hash))
 
-  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))  ; Calculate the maximum base
-
-  ;; Helper function to update the dp vector
-  (define (update-dp dp current-power)
-    (for/fold ([dp dp]) ([i (in-range n (- current-power 1) -1)])
-      (let ([new-value (modulo (+ (vector-ref dp i)
-                                  (vector-ref dp (- i current-power)))
-                               MOD)])
-        (vector-set! dp i new-value)
-        dp)))
-
-  ;; Initialize the dp vector with zeros and set the base case
-  (define dp (for/fold ([v (make-vector (+ n 1) 0)])
-                     ([i (in-range 1 (+ max-base 1))])
-               (let ([current-power (expt i x)])
-                 (update-dp v current-power))))
-
-  (vector-ref dp n))  ; Return the number of ways to express n
+  ;; Define the function to compute the number of ways recursively
+  (define (ways n current)
+    (cond
+      [(= n 0) 1]
+      [(< n 0) 0]
+      [(>= current (add1 (floor (expt n (/ 1 x))))) 0]
+      [else
+       (hash-ref! memo (list n current)
+                  (lambda ()
+                    (modulo (+ (ways (- n (expt current x)) (add1 current))
+                               (ways n (add1 current)))
+                            MOD)))]))
+  (ways n 1))
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

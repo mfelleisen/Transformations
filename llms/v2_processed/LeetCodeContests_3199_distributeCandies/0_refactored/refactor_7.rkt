@@ -16,19 +16,14 @@
 (define (distributeCandies n limit)
   ;; Generate all possible distributions of candies among three children
   ;; where no child gets more than `limit` candies.
-  (define (valid-distributions sum limit)
-    (for*/sum ([a (in-range (add1 (min sum limit)))]
-               [b (in-range (add1 (min (- sum a) limit)))]
-               #:when (<= (- sum a b) limit))
-      1))
-  ;; Count the number of valid distributions
+  (define (valid-distributions n limit)
+    (for*/sum ([a (in-range (add1 (min n limit)))]
+               [b (in-range (add1 (min (- n a) limit)))]
+               #:when (<= (- n a b) limit))
+      1)) ;; Count each valid distribution as 1
+  
+  ;; Return the count of valid distributions
   (valid-distributions n limit))
-
-;; Explanation:
-;; The function `distributeCandies` uses `for*/sum` to iterate over all possible
-;; values of `a` and `b` such that the sum of `a`, `b`, and `c` (where `c` is calculated
-;; as `n - a - b`) equals `n`. The `#:when` clause ensures that `c` does not exceed `limit`.
-;; The function returns the count of all such valid distributions.
 
 (require rackunit)
 

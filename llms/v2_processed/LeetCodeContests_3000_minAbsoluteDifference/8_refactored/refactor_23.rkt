@@ -27,18 +27,27 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  ;; Helper function to find the minimum absolute difference in a list given a starting index.
-  (define (min-diff-from-index nums x i)
-    (define curr-val (list-ref nums i))
-    (define valid-pairs (drop (take nums (+ i x 1)) i))
-    (define diffs (map (lambda (val) (abs (- curr-val val))) valid-pairs))
-    (if (empty? diffs) +inf.0 (apply min diffs)))
+  ;; This function finds the minimum absolute difference between two elements
+  ;; in the array that are at least x indices apart.
+  (define n (length nums))
   
-  ;; Iterate over the list and find the minimum absolute difference.
-  (define diffs (for/list ([i (in-range (- (length nums) x))])
-                  (min-diff-from-index nums x i)))
-
-  (apply min diffs))
+  ;; Helper function to compute the minimum absolute difference for a given index range
+  (define (compute-min-diff nums i j)
+    (for/fold ([min-diff +inf.0]) ([k (in-range i (- j x))])
+      (define current (list-ref nums k))
+      (for/fold ([min-diff min-diff]) ([l (in-range (+ k x) j)])
+        (define diff (abs (- current (list-ref nums l))))
+        (min min-diff diff))))
+  
+  (define (helper nums x i min-diff)
+    (if (>= i (- n x))
+        min-diff
+        (let ([new-diff (compute-min-diff nums i n)])
+          (if (zero? new-diff)
+              0
+              (helper nums x (+ i 1) (min min-diff new-diff))))))
+  
+  (helper nums x 0 +inf.0))
 
 ;; Example usage:
 (minAbsoluteDifference '(4 3 2 4) 2)  ; Output: 0

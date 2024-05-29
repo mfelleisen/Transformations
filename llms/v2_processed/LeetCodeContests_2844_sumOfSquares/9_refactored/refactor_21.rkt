@@ -19,8 +19,8 @@
 (define (sumOfSquares nums)
   (define n (length nums))
   (define (square x) (* x x))
-  (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (modulo n i)))
+  
+  (for/sum ([i (in-range 1 (add1 n))] #:when (zero? (modulo n i)))
     (square (list-ref nums (sub1 i)))))
 
 ;; Example usage:

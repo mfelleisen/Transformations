@@ -33,18 +33,18 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))
-
+  
   ;; Helper function to generate the beautiful array
   (define (generate-beautiful-array n target)
-    (define (gen-acc nums candidate count)
-      (cond
-        [(= count n) nums]
-        [(ormap (lambda (num) (= (+ num candidate) target)) nums)
-         (gen-acc nums (+ candidate 1) count)]
-        [else (gen-acc (cons candidate nums) (+ candidate 1) (+ count 1))]))
-    (gen-acc '() 1 0))
+    (define (helper accum current count)
+      (if (= count n)
+          accum
+          (if (ormap (λ (num) (= (+ num current) target)) accum)
+              (helper accum (+ current 1) count)
+              (helper (cons current accum) (+ current 1) (+ count 1)))))
+    (helper '() 1 0))
 
-  ;; Calculate the sum and take modulo MOD
+  ;; Calculate the sum of the beautiful array and take modulo MOD
   (modulo (apply + (generate-beautiful-array n target)) MOD))
 
 ;; Example test cases

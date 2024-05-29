@@ -19,22 +19,17 @@
 (define (sumOfSquares nums)
   (define n (length nums))
   
-  (define (is-special? idx)
-    (zero? (remainder n idx)))
+  (define (is-special? i)
+    (zero? (remainder n i)))
   
   (define (square x)
     (* x x))
   
-  (define (special-sum acc idx val)
-    (if (is-special? idx)
-        (+ acc (square val))
-        acc))
-  
-  (foldl special-sum 0 (map list (range 1 (add1 n)) nums)))
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (is-special? i))
+    (square (list-ref nums (sub1 i)))))
 
-;; Example usage:
-;; (sumOfSquares '(1 2 3 4))  ; Output: 21
-;; (sumOfSquares '(2 7 1 19 18 3))  ; Output: 63
+;; The function sumOfSquares now accepts a list of numbers and returns the sum of the squares of all special elements.
 
 (require rackunit)
 

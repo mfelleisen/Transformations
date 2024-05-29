@@ -33,26 +33,25 @@
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus as 10^9 + 7.
-
-  ;; Helper function to build the beautiful array.
-  (define (build-beautiful-nums n target candidate acc)
-    (cond
-      [(= n 0) (reverse acc)]  ; If we have enough numbers, return them.
-      [(for/and ([num (in-list acc)])  ; Iterate through each number in `acc`.
-                (not (= (+ num candidate) target)))
-       (build-beautiful-nums (sub1 n) target (+ candidate 1) (cons candidate acc))]  ; Include candidate.
-      [else (build-beautiful-nums n target (+ candidate 1) acc)]))  ; Skip candidate.
-
-  ;; Generate the beautiful array starting with an empty list and candidate 1.
-  (define beautiful-nums (build-beautiful-nums n target 1 '()))
-
+  
+  (define (generate-beautiful n target candidate acc)
+    (if (= n 0)
+        acc
+        (if (or (empty? acc)
+                (for/and ([num (in-list acc)])
+                  (not (= (+ num candidate) target))))
+            (generate-beautiful (- n 1) target (+ candidate 1) (cons candidate acc))
+            (generate-beautiful n target (+ candidate 1) acc))))
+  
+  (define beautiful-nums (generate-beautiful n target 1 '()))
+  
   ;; Calculate the sum of the beautiful array modulo MOD.
-  (modulo (foldl + 0 beautiful-nums) MOD))
+  (modulo (apply + beautiful-nums) MOD))
 
 ;; Example test cases
 (displayln (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])
 (displayln (minimumPossibleSum 3 3))   ; Expected: 8 (nums = [1, 3, 4])
-(displayln (minimumPossibleSum 1 1))   ; Expected: 1 (nums = [1]))
+(displayln (minimumPossibleSum 1 1))   ; Expected: 1 (nums = [1])
 
 (require rackunit)
 

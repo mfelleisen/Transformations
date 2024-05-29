@@ -14,17 +14,12 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  (define (count-ways a b)
-    (let ((c (- n (+ a b))))
+  (define (count-ways a)
+    (for/sum ([b (in-range (min (- n a) limit 1) (min (- n a) limit 1))])
+      (define c (- n a b))
       (if (<= c limit) 1 0)))
-
-  (define (distribute a b)
-    (cond
-      [(> a (min n limit)) 0]
-      [(> b (min (- n a) limit)) (distribute (add1 a) 0)]
-      [else (+ (count-ways a b) (distribute a (add1 b)))]))
-
-  (distribute 0 0))
+  (for/sum ([a (in-range (min n limit 1) (min n limit 1))])
+    (count-ways a)))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

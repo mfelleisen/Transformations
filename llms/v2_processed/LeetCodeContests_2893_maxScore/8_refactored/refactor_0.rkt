@@ -21,27 +21,33 @@
 ;; Constraints:
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
-(define (different-parity? a b)
-  (not (= (modulo a 2) (modulo b 2))))
-
-;; Main function to compute the maximum score
 (define (maxScore nums x)
-  ;; Inner recursive function to compute the maximum score with memoization
-  (define (compute max-scores i)
-    (if (>= i (length nums))
-        (apply max (hash-values max-scores))
-        (let* ((current-score (hash-ref max-scores i))
-               (next-scores (for/fold ([max-scores max-scores])
-                             ([j (in-range (add1 i) (length nums))])
-                             (let* ((next-score (+ current-score (list-ref nums j)))
-                                    (next-score (if (different-parity? (list-ref nums i) (list-ref nums j))
-                                                    (- next-score x)
-                                                    next-score)))
-                               (hash-update max-scores j (lambda (old) (max old next-score)) next-score)))))
-          (compute next-scores (add1 i)))))
+  ;; Define a helper function to determine the parity of a number
+  (define (parity n) (modulo n 2))
   
-  ;; Initialize the memo table with the initial score
-  (compute (hash 0 (first nums)) 0))
+  ;; Define a recursive function with memoization to calculate the maximum score
+  (define (max-score-memo pos memo)
+    (define n (length nums))
+    (if (>= pos n)
+        -inf.0
+        (hash-ref memo pos
+                  (lambda ()
+                    (let loop ([j (add1 pos)] [best (list-ref nums pos)])
+                      (if (>= j n)
+                          (begin (hash-set! memo pos best)
+                                 best)
+                          (let* ((next-val (list-ref nums j))
+                                 (base-score (+ (list-ref nums pos) next-val))
+                                 (current-score (if (not (= (parity (list-ref nums pos)) (parity next-val)))
+                                                    (- base-score x)
+                                                    base-score)))
+                            (loop (add1 j) (max best (max-score-memo j memo))))))))))
+  
+  ;; Initialize the memoization hash table
+  (define memo (make-hash))
+  
+  ;; Compute the maximum score starting from position 0
+  (max-score-memo 0 memo))
 
 ;; Example cases
 (displayln (maxScore '(2 3 6 1 9 2) 5))  ;; Output: 13

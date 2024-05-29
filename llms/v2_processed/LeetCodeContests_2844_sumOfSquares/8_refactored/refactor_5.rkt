@@ -17,12 +17,17 @@
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
+  ;; Helper function to check if an index i divides n
+  (define (special? i n)
+    (zero? (remainder n i)))
+
+  ;; Get the length of the nums list
   (define n (length nums))
-  (for/sum ([i (in-range 1 (+ n 1))])
-    (if (zero? (remainder n i))
-        (let ([elem (list-ref nums (- i 1))])
-          (* elem elem))
-        0)))
+
+  ;; Iterate over the indices and filter for special elements, then sum their squares
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (special? i n))
+    (sqr (list-ref nums (sub1 i)))))
 
 (require rackunit)
 

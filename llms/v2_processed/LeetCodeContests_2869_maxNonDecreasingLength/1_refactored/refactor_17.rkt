@@ -28,18 +28,37 @@
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
 (define (maxNonDecreasingLength nums1 nums2)
-  (define n (length nums1))
-  
-  ;; Helper function to compute the maximum non-decreasing length.
-  (define (max-length prev choices)
-    (for/fold ([max-len 1]) ([choice choices])
-      (if (>= choice prev)
-          (max max-len (add1 (max-length choice (cdr (member choice choices)))))
-          max-len)))
+  ;; Helper function to update the dp values
+  (define (update-dp dp current previous value)
+    (if (>= (list-ref current value) (list-ref previous (- value 1)))
+        (+ 1 (vector-ref dp (- value 1)))
+        1))
 
-  ;; Initial call to the helper function starting with the first elements of nums1 and nums2.
-  (max (max-length (first nums1) (cons (first nums1) nums1))
-       (max-length (first nums2) (cons (first nums2) nums2))))
+  ;; Recursively calculate the length of the longest non-decreasing subarray
+  (define (calculate-dp nums1 nums2 index dp1 dp2 max-len)
+    (if (>= index (length nums1))
+        max-len
+        (let* ([dp1-i (max (update-dp dp1 nums1 nums1 index)
+                           (update-dp dp1 nums1 nums2 index))]
+               [dp2-i (max (update-dp dp2 nums2 nums1 index)
+                           (update-dp dp2 nums2 nums2 index))]
+               [new-max-len (max max-len dp1-i dp2-i)])
+          (vector-set! dp1 index dp1-i)
+          (vector-set! dp2 index dp2-i)
+          (calculate-dp nums1 nums2 (+ index 1) dp1 dp2 new-max-len))))
+
+  ;; Initialize dp arrays
+  (define n (length nums1))
+  (define dp1 (make-vector n 1))
+  (define dp2 (make-vector n 1))
+
+  ;; Start the recursive calculation
+  (calculate-dp nums1 nums2 1 dp1 dp2 1))
+
+;; Test cases
+(maxNonDecreasingLength '(2 3 1) '(1 2 1)) ; => 2
+(maxNonDecreasingLength '(1 3 2 1) '(2 2 3 4)) ; => 4
+(maxNonDecreasingLength '(1 1) '(2 2)) ; => 2
 
 (require rackunit)
 

@@ -20,34 +20,21 @@
 ;; Constraints:
 ;;  * 3 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 106
+(define (triplet-value nums i j k)
+  (* (- (list-ref nums i) (list-ref nums j)) (list-ref nums k)))
+
+;; Function to generate all possible triplets (i, j, k) where i < j < k
+(define (generate-triplets nums)
+  (for*/list ([i (in-range 0 (- (length nums) 2))]
+              [j (in-range (+ i 1) (- (length nums) 1))]
+              [k (in-range (+ j 1) (length nums))])
+    (triplet-value nums i j k)))
+
+;; Function to return the maximum value over all triplets or 0 if all are negative
 (define (maximumTripletValue nums)
-  (define (triplet-value x y z)
-    (* (- x y) z))
-  
-  (define (max-triplet-value max-so-far i j k)
-    (if (or (empty? k) (empty? (rest j)))
-        max-so-far
-        (let* ([x (first i)]
-               [y (first j)]
-               [z (first k)]
-               [current-value (triplet-value x y z)]
-               [new-max (max max-so-far current-value)])
-          (max-triplet-value new-max i j (rest k)))))
-
-  (define (max-value-for-i max-so-far i j)
-    (if (empty? (rest j))
-        max-so-far
-        (let* ([x (first i)]
-               [new-max (max-triplet-value max-so-far i j (rest j))])
-          (max-value-for-i new-max i (rest j)))))
-
-  (define (max-value-overall max-so-far i)
-    (if (empty? (rest (rest i)))
-        max-so-far
-        (let* ([new-max (max-value-for-i max-so-far i (rest i))])
-          (max-value-overall new-max (rest i)))))
-
-  (max-value-overall 0 nums))
+  (define triplet-values (generate-triplets nums))
+  (define max-triplet-value (apply max (cons 0 triplet-values)))
+  max-triplet-value)
 
 ;; Example usage
 (maximumTripletValue '(12 6 1 2 7))  ;; Output: 77

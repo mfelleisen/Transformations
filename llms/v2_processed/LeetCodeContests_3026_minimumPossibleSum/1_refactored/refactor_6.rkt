@@ -33,16 +33,15 @@
 (define (minimumPossibleSum n target)
   (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
   
-  (define (can-use? nums candidate)
-    (not (ormap (λ (num) (= (+ num candidate) target)) nums)))
-
+  ;; Recursive function to construct the nums list
   (define (construct-nums nums candidate count)
     (if (= count n)
-        (reverse nums)
-        (if (can-use? nums candidate)
-            (construct-nums (cons candidate nums) (+ candidate 1) (+ count 1))
+        nums
+        (if (not (ormap (lambda (num) (= (+ num candidate) target)) nums))
+            (construct-nums (cons candidate nums) (+ candidate 1) (add1 count))
             (construct-nums nums (+ candidate 1) count))))
   
+  ;; Calculate the sum of the beautiful array mod MOD
   (modulo (apply + (construct-nums '() 1 0)) MOD))
 
 ;; Example test cases

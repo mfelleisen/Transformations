@@ -21,18 +21,15 @@
 ;; 2 <= nums.length <= 100
 ;; 1 <= nums[i] <= 100
 (define (hasTrailingZeros nums)
-  ;; This function checks if it's possible to select two or more elements from the list `nums`
-  ;; such that their bitwise OR results in at least one trailing zero in binary representation.
-  
-  ;; Using a higher-order function to check pairs directly without generating explicit combinations
-  (define (even-bitwise-ior? x y)
+  ;; Check if the bitwise OR of any two numbers in the list has at least one trailing zero
+  (define (has-trailing-zero? x y)
     (even? (bitwise-ior x y)))
   
-  ;; Using `for/first` to short-circuit the search as soon as we find a valid pair
-  (for/first ([i (in-list nums)]
-              [j (in-list nums)]
-              #:when (not (eq? i j)))
-    (even-bitwise-ior? i j)))
+  ;; Use for/or to check if any pair of elements in the list meets the condition
+  (for/or ([i (in-list nums)]
+           [j (in-list nums)]
+           #:when (not (eq? i j)))
+    (has-trailing-zero? i j)))
 
 ;; Example usage:
 (displayln (hasTrailingZeros '(1 2 3 4 5)))  ; Output: #t

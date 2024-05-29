@@ -25,18 +25,18 @@
 ;; 3 <= n <= 50
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
-  ;; Helper function to calculate the cost given breakpoints i and j
-  (define (calculate-cost nums i j)
-    (+ (first nums) (list-ref nums i) (list-ref nums j)))
-
-  ;; Generate all possible pairs of breakpoints (i, j) and calculate the corresponding costs
-  (define possible-costs
-    (for*/list ([i (in-range 1 (sub1 (length nums)))]
-                [j (in-range (add1 i) (length nums))])
-      (calculate-cost nums i j)))
-
-  ;; Find the minimum cost among all possible costs
-  (apply min possible-costs))
+  (define n (length nums))
+  (cond
+    [(= n 3) (apply + nums)]  ; If there are exactly 3 elements, return the sum of all elements
+    [else
+     (define min-cost +inf.0)  ; Start with a large number for comparison
+     (for*/fold ([min-cost min-cost])
+                ([i (in-range 1 (- n 1))]
+                 [j (in-range (+ i 1) n)])
+       (let ([cost (+ (first nums)  ; Cost of the first subarray
+                      (list-ref nums i)  ; Cost of the second subarray
+                      (list-ref nums j))])  ; Cost of the third subarray
+         (min min-cost cost)))]))  ; Update min-cost if a smaller cost is found
 
 ;; Examples
 (minimumCost '(1 2 3 12))  ; Output: 6

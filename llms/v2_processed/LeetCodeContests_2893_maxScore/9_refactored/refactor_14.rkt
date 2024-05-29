@@ -23,31 +23,26 @@
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
   (define n (length nums))
-  (define (parity num) (modulo num 2))
 
-  ;; Recursive helper function with memoization
-  (define (max-score-helper i current-score last-parity memo)
-    (if (= i n)
-        current-score
-        (let ([key (list i current-score last-parity)])
-          (if (hash-has-key? memo key)
-              (hash-ref memo key)
-              (let loop ([j (add1 i)] [max-score current-score])
-                (if (< j n)
-                    (let* ([next-score (+ current-score (list-ref nums j))]
-                           [final-score (if (not (= last-parity (parity (list-ref nums j))))
-                                            (- next-score x)
-                                            next-score)])
-                      (set! max-score (max max-score
-                                           (max-score-helper j final-score (parity (list-ref nums j)) memo)))
-                      (loop (add1 j) max-score))
-                    (begin
-                      (hash-set! memo key max-score)
-                      max-score)))))))
+  ;; Helper function to calculate the parity of a number
+  (define (parity num)
+    (modulo num 2))
   
-  ;; Initialize memoization table and start the recursion
-  (define memo (make-hash))
-  (max-score-helper 0 (first nums) (parity (first nums)) memo))
+  ;; Use a vector to store the maximum scores for each position.
+  (define dp (make-vector n -inf.0))
+  (vector-set! dp 0 (first nums))
+
+  ;; Traverse each position using two nested loops
+  (for* ([i (in-range n)]
+         [j (in-range (add1 i) n)])
+    (let* ([current-score (+ (vector-ref dp i) (list-ref nums j))]
+           [current-score (if (not (= (parity (list-ref nums i)) (parity (list-ref nums j))))
+                             (- current-score x)
+                             current-score)])
+      (vector-set! dp j (max (vector-ref dp j) current-score))))
+  
+  ;; Return the maximum score from the dp vector
+  (apply max (vector->list dp)))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

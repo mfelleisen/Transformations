@@ -31,18 +31,18 @@
 ;;  * 1 <= n <= 109
 ;;  * 1 <= target <= 109
 (define (minimumPossibleSum n target)
-  (define MOD (add1 (expt 10 9)))  ; Define the modulo constant
+  (define MOD (add1 (expt 10 9)))
+  
+  (define (find-sum n target mod)
+    (define (add-integers i j sum count)
+      (if (= count n)
+          sum
+          (if (= (+ i j) target)
+              (add-integers i (+ j 1) sum count)
+              (add-integers (+ i 1) j (modulo (+ sum i) mod) (+ count 1)))))
+    (add-integers 1 1 0 0))
 
-  ;; Helper function to construct the nums list iteratively
-  (define (construct-nums nums candidate)
-    (if (= (length nums) n)
-        nums
-        (if (not (ormap (lambda (num) (= (+ num candidate) target)) nums))
-            (construct-nums (cons candidate nums) (+ candidate 1))
-            (construct-nums nums (+ candidate 1)))))
-
-  ;; Calculate the sum of the beautiful array mod MOD
-  (modulo (foldl + 0 (construct-nums '() 1)) MOD))
+  (find-sum n target MOD))
 
 ;; Example test cases
 (display (minimumPossibleSum 2 3))   ; Expected: 4 (nums = [1, 3])

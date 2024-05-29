@@ -22,7 +22,7 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (minOperations nums)
-  ;; Use a hash table to count occurrences of each number in the list
+  ;; Calculate the frequency of each number in the list
   (define freq (for/fold ([h (hash)]) ([num nums])
                  (hash-update h num add1 0)))
   
@@ -38,15 +38,12 @@
              -1)]))  ; Otherwise, it's impossible
   
   ;; Calculate total operations and handle cases where it's impossible to empty the array
-  (define (calculate-total-ops freq)
+  (define-values (total-ops impossible)
     (for/fold ([ops 0] [impossible #f]) ([f (in-hash-values freq)])
       (let ([op (calc-ops f)])
         (if (= op -1)
             (values ops #t)  ; If any frequency makes it impossible, set flag
             (values (+ ops op) impossible)))))  ; Otherwise, accumulate operations
-  
-  ;; Calculate the total operations needed
-  (define-values (total-ops impossible) (calculate-total-ops freq))
   
   ;; If any frequency was impossible to deal with, return -1, otherwise return total operations
   (if impossible -1 total-ops))

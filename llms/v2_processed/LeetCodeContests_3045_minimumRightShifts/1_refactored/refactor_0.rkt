@@ -24,25 +24,25 @@
 (define (minimumRightShifts nums)
   (define n (length nums))
   
-  ;; Helper function to check if a list is sorted
-  (define (sorted? lst)
-    (andmap (lambda (i) (<= (list-ref lst i) (list-ref lst (+ i 1))))
-            (range 0 (sub1 (length lst)))))
+  (define (is-sorted lst)
+    (for/and ([i (in-range (sub1 n))])
+      (<= (list-ref lst i) (list-ref lst (add1 i)))))
   
-  ;; Helper function to perform a right shift
-  (define (right-shift lst)
+  (define (shift-right lst)
     (append (list (last lst)) (take lst (sub1 (length lst)))))
   
-  ;; Recursively try right shifts until sorted or all possibilities exhausted
   (define (find-shifts lst count)
     (cond
-      [(sorted? lst) count]
-      [(= count n) -1]
-      [else (find-shifts (right-shift lst) (add1 count))]))
+      [(is-sorted lst) count]
+      [(>= count n) -1]
+      [else (find-shifts (shift-right lst) (add1 count))]))
   
-  ;; Start with zero right shifts
   (find-shifts nums 0))
 
+;; Test cases
+(minimumRightShifts '(3 4 5 1 2))   ; Expected output: 2
+(minimumRightShifts '(1 3 5))       ; Expected output: 0
+(minimumRightShifts '(2 1 4))       ; Expected output: -1
 
 (require rackunit)
 

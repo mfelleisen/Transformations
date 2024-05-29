@@ -22,27 +22,39 @@
 ;;  * 1 <= n <= 300
 ;;  * 1 <= x <= 5
 (define (numberOfWays n x)
-  (define MOD (+ (expt 10 9) 7))  ; Define the modulus
+  (define MOD (+ (expt 10 9) 7))  ;; Define the modulus
 
-  ;; Helper function to compute the number of ways recursively with memoization
-  (define (ways current target)
+  ;; Helper function to calculate the number of ways using recursion and memoization
+  (define (calculate-ways n current-base memo)
     (cond
-      [(zero? target) 1]  ; If target is 0, there is one way (using no numbers)
-      [(or (< target 0) (zero? current)) 0]  ; No ways if target is negative or no numbers left
+      [(zero? n) 1]  ;; Base case: one way to make 0 (use no numbers)
+      [(or (< n 0) (zero? current-base)) 0]  ;; No way to make negative or out-of-bounds
       [else
-       (define current-power (expt current x))
-       (+ (ways (- current 1) target)  ; Skip the current number
-          (if (>= target current-power)  ; Include the current number if it can be subtracted
-              (ways (- current 1) (- target current-power))
-              0))]))
+       (define current-power (expt current-base x))
+       (define next-base (sub1 current-base))
+       (define key (list n current-base))
+       (cond
+         [(hash-has-key? memo key) (hash-ref memo key)]
+         [else
+          (define result
+            (modulo (+ (calculate-ways (- n current-power) next-base memo)  ;; Use current power
+                       (calculate-ways n next-base memo))  ;; Skip current power
+                    MOD))
+          (hash-set! memo key result)
+          result])]))
 
   ;; Calculate the maximum base such that base^x <= n
   (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
-  (modulo (ways max-base n) MOD))
+
+  ;; Use a hash table for memoization
+  (define memo (make-hash))
+
+  ;; Start the recursion with the full value of n and the maximum base
+  (calculate-ways n max-base memo))
 
 ;; Example usages
-(numberOfWays 10 2)  ; Output: 1
-(numberOfWays 4 1)   ; Output: 2
+(numberOfWays 10 2)  ;; Output: 1
+(numberOfWays 4 1)   ;; Output: 2
 
 (require rackunit)
 

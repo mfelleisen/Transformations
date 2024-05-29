@@ -25,18 +25,12 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 0 <= nums[i], k <= 105
 (define (maximumBeauty nums k)
-  ;; Use a frequency count hash table to track possible values
   (define freq-map (make-hash))
   
-  ;; Helper function to update frequency map for a given number within its range
-  (define (update-freq num)
+  (for ([num nums])
     (for ([possible-value (in-range (- num k) (+ num k 1))])
       (hash-update! freq-map possible-value add1 0)))
   
-  ;; Update the frequency map for each number in nums
-  (for-each update-freq nums)
-  
-  ;; Return the maximum frequency found in the map, which represents the maximum beauty
   (apply max (hash-values freq-map)))
 
 ;; Example usage:

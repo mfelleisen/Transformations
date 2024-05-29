@@ -22,17 +22,16 @@
 ;; Constraints:
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
-(define (maxArrayValue nums)
-  ;; Function to combine elements from end to start, accumulating the maximum value
+(define (maxArrayValue nums) ;; contract mav/c
+  ;; Combine elements from end to start, as described in the prompt.
   (define (combine-reverse lst)
-    (for/fold ([acc '()] [max-val 0] #:result max-val) ([x (in-list lst)])
-      (let ([new-acc (if (and (pair? acc) (<= x (car acc)))
-                         (cons (+ x (car acc)) (cdr acc))
-                         (cons x acc))])
-        (values new-acc (max (car new-acc) max-val)))))
-
-  ;; Start combining from the reversed list and return the maximum value found
-  (combine-reverse (reverse nums)))
+    (for/fold ([acc '()]) ([current (in-list (reverse lst))])
+      (if (and (not (empty? acc)) (<= current (first acc)))
+          (cons (+ current (first acc)) (rest acc))
+          (cons current acc))))
+  
+  ;; The largest element after all possible combinations is found.
+  (apply max (combine-reverse nums)))
 
 ;; Example usage:
 (maxArrayValue '(2 3 7 9 3))  ; Output: 21

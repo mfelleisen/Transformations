@@ -17,24 +17,23 @@
 ;;  * 2 <= coordinates.length <= 50000
 ;;  * 0 <= xi, yi <= 106
 ;;  * 0 <= k <= 100
-(define (countPairs coordinates k)
-  ;; This function counts the number of valid pairs (i, j) such that the distance between points i and j is exactly k.
-  (define (calculate-distance p1 p2)
-    ;; This helper function calculates the XOR-based distance between two points
-    (+ (bitwise-xor (first p1) (first p2))
-       (bitwise-xor (second p1) (second p2))))
+(define (calculate-distance p1 p2)
+  (match-define (list x1 y1) p1)
+  (match-define (list x2 y2) p2)
+  (+ (bitwise-xor x1 x2) (bitwise-xor y1 y2)))
 
-  (define n (length coordinates))
-  
-  ;; Use for*/sum to iterate over all pairs (i, j) where i < j and sum up the valid pairs
-  (for*/sum ([i (in-range n)]
-             [j (in-range (add1 i) n)]
-             #:when (= k (calculate-distance (list-ref coordinates i) (list-ref coordinates j))))
+;; Define a function to count the number of valid pairs (i, j)
+(define (countPairs coordinates k)
+  ;; Use for/sum to accumulate the count of valid pairs
+  (for*/sum ([i (in-naturals)]
+             [p1 (in-list coordinates)]
+             [p2 (in-list (drop coordinates (add1 i)))]
+             #:when (= k (calculate-distance p1 p2)))
     1))
 
 ;; Example usage:
-;; (countPairs '([1 2] [4 2] [1 3] [5 2]) 5)  ; Should return 2
-;; (countPairs '([1 3] [1 3] [1 3] [1 3] [1 3]) 0)  ; Should return 10
+;; (countPairs '((1 2) (4 2) (1 3) (5 2)) 5)  ; Should return 2
+;; (countPairs '((1 3) (1 3) (1 3) (1 3) (1 3)) 0)  ; Should return 10
 
 (require rackunit)
 

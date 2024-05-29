@@ -16,21 +16,17 @@
 ;; Constraints:
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
-(define (sumOfSquares nums)
-  ;; Calculate the length of the nums list
+(define (sumOfSquares nums) ;; contract  sos/c
   (define n (length nums))
-  
-  ;; Define a function to check if an index is special and compute the square
-  (define (special-square i x)
-    (if (zero? (remainder n i))
-        (* x x)
-        0))
-  
-  ;; Calculate the sum of squares of all special elements
-  (for/sum ([i (in-naturals 1)] [x (in-list nums)])
-    (special-square i x)))
 
-;; The function sumOfSquares now accepts a list of numbers and returns the sum of the squares of all special elements.
+  (define (special-sum acc i)
+    (if (zero? (remainder n i))
+        (+ acc (sqr (list-ref nums (sub1 i))))
+        acc))
+
+  (for/fold ([acc 0])
+            ([i (in-range 1 (add1 n))])
+    (special-sum acc i)))
 
 (require rackunit)
 

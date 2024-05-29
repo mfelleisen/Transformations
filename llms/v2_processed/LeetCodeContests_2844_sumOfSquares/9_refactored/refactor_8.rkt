@@ -19,15 +19,12 @@
 (define (sumOfSquares nums)
   (define n (length nums))
   
-  ;; Function to check if an index is special
   (define (special-index? i)
-    (zero? (modulo n i)))
+    (= (modulo n i) 0))
   
-  ;; Function to square a number
   (define (square x)
     (* x x))
   
-  ;; Use a higher-order function to filter and map the special elements, then sum their squares
   (for/sum ([i (in-range 1 (add1 n))]
             #:when (special-index? i))
     (square (list-ref nums (sub1 i)))))

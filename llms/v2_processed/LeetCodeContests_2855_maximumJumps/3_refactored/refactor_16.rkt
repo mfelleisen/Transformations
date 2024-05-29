@@ -35,25 +35,24 @@
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
   (define n (length nums))
-  
-  ;; Helper function to update dp based on the current index i
-  (define (update-dp i dp)
-    (if (= (list-ref dp i) -inf.0)
-        dp  ; If dp[i] is -inf, return dp unchanged
-        (for/fold ([dp-acc dp]) ([j (in-range (+ i 1) n)])
-          (if (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
-              (list-set dp-acc j (max (list-ref dp-acc j) (+ 1 (list-ref dp-acc i))))
-              dp-acc))))
-  
-  ;; Initialize the dp list with negative infinity except the first element set to 0
-  (define initial-dp (cons 0 (make-list (- n 1) -inf.0)))
-  
-  ;; Fold over the range from 0 to n to update dp for each index
-  (define final-dp (foldl update-dp initial-dp (range n)))
-  
-  ;; Check the last element of dp; if it's still -inf, return -1, otherwise return the value
-  (let ((result (last final-dp)))
-    (if (= result -inf.0) -1 result)))
+
+  ;; Initialize a vector to store the maximum number of jumps for each index
+  (define dp (build-vector n (λ (i) (if (zero? i) 0 -inf.0))))
+
+  ;; Iterate over each index i in nums
+  (for ([i (in-range n)])
+    (when (not (= (vector-ref dp i) -inf.0))
+      ;; Check potential jumps from index i to j
+      (for ([j (in-range (add1 i) n)])
+        (when (<= (abs (- (list-ref nums j) (list-ref nums i))) target)
+          ;; Update the dp vector with the maximum of current value or jumps from i + 1
+          (vector-set! dp j (max (vector-ref dp j) (add1 (vector-ref dp i))))))))
+
+  ;; Check the value at the last index to determine if it's reachable
+  (let ([result (vector-ref dp (sub1 n))])
+    (if (= result -inf.0)
+        -1
+        result)))
 
 ;; Example usage:
 (maximumJumps '(1 3 6 4 1 2) 2)  ; Output: 3

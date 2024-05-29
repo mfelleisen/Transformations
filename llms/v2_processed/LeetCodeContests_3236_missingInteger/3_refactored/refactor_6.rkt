@@ -15,32 +15,37 @@
 ;; 1 <= nums.length <= 50
 ;; 1 <= nums[i] <= 50
 (define (missingInteger nums)
-  ;; Helper function to find the longest sequential prefix
+  ;; Helper function to find the longest sequential prefix and its sum
   (define (longest-sequential-prefix nums)
-    (define (helper lst prev sum)
-      (match lst
+    (define (iter prefix-sum prev num-list)
+      (match num-list
         [(cons x xs)
          (if (= x (+ prev 1))
-             (helper xs x (+ sum x))
-             sum)]
-        [else sum]))
-    (helper (rest nums) (first nums) (first nums)))
+             (iter (+ prefix-sum x) x xs)
+             prefix-sum)]
+        [else prefix-sum]))
+    (iter (first nums) (first nums) (rest nums)))
 
   ;; Helper function to find the smallest missing integer
-  (define (smallest-missing nums x)
-    (if (memv x nums)
-        (smallest-missing nums (+ x 1))
+  (define (smallest-missing x nums)
+    (if (member x nums)
+        (smallest-missing (+ x 1) nums)
         x))
 
   ;; Calculate the sum of the longest sequential prefix
   (define sum-prefix (longest-sequential-prefix nums))
+  
+  ;; Find the smallest missing integer greater than or equal to sum-prefix
+  (smallest-missing sum-prefix nums))
 
-  ;; Find the smallest missing integer greater than or equal to sum_prefix
-  (smallest-missing nums sum-prefix))
+;; The function uses recursion and accumulators for both finding the
+;; longest sequential prefix and the smallest missing integer.
+;; It leverages Racket's `member` function to check for the presence of an element in the list,
+;; and `match` to pattern match on the list structure.
 
 ;; Example usage:
-(missingInteger '(1 2 3 2 5)) ;; Output: 6
-(missingInteger '(3 4 5 1 12 14 13)) ;; Output: 15
+(missingInteger '(1 2 3 2 5)) ; Output: 6
+(missingInteger '(3 4 5 1 12 14 13)) ; Output: 15
 
 (require rackunit)
 

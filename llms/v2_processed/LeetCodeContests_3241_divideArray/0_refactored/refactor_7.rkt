@@ -25,30 +25,17 @@
 ;; 1 <= nums[i] <= 105
 ;; 1 <= k <= 105
 (define (divideArray nums k)
-  (define sorted-nums (sort nums <))  ; Sort the list in ascending order
+  (define (divide-helper sorted-nums result)
+    (match sorted-nums
+      [(list) (reverse result)]
+      [(list-rest a b c rest)
+       (if (<= (- c a) k)
+           (divide-helper rest (cons (list a b c) result))
+           '())]
+      [_ '()])) ;; This handles cases where less than 3 elements are left
+  (define sorted-nums (sort nums <))
+  (divide-helper sorted-nums '()))
 
-  ;; Helper function to divide the sorted list into groups of 3
-  (define (group-by-three lst)
-    (if (empty? lst)
-        '()
-        (let ([group (take lst 3)]
-              [rest (drop lst 3)])
-          (cons group (group-by-three rest)))))
-
-  ;; Helper function to check if a group satisfies the condition
-  (define (valid-group? group)
-    (<= (- (last group) (first group)) k))
-
-  ;; Create groups and check if all groups are valid
-  (let* ([groups (group-by-three sorted-nums)]
-         [all-valid? (andmap valid-group? groups)])
-    (if all-valid?
-        groups
-        '())))
-
-;; Helper functions to access elements of a list by index
-(define (first lst) (car lst))
-(define (last lst) (car (reverse lst)))
 
 (require rackunit)
 

@@ -22,19 +22,16 @@
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
 (define (findPeaks mountain)
-  ;; This function finds all the peaks in the given mountain list.
-  ;; A peak is an element that is strictly greater than its neighbors.
-  ;; The first and last elements are never considered as peaks.
-  (define (is-peak left current right)
-    (and (> current left)
-         (> current right)))
-  
-  ;; Generate a list of indices from 1 to second last element index
-  ;; and check if the element at each index is a peak.
+  ;; Helper function to determine if an element at index i is a peak.
+  (define (is-peak i)
+    (match-define (list left current right) (list (list-ref mountain (sub1 i))
+                                                  (list-ref mountain i)
+                                                  (list-ref mountain (add1 i))))
+    (and (> current left) (> current right)))
+
+  ;; Filter and collect indices where the element is a peak.
   (for/list ([i (in-range 1 (sub1 (length mountain)))]
-             #:when (is-peak (list-ref mountain (sub1 i))
-                             (list-ref mountain i)
-                             (list-ref mountain (add1 i))))
+    #:when (is-peak i))
     i))
 
 ;; Example usage:

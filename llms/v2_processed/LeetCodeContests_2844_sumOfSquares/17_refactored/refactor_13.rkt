@@ -18,13 +18,11 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  ;; Filter the indices that divide n and calculate the sum of their squares
-  (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (remainder n i)))
-    (sqr (list-ref nums (sub1 i)))))
+  (define (special? i) (zero? (remainder n i)))
+  (define (square x) (* x x))
 
-;; The function uses `for/sum` with a `#:when` clause to filter indices that divide n.
-;; `list-ref` is used to access elements of the list using 0-based indexing.
+  (for/sum ([i (in-range 1 (add1 n))] #:when (special? i))
+    (square (list-ref nums (sub1 i)))))
 
 (require rackunit)
 

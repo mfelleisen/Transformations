@@ -24,34 +24,28 @@
 (define (maxScore nums x)
   (define n (length nums))
   
-  ;; Define a helper function to calculate the score for a specific transition
-  (define (calc-score i j)
-    (let* ([current-score (+ (list-ref nums i) (list-ref nums j))]
-           [penalty (if (not (= (modulo (list-ref nums i) 2)
+  ;; Using a vector to keep track of the maximum scores efficiently.
+  (define dp (make-vector n -inf.0))
+  (vector-set! dp 0 (first nums)) ; Initialize the score for the starting position.
+  
+  ;; Update the dp vector considering the move from i to j.
+  (define (update-dp i j)
+    (define current-score (+ (vector-ref dp i) (list-ref nums j)))
+    (define penalty (if (not (= (modulo (list-ref nums i) 2)
                                 (modulo (list-ref nums j) 2)))
                         x
-                        0)]
-           [new-score (- current-score penalty)])
-      new-score))
-
-  ;; Define a helper function for the dynamic programming process
-  (define (dp-helper i dp)
-    (foldl (lambda (j dp-acc)
-             (let ([new-score (calc-score i j)])
-               (if (> new-score (list-ref dp-acc j))
-                   (list-set dp-acc j new-score)
-                   dp-acc)))
-           dp
-           (range (add1 i) n)))
-
-  ;; Initialize the dynamic programming list with negative infinities, setting the first element to nums[0]
-  (define initial-dp (cons (first nums) (make-list (sub1 n) -inf.0)))
-
-  ;; Perform the dynamic programming process using fold
-  (define final-dp (foldl dp-helper initial-dp (range n)))
-
-  ;; Return the maximum value from the dp list as the final answer
-  (apply max final-dp))
+                        0))
+    (define new-score (- current-score penalty))
+    (when (> new-score (vector-ref dp j))
+      (vector-set! dp j new-score)))
+  
+  ;; Iterate through all possible i and j to fill the dp vector.
+  (for ([i (in-range n)])
+    (for ([j (in-range (add1 i) n)])
+      (update-dp i j)))
+  
+  ;; Return the maximum score obtained.
+  (apply max (vector->list dp)))
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ; Output: 13

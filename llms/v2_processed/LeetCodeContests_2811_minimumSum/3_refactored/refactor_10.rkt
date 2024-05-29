@@ -16,23 +16,24 @@
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
 (define (minimumSum n k)
-  ;; Helper function to build the k-avoiding array iteratively
-  (define (build-k-avoiding count current-number used-numbers total-sum)
-    (if (= count n)
-        total-sum
-        (if (or (not (set-member? used-numbers (- k current-number)))
-                (= current-number (- k current-number)))
-            (build-k-avoiding (+ count 1)
-                              (+ current-number 1)
-                              (set-add used-numbers current-number)
-                              (+ total-sum current-number))
-            (build-k-avoiding count
-                              (+ current-number 1)
-                              used-numbers
-                              total-sum))))
+  ;; Helper function to construct the k-avoiding array and calculate its sum
+  (define (construct-k-avoiding used-numbers current-number count total-sum)
+    (cond
+      [(= count n) total-sum]
+      [(or (not (set-member? used-numbers (- k current-number)))
+           (= current-number (- k current-number)))
+       (construct-k-avoiding (set-add used-numbers current-number)
+                             (add1 current-number)
+                             (add1 count)
+                             (+ total-sum current-number))]
+      [else
+       (construct-k-avoiding used-numbers
+                             (add1 current-number)
+                             count
+                             total-sum)]))
   
-  ;; Start the iteration with count 0, starting number 1, empty set of used numbers, and total sum 0
-  (build-k-avoiding 0 1 (set) 0))
+  ;; Start the recursive process with an empty set, starting number 1, count 0, and total sum 0
+  (construct-k-avoiding (set) 1 0 0))
 
 ;; Example usage:
 (minimumSum 5 4)  ; Output: 18

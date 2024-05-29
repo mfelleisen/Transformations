@@ -31,18 +31,17 @@
   ;; Calculate the sum of squares of distinct counts of all subarrays of nums.
   (define n (length nums))
   
-  ;; Helper function to compute the sum of squares of distinct counts for subarrays starting at index `i`.
-  (define (sum-from-start i)
-    (define (loop j seen total)
-      (if (>= j n)
-          total
-          (let ((new-seen (set-add seen (list-ref nums j))))
-            (loop (add1 j) new-seen (+ total (expt (set-count new-seen) 2))))))
-    (loop i (set) 0))
+  ;; Helper function to accumulate the sum of the squares of distinct counts.
+  (define (accumulate-sum nums)
+    (for/fold ([total 0]) ([i (in-range n)])
+      (define-values (seen sub-total)
+        (for/fold ([seen (make-hash)] [sub-total 0]) ([j (in-range i n)])
+          (hash-update! seen (list-ref nums j) add1 0)
+          (define distinct-count (hash-count seen))
+          (values seen (+ sub-total (sqr distinct-count)))))
+      (+ total sub-total)))
   
-  ;; Compute the total sum by iterating over each possible starting index.
-  (for/fold ([total-sum 0]) ([i (in-range n)])
-    (+ total-sum (sum-from-start i))))
+  (accumulate-sum nums))
 
 ;; Example usage:
 (sumCounts '(1 2 1))  ; Output: 15

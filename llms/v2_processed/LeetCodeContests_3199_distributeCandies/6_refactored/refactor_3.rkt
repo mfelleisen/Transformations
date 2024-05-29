@@ -16,19 +16,12 @@
 (define (distributeCandies n limit)
   ;; Function to calculate the number of ways to distribute `n` candies among 3 children
   ;; such that no child receives more than `limit` candies.
+  (define (in-range? x max) (<= x max))
   
-  ;; Helper function to count valid distributions for a given `a` and `b`
-  (define (count-distributions a b)
-    (let ((c (- n (+ a b))))
-      (if (<= 0 c limit) 1 0)))
-  
-  (define (valid-b-values a)
-    (for/sum ([b (in-range (min (- n a) (add1 limit)))])
-      (count-distributions a b)))
-
-  ;; Main logic to iterate over possible values of `a`
-  (for/sum ([a (in-range (add1 (min n limit)))])
-    (valid-b-values a)))
+  (for/sum ([a (in-range (min n limit))])
+    (for/sum ([b (in-range (min (- n a) limit))])
+      (define c (- n a b))
+      (if (in-range? c limit) 1 0))))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

@@ -30,19 +30,18 @@
 ;; 1 <= n == batteryPercentages.length <= 100 
 ;; 0 <= batteryPercentages[i] <= 100
 (define (countTestedDevices batteryPercentages)
-  (define (count-devices percentages count delta)
-    (match percentages
-      ;; Base case: when the list is empty, return the count
-      [(list) count]
-      ;; If the current battery percentage minus the accumulated delta is greater than 0,
-      ;; increment the count and the delta, otherwise just continue with the current delta
-      [(cons first rest)
-       (if (> (- first delta) 0)
-           (count-devices rest (add1 count) (add1 delta))
-           (count-devices rest count delta))]))
-
-  ;; Start counting devices with an initial count and delta of 0
-  (count-devices batteryPercentages 0 0))
+  ;; Helper function to simulate the testing process
+  (define (test-devices lst tested-count)
+    (if (null? lst)
+        tested-count
+        (let ([first (car lst)]
+              [rest (cdr lst)])
+          (if (> first 0)
+              (test-devices (map (λ (x) (max 0 (- x 1))) rest)
+                            (+ tested-count 1))
+              (test-devices rest tested-count)))))
+  ;; Start the recursive testing process
+  (test-devices batteryPercentages 0))
 
 ;; Example usage:
 (countTestedDevices '(1 1 2 1 3))  ; Output: 3

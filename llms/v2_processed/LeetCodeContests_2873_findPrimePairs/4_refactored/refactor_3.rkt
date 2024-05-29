@@ -2,13 +2,15 @@
 
 ;; Function to check if a number is prime
 (define (is-prime? num)
-  (define (divisible? n d)
-    (zero? (remainder n d)))
+  ;; Check base cases
+  (define (divisible? num div)
+    (zero? (remainder num div)))
   (cond
     [(<= num 1) #f]
     [(<= num 3) #t]
     [(or (divisible? num 2) (divisible? num 3)) #f]
     [else
+     ;; Check for factors from 5 upwards, skipping even numbers
      (let loop ([i 5])
        (cond
          [(> (* i i) num) #t]
@@ -17,17 +19,14 @@
 
 ;; Function to find prime pairs that sum to n
 (define (findPrimePairs n)
-  (define (prime-pairs primes)
-    (for*/list ([x primes]
-                [y (in-list (drop primes (index-of primes x)))])
-      (when (and (<= x y) (= (+ x y) n))
-        (list x y))))
-
   ;; Generate list of primes up to n
   (define primes (filter is-prime? (range 2 (add1 n))))
-  
-  ;; Return the list of prime pairs
-  (prime-pairs primes))
+  ;; Find all pairs (x, y) where x + y = n and both x and y are prime
+  (for/list ([x primes]
+             #:when (<= x (quotient n 2))
+             [y (filter (λ (p) (= p (- n x))) primes)]
+             #:when (<= x y))
+    (list x y)))
 
 ;; Example usage
 (findPrimePairs 10)  ;; Output: '((3 7) (5 5))

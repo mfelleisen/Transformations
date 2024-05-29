@@ -28,12 +28,13 @@
   (define (combine-nums lst)
     ;; Fold the list from the right, combining elements as per the given rules
     (foldr (lambda (current acc)
-             (if (and (not (null? acc)) (<= current (car acc)))
-                 ;; If current element is less than or equal to the first element of accumulator,
-                 ;; combine them into one element and continue
-                 (cons (+ current (car acc)) (cdr acc))
-                 ;; Otherwise, just add the current element to the front of accumulator
-                 (cons current acc)))
+             (match acc
+               [(cons first rest)
+                (if (<= current first)
+                    (cons (+ current first) rest)
+                    (cons current acc))]
+               [empty
+                (cons current empty)]))
            '()  ;; Start with an empty list as the accumulator
            lst))
   ;; Return the maximum value from the combined list
@@ -42,7 +43,6 @@
 ;; Example usage:
 (displayln (maxArrayValue '(2 3 7 9 3)))  ;; Output: 21
 (displayln (maxArrayValue '(5 3 3)))      ;; Output: 11
-
 
 (require rackunit)
 

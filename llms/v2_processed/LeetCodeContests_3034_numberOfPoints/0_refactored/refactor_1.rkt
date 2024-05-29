@@ -14,17 +14,19 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * nums[i].length == 2
 ;;  * 1 <= starti <= endi <= 100
-(define (numberOfPoints nums) ;; contract  numberOfPoints/c
+(define (numberOfPoints nums)
+  ;; Helper function to generate a set of integers from start to end (inclusive).
   (define (range-set start end)
     (for/set ([i (in-range start (add1 end))])
       i))
-
-  (define ranges
-    (for/fold ([s (set)])
-              ([num (in-list nums)])
-      (set-union s (apply range-set num))))
-
-  (set-count ranges))
+  
+  ;; Create a set of all points covered by cars and return the size of the set.
+  (define all-points
+    (for/fold ([points (set)])
+              ([range (in-list nums)])
+      (set-union points (apply range-set range))))
+  
+  (set-count all-points))
 
 ;; Example usage:
 ;; (numberOfPoints '((3 6) (1 5) (4 7)))  ; Should return 7

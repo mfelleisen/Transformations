@@ -21,15 +21,18 @@
 (define (numberGame nums)
   ;; This function simulates a game where Alice and Bob alternately remove the minimum element from the list `nums`.
   ;; Bob appends his element first to the result list `arr`, followed by Alice. This continues until `nums` is empty.
-  (define (game-step nums acc)
-    (if (empty? nums)
-        (reverse acc)
-        (let* ((sorted-nums (sort nums <))
-               (alice-choice (first sorted-nums))
-               (bob-choice (second sorted-nums))
-               (remaining-nums (drop sorted-nums 2)))
-          (game-step remaining-nums (cons alice-choice (cons bob-choice acc))))))
-  (game-step nums '()))
+  (define (remove-min lst)
+    (define min-val (apply min lst))
+    (values min-val (remove min-val lst)))
+
+  (define (game-loop nums arr)
+    (match nums
+      ['() (reverse arr)]
+      [_ (define-values (min1 nums1) (remove-min nums))
+         (define-values (min2 nums2) (remove-min nums1))
+         (game-loop nums2 (cons min1 (cons min2 arr)))]))
+
+  (game-loop nums '()))
 
 ;; Example usage:
 (numberGame '(5 4 2 3))  ; Output: '(3 2 5 4)

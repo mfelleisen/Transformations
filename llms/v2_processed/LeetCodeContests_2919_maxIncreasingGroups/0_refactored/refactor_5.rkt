@@ -39,14 +39,14 @@
   ;; Sort the usageLimits to facilitate the creation of groups in increasing order of their lengths
   (define sorted-limits (sort usageLimits <))
   
-  ;; This function iterates through the sorted limits to count how many groups can be formed
+  ;; This function recursively counts how many groups can be formed
   (define (count-groups limits current-min-size total num-groups)
     (match limits
       ;; Base case: if there are no more limits, return the number of groups formed
-      [(list) num-groups]
+      ['() num-groups]
       ;; Recursive case: process each limit
       [(cons limit remaining-limits)
-       (let* ((new-total (+ total limit)))  ;; Update total with the current limit
+       (let ([new-total (+ total limit)])
          (if (>= new-total current-min-size)  ;; Check if a new group can be formed
              ;; If yes, form a new group
              (count-groups remaining-limits

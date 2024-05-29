@@ -30,26 +30,19 @@
 ;;  * words consists of distinct strings.
 ;;  * words[i] consists of lowercase English letters.
 (define (getWordsInLongestSubsequence n words groups)
-  (define (valid-subsequence [idxs (cons 0 '())])
-    (match idxs
-      [(cons i (cons j rst))
-       (if (= (list-ref groups i) (list-ref groups j))
-           #f
-           (valid-subsequence (cons j rst)))]
-      [_ #t]))
+  (define (filter-groups words groups)
+    (define-values (acc last-group)
+      (for/fold ([acc '()] [last-group (first groups)])
+                ([word (in-list (rest words))]
+                 [group (in-list (rest groups))])
+        (if (= group last-group)
+            (values acc last-group)
+            (values (cons word acc) group))))
+    (reverse (cons (first words) acc)))
 
-  (define (find-longest [idxs (cons 0 '())])
-    (for/fold ([longest '()])
-              ([i (in-range n)])
-      (define current (reverse (cons i idxs)))
-      (if (valid-subsequence current)
-          (if (> (length current) (length longest))
-              current
-              longest)
-          longest)))
-
-  (define longest-indices (find-longest (cons 0 '())))
-  (map (lambda (i) (list-ref words i)) (reverse longest-indices)))
+  (if (= n 0)
+      '()
+      (filter-groups words groups)))
 
 ;; Example usage:
 (define n 4)

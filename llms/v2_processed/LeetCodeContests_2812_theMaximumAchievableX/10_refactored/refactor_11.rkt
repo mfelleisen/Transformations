@@ -20,12 +20,12 @@
 ;; Constraints:
 ;;  * 1 <= num, t <= 50
 (define (theMaximumAchievableX num t)
-  ;; The function calculates the maximum achievable number x
-  ;; starting from a given number `num` with up to `t` operations allowed.
-  ;; Each operation can either increase or decrease `x` by 1 while doing the opposite to `num`.
-  ;; This results in x = num + 2 * t.
+  ;; Calculate the maximum achievable number x given num and t
   (+ num (* 2 t)))
 
+;; Example usage:
+;; (theMaximumAchievableX 4 1) ; => 6
+;; (theMaximumAchievableX 3 2) ; => 7
 
 (require rackunit)
 

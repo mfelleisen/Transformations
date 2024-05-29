@@ -35,29 +35,29 @@
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
   (define n (length nums))
-  
-  ;; Helper function to determine if a jump is possible
-  (define (can-jump? i j)
+
+  ;; Helper function to check if a jump is valid
+  (define (valid-jump? i j)
     (<= (abs (- (list-ref nums j) (list-ref nums i))) target))
-  
+
   ;; Helper function to update the dp list
-  (define (update-dp dp i)
-    (if (= (list-ref dp i) -inf.0)
+  (define (update-dp i dp)
+    (if (negative? (list-ref dp i))
         dp
-        (for/fold ([dp dp]) ([j (in-range (add1 i) n)])
-          (if (can-jump? i j)
-              (list-set dp j (max (list-ref dp j) (add1 (list-ref dp i))))
+        (for/fold ([dp dp]) ([j (in-range (+ i 1) n)])
+          (if (valid-jump? i j)
+              (list-set dp j (max (list-ref dp j) (+ 1 (list-ref dp i))))
               dp))))
-  
-  ;; Initialize dp list with -inf.0 except the first element set to 0
-  (define dp (cons 0 (make-list (sub1 n) -inf.0)))
-  
-  ;; Iterate over each index and update dp accordingly
-  (define final-dp (for/fold ([dp dp]) ([i (in-range n)])
-                     (update-dp dp i)))
-  
-  ;; Check the last element of dp; if it's still -inf.0, return -1, otherwise return the value
-  (if (= (last final-dp) -inf.0)
+
+  ;; Initialize the dp list with -1 except the first element set to 0
+  (define initial-dp (cons 0 (make-list (- n 1) -1)))
+
+  ;; Update the dp list for each index
+  (define final-dp (for/fold ([dp initial-dp]) ([i (in-range n)])
+                     (update-dp i dp)))
+
+  ;; Check the last element of dp to determine the result
+  (if (negative? (last final-dp))
       -1
       (last final-dp)))
 

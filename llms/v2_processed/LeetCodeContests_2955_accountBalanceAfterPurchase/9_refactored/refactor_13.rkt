@@ -18,22 +18,17 @@
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
-  ;; Define the initial balance.
+  ;; Define the initial balance
   (define initial-balance 100)
   
-  ;; Calculate the nearest multiple of 10, choosing the larger one in case of a tie.
-  (define rounded-amount
-    (let* ([lower-bound (* 10 (quotient purchaseAmount 10))]
-           [upper-bound (+ lower-bound 10)])
-      (if (< (- purchaseAmount lower-bound) (- upper-bound purchaseAmount))
-          lower-bound
-          upper-bound)))
+  ;; Calculate the nearest multiple of 10 using round
+  (define rounded-amount (* 10 (round (/ purchaseAmount 10))))
   
-  ;; Calculate and return the new balance after the purchase.
+  ;; Calculate and return the new balance after the purchase
   (- initial-balance rounded-amount))
 
-;; The refactored function calculates the nearest multiple of 10 more concisely
-;; and avoids unnecessary local bindings, making the code more idiomatic and streamlined.
+;; The refactored function uses the `round` function to find the nearest multiple of 10 in a single step.
+;; This approach avoids the need for conditional expressions and simplifies the computation.
 
 (require rackunit)
 

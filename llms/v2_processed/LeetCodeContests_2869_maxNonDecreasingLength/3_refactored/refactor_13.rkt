@@ -32,37 +32,32 @@
 (define (maxNonDecreasingLength nums1 nums2)
   (define n (length nums1))
   
-  ;; Helper function to update dp values
-  (define (update-dp current prev dp1 dp2)
-    (max (if (>= current (first prev)) (+ 1 (second prev)) 1)
-         (if (>= current (third prev)) (+ 1 (fourth prev)) 1)))
+  (define (update-dp dp1 dp2 i)
+    (define prev-i (sub1 i))
+    (define num1-i (list-ref nums1 i))
+    (define num1-prev (list-ref nums1 prev-i))
+    (define num2-i (list-ref nums2 i))
+    (define num2-prev (list-ref nums2 prev-i))
+    
+    (values
+     (max (vector-ref dp1 i)
+          (if (>= num1-i num1-prev) (+ (vector-ref dp1 prev-i) 1) 1)
+          (if (>= num1-i num2-prev) (+ (vector-ref dp2 prev-i) 1) 1))
+     (max (vector-ref dp2 i)
+          (if (>= num2-i num1-prev) (+ (vector-ref dp1 prev-i) 1) 1)
+          (if (>= num2-i num2-prev) (+ (vector-ref dp2 prev-i) 1) 1))))
 
-  ;; Function to process the dp update for each element
-  (define (process dp1 dp2 max-len i)
-    (define current1 (list-ref nums1 i))
-    (define current2 (list-ref nums2 i))
-    (define prev (list (list-ref nums1 (sub1 i))
-                       (vector-ref dp1 (sub1 i))
-                       (list-ref nums2 (sub1 i))
-                       (vector-ref dp2 (sub1 i))))
-    (define new-dp1 (update-dp current1 prev dp1 dp2))
-    (define new-dp2 (update-dp current2 prev dp1 dp2))
-    (values new-dp1 new-dp2 (max max-len new-dp1 new-dp2)))
+  (define (loop i dp1 dp2 max-len)
+    (if (= i n)
+        max-len
+        (let-values ([(new-dp1 new-dp2) (update-dp dp1 dp2 i)])
+          (vector-set! dp1 i new-dp1)
+          (vector-set! dp2 i new-dp2)
+          (loop (add1 i) dp1 dp2 (max max-len new-dp1 new-dp2)))))
 
-  ;; Initialize dp vectors and max length
-  (define dp1 (make-vector n 1))
-  (define dp2 (make-vector n 1))
-  (define max-len 1)
-
-  ;; Iterate through the list indices to update dp values
-  (for ([i (in-range 1 n)])
-    (define-values (new-dp1 new-dp2 new-max-len) (process dp1 dp2 max-len i))
-    (vector-set! dp1 i new-dp1)
-    (vector-set! dp2 i new-dp2)
-    (set! max-len new-max-len))
-
-  ;; Return the maximum length found
-  max-len)
+  (let ([dp1 (make-vector n 1)]
+        [dp2 (make-vector n 1)])
+    (loop 1 dp1 dp2 1)))
 
 ;; Example usage
 (maxNonDecreasingLength '(2 3 1) '(1 2 1))  ; Output: 2

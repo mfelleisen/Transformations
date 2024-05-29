@@ -26,24 +26,20 @@
 ;; 1 <= nums[i] <= 50
 (define (minimumCost nums)
   (define n (length nums))
-
-  ;; Function to calculate the cost of dividing nums at positions i and j
-  (define (cost i j)
-    (+ (list-ref nums 0) (list-ref nums i) (list-ref nums j)))
-
-  ;; Generate all valid (i, j) pairs where 1 <= i < j < n
-  (define valid-pairs
-    (for*/list ([i (in-range 1 (- n 1))]
-                [j (in-range (+ i 1) n)])
-      (list i j)))
-
-  ;; Find the minimum cost among all valid pairs
-  (apply min (map (λ (pair) (apply cost pair)) valid-pairs)))
-
-;; Test examples
-(minimumCost '(1 2 3 12))  ; Output: 6
-(minimumCost '(5 4 3))     ; Output: 12
-(minimumCost '(10 3 1 1))  ; Output: 12
+  
+  (define (min-cost-for-splits i j)
+    (+ (list-ref nums 0)
+       (list-ref nums i)
+       (list-ref nums j)))
+  
+  (define (find-min-cost i)
+    (for/fold ([min-cost +inf.0]) ([j (in-range (+ i 1) n)])
+      (min min-cost (min-cost-for-splits i j))))
+  
+  (if (= n 3)
+      (apply + nums)
+      (for/fold ([overall-min-cost +inf.0]) ([i (in-range 1 (- n 1))])
+        (min overall-min-cost (find-min-cost i)))))
 
 (require rackunit)
 

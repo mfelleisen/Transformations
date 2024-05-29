@@ -18,12 +18,17 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  (define (square x) (* x x))
 
-  ;; Filter indices that are divisors of n, calculate their squares, and sum them up
-  (for/sum ([i (in-range 1 (add1 n))]
-            #:when (zero? (modulo n i)))
-    (square (list-ref nums (sub1 i)))))
+  ;; Helper function to determine if an index is special and return its square if it is
+  (define (special-square i)
+    (define k (add1 i))
+    (if (zero? (modulo n k))
+        (* (list-ref nums i) (list-ref nums i))
+        0))
+
+  ;; Sum up the squares of special elements
+  (for/sum ([i (in-range n)])
+    (special-square i)))
 
 ;; Example usage:
 (sumOfSquares '(1 2 3 4)) ; Output: 21

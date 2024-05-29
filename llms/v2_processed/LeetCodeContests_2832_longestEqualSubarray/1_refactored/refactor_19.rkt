@@ -23,31 +23,31 @@
 ;;  * 1 <= nums[i] <= nums.length
 ;;  * 0 <= k <= nums.length
 (define (longestEqualSubarray nums k)
+  ;; Helper function to update frequency counts immutably
   (define (update-counts counts num increment)
     (hash-update counts num (lambda (v) (+ v increment)) 0))
   
-  (define (find-max-length nums k)
-    (let loop ([right 0] [left 0] [count (hash)] [max-length 0])
-      (if (= right (length nums))
-          max-length
-          (let* ([current (list-ref nums right)]
-                 [updated-count (update-counts count current 1)]
-                 [max-freq (apply max (hash-values updated-count))]
-                 [window-length (+ 1 (- right left))]
-                 [new-max-length (max max-length max-freq)]
-                 [should-shrink (> (- window-length max-freq) k)])
-            (if should-shrink
-                (loop (+ right 1)
-                      (+ left 1)
-                      (update-counts updated-count (list-ref nums left) -1)
-                      new-max-length)
-                (loop (+ right 1) left updated-count new-max-length))))))
+  ;; Sliding window approach
+  (define (sliding-window right count max-length left)
+    (if (>= right (length nums))
+        max-length
+        (let* ([num-right (list-ref nums right)]
+               [new-count (update-counts count num-right 1)]
+               [max-freq (apply max (hash-values new-count))]
+               [window-length (+ 1 (- right left))]
+               [shrink? (> (- window-length max-freq) k)])
+          (if shrink?
+              (let* ([num-left (list-ref nums left)]
+                     [updated-count (update-counts new-count num-left -1)])
+                (sliding-window (+ right 1) updated-count max-length (+ left 1)))
+              (sliding-window (+ right 1) new-count (max max-length max-freq) left)))))
   
-  (find-max-length nums k))
+  ;; Initialize variables and start the sliding window
+  (sliding-window 0 (hash) 0 0))
 
 ;; Example usage:
-;; (longestEqualSubarray '(1 3 2 3 1 3) 3) ; Output: 3
-;; (longestEqualSubarray '(1 1 2 2 1 1) 2) ; Output: 4
+;; (longestEqualSubarray '(1 3 2 3 1 3) 3) ; => 3
+;; (longestEqualSubarray '(1 1 2 2 1 1) 2) ; => 4
 
 (require rackunit)
 

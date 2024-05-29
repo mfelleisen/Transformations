@@ -24,20 +24,21 @@
 (define (maximumTripletValue nums)
   (define n (length nums))
 
-  ;; Helper function to compute the triplet value
+  ;; Helper function to compute the triplet value.
   (define (triplet-value i j k)
     (* (- (list-ref nums i) (list-ref nums j)) (list-ref nums k)))
 
-  ;; Using a fold to accumulate the maximum triplet value
-  (define (max-triplet-value i j k max-val)
-    (let ((current-val (triplet-value i j k)))
-      (max max-val current-val)))
+  ;; Generate all valid triplets using for comprehensions
+  (define triplet-values
+    (for*/list ([i (in-range 0 (- n 2))]
+                [j (in-range (+ i 1) (- n 1))]
+                [k (in-range (+ j 1) n)])
+      (triplet-value i j k)))
 
-  ;; Generate all triplets and compute the maximum triplet value
-  (for/fold ([max-val 0]) ([i (in-range 0 (- n 2))])
-    (for/fold ([max-val max-val]) ([j (in-range (+ i 1) (- n 1))])
-      (for/fold ([max-val max-val]) ([k (in-range (+ j 1) n)])
-        (max-triplet-value i j k max-val)))))
+  ;; Find the maximum triplet value or 0 if all are negative.
+  (if (empty? triplet-values)
+      0
+      (apply max 0 triplet-values)))
 
 ;; Example usage
 (maximumTripletValue '(12 6 1 2 7))  ; Output: 77

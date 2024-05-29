@@ -27,25 +27,22 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  ;; Compute the minimum absolute difference between elements in `nums`
-  ;; that are at least `x` indices apart.
-  (define len (length nums))
-  
-  (define (update-min-diff current-min i j)
-    (let ((diff (abs (- (list-ref nums i) (list-ref nums j)))))
-      (min current-min diff)))
-  
-  (define (inner-loop i min-diff)
-    (for/fold ([current-min min-diff]) ([j (in-range (+ i x) len)])
-      (update-min-diff current-min i j)))
+  ;; Helper function to compute the minimum absolute difference
+  (define (compute-min-diff i min-diff)
+    (if (>= i (- (length nums) x))
+        min-diff
+        (let loop ((j (+ i x)) (current-min min-diff))
+          (if (>= j (length nums))
+              (compute-min-diff (+ i 1) current-min)
+              (let ((diff (abs (- (list-ref nums i) (list-ref nums j)))))
+                (loop (+ j 1) (min current-min diff)))))))
 
-  (for/fold ([min-diff +inf.0]) ([i (in-range (- len x))])
-    (inner-loop i min-diff)))
+  (compute-min-diff 0 +inf.0))
 
-;; Examples
-(minAbsoluteDifference '(4 3 2 4) 2) ; Output: 0
-(minAbsoluteDifference '(5 3 2 10 15) 1) ; Output: 1
-(minAbsoluteDifference '(1 2 3 4) 3) ; Output: 3
+;; Example usage:
+(minAbsoluteDifference '(4 3 2 4) 2)  ; Output: 0
+(minAbsoluteDifference '(5 3 2 10 15) 1)  ; Output: 1
+(minAbsoluteDifference '(1 2 3 4) 3)  ; Output: 3
 
 (require rackunit)
 

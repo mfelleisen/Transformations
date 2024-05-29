@@ -24,31 +24,23 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulus
 
-  ;; Helper function to calculate the number of ways recursively
-  (define (ways-helper target base current-power memo)
-    (cond
-      [(= target 0) 1] ; Base case: one way to make 0
-      [(or (< target 0) (= base 0)) 0] ; No ways if target is negative or base is 0
-      [else
-       (let* ([current-power (expt base x)]
-              [memo-key (cons target base)]
-              [memo-result (hash-ref memo memo-key #f)])
-         (if memo-result
-             memo-result
-             (let ([include-current (ways-helper (- target current-power) (- base 1) current-power memo)]
-                   [exclude-current (ways-helper target (- base 1) current-power memo)])
-               (let ([result (modulo (+ include-current exclude-current) MOD)])
-                 (hash-set! memo memo-key result)
-                 result))))]))
+  ;; Helper function to compute the number of ways recursively
+  (define (count-ways n base)
+    (if (zero? n)
+        1
+        (if (or (< n 0) (zero? base))
+            0
+            (let ([current-power (expt base x)])
+              (modulo
+               (+ (count-ways (- n current-power) (- base 1))
+                  (count-ways n (- base 1)))
+               MOD)))))
 
   ;; Calculate the maximum base such that base^x <= n
   (define max-base (inexact->exact (floor (expt n (/ 1 x)))))
 
-  ;; Initialize memoization table
-  (define memo (make-hash))
-
-  ;; Calculate the number of ways using the helper function
-  (ways-helper n max-base (expt max-base x) memo))
+  ;; Start the recursive computation
+  (count-ways n max-base))
 
 ;; Example usages
 (numberOfWays 10 2)  ; Output: 1

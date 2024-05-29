@@ -39,20 +39,21 @@
 ;;  * 0 <= nums[i] <= 109
 ;;  * 0 <= k <= 109
 (define (minIncrementOperations nums k)
-  (define (process nums needed-increments)
-    (define max-in-window (apply max (take nums 3)))
-    (if (< max-in-window k)
-        (let ([needed (- k max-in-window)])
-          (process (cons (+ (first nums) needed) (rest nums)) (+ needed-increments needed)))
-        needed-increments))
-
+  ;; Check if a window of size 3 or more needs increment
+  (define (needs-increment? window)
+    (let ([max-in-window (apply max window)])
+      (if (< max-in-window k)
+          (- k max-in-window)
+          0)))
+  
+  ;; Recursive function to process each window of size 3 or more
   (define (process-windows nums index increments)
     (if (>= index (- (length nums) 2))
         increments
-        (let ([window (take (drop nums index) 3)]
-              [next-nums (drop nums 3)])
-          (process-windows next-nums (+ index 1) (process window increments)))))
+        (let ([needed (needs-increment? (take (drop nums index) 3))])
+          (process-windows nums (+ index 1) (+ increments needed)))))
   
+  ;; Start processing from the first index
   (process-windows nums 0 0))
 
 ;; Example usage:

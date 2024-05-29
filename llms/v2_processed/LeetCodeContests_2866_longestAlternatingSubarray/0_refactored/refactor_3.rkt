@@ -28,38 +28,26 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
-  ;; Function to determine the longest subarray meeting specific conditions
-  (define (valid-start? x)
-    ;; Check if the starting element is even and within the threshold
-    (and (even? x) (<= x threshold)))
+  (define (valid-start? index)
+    (let ([num (list-ref nums index)])
+      (and (even? num) (<= num threshold))))
 
-  ;; Calculate the maximum subarray length starting from a given index
-  (define (max-subarray-length nums)
-    (define (helper current-index current-length last-modulo remaining-nums)
-      (match remaining-nums
-        [(cons current-num rest-nums)
-         (if (and (<= current-num threshold) 
-                  (not (= (modulo current-num 2) last-modulo)))
-             (helper (add1 current-index) 
-                     (add1 current-length) 
-                     (modulo current-num 2) 
-                     rest-nums)
-             current-length)]
-        [_ current-length]))
+  (define (max-subarray-length starting-index)
+    (let loop ([current-index (add1 starting-index)]
+               [current-length 1]
+               [last-modulo (modulo (list-ref nums starting-index) 2)])
+      (if (and (< current-index (length nums))
+               (<= (list-ref nums current-index) threshold)
+               (not (= (modulo (list-ref nums current-index) 2) last-modulo)))
+          (loop (add1 current-index)
+                (add1 current-length)
+                (modulo (list-ref nums current-index) 2))
+          current-length)))
 
-    (helper 1 1 (modulo (first nums) 2) (rest nums)))
-
-  ;; Recursively find the maximum length of valid subarrays
-  (define (find-max-length max-so-far nums)
-    (match nums
-      [(cons x rest-nums)
-       (if (valid-start? x)
-           (find-max-length (max max-so-far (max-subarray-length nums)) rest-nums)
-           (find-max-length max-so-far rest-nums))]
-      [_ max-so-far]))
-
-  ;; Start the recursive search from the first index
-  (find-max-length 0 nums))
+  (for/fold ([max-length 0]) ([i (in-range (length nums))])
+    (if (valid-start? i)
+        (max max-length (max-subarray-length i))
+        max-length)))
 
 ;; Example usage:
 (longestAlternatingSubarray '(3 2 5 4) 5)  ; Output: 3

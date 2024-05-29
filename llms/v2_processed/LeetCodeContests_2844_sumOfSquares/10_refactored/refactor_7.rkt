@@ -18,15 +18,23 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-  (define (is-special? i)
+  
+  ;; Helper function to check if an index divides n
+  (define (special? i)
     (zero? (remainder n i)))
+  
+  ;; Helper function to square a number
   (define (square x)
     (* x x))
   
+  ;; Calculate the sum of squares of special elements
   (for/sum ([i (in-range 1 (add1 n))]
-            #:when (is-special? i))
+            #:when (special? i))
     (square (list-ref nums (sub1 i)))))
 
+;; Example usage
+(sumOfSquares '(1 2 3 4))  ;; Output: 21
+(sumOfSquares '(2 7 1 19 18 3))  ;; Output: 63
 
 (require rackunit)
 

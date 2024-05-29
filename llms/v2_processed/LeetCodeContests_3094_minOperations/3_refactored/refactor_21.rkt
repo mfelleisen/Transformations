@@ -22,7 +22,7 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
 (define (minOperations nums)
-  ;; Use a hash to count occurrences of each number in the list
+  ;; Use a hash table to count occurrences of each number in the list
   (define freq (for/fold ([h (hash)]) ([num nums])
                  (hash-update h num add1 0)))
   

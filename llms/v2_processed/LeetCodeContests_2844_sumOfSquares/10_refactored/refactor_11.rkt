@@ -16,18 +16,22 @@
 ;; Constraints:
 ;;  * 1 <= nums.length == n <= 50
 ;;  * 1 <= nums[i] <= 50
-(define (sumOfSquares nums) ;; contract: sos/c
+(define (sumOfSquares nums)
   (define n (length nums))
   
-  ;; Check if an index divides n
-  (define (is-special? i)
-    (zero? (modulo n i)))
+  (define (is-special i)
+    (zero? (remainder n i)))
   
-  ;; Compute the sum of squares of all special elements
-  (for/sum ([i (in-range 1 (add1 n))]
-            #:when (is-special? i))
-    (let ([num (list-ref nums (sub1 i))])
-      (* num num))))
+  (define (square x)
+    (* x x))
+  
+  (define (special-elements-squares nums)
+    (for/list ([i (in-range 1 (add1 n))]
+               #:when (is-special i))
+      (square (list-ref nums (sub1 i)))))
+  
+  (apply + (special-elements-squares nums)))
+
 
 (require rackunit)
 

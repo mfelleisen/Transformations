@@ -18,17 +18,17 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
-
-  ;; Helper function to check if an index is special and compute its square
-  (define (special-square i)
-    (let ([num (list-ref nums (sub1 i))])
-      (if (zero? (modulo n i))
-          (* num num)
-          0)))
-
-  ;; Sum up the squares of special elements
-  (for/sum ([i (in-range 1 (add1 n))])
-    (special-square i)))
+  
+  (define (is-special-index? i)
+    (zero? (modulo n i)))
+  
+  (define (special-element-squares)
+    (for/sum ([i (in-range 1 (add1 n))]
+              #:when (is-special-index? i))
+      (let ([val (list-ref nums (sub1 i))])
+        (* val val))))
+  
+  (special-element-squares))
 
 ;; Example usage:
 (sumOfSquares '(1 2 3 4)) ; Output: 21

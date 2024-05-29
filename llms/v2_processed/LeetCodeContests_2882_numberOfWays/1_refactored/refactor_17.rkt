@@ -21,24 +21,25 @@
 (define (numberOfWays n x)
   (define MOD (+ (expt 10 9) 7))  ; Define the modulo constant
 
-  ;; Helper function to calculate the power
-  (define (power base exp)
-    (expt base exp))
+  ;; Initialize dp vector with zeros and set the base case
+  (define dp (build-vector (+ n 1) (lambda (i) (if (= i 0) 1 0))))
 
-  ;; Initialize the dp vector with base case
-  (define dp
-    (for/fold ([dp (hash 0 1)])  ; Initial dp hash with base case
-              ([base (in-range 1 (add1 (inexact->exact (floor (expt n (/ 1 x))))))])
-      (define current-power (power base x))
-      (for/fold ([dp dp])
-                ([i (in-range n (- current-power 1) -1)])
-        (hash-update dp i
-                     (lambda (v)
-                       (modulo (+ v (hash-ref dp (- i current-power) 0)) MOD))
-                     0))))
+  (define max-base (inexact->exact (floor (expt n (/ 1 x)))))  ; Calculate the maximum base
 
-  ;; Return the number of ways to express n
-  (hash-ref dp n 0))
+  ;; Function to update dp vector for a given base
+  (define (update-dp base)
+    (define current-power (expt base x))
+    (for ([i (in-range n (- current-power 1) -1)])
+      (vector-set! dp i
+                   (modulo (+ (vector-ref dp i)
+                              (vector-ref dp (- i current-power)))
+                           MOD))))
+
+  ;; Iterate over each base and update the dp vector
+  (for ([base (in-range 1 (+ max-base 1))])
+    (update-dp base))
+
+  (vector-ref dp n))  ; Return the number of ways to express n
 
 ;; Example usages
 (displayln (numberOfWays 10 2))  ; Output: 1

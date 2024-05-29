@@ -14,16 +14,15 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Helper function to count valid distributions
-  (define (count-valid-distributions remaining-candies child-index)
-    (cond
-      [(= child-index 3) (if (<= remaining-candies limit) 1 0)]
-      [else
-       (for/sum ([candies (in-range (add1 (min remaining-candies limit)))])
-         (count-valid-distributions (- remaining-candies candies) (add1 child-index)))]))
-
-  ;; Start counting with all candies and the first child
-  (count-valid-distributions n 1))
+  ;; Helper function to generate all valid distributions
+  (define (valid-candy-distributions n limit)
+    (for*/list ([a (in-range (add1 (min n limit)))]  ; Iterates from 0 to min(n, limit)
+                [b (in-range (add1 (min (- n a) limit)))]  ; Iterates from 0 to min(n-a, limit)
+                #:when (<= (- n a b) limit))  ; Ensure the third child's candies do not exceed limit
+      (list a b (- n a b))))  ; Return the distribution as a list
+  
+  ;; Count the number of valid distributions
+  (length (valid-candy-distributions n limit)))
 
 ;; Example usage:
 (displayln (distributeCandies 5 2))  ; Output: 3

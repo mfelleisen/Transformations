@@ -22,26 +22,32 @@
 ;;  * 2 <= nums.length <= 105
 ;;  * 1 <= nums[i], x <= 106
 (define (maxScore nums x)
-  ;; Define a helper function for parity check
-  (define (parity n) (modulo n 2))
-  
-  ;; Helper function to update the dp list based on current index i and target x
-  (define (update-dp dp nums x)
-    (for/fold ([dp dp]) ([i (in-range (length nums))])
-      (for/fold ([dp dp]) ([j (in-range (add1 i) (length nums))])
-        (let* ([current-score (+ (list-ref dp i) (list-ref nums j))]
-               [penalized-score (if (not (= (parity (list-ref nums i)) (parity (list-ref nums j))))
-                                    (- current-score x)
-                                    current-score)])
-          (if (> penalized-score (list-ref dp j))
-              (list-set dp j penalized-score)
-              dp)))))
-  
-  ;; Initialize dp list
-  (define dp (cons (first nums) (make-list (sub1 (length nums)) -inf.0)))
-  
-  ;; Update dp list and return the maximum value
-  (apply max (update-dp dp nums x)))
+  (define n (length nums))
+
+  ;; Define a helper function to calculate new score based on parities
+  (define (calculate-score current-score num-i num-j)
+    (if (= (modulo num-i 2) (modulo num-j 2))
+        (+ current-score num-j)
+        (- (+ current-score num-j) x)))
+
+  ;; Define an accumulator function to update the dp list
+  (define (update-dp dp i)
+    (let ((current-score (list-ref dp i))
+          (num-i (list-ref nums i)))
+      (for/fold ([dp dp]) ([j (in-range (add1 i) n)])
+        (let* ((num-j (list-ref nums j))
+               (new-score (calculate-score current-score num-i num-j)))
+          (list-set dp j (max (list-ref dp j) new-score))))))
+
+  ;; Initialize the dp list
+  (define dp (cons (first nums) (make-list (sub1 n) -inf.0)))
+
+  ;; Update the dp list for each index
+  (define final-dp (for/fold ([dp dp]) ([i (in-range n)])
+                     (update-dp dp i)))
+
+  ;; Return the maximum value in the final dp list
+  (apply max final-dp))
 
 ;; Example cases
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13

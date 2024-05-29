@@ -28,24 +28,29 @@
 ;;  * The input is generated such that if team a is stronger than team b, team b is not stronger than team a.
 ;;  * The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
 (define (findChampion n edges)
-  ;; Create a hash to keep track of the number of incoming edges for each team
-  (define in-degrees (make-hash (map (lambda (i) (cons i 0)) (range n))))
-  
-  ;; Populate the in-degrees hash by iterating over each edge
-  (for-each (lambda (edge)
-              (hash-update! in-degrees (second edge) add1))
-            edges)
-  
-  ;; Find the teams with zero in-degrees
-  (define zero-in-degree-teams
-    (for/list ([team (in-range n)]
-               #:when (= (hash-ref in-degrees team) 0))
-      team))
-  
-  ;; Determine the result based on the number of teams with zero in-degrees
-  (match zero-in-degree-teams
-    [(list unique-champion) unique-champion] ;; If exactly one, return it
-    [_ -1])) ;; Otherwise, return -1 indicating no unique champion or no champion at all
+  ;; Step 1: Create an adjacency list representation of the graph and compute in-degrees
+  (define (build-graph edges)
+    (for/fold ([in-degrees (make-vector n 0)]
+               [adj-list (make-vector n empty)])
+              ([edge edges])
+      (define u (first edge))
+      (define v (second edge))
+      (vector-set! in-degrees v (+ 1 (vector-ref in-degrees v)))
+      (vector-set! adj-list u (cons v (vector-ref adj-list u)))
+      (values in-degrees adj-list)))
+
+  ;; Step 2: Find all nodes with zero in-degrees
+  (define (find-zero-in-degree-teams in-degrees)
+    (for/list ([i (in-range n)]
+               #:when (= (vector-ref in-degrees i) 0))
+      i))
+
+  ;; Step 3: Main logic to determine the champion
+  (define-values (in-degrees adj-list) (build-graph edges))
+  (define zero-in-degree-teams (find-zero-in-degree-teams in-degrees))
+  (if (= (length zero-in-degree-teams) 1)
+      (first zero-in-degree-teams)
+      -1))
 
 ;; Example usage:
 (findChampion 3 '((0 1) (1 2)))  ;; Output: 0

@@ -27,23 +27,18 @@
 ;;  * 1 <= nums[i] <= 109
 ;;  * 0 <= x < nums.length
 (define (minAbsoluteDifference nums x)
-  ;; Helper function to calculate the minimum absolute difference
-  (define (min-abs-diff lst1 lst2)
-    (for/fold ([min-diff +inf.0])
-              ([n1 (in-list lst1)] [n2 (in-list lst2)])
-      (min min-diff (abs (- n1 n2)))))
+  ;; Function to find the minimum absolute difference between two elements
+  ;; in the array that are at least x indices apart.
 
-  ;; Split the list into pairs of sublists with the required index separation
-  (define sublists
-    (for/list ([i (in-range x (length nums))])
-      (list (take nums i) (drop nums i))))
+  (define (helper min-diff sublist rest)
+    (match rest
+      [(cons y ys)
+       (define new-min-diff (for/fold ([md min-diff]) ([v sublist])
+                              (min md (abs (- v y)))))
+       (helper new-min-diff (cdr sublist) ys)]
+      [else min-diff]))
 
-  ;; Calculate the minimum absolute difference for each pair of sublists
-  (for/fold ([global-min +inf.0])
-            ([sublists (in-list sublists)])
-    (match sublists
-      [(list lst1 lst2)
-       (min global-min (min-abs-diff lst1 lst2))])))
+  (helper +inf.0 (take nums (- (length nums) x)) (drop nums x)))
 
 ;; Example usage:
 (minAbsoluteDifference '(4 3 2 4) 2)  ; Output: 0

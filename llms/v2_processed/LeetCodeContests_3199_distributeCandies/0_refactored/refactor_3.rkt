@@ -14,21 +14,20 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Helper function to generate valid distributions recursively
-  (define (count-distributions n limit a b)
-    (if (> a limit)
-        0
-        (if (> b limit)
-            (count-distributions n limit (+ a 1) 0)
-            (if (<= (- n a b) limit)
-                (+ 1 (count-distributions n limit a (+ b 1)))
-                (count-distributions n limit a (+ b 1))))))
-  ;; Start the count with initial values of `a` and `b`
-  (count-distributions n limit 0 0))
+  ;; Generate all possible distributions of candies among three children
+  ;; where no child gets more than `limit` candies.
+  (define valid-distributions
+    (for*/list ([a (in-range (add1 (min n limit)))]
+                [b (in-range (add1 (min (- n a) limit)))]
+                #:when (<= (- n a b) limit))
+      (list a b (- n a b))))
+  
+  ;; Count the number of valid distributions
+  (length valid-distributions))
 
-;; The function `distributeCandies` uses a recursive helper function `count-distributions`
-;; to count all possible valid distributions of candies among three children, ensuring
-;; that no child gets more than `limit` candies.
+;; Example usage:
+(distributeCandies 5 2)  ; Output: 3
+(distributeCandies 3 3)  ; Output: 10
 
 (require rackunit)
 

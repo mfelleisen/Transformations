@@ -18,9 +18,14 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
+
   (define (square x) (* x x))
 
-  (for/sum ([i (in-range 1 (add1 n))] #:when (zero? (modulo n i)))
+  (define (special-index? i)
+    (zero? (modulo n i)))
+
+  (for/sum ([i (in-range 1 (add1 n))]
+            #:when (special-index? i))
     (square (list-ref nums (sub1 i)))))
 
 ;; Example usage:

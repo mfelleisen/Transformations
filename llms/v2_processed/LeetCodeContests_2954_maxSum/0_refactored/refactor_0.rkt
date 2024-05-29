@@ -21,30 +21,45 @@
 ;;  * 1 <= m <= k <= nums.length
 ;;  * 1 <= nums[i] <= 109
 (define (maxSum nums m k)
-  ;; Helper function to check if a subarray is almost unique
-  (define (almost-unique? subarray)
-    (>= (length (remove-duplicates subarray)) m))
+  (define (sliding-window sums distinct-counts i)
+    (define new-sum (+ (car sums) (list-ref nums (+ i k)) (- (list-ref nums i))))
+    (define new-distinct-counts
+      (let* ((old-count (hash-ref distinct-counts (list-ref nums i) 0))
+             (new-count (hash-ref distinct-counts (list-ref nums (+ i k)) 0)))
+        (if (= old-count 1)
+            (hash-remove (hash-set distinct-counts (list-ref nums (+ i k)) (+ new-count 1))
+                         (list-ref nums i))
+            (hash-set (hash-set distinct-counts (list-ref nums (+ i k)) (+ new-count 1))
+                      (list-ref nums i)
+                      (- old-count 1)))))
+    (values new-sum new-distinct-counts))
 
-  ;; Helper function to calculate the sum of a subarray
-  (define (subarray-sum subarray)
-    (apply + subarray))
+  (define (initial-window nums k)
+    (let* ((window (take nums k))
+           (sum (apply + window))
+           (distinct-counts (for/fold ([counts (hash)])
+                             ([num window])
+                             (hash-update counts num add1 0))))
+      (values sum distinct-counts)))
 
-  ;; Generate all subarrays of length k
-  (define (subarrays-of-length-k lst k)
-    (if (< (length lst) k)
-        '()
-        (cons (take lst k)
-              (subarrays-of-length-k (rest lst) k))))
+  (define (max-sum-aux nums m k i current-sum distinct-counts max-sum)
+    (if (= (+ i k) (length nums))
+        max-sum
+        (let-values ([(new-sum new-distinct-counts) (sliding-window (list current-sum) distinct-counts i)])
+          (max-sum-aux nums
+                       m
+                       k
+                       (add1 i)
+                       new-sum
+                       new-distinct-counts
+                       (if (>= (hash-count new-distinct-counts) m)
+                           (max max-sum new-sum)
+                           max-sum)))))
 
-  ;; Filter subarrays to keep only almost unique ones
-  (define almost-unique-subarrays
-    (filter almost-unique? (subarrays-of-length-k nums k)))
-
-  ;; Find the maximum sum among the almost unique subarrays
-  (if (null? almost-unique-subarrays)
+  (if (< (length nums) k)
       0
-      (apply max (map subarray-sum almost-unique-subarrays))))
-
+      (let-values ([(initial-sum initial-distinct-counts) (initial-window nums k)])
+        (max-sum-aux nums m k 0 initial-sum initial-distinct-counts 0))))
 
 (require rackunit)
 

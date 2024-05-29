@@ -24,9 +24,9 @@
 ;;  * 1 <= n == hours.length <= 50
 ;;  * 0 <= hours[i], target <= 105
 (define (numberOfEmployeesWhoMetTarget hours target)
-  ;; Use the 'count' function to count employees who worked at least 'target' hours.
-  ;; The 'count' function applies a predicate to each element of the list and counts those for which the predicate returns true.
-  (count (curry >= target) hours))
+  ;; Use the 'filter' function to select employees who worked at least 'target' hours
+  ;; and then count the length of the resulting list.
+  (length (filter (lambda (hour) (>= hour target)) hours)))
 
 ;; Example use cases:
 ;; (numberOfEmployeesWhoMetTarget '(0 1 2 3 4) 2) returns 3

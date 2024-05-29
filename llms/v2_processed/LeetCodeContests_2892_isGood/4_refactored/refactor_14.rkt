@@ -24,11 +24,17 @@
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= num[i] <= 200
 (define (isGood nums)
-  (define n (apply max nums)) ; Find the maximum element in nums which acts as 'n'
-  (define counts (for/fold ([counts (hash)])
-                  ([num (in-list nums)])
-                (hash-update counts num add1 0)))
-  (and (equal? (length nums) (+ n 1)) ; Check if the length of nums is n + 1
+  ;; Helper function to create a frequency dictionary
+  (define (build-frequency-dict lst)
+    (for/fold ([counts (hash)])
+              ([num (in-list lst)])
+      (hash-update counts num add1 0)))
+
+  ;; Main logic
+  (define n (apply max nums))
+  (define counts (build-frequency-dict nums))
+
+  (and (= (length nums) (+ n 1)) ; Check if the length of nums is n + 1
        (for/and ([i (in-range 1 n)]) ; Check that all numbers from 1 to n-1 appear exactly once
          (= (hash-ref counts i 0) 1))
        (= (hash-ref counts n 0) 2))) ; Check that n appears exactly twice

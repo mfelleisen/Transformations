@@ -14,20 +14,13 @@
 ;;  * 1 <= n <= 50
 ;;  * 1 <= limit <= 50
 (define (distributeCandies n limit)
-  ;; Helper function to generate valid distributions recursively
-  (define (count-ways candies limit child-count)
-    (cond
-      [(= child-count 1) (if (<= candies limit) 1 0)]
-      [else
-       (for/sum ([i (in-range (add1 (min candies limit)))])
-         (count-ways (- candies i) limit (- child-count 1)))]))
-
-  ;; Start the recursive counting with 3 children
-  (count-ways n limit 3))
-
-;; Example usage:
-;; (distributeCandies 5 2) should return 3
-;; (distributeCandies 3 3) should return 10
+  (define (valid-distributions cnt lim)
+    (for*/list ([a (in-range 0 (add1 (min cnt lim)))]
+                [b (in-range 0 (add1 (min (- cnt a) lim)))]
+                #:when (<= (- cnt a b) lim))
+      (list a b (- cnt a b))))
+  
+  (length (valid-distributions n limit)))
 
 (require rackunit)
 

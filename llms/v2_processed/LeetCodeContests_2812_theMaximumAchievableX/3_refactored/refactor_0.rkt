@@ -25,9 +25,9 @@
   ;; increasing x by t and decreasing num by t, which results in x = num + 2 * t.
   (+ num (* 2 t)))
 
-;; Example usage:
-(theMaximumAchievableX 4 1) ; => 6
-(theMaximumAchievableX 3 2) ; => 7
+;; Examples for testing
+(theMaximumAchievableX 4 1) ; Expected output: 6
+(theMaximumAchievableX 3 2) ; Expected output: 7
 
 (require rackunit)
 
