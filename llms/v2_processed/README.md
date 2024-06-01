@@ -1,0 +1,77 @@
+
+## Allocation of Inspection
+
+### Protocol
+
+We will add an eval file to each directory that contains HIGH or LOW
+on the first line and, if it is LOW, contains an explanation below
+the first line. 
+
+### Christos
+
+- _minimumSum/: [highest](LeetCodeContests_2811_minimumSum/highest_heuristic.txt), [dir](LeetCodeContests_2811_minimumSum/)
+- _theMaximumAchievableX/: [highest](LeetCodeContests_2812_theMaximumAchievableX/highest_heuristic.txt), [dir](LeetCodeContests_2812_theMaximumAchievableX)
+- _longestEqualSubarray/: [highest](LeetCodeContests_2832_longestEqualSubarray/highest_heuristic.txt), [dir](LeetCodeContests_2832_longestEqualSubarray)
+- _sumOfSquares/: [highest](LeetCodeContests_2844_sumOfSquares/highest_heuristic.txt), [dir](LeetCodeContests_2844_sumOfSquares)
+- _maximumJumps/: [highest](LeetCodeContests_2855_maximumJumps/highest_heuristic.txt), [dir](LeetCodeContests_2855_maximumJumps)
+- _longestAlternatingSubarray/: [highest](LeetCodeContests_2866_longestAlternatingSubarray/highest_heuristic.txt), [dir](LeetCodeContests_2866_longestAlternatingSubarray)
+- _maxNonDecreasingLength/: [highest](LeetCodeContests_2869_maxNonDecreasingLength/highest_heuristic.txt), [dir](LeetCodeContests_2869_maxNonDecreasingLength)
+- _maxArrayValue/: [highest](LeetCodeContests_2872_maxArrayValue/highest_heuristic.txt), [dir](LeetCodeContests_2872_maxArrayValue)
+- _findPrimePairs/: [highest](LeetCodeContests_2873_findPrimePairs/highest_heuristic.txt), [dir](LeetCodeContests_2873_findPrimePairs)
+- _numberOfEmployeesWhoMetTarget/: [highest](LeetCodeContests_2876_numberOfEmployeesWhoMetTarget/highest_heuristic.txt), [dir](LeetCodeContests_2876_numberOfEmployeesWhoMetTarget)
+- _numberOfWays/: [highest](LeetCodeContests_2882_numberOfWays/highest_heuristic.txt), [dir](LeetCodeContests_2882_numberOfWays)
+- _countBlackBlocks/: [highest](LeetCodeContests_2889_countBlackBlocks/highest_heuristic.txt), [dir](LeetCodeContests_2889_countBlackBlocks)
+- _maximumBeauty/: [highest](LeetCodeContests_2891_maximumBeauty/highest_heuristic.txt), [dir](LeetCodeContests_2891_maximumBeauty)
+- _isGood/: [highest](LeetCodeContests_2892_isGood/highest_heuristic.txt), [dir](LeetCodeContests_2892_isGood)
+- _maxScore/: [highest](LeetCodeContests_2893_maxScore/highest_heuristic.txt), [dir](LeetCodeContests_2893_maxScore)
+- _maxSum/: [highest](LeetCodeContests_2902_maxSum/highest_heuristic.txt), [dir](LeetCodeContests_2902_maxSum)
+- _countPairs/: [highest](LeetCodeContests_2917_countPairs/highest_heuristic.txt), [dir](LeetCodeContests_2917_countPairs)
+- _maxIncreasingGroups/: [highest](LeetCodeContests_2919_maxIncreasingGroups/highest_heuristic.txt), [dir](LeetCodeContests_2919_maxIncreasingGroups)
+- _countPairs/: [highest](LeetCodeContests_2953_countPairs/highest_heuristic.txt), [dir](LeetCodeContests_2953_countPairs)
+- _maxSum/: [highest](LeetCodeContests_2954_maxSum/highest_heuristic.txt), [dir](LeetCodeContests_2954_maxSum)
+- _accountBalanceAfterPurchase/: [highest](LeetCodeContests_2955_accountBalanceAfterPurchase/highest_heuristic.txt), [dir](LeetCodeContests_2955_accountBalanceAfterPurchase)
+- _maximizeTheProfit/: [highest](LeetCodeContests_2979_maximizeTheProfit/highest_heuristic.txt), [dir](LeetCodeContests_2979_maximizeTheProfit)
+- _countSymmetricIntegers/: [highest](LeetCodeContests_2998_countSymmetricIntegers/highest_heuristic.txt), [dir](LeetCodeContests_2998_countSymmetricIntegers)
+- _minAbsoluteDifference/: [highest](LeetCodeContests_3000_minAbsoluteDifference/highest_heuristic.txt), [dir](LeetCodeContests_3000_minAbsoluteDifference)
+- _minimumPossibleSum/: [highest](LeetCodeContests_3026_minimumPossibleSum/highest_heuristic.txt), [dir](LeetCodeContests_3026_minimumPossibleSum)
+- _getMaxFunctionValue/: [highest](LeetCodeContests_3032_getMaxFunctionValue/highest_heuristic.txt), [dir](LeetCodeContests_3032_getMaxFunctionValue)
+- _numberOfPoints/: [highest](LeetCodeContests_3034_numberOfPoints/highest_heuristic.txt), [dir](LeetCodeContests_3034_numberOfPoints)
+- _minimumRightShifts/: [highest](LeetCodeContests_3045_minimumRightShifts/highest_heuristic.txt), [dir](LeetCodeContests_3045_minimumRightShifts)
+- _minOperations/: [highest](LeetCodeContests_3094_minOperations/highest_heuristic.txt), [dir](LeetCodeContests_3094_minOperations)
+- _maxNumberOfAlloys/: [highest](LeetCodeContests_3095_maxNumberOfAlloys/highest_heuristic.txt), [dir](LeetCodeContests_3095_maxNumberOfAlloys)
+- _lengthOfLongestSubsequence/: [highest](LeetCodeContests_3106_lengthOfLongestSubsequence/highest_heuristic.txt), [dir](LeetCodeContests_3106_lengthOfLongestSubsequence)
+- _maximumSumOfHeights/: [highest](LeetCodeContests_3114_maximumSumOfHeights/highest_heuristic.txt), [dir](LeetCodeContests_3114_maximumSumOfHeights)
+
+### Matthias
+
+- _getWordsInLongestSubsequence/: [highest](LeetCodeContests_3143_getWordsInLongestSubsequence/highest_heuristic.txt), [dir](LeetCodeContests_3143_getWordsInLongestSubsequence)
+- _maximumTripletValue/: [highest](LeetCodeContests_3154_maximumTripletValue/highest_heuristic.txt), [dir](LeetCodeContests_3154_maximumTripletValue)
+- _sumCounts/: [highest](LeetCodeContests_3163_sumCounts/highest_heuristic.txt), [dir](LeetCodeContests_3163_sumCounts)
+- _findIndices/: [highest](LeetCodeContests_3165_findIndices/highest_heuristic.txt), [dir](LeetCodeContests_3165_findIndices)
+- _minimumSum/: [highest](LeetCodeContests_3176_minimumSum/highest_heuristic.txt), [dir](LeetCodeContests_3176_minimumSum)
+- _minIncrementOperations/: [highest](LeetCodeContests_3178_minIncrementOperations/highest_heuristic.txt), [dir](LeetCodeContests_3178_minIncrementOperations)
+- _findKOr/: [highest](LeetCodeContests_3183_findKOr/highest_heuristic.txt), [dir](LeetCodeContests_3183_findKOr)
+- _findChampion/: [highest](LeetCodeContests_3188_findChampion/highest_heuristic.txt), [dir](LeetCodeContests_3188_findChampion)
+- _findChampion/: [highest](LeetCodeContests_3189_findChampion/highest_heuristic.txt), [dir](LeetCodeContests_3189_findChampion)
+- _maximumXorProduct/: [highest](LeetCodeContests_3192_maximumXorProduct/highest_heuristic.txt), [dir](LeetCodeContests_3192_maximumXorProduct)
+- _maximumStrongPairXor/: [highest](LeetCodeContests_3193_maximumStrongPairXor/highest_heuristic.txt), [dir](LeetCodeContests_3193_maximumStrongPairXor)
+- _distributeCandies/: [highest](LeetCodeContests_3199_distributeCandies/highest_heuristic.txt), [dir](LeetCodeContests_3199_distributeCandies)
+- _findHighAccessEmployees/: [highest](LeetCodeContests_3202_findHighAccessEmployees/highest_heuristic.txt), [dir](LeetCodeContests_3202_findHighAccessEmployees)
+- _findIntersectionValues/: [highest](LeetCodeContests_3206_findIntersectionValues/highest_heuristic.txt), [dir](LeetCodeContests_3206_findIntersectionValues)
+- _countSubarrays/: [highest](LeetCodeContests_3213_countSubarrays/highest_heuristic.txt), [dir](LeetCodeContests_3213_countSubarrays)
+- _areSimilar/: [highest](LeetCodeContests_3215_areSimilar/highest_heuristic.txt), [dir](LeetCodeContests_3215_areSimilar)
+- _countTestedDevices/: [highest](LeetCodeContests_3220_countTestedDevices/highest_heuristic.txt), [dir](LeetCodeContests_3220_countTestedDevices)
+- _findPeaks/: [highest](LeetCodeContests_3221_findPeaks/highest_heuristic.txt), [dir](LeetCodeContests_3221_findPeaks)
+- _numberGame/: [highest](LeetCodeContests_3226_numberGame/highest_heuristic.txt), [dir](LeetCodeContests_3226_numberGame)
+- _findMissingAndRepeatedValues/: [highest](LeetCodeContests_3227_findMissingAndRepeatedValues/highest_heuristic.txt), [dir](LeetCodeContests_3227_findMissingAndRepeatedValues)
+- _missingInteger/: [highest](LeetCodeContests_3236_missingInteger/highest_heuristic.txt) -, [dir](LeetCodeContests_3236_missingInteger)
+- _minimumOperationsToMakeEqual/: [highest](LeetCodeContests_3239_minimumOperationsToMakeEqual/highest_heuristic.txt), [dir](LeetCodeContests_3239_minimumOperationsToMakeEqual)
+- _findMaximumNumber/: [highest](LeetCodeContests_3240_findMaximumNumber/highest_heuristic.txt) -, [dir](LeetCodeContests_3240_findMaximumNumber)
+- _divideArray/: [highest](LeetCodeContests_3241_divideArray/highest_heuristic.txt), [dir](LeetCodeContests_3241_divideArray)
+- _maxFrequencyElements/: [highest](LeetCodeContests_3242_maxFrequencyElements/highest_heuristic.txt), [dir](LeetCodeContests_3242_maxFrequencyElements)
+- _hasTrailingZeros/: [highest](LeetCodeContests_3246_hasTrailingZeros/highest_heuristic.txt), [dir](LeetCodeContests_3246_hasTrailingZeros)
+- _minOperations/: [highest](LeetCodeContests_3249_minOperations/highest_heuristic.txt), [dir](LeetCodeContests_3249_minOperations)
+- _areaOfMaxDiagonal/: [highest](LeetCodeContests_3251_areaOfMaxDiagonal/highest_heuristic.txt), [dir](LeetCodeContests_3251_areaOfMaxDiagonal)
+- _incremovableSubarrayCount/: [highest](LeetCodeContests_3252_incremovableSubarrayCount/highest_heuristic.txt), [dir](LeetCodeContests_3252_incremovableSubarrayCount)
+- _minimumCost/: [highest](LeetCodeContests_3260_minimumCost/highest_heuristic.txt), [dir](LeetCodeContests_3260_minimumCost)
+- _minimumCost/: [highest](LeetCodeContests_3263_minimumCost/highest_heuristic.txt), [dir](LeetCodeContests_3263_minimumCost)
