@@ -15,7 +15,7 @@ def heuristic(code) -> Tuple[int, str]:
     code = re.sub(r'".*?"', "", code)
 
     # use of mutation
-    mut = len(re.findall(r"\(\w*! ", code))
+    mut = len(re.findall(r"\(\w+[\w-]*!\s", code))
     # use of indexing
     ref = len(re.findall(r"\(\w*-ref ", code))
 
@@ -60,6 +60,9 @@ def heuristic(code) -> Tuple[int, str]:
 def main(args):
     header = "id,heuristic,mutation,indexing,hof,for_hof,helpers,match,let\n"
     for problem_dir in Path(args.problems_path).iterdir():
+        if not problem_dir.is_dir():
+            continue
+
         contents = header
 
         highest_h = float("-inf")
