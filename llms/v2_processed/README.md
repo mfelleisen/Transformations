@@ -3,9 +3,18 @@
 
 ### Protocol
 
-We will add an eval file to each directory that contains HIGH or LOW
-on the first line and, if it is LOW, contains an explanation below
-the first line. 
+We will score each program as follows: 
+
+| score | [would] produce a versionthat is HIGHly modern  | ... |
+| ----- | ----------------------------------------------- | --- |
+|   3   | minor changes produce a HIGHLY readable program | ... | 
+|   2   | easy rewrites of functions into `for`           | ... |
+|       | obvious merger of functions                     | ... |
+|   1   | sophisticated merger of functions               | ... | 
+|       | sophisticated recognition of eliminating indexing with `for` over lists | ... | 
+|   0   | none of the above helps                         | ... | 
+
+
 
 ### Christos
 
@@ -48,10 +57,10 @@ the first line.
 
 | done | name        | -> highest  | --> directory | --> file | score | 
 | ---- | ----------- | ----------- | ------------- | -------- | ----- | 
-|     | getWordsInLongestSubsequence/ | [highest](LeetCodeContests_3143_getWordsInLongestSubsequence/highest_heuristic.txt) |  [dir](LeetCodeContests_3143_getWordsInLongestSubsequence) |  [path-to-selected-high](LeetCodeContests_3143_getWordsInLongestSubsequence/1_refactored/refactor_86.rkt) | 6 |
-|     | maximumTripletValue/ | [highest](LeetCodeContests_3154_maximumTripletValue/highest_heuristic.txt) |  [dir](LeetCodeContests_3154_maximumTripletValue) |  [path-to-selected-high](LeetCodeContests_3154_maximumTripletValue/10_refactored/refactor_11.rkt) | 1 |
-|     | sumCounts/ | [highest](LeetCodeContests_3163_sumCounts/highest_heuristic.txt) |  [dir](LeetCodeContests_3163_sumCounts) |  [path-to-selected-high](LeetCodeContests_3163_sumCounts/0_refactored/refactor_68.rkt) | 5 |
-|     | findIndices/ | [highest](LeetCodeContests_3165_findIndices/highest_heuristic.txt) |  [dir](LeetCodeContests_3165_findIndices) |  [path-to-selected-high](LeetCodeContests_3165_findIndices/0_refactored/refactor_1.rkt) | 0 |
+| FIXED | getWordsInLongestSubsequence/ | [highest](LeetCodeContests_3143_getWordsInLongestSubsequence/highest_heuristic.txt) |  [dir](LeetCodeContests_3143_getWordsInLongestSubsequence) |  [path-to-selected-high](LeetCodeContests_3143_getWordsInLongestSubsequence/1_refactored/refactor_86.rkt) | 6 |
+| FIXED | maximumTripletValue/ | [highest](LeetCodeContests_3154_maximumTripletValue/highest_heuristic.txt) |  [dir](LeetCodeContests_3154_maximumTripletValue) |  [path-to-selected-high](LeetCodeContests_3154_maximumTripletValue/10_refactored/refactor_11.rkt) | 1 |
+| FIXED* | sumCounts/ | [highest](LeetCodeContests_3163_sumCounts/highest_heuristic.txt) |  [dir](LeetCodeContests_3163_sumCounts) |  [path-to-selected-high](LeetCodeContests_3163_sumCounts/0_refactored/refactor_68.rkt) | 5 |
+| FIXED  | findIndices/ | [highest](LeetCodeContests_3165_findIndices/highest_heuristic.txt) |  [dir](LeetCodeContests_3165_findIndices) |  [path-to-selected-high](LeetCodeContests_3165_findIndices/0_refactored/refactor_1.rkt) | 0 |
 |     | minimumSum/ | [highest](LeetCodeContests_3176_minimumSum/highest_heuristic.txt) |  [dir](LeetCodeContests_3176_minimumSum) |  [path-to-selected-high](LeetCodeContests_3176_minimumSum/0_refactored/refactor_54.rkt) | 6 |
 |     | minIncrementOperations/ | [highest](LeetCodeContests_3178_minIncrementOperations/highest_heuristic.txt) |  [dir](LeetCodeContests_3178_minIncrementOperations) |  [path-to-selected-high](LeetCodeContests_3178_minIncrementOperations/0_refactored/refactor_53.rkt) | 3 |
 |     | findKOr/ | [highest](LeetCodeContests_3183_findKOr/highest_heuristic.txt) |  [dir](LeetCodeContests_3183_findKOr) |  [path-to-selected-high](LeetCodeContests_3183_findKOr/1_refactored/refactor_36.rkt) | 8 |
