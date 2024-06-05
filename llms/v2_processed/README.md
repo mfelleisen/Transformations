@@ -11,7 +11,7 @@ the first line.
 
 | done | name        | -> highest  | --> directory | --> file | score | 
 | ---- | ----------- | ----------- | ------------- | -------- | ----- | 
-|     | minimumSum/ | [highest](LeetCodeContests_2811_minimumSum/highest_heuristic.txt) |  [dir](LeetCodeContests_2811_minimumSum/) |  [path-to-selected-high](LeetCodeContests_2811_minimumSum/1_refactored/refactor_6.rkt) | 5 |
+|  X   | minimumSum/ | [highest](LeetCodeContests_2811_minimumSum/highest_heuristic.txt) |  [dir](LeetCodeContests_2811_minimumSum/) |  [path-to-selected-high](LeetCodeContests_2811_minimumSum/1_refactored/refactor_6.rkt) | 5 |
 |     | theMaximumAchievableX/ | [highest](LeetCodeContests_2812_theMaximumAchievableX/highest_heuristic.txt) |  [dir](LeetCodeContests_2812_theMaximumAchievableX) |  [path-to-selected-high](LeetCodeContests_2812_theMaximumAchievableX/10_refactored/refactor_14.rkt) | 2 |
 |     | longestEqualSubarray/ | [highest](LeetCodeContests_2832_longestEqualSubarray/highest_heuristic.txt) |  [dir](LeetCodeContests_2832_longestEqualSubarray) |  [path-to-selected-high](LeetCodeContests_2832_longestEqualSubarray/1_refactored/refactor_95.rkt) | 0 |
 |     | sumOfSquares/ | [highest](LeetCodeContests_2844_sumOfSquares/highest_heuristic.txt) |  [dir](LeetCodeContests_2844_sumOfSquares) |  [path-to-selected-high](LeetCodeContests_2844_sumOfSquares/10_refactored/refactor_45.rkt) | 4 |
