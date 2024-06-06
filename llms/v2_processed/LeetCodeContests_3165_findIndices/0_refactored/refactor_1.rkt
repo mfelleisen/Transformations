@@ -1,11 +1,15 @@
 #lang racket
 
-;; You are given a 0-indexed integer array nums having length n, an integer indexDifference, and an integer valueDifference.
-;; Your task is to find two indices i and j, both in the range [0, n - 1], that satisfy the following conditions:
+;; You are given a 0-indexed integer array nums having length n, an integer indexDifference,
+;; and an integer valueDifference.
+;; Your task is to find two indices i and j in the range [0, n - 1], that satisfy these conditions:
 ;;  * abs(i - j) >= indexDifference, and
 ;;  * abs(nums[i] - nums[j]) >= valueDifference
-;; Return an integer array answer, where answer = [i, j] if there are two such indices, and answer = [-1, -1] otherwise. If there are multiple choices for the two indices, return any of them.
+;; Return an integer array answer, where answer = [i, j] if there are two such indices, and
+;; answer = [-1, -1] otherwise. If there are multiple choices for the two indices, return any of them.
+
 ;; Note: i and j may be equal.
+
 ;; Example 1:
 ;; Input: nums = [5,1,4,1], indexDifference = 2, valueDifference = 4
 ;; Output: [0,3]
@@ -13,6 +17,7 @@
 ;; abs(0 - 3) >= 2 and abs(nums[0] - nums[3]) >= 4.
 ;; Hence, a valid answer is [0,3].
 ;; [3,0] is also a valid answer.
+
 ;; Example 2:
 ;; Input: nums = [2,1], indexDifference = 0, valueDifference = 0
 ;; Output: [0,0]
@@ -20,21 +25,38 @@
 ;; abs(0 - 0) >= 0 and abs(nums[0] - nums[0]) >= 0.
 ;; Hence, a valid answer is [0,0].
 ;; Other valid answers are [0,1], [1,0], and [1,1].
+
 ;; Example 3:
 ;; Input: nums = [1,2,3], indexDifference = 2, valueDifference = 4
 ;; Output: [-1,-1]
-;; Explanation: In this example, it can be shown that it is impossible to find two indices that satisfy both conditions.
+;; Explanation: In this example, it can be shown that it is impossible to find two indices
+;; that satisfy both conditions.
 ;; Hence, [-1,-1] is returned.
+
 ;; Constraints:
 ;;  * 1 <= n == nums.length <= 100
 ;;  * 0 <= nums[i] <= 50
 ;;  * 0 <= indexDifference <= 100
 ;;  * 0 <= valueDifference <= 50
+
 (define (findIndices nums indexDifference valueDifference)
+  (define (valid-pair? i j)
+    (and (>= (abs (- i j)) indexDifference)
+         (>= (abs (- (list-ref nums i) (list-ref nums j))) valueDifference)))
+  
+  (define n (length nums))
+  (define result
+    (for*/or ([i (in-range n)] [j (in-range n)] #:when (valid-pair? i j))
+      (list i j)))
+  
+  (or result (list -1 -1)))
+
+(define (findIndices-AI nums indexDifference valueDifference)
   ;; Define a helper function to check the conditions for indices i and j
   (define (valid-pair? i j)
     (and (>= (abs (- i j)) indexDifference)  ; Check index difference condition
-         (>= (abs (- (list-ref nums i) (list-ref nums j))) valueDifference))) ; Check value difference condition
+         (>= (abs (- (list-ref nums i) (list-ref nums j))) valueDifference)))
+  ; Check value difference condition
 
   ;; Generate all pairs of indices (i, j) from 0 to (length nums - 1)
   (define (generate-pairs n)
@@ -60,7 +82,8 @@
       (list -1 -1)))
 
 ;; The function `findIndices` iterates over all possible pairs of indices in the array `nums`.
-;; It checks each pair to see if they satisfy the conditions specified by `indexDifference` and `valueDifference`.
+;; It checks each pair to see if they satisfy the conditions specified by `indexDifference` and
+;; `valueDifference`.
 ;; If a valid pair is found, it returns that pair. If no such pair exists, it returns `[-1, -1]`.
 
 (require rackunit)

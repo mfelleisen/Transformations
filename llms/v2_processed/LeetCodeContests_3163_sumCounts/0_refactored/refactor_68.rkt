@@ -2,9 +2,12 @@
 
 ;; You are given a 0-indexed integer array nums.
 ;; The distinct count of a subarray of nums is defined as:
-;;  * Let nums[i..j] be a subarray of nums consisting of all the indices from i to j such that 0 <= i <= j < nums.length. Then the number of distinct values in nums[i..j] is called the distinct count of nums[i..j].
+;;  * Let nums[i..j] be a subarray of nums consisting of all the indices from i to j such that
+;; 0 <= i <= j < nums.length. Then the number of distinct values in nums[i..j] is called the
+;; distinct count of nums[i..j].
 ;; Return the sum of the squares of distinct counts of all subarrays of nums.
 ;; A subarray is a contiguous non-empty sequence of elements within an array.
+
 ;; Example 1:
 ;; Input: nums = [1,2,1]
 ;; Output: 15
@@ -15,7 +18,9 @@
 ;; [1,2]: 2 distinct values
 ;; [2,1]: 2 distinct values
 ;; [1,2,1]: 2 distinct values
-;; The sum of the squares of the distinct counts in all subarrays is equal to 12 + 12 + 12 + 22 + 22 + 22 = 15.
+;; The sum of the squares of the distinct counts in all subarrays is equal to
+;;  12 + 12 + 12 + 22 + 22 + 22 = 15.
+
 ;; Example 2:
 ;; Input: nums = [1,1]
 ;; Output: 3
@@ -23,11 +28,24 @@
 ;; [1]: 1 distinct value
 ;; [1]: 1 distinct value
 ;; [1,1]: 1 distinct value
-;; The sum of the squares of the distinct counts in all subarrays is equal to 12 + 12 + 12 = 3.
+;; The sum of the squares of the distinct counts in all subarrays is equal to
+;;  12 + 12 + 12 = 3.
+
 ;; Constraints:
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 100
+
+;; MF: The AI learned about `in-suffixes` and implemented a totally simplistic version of it.
+;;   This won't be fast but it sure simplifies the coding. 
+
 (define (sumCounts nums)
+  (for/fold ([total 0]) ([suffix (in-suffixes nums)])
+    (for/fold ([seen (set)] [acc total] #:result acc) ([x suffix])
+      (define new-seen (set-add seen x))
+      (define new-acc (+ acc (sqr (set-count new-seen))))
+      (values new-seen new-acc))))
+
+(define (sumCounts-AI nums)
   ;; Nested function to scan subarrays and calculate the sum of squares of distinct counts
   (define (scan-subarrays lst)
     (define (scan lst seen acc)
@@ -158,6 +176,6 @@
     (check-within (candidate (list 2 2 1 1 1 2 5 4 5)) 296 0.001)
     (check-within (candidate (list 3 2 3)) 15 0.001)
     (check-within (candidate (list 2 1 5 4 3 3 2 1 5 5)) 652 0.001)
-))
+    ))
 
 (test-humaneval)

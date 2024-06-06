@@ -15,6 +15,13 @@ We will score each program as follows:
 |   0   | none of the above helps                         | ... | 
 
 
+Examples 
+
+1. AI fails to recognize when a tail-recursive function with accumulators 
+is just a `for/fold` in modern Racket. See minIncrementOperations/
+
+
+
 
 ### Christos
 
@@ -55,19 +62,26 @@ We will score each program as follows:
 
 ### Matthias
 
+(a) AI re-invents `in-suffixes` (but in an expensive way). 
+
+(b) AI re-invests `list->set` (not realizing that lists can be treated as sets). 
+
+(c) AI writes ";; The function uses higher-order functions and idiomatic constructs such as `for/list` to avoid
+;; explicit loops." All I can say is "huh"? 
+
 | done | name        | -> highest  | --> directory | --> file | score | 
 | ---- | ----------- | ----------- | ------------- | -------- | ----- | 
-| FIXED | getWordsInLongestSubsequence/ | [highest](LeetCodeContests_3143_getWordsInLongestSubsequence/highest_heuristic.txt) |  [dir](LeetCodeContests_3143_getWordsInLongestSubsequence) |  [path-to-selected-high](LeetCodeContests_3143_getWordsInLongestSubsequence/1_refactored/refactor_86.rkt) | 6 |
-| FIXED | maximumTripletValue/ | [highest](LeetCodeContests_3154_maximumTripletValue/highest_heuristic.txt) |  [dir](LeetCodeContests_3154_maximumTripletValue) |  [path-to-selected-high](LeetCodeContests_3154_maximumTripletValue/10_refactored/refactor_11.rkt) | 1 |
-| FIXED* | sumCounts/ | [highest](LeetCodeContests_3163_sumCounts/highest_heuristic.txt) |  [dir](LeetCodeContests_3163_sumCounts) |  [path-to-selected-high](LeetCodeContests_3163_sumCounts/0_refactored/refactor_68.rkt) | 5 |
-| FIXED  | findIndices/ | [highest](LeetCodeContests_3165_findIndices/highest_heuristic.txt) |  [dir](LeetCodeContests_3165_findIndices) |  [path-to-selected-high](LeetCodeContests_3165_findIndices/0_refactored/refactor_1.rkt) | 0 |
-|     | minimumSum/ | [highest](LeetCodeContests_3176_minimumSum/highest_heuristic.txt) |  [dir](LeetCodeContests_3176_minimumSum) |  [path-to-selected-high](LeetCodeContests_3176_minimumSum/0_refactored/refactor_54.rkt) | 6 |
-|     | minIncrementOperations/ | [highest](LeetCodeContests_3178_minIncrementOperations/highest_heuristic.txt) |  [dir](LeetCodeContests_3178_minIncrementOperations) |  [path-to-selected-high](LeetCodeContests_3178_minIncrementOperations/0_refactored/refactor_53.rkt) | 3 |
-|     | findKOr/ | [highest](LeetCodeContests_3183_findKOr/highest_heuristic.txt) |  [dir](LeetCodeContests_3183_findKOr) |  [path-to-selected-high](LeetCodeContests_3183_findKOr/1_refactored/refactor_36.rkt) | 8 |
-|     | findChampion/ | [highest](LeetCodeContests_3188_findChampion/highest_heuristic.txt) |  [dir](LeetCodeContests_3188_findChampion) |  [path-to-selected-high](LeetCodeContests_3188_findChampion/4_refactored/refactor_91.rkt) | 4 |
-|     | findChampion/ | [highest](LeetCodeContests_3189_findChampion/highest_heuristic.txt) |  [dir](LeetCodeContests_3189_findChampion) |  [path-to-selected-high](LeetCodeContests_3189_findChampion/0_refactored/refactor_51.rkt) | 3 |
-|     | maximumXorProduct/ | [highest](LeetCodeContests_3192_maximumXorProduct/highest_heuristic.txt) |  [dir](LeetCodeContests_3192_maximumXorProduct) |  [path-to-selected-high](LeetCodeContests_3192_maximumXorProduct/8_refactored/refactor_98.rkt) | 5 |
-|     | maximumStrongPairXor/ | [highest](LeetCodeContests_3193_maximumStrongPairXor/highest_heuristic.txt) |  [dir](LeetCodeContests_3193_maximumStrongPairXor) |  [path-to-selected-high](LeetCodeContests_3193_maximumStrongPairXor/4_refactored/refactor_72.rkt) | 9 |
+| 2 | getWordsInLongestSubsequence/ | [highest](LeetCodeContests_3143_getWordsInLongestSubsequence/highest_heuristic.txt) |  [dir](LeetCodeContests_3143_getWordsInLongestSubsequence) |  [path-to-selected-high](LeetCodeContests_3143_getWordsInLongestSubsequence/1_refactored/refactor_86.rkt) | 6 |
+| 1 | maximumTripletValue/ | [highest](LeetCodeContests_3154_maximumTripletValue/highest_heuristic.txt) |  [dir](LeetCodeContests_3154_maximumTripletValue) |  [path-to-selected-high](LeetCodeContests_3154_maximumTripletValue/10_refactored/refactor_11.rkt) | 1 |
+| 1 (a) | sumCounts/ | [highest](LeetCodeContests_3163_sumCounts/highest_heuristic.txt) |  [dir](LeetCodeContests_3163_sumCounts) |  [path-to-selected-high](LeetCodeContests_3163_sumCounts/0_refactored/refactor_68.rkt) | 5 |
+| 1  | findIndices/ | [highest](LeetCodeContests_3165_findIndices/highest_heuristic.txt) |  [dir](LeetCodeContests_3165_findIndices) |  [path-to-selected-high](LeetCodeContests_3165_findIndices/0_refactored/refactor_1.rkt) | 0 |
+| 1 (b) | minimumSum/ | [highest](LeetCodeContests_3176_minimumSum/highest_heuristic.txt) |  [dir](LeetCodeContests_3176_minimumSum) |  [path-to-selected-high](LeetCodeContests_3176_minimumSum/0_refactored/refactor_54.rkt) | 6 |
+| 1 | minIncrementOperations/ | [highest](LeetCodeContests_3178_minIncrementOperations/highest_heuristic.txt) |  [dir](LeetCodeContests_3178_minIncrementOperations) |  [path-to-selected-high](LeetCodeContests_3178_minIncrementOperations/0_refactored/refactor_53.rkt) | 3 |
+|  3   | findKOr/ | [highest](LeetCodeContests_3183_findKOr/highest_heuristic.txt) |  [dir](LeetCodeContests_3183_findKOr) |  [path-to-selected-high](LeetCodeContests_3183_findKOr/1_refactored/refactor_36.rkt) | 8 |
+|  2  | findChampion/ | [highest](LeetCodeContests_3188_findChampion/highest_heuristic.txt) |  [dir](LeetCodeContests_3188_findChampion) |  [path-to-selected-high](LeetCodeContests_3188_findChampion/4_refactored/refactor_91.rkt) | 4 |
+|  3   | findChampion/ | [highest](LeetCodeContests_3189_findChampion/highest_heuristic.txt) |  [dir](LeetCodeContests_3189_findChampion) |  [path-to-selected-high](LeetCodeContests_3189_findChampion/0_refactored/refactor_51.rkt) | 3 |
+|  2 (c)  | maximumXorProduct/ | [highest](LeetCodeContests_3192_maximumXorProduct/highest_heuristic.txt) |  [dir](LeetCodeContests_3192_maximumXorProduct) |  [path-to-selected-high](LeetCodeContests_3192_maximumXorProduct/8_refactored/refactor_98.rkt) | 5 |
+|  2  | maximumStrongPairXor/ | [highest](LeetCodeContests_3193_maximumStrongPairXor/highest_heuristic.txt) |  [dir](LeetCodeContests_3193_maximumStrongPairXor) |  [path-to-selected-high](LeetCodeContests_3193_maximumStrongPairXor/4_refactored/refactor_72.rkt) | 9 |
 |     | distributeCandies/ | [highest](LeetCodeContests_3199_distributeCandies/highest_heuristic.txt) |  [dir](LeetCodeContests_3199_distributeCandies) |  [path-to-selected-high](LeetCodeContests_3199_distributeCandies/1_refactored/refactor_66.rkt) | 4 |
 |     | findHighAccessEmployees/ | [highest](LeetCodeContests_3202_findHighAccessEmployees/highest_heuristic.txt) |  [dir](LeetCodeContests_3202_findHighAccessEmployees) |  [path-to-selected-high](LeetCodeContests_3202_findHighAccessEmployees/0_refactored/refactor_95.rkt) | 6 |
 |     | findIntersectionValues/ | [highest](LeetCodeContests_3206_findIntersectionValues/highest_heuristic.txt) |  [dir](LeetCodeContests_3206_findIntersectionValues) |  [path-to-selected-high](LeetCodeContests_3206_findIntersectionValues/1_refactored/refactor_22.rkt) | 6 |

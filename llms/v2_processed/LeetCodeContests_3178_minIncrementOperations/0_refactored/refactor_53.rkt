@@ -4,9 +4,11 @@
 ;; You are given a 0-indexed integer array nums having length n, and an integer k.
 ;; You can perform the following increment operation any number of times (including zero):
 ;;  * Choose an index i in the range [0, n - 1], and increase nums[i] by 1.
-;; An array is considered beautiful if, for any subarray with a size of 3 or more, its maximum element is greater than or equal to k.
-;; Return an integer denoting the minimum number of increment operations needed to make nums beautiful.
+;; An array is considered beautiful if, for any subarray with a size of 3 or more, its maximum element
+;; is greater than or equal to k.
+;; Return an integer denoting the minimum number of increment operations needed to make nums beautiful
 ;; A subarray is a contiguous non-empty sequence of elements within an array.
+
 ;; Example 1:
 ;; Input: nums = [2,3,0,0,2], k = 4
 ;; Output: 3
@@ -14,10 +16,12 @@
 ;; Choose index i = 1 and increase nums[1] by 1 -> [2,4,0,0,2].
 ;; Choose index i = 4 and increase nums[4] by 1 -> [2,4,0,0,3].
 ;; Choose index i = 4 and increase nums[4] by 1 -> [2,4,0,0,4].
-;; The subarrays with a size of 3 or more are: [2,4,0], [4,0,0], [0,0,4], [2,4,0,0], [4,0,0,4], [2,4,0,0,4].
+;; The subarrays with a size of 3 or more are:
+;;    [2,4,0], [4,0,0], [0,0,4], [2,4,0,0], [4,0,0,4], [2,4,0,0,4].
 ;; In all the subarrays, the maximum element is equal to k = 4, so nums is now beautiful.
 ;; It can be shown that nums cannot be made beautiful with fewer than 3 increment operations.
 ;; Hence, the answer is 3.
+
 ;; Example 2:
 ;; Input: nums = [0,1,3,3], k = 5
 ;; Output: 2
@@ -28,17 +32,38 @@
 ;; In all the subarrays, the maximum element is equal to k = 5, so nums is now beautiful.
 ;; It can be shown that nums cannot be made beautiful with fewer than 2 increment operations.
 ;; Hence, the answer is 2.
+
 ;; Example 3:
 ;; Input: nums = [1,1,2], k = 1
 ;; Output: 0
 ;; Explanation: The only subarray with a size of 3 or more in this example is [1,1,2].
 ;; The maximum element, 2, is already greater than k = 1, so we don't need any increment operation.
 ;; Hence, the answer is 0.
+
 ;; Constraints:
 ;;  * 3 <= n == nums.length <= 105
 ;;  * 0 <= nums[i] <= 109
 ;;  * 0 <= k <= 109
-(define (minIncrementOperations nums k)
+
+(define (minIncrementOperations nums0 k)
+  ;; Helper function to calculate the total increments needed for a given window
+  (define (needed-increments window k)
+    (define max-in-window (apply max window))
+    (max 0 (- k max-in-window)))
+
+  ;; Helper function to apply increments to a window
+  (define (apply-increments window increments)
+    (map (λ (x) (+ x increments)) window))
+  
+  ;; Main function to traverse the list and calculate total increments
+  (for/fold ([nums nums0] [increments 0] #:result increments) ([i (in-range (- (length nums0) 2))])
+    (define current-window (take (drop nums i) 3))
+    (define needed (needed-increments current-window k))
+    (define updated-window (apply-increments current-window needed))
+    (values (append (take nums i) updated-window (drop nums (+ i 3)))
+            (+ increments needed))))
+
+(define (minIncrementOperations-AI nums k)
   ;; Helper function to calculate the total increments needed for a given window
   (define (needed-increments window k)
     (let ((max-in-window (apply max window)))
@@ -177,6 +202,6 @@
     (check-within (candidate (list 28 4 38 38 37 13 47 48 49) 61) 60 0.001)
     (check-within (candidate (list 29 0 34 5 5 24 43 23 27) 98) 193 0.001)
     (check-within (candidate (list 41 53 77 44 79 66 2 46 64) 204) 405 0.001)
-))
+    ))
 
 (test-humaneval)
