@@ -45,6 +45,8 @@
     [(list only-one) only-one]
     [_ -1]))
 
+;; ---------------------------------------------------------------------------------------------------
+
 (define (findChampion-AI n edges)
   ;; Define a hash to keep track of in-degrees for each team.
   (define in-degrees (make-hash (map (lambda (i) (cons i 0)) (range n))))

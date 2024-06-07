@@ -44,7 +44,9 @@
     (if (>= (count-bit-set bit nums) k) (arithmetic-shift 1 bit) 0))
   
   (for/fold ([b 0]) ([bit (range 0 max-bits)])
-      (bitwise-ior b (result-bit bit nums k))))
+    (bitwise-ior b (result-bit bit nums k))))
+
+;; ---------------------------------------------------------------------------------------------------
 
 (define (findKOr-AI nums k)
   ;; Define the maximum number of bits we are going to check.
@@ -182,6 +184,6 @@
     (check-within (candidate (list 28 3 15 30 10 29) 4) 14 0.001)
     (check-within (candidate (list 0 31 13 24 16 21) 3) 29 0.001)
     (check-within (candidate (list 11 20 28 29 3 4) 2) 31 0.001)
-))
+    ))
 
 (test-humaneval)

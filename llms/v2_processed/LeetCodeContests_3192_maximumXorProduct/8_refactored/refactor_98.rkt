@@ -36,6 +36,8 @@
     (define xor-product (* (bitwise-xor a x) (bitwise-xor b x)))
     (max (modulo xor-product MOD) max-candidate)))
 
+;; ---------------------------------------------------------------------------------------------------
+
 (define (maximumXorProduct-AI a b n)
   (define MOD (+ (expt 10 9) 7))
   (define upper-limit (expt 2 n))

@@ -51,6 +51,8 @@
   
   (and (not (any-team-potentially-stronger? potential-champion)) potential-champion))
 
+;; ---------------------------------------------------------------------------------------------------
+
 (define (findChampion-AI grid)
   ;; This function takes a grid representing the strengths of teams in a tournament and returns the
   ;; champion team.

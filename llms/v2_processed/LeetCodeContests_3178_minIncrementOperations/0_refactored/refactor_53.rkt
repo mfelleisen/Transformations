@@ -63,6 +63,8 @@
     (values (append (take nums i) updated-window (drop nums (+ i 3)))
             (+ increments needed))))
 
+;; ---------------------------------------------------------------------------------------------------
+
 (define (minIncrementOperations-AI nums k)
   ;; Helper function to calculate the total increments needed for a given window
   (define (needed-increments window k)

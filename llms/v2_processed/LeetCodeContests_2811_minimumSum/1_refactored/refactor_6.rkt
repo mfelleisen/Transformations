@@ -3,7 +3,8 @@
 ;; Define the function minimumSum that calculates the minimum possible sum
 ;; of a k-avoiding array of length n.
 ;; You are given two integers, n and k.
-;; An array of distinct positive integers is called a k-avoiding array if there does not exist any pair of distinct elements that sum to k.
+;; An array of distinct positive integers is called a k-avoiding array if there does not exist
+;  any pair of distinct elements that sum to k.
 ;; Return the minimum possible sum of a k-avoiding array of length n.
 ;; Example 1:
 ;; Input: n = 5, k = 4
@@ -17,6 +18,9 @@
 ;; It can be proven that there is no k-avoiding array with a sum less than 3.
 ;; Constraints:
 ;;  * 1 <= n, k <= 50
+
+
+
 (define (minimumSum n k)
   (define (sum-seq seq)
     (for/sum ([x seq]) x))
@@ -36,6 +40,8 @@
     (find-seq 0 1 (set) '()))
 
   (sum-seq (avoid-seq n k)))
+
+;; ---------------------------------------------------------------------------------------------------
 
 ;; Example usage (not part of the function definition):
 ;; (minimumSum 5 4)  ;; Should return 18

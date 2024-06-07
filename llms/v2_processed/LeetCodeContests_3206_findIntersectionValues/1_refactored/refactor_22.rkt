@@ -30,13 +30,7 @@
       1))
   (list (count nums1 nums2) (count nums2 nums1)))
 
-(define (findIntersectionValues-HIGH nums1 nums2)
-  (define (count lst)
-    (for/sum ([x (in-set lst)]) ;; type mistake
-      (if (set-member? intersection x) 1 0)))
-  
-  (define intersection (set-intersect nums1 nums2))
-  (list (count nums1) (count nums2)))
+;; ---------------------------------------------------------------------------------------------------
 
 (define (findIntersectionValues-AI nums1 nums2)
   ;; Helper function to create a set from a list

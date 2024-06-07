@@ -51,6 +51,8 @@
   
   (or result (list -1 -1)))
 
+;; ---------------------------------------------------------------------------------------------------
+
 (define (findIndices-AI nums indexDifference valueDifference)
   ;; Define a helper function to check the conditions for indices i and j
   (define (valid-pair? i j)

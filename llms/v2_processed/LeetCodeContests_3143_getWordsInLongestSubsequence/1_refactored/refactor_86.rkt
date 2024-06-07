@@ -50,6 +50,8 @@
         (values cg (cons w accum))
         (values lg accum))))
 
+;; ---------------------------------------------------------------------------------------------------
+
 (define (getWordsInLongestSubsequence-AI n words groups)
   (define (filter-words [ws words] [gs groups] [last-group #f] [accum '()])
     (match ws

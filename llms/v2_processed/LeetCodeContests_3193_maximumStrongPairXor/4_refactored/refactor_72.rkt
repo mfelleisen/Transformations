@@ -45,6 +45,8 @@
 (define (pair-xor x y)
   (bitwise-xor x y))
 
+;; ---------------------------------------------------------------------------------------------------
+
 ;; Define the main function to compute the maximum XOR of all strong pairs in the list nums
 (define (maximumStrongPairXor-AI nums)
   ;; Generate all pairs from the list, including pairs of the same elements

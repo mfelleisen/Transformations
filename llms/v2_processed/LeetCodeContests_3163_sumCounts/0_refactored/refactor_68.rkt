@@ -45,6 +45,8 @@
       (define new-acc (+ acc (sqr (set-count new-seen))))
       (values new-seen new-acc))))
 
+;; ---------------------------------------------------------------------------------------------------
+
 (define (sumCounts-AI nums)
   ;; Nested function to scan subarrays and calculate the sum of squares of distinct counts
   (define (scan-subarrays lst)

@@ -34,11 +34,10 @@
     (* (- (list-ref nums i) (list-ref nums j)) (list-ref nums k)))
   
   (define n (length nums))
-  (for*/fold ([m 0]) ([i (in-range 0 (- n 2))]
-                      [j (in-range (+ i 1) (- n 1))]
-                      [k (in-range (+ j 1) n)])
+  (for*/fold ([m 0])([i (in-range 0 (- n 2))] [j (in-range (+ i 1) (- n 1))] [k (in-range (+ j 1) n)])
     (max m (triplet-value i j k))))
 
+;; ---------------------------------------------------------------------------------------------------
 
 (define (maximumTripletValue-AI nums)
   ;; Helper function to generate all triplet indices (i, j, k) where i < j < k
