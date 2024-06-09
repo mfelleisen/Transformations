@@ -35,28 +35,19 @@
 ;; 1 <= k <= 50
 
 (define (areSimilar mat k)
-  ;; Helper function to perform cyclic shift
-  (define (cyclic-shift row shifts direction)
-    (define len (length row))
-    (define actual-shifts (modulo shifts len))
-    (define split-at (if (equal? direction 'right)
-                         (- len actual-shifts)
-                         actual-shifts))
-    (append (drop row split-at) (take row split-at)))
-  
-  ;; Function to apply appropriate shift depending on the row index
-  (define (process-row idx row)
-    (if (even? idx)
-        (cyclic-shift row k 'left)
-        (cyclic-shift row k 'right)))
-
-  ;; Transform the matrix by applying shifts
   (define transformed-mat
-    (for/list ([idx (in-naturals)] [item (in-list mat)])
-    (process-row idx item)))
+    (for/list ([idx (in-naturals)] [row (in-list mat)])
+      (if (even? idx)
+          (cyclic-shift row k 'left)
+          (cyclic-shift row k 'right))))
   
-  ;; Compare initial and final matrices
   (equal? mat transformed-mat))
+
+(define (cyclic-shift row shifts direction)
+  (define len (length row))
+  (define actual-shifts (modulo shifts len))
+  (define split-at (if (equal? direction 'right) (- len actual-shifts) actual-shifts))
+  (append (drop row split-at) (take row split-at)))
 
 ;; ---------------------------------------------------------------------------------------------------
 (define (areSimilar-AI mat k)
@@ -206,6 +197,6 @@
     (check-within (candidate (list (list 7 3 10 2 3 1 10) (list 7 6 10 1 3 2 1) (list 9 1 5 7 1 8 3) (list 4 10 10 7 7 9 7) (list 7 9 1 5 3 8 4) (list 4 9 5 10 2 8 10) (list 2 5 10 3 6 2 9) (list 6 7 2 3 4 2 2)) 1) #f 0.001)
     (check-within (candidate (list (list 8 8) (list 9 9) (list 2 2) (list 10 10) (list 10 10) (list 1 1) (list 5 5) (list 9 9) (list 7 7)) 2) #t 0.001)
     (check-within (candidate (list (list 2 1 7 3 7 6 7 9 9 3) (list 3 9 10 4 4 6 8 10 5 6) (list 9 8 6 2 3 4 9 1 9 10) (list 7 10 8 8 3 9 9 5 8 9) (list 9 5 6 9 9 6 4 3 2 3) (list 3 10 6 2 7 6 10 6 2 6) (list 7 9 7 4 5 7 2 4 9 5) (list 4 7 9 6 7 4 6 4 10 4)) 6) #f 0.001)
-))
+    ))
 
 (test-humaneval)

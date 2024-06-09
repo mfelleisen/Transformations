@@ -1,35 +1,60 @@
 #lang racket
 
-;; You are given a 0-indexed integer array batteryPercentages having length n, denoting the battery percentages of n 0-indexed devices.
-;; Your task is to test each device i in order from 0 to n - 1, by performing the following test operations:
+;; You are given a 0-indexed integer array batteryPercentages having length n, denoting the battery
+;; percentages of n 0-indexed devices.
+;; Your task is to test each device i in order from 0 to n - 1, by performing the following test
+;; operations:
 ;; If batteryPercentages[i] is greater than 0:
 ;; Increment the count of tested devices.
-;; Decrease the battery percentage of all devices with indices j in the range [i + 1, n - 1] by 1, ensuring their battery percentage never goes below 0, i.e, batteryPercentages[j] = max(0, batteryPercentages[j] - 1).
+;; Decrease the battery percentage of all devices with indices j in the range [i + 1, n - 1] by 1,
+;; ensuring their battery percentage never goes below 0, i.e, batteryPercentages[j] = max(0,
+;; batteryPercentages[j] - 1).
 ;; Move to the next device.
 ;; Otherwise, move to the next device without performing any test.
-;; Return an integer denoting the number of devices that will be tested after performing the test operations in order.
+;; Return an integer denoting the number of devices that will be tested after performing the test
+;; operations in order.
+
 ;; Example 1:
 ;; Input: batteryPercentages = [1,1,2,1,3]
 ;; Output: 3
 ;; Explanation: Performing the test operations in order starting from device 0:
-;; At device 0, batteryPercentages[0] > 0, so there is now 1 tested device, and batteryPercentages becomes [1,0,1,0,2].
+;; At device 0, batteryPercentages[0] > 0, so there is now 1 tested device, and batteryPercentages
+;; becomes [1,0,1,0,2].
 ;; At device 1, batteryPercentages[1] == 0, so we move to the next device without testing.
-;; At device 2, batteryPercentages[2] > 0, so there are now 2 tested devices, and batteryPercentages becomes [1,0,1,0,1].
+;; At device 2, batteryPercentages[2] > 0, so there are now 2 tested devices, and batteryPercentages
+;; becomes [1,0,1,0,1].
 ;; At device 3, batteryPercentages[3] == 0, so we move to the next device without testing.
-;; At device 4, batteryPercentages[4] > 0, so there are now 3 tested devices, and batteryPercentages stays the same.
+;; At device 4, batteryPercentages[4] > 0, so there are now 3 tested devices, and batteryPercentages
+;; stays the same.
 ;; So, the answer is 3.
+
 ;; Example 2:
 ;; Input: batteryPercentages = [0,1,2]
 ;; Output: 2
 ;; Explanation: Performing the test operations in order starting from device 0:
 ;; At device 0, batteryPercentages[0] == 0, so we move to the next device without testing.
-;; At device 1, batteryPercentages[1] > 0, so there is now 1 tested device, and batteryPercentages becomes [0,1,1].
-;; At device 2, batteryPercentages[2] > 0, so there are now 2 tested devices, and batteryPercentages stays the same.
+;; At device 1, batteryPercentages[1] > 0, so there is now 1 tested device, and batteryPercentages
+;; becomes [0,1,1].
+;; At device 2, batteryPercentages[2] > 0, so there are now 2 tested devices, and batteryPercentages
+;; stays the same.
 ;; So, the answer is 2.
+
 ;; Constraints:
 ;; 1 <= n == batteryPercentages.length <= 100 
 ;; 0 <= batteryPercentages[i] <= 100
-(define (countTestedDevices batteryPercentages)
+
+
+;; but when I worked on this I came up with this one, which requires a non-structural transformation 
+(define (countTestedDevices percentages0) 
+  (for/fold ([count 0] [delta 0] #:result count) ([x (in-list percentages0)])
+    (if (> (- x delta) 0)
+        (values (add1 count) (add1 delta))
+        (values count        delta))))
+
+;; ---------------------------------------------------------------------------------------------------
+;; this is an ISL+ solution and okay
+
+(define (countTestedDevices-AI batteryPercentages)
   (define (reduce-battery rest)
     (map (lambda (x) (max 0 (- x 1))) rest))
 
@@ -153,6 +178,6 @@
     (check-within (candidate (list 1 4 7 2 12 8 1 11 5 10 2 3)) 7 0.001)
     (check-within (candidate (list 2 5 4 4 9 6 10 0 11 8 2 10)) 9 0.001)
     (check-within (candidate (list 4 11 9 8 9 11 11 5 11 6 12 11)) 10 0.001)
-))
+    ))
 
 (test-humaneval)

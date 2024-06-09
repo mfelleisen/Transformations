@@ -5,26 +5,50 @@
 ;; Notes:
 ;; A peak is defined as an element that is strictly greater than its neighboring elements.
 ;; The first and last elements of the array are not a peak.
+
 ;; Example 1:
 ;; Input: mountain = [2,4,4]
 ;; Output: []
-;; Explanation: mountain[0] and mountain[2] can not be a peak because they are first and last elements of the array.
+;; Explanation: mountain[0] and mountain[2] can not be a peak because they are first and last elements
+;; of the array.
 ;; mountain[1] also can not be a peak because it is not strictly greater than mountain[2].
 ;; So the answer is [].
+
 ;; Example 2:
 ;; Input: mountain = [1,4,3,8,5]
 ;; Output: [1,3]
-;; Explanation: mountain[0] and mountain[4] can not be a peak because they are first and last elements of the array.
-;; mountain[2] also can not be a peak because it is not strictly greater than mountain[3] and mountain[1].
+;; Explanation: mountain[0] and mountain[4] can not be a peak because they are first and last element
+;; of the array.
+;; mountain[2]  can not be a peak because it is not strictly greater than mountain[3] & mountain[1].
 ;; But mountain [1] and mountain[3] are strictly greater than their neighboring elements.
 ;; So the answer is [1,3].
+
 ;; Constraints:
 ;; 3 <= mountain.length <= 100
 ;; 1 <= mountain[i] <= 100
-(define (findPeaks mountain)
-  (define (is-peak? left curr right)
-    (and (> curr left) (> curr right)))
 
+(define (findPeaks-compact mountain)
+  (match mountain
+    [(list left at others ...)
+     (for/fold ([left left] [at at] [P '()] #:result (reverse P)) ([right others] [i (in-naturals 1)])
+       (values at right (if  (is-peak? left at right) (cons i P) P)))]
+    [_ '()]))
+
+(define (findPeaks mountain)
+  (define (peaks-helper left at others idx)
+    (match others
+      [(cons right rest)
+       (if (is-peak? left at right)
+           (cons idx (peaks-helper at right rest (add1 idx)))
+           (peaks-helper at right rest (add1 idx)))]
+      [_ '()]))
+
+  (match mountain
+    [(list first x rest ...) (peaks-helper first x rest 1)]
+    [_ '()]))
+
+;; ---------------------------------------------------------------------------------------------------
+(define (findPeaks-AI mountain)
   (define (peaks-helper prev curr lst idx)
     (match lst
       [(cons next rest)
@@ -34,9 +58,12 @@
       [_ '()]))
 
   (match mountain
-    [(list _ x rest ...)
+    [(list _ x rest ...) ;; this is dumb 
      (peaks-helper (first mountain) x rest 1)]
     [_ '()]))
+
+(define (is-peak? left curr right)
+  (and (> curr left) (> curr right)))
 
 ;; Example usage:
 (findPeaks '(2 4 4))          ; Output: '()
@@ -150,6 +177,6 @@
     (check-within (candidate (list 5 7 4 3)) (list 1) 0.001)
     (check-within (candidate (list 5 8 7 8)) (list 1) 0.001)
     (check-within (candidate (list 6 2 8 6)) (list 2) 0.001)
-))
+    ))
 
 (test-humaneval)
