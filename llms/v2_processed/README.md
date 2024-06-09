@@ -71,6 +71,8 @@ is just a `for/fold` in modern Racket. See minIncrementOperations/
 
 (d) I copied the `in-suffixes` over and then a good modern code fell into place.
 
+(e) "AI" creates a list of 1 number, matches it, and never does anything else with match. Worst code I have ever seen. Not even my F 1 students could do this badly. 
+
 | done | name        | -> highest  | --> directory | --> file | score | 
 | ---- | ----------- | ----------- | ------------- | -------- | ----- | 
 | 2 | getWordsInLongestSubsequence/ | [highest](LeetCodeContests_3143_getWordsInLongestSubsequence/highest_heuristic.txt) |  [dir](LeetCodeContests_3143_getWordsInLongestSubsequence) |  [path-to-selected-high](LeetCodeContests_3143_getWordsInLongestSubsequence/1_refactored/refactor_86.rkt) | 6 |
@@ -87,8 +89,8 @@ is just a `for/fold` in modern Racket. See minIncrementOperations/
 |  3  | distributeCandies/ | [highest](LeetCodeContests_3199_distributeCandies/highest_heuristic.txt) |  [dir](LeetCodeContests_3199_distributeCandies) |  [path-to-selected-high](LeetCodeContests_3199_distributeCandies/1_refactored/refactor_66.rkt) | 4 |
 |  0 (d)| findHighAccessEmployees/ | [highest](LeetCodeContests_3202_findHighAccessEmployees/highest_heuristic.txt) |  [dir](LeetCodeContests_3202_findHighAccessEmployees) |  [path-to-selected-high](LeetCodeContests_3202_findHighAccessEmployees/0_refactored/refactor_95.rkt) | 6 |
 |   0  | findIntersectionValues/ | [highest](LeetCodeContests_3206_findIntersectionValues/highest_heuristic.txt) |  [dir](LeetCodeContests_3206_findIntersectionValues) |  [path-to-selected-high](LeetCodeContests_3206_findIntersectionValues/1_refactored/refactor_22.rkt) | 6 |
-|     | countSubarrays/ | [highest](LeetCodeContests_3213_countSubarrays/highest_heuristic.txt) |  [dir](LeetCodeContests_3213_countSubarrays) |  [path-to-selected-high](LeetCodeContests_3213_countSubarrays/2_refactored/refactor_65.rkt) | 4 |
-|     | areSimilar/ | [highest](LeetCodeContests_3215_areSimilar/highest_heuristic.txt) |  [dir](LeetCodeContests_3215_areSimilar) |  [path-to-selected-high](LeetCodeContests_3215_areSimilar/1_refactored/refactor_9.rkt) | 5 |
+|   0 (e) | countSubarrays/ | [highest](LeetCodeContests_3213_countSubarrays/highest_heuristic.txt) |  [dir](LeetCodeContests_3213_countSubarrays) |  [path-to-selected-high](LeetCodeContests_3213_countSubarrays/2_refactored/refactor_65.rkt) | 4 |
+|  3  | areSimilar/ | [highest](LeetCodeContests_3215_areSimilar/highest_heuristic.txt) |  [dir](LeetCodeContests_3215_areSimilar) |  [path-to-selected-high](LeetCodeContests_3215_areSimilar/1_refactored/refactor_9.rkt) | 5 |
 |     | countTestedDevices/ | [highest](LeetCodeContests_3220_countTestedDevices/highest_heuristic.txt) |  [dir](LeetCodeContests_3220_countTestedDevices) |  [path-to-selected-high](LeetCodeContests_3220_countTestedDevices/0_refactored/refactor_3.rkt) | 7 |
 |     | findPeaks/ | [highest](LeetCodeContests_3221_findPeaks/highest_heuristic.txt) |  [dir](LeetCodeContests_3221_findPeaks) |  [path-to-selected-high](LeetCodeContests_3221_findPeaks/1_refactored/refactor_64.rkt) | 4 |
 |     | numberGame/ | [highest](LeetCodeContests_3226_numberGame/highest_heuristic.txt) |  [dir](LeetCodeContests_3226_numberGame) |  [path-to-selected-high](LeetCodeContests_3226_numberGame/8_refactored/refactor_26.rkt) | 7 |

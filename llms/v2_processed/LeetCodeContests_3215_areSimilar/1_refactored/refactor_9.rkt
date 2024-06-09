@@ -1,30 +1,65 @@
 #lang racket
 
 ;; Function to check if cyclic shifts on matrix rows result in the same matrix
-;; You are given a 0-indexed m x n integer matrix mat and an integer k. You have to cyclically right shift odd indexed rows k times and cyclically left shift even indexed rows k times.
+;; You are given a 0-indexed m x n integer matrix mat and an integer k. You have to cyclically right
+;; shift odd indexed rows k times and cyclically left shift even indexed rows k times.
 ;; Return true if the initial and final matrix are exactly the same and false otherwise.
+
 ;; Example 1:
 ;; Input: mat = [[1,2,1,2],[5,5,5,5],[6,3,6,3]], k = 2
 ;; Output: true
 ;; Explanation:
 ;; Initially, the matrix looks like the first figure. 
-;; Second figure represents the state of the matrix after one right and left cyclic shifts to even and odd indexed rows.
-;; Third figure is the final state of the matrix after two cyclic shifts which is similar to the initial matrix.
+;; Second figure represents the state of the matrix after one right and left cyclic shifts to even
+;; and odd indexed rows.
+;; Third figure is the final state of the matrix after two cyclic shifts which is similar to the
+;; initial matrix.
 ;; Therefore, return true.
+
 ;; Example 2:
 ;; Input: mat = [[2,2],[2,2]], k = 3
 ;; Output: true
-;; Explanation: As all the values are equal in the matrix, even after performing cyclic shifts the matrix will remain the same. Therefeore, we return true.
+;; Explanation: As all the values are equal in the matrix, even after performing cyclic shifts the
+;; matrix will remain the same. Therefeore, we return true.
+
 ;; Example 3:
 ;; Input: mat = [[1,2]], k = 1
 ;; Output: false
-;; Explanation: After one cyclic shift, mat = [[2,1]] which is not equal to the initial matrix. Therefore we return false.
+;; Explanation: After one cyclic shift, mat = [[2,1]] which is not equal to the initial matrix.
+;; Therefore we return false.
+
 ;; Constraints:
 ;; 1 <= mat.length <= 25
 ;; 1 <= mat[i].length <= 25
 ;; 1 <= mat[i][j] <= 25
 ;; 1 <= k <= 50
+
 (define (areSimilar mat k)
+  ;; Helper function to perform cyclic shift
+  (define (cyclic-shift row shifts direction)
+    (define len (length row))
+    (define actual-shifts (modulo shifts len))
+    (define split-at (if (equal? direction 'right)
+                         (- len actual-shifts)
+                         actual-shifts))
+    (append (drop row split-at) (take row split-at)))
+  
+  ;; Function to apply appropriate shift depending on the row index
+  (define (process-row idx row)
+    (if (even? idx)
+        (cyclic-shift row k 'left)
+        (cyclic-shift row k 'right)))
+
+  ;; Transform the matrix by applying shifts
+  (define transformed-mat
+    (for/list ([idx (in-naturals)] [item (in-list mat)])
+    (process-row idx item)))
+  
+  ;; Compare initial and final matrices
+  (equal? mat transformed-mat))
+
+;; ---------------------------------------------------------------------------------------------------
+(define (areSimilar-AI mat k)
   ;; Helper function to perform cyclic shift
   (define (cyclic-shift row shifts direction)
     (define len (length row))
@@ -48,9 +83,9 @@
   (equal? mat transformed-mat))
 
 ;; The function `map-indexed` is not built-in in Racket, so we define it using `map` and `in-indexed`
-(define (map-indexed f lst)
-  (for/list ([idx (in-naturals)] [item (in-list lst)])
-    (f idx item)))
+(define (map-indexed process-row mat)
+  (for/list ([idx (in-naturals)] [item (in-list mat)])
+    (process-row idx item)))
 
 ;; Test examples
 (define mat1 '((1 2 1 2) (5 5 5 5) (6 3 6 3)))

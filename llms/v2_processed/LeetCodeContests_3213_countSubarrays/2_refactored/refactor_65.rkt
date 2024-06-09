@@ -1,21 +1,46 @@
 #lang racket
 
 ;; You are given an integer array nums and a positive integer k.
-;; Return the number of subarrays where the maximum element of nums appears at least k times in that subarray.
+;; Return the number of subarrays where the maximum element of nums appears at least k times in
+;; that subarray.
 ;; A subarray is a contiguous sequence of elements within an array.
+
 ;; Example 1:
 ;; Input: nums = [1,3,2,3,3], k = 2
 ;; Output: 6
-;; Explanation: The subarrays that contain the element 3 at least 2 times are: [1,3,2,3], [1,3,2,3,3], [3,2,3], [3,2,3,3], [2,3,3] and [3,3].
+;; Explanation: The subarrays that contain the element 3 at least 2 times are:
+;; [1,3,2,3], [1,3,2,3,3], [3,2,3], [3,2,3,3], [2,3,3] and [3,3].
+
 ;; Example 2:
 ;; Input: nums = [1,4,2,1], k = 3
 ;; Output: 0
 ;; Explanation: No subarray contains the element 4 at least 3 times.
+
 ;; Constraints:
 ;; 1 <= nums.length <= 105
 ;; 1 <= nums[i] <= 106
 ;; 1 <= k <= 105
+
+
 (define (countSubarrays nums k)
+  (define max-element (apply max nums))
+  
+  (for/fold ([total 0]) ([suffix (in-suffixes nums)])
+    (for/fold ((frequency (hash)) (cmax 0) (count total) #:result count) ([n suffix])
+      (define frequency++ (hash-update frequency n add1 0))
+      (define cmax++      (max n cmax))
+      (define count++
+        (if (and (= cmax++ max-element) (>= (hash-ref frequency++ cmax++ 0) k))
+            (+ count 1)
+            count))
+      (values frequency++ cmax++ count++))))
+
+(define (in-suffixes lst)
+  (for/list ([i (in-range (length lst))])
+    (drop lst i)))
+
+;; ---------------------------------------------------------------------------------------------------
+(define (countSubarrays-AI nums k)
   ;; Calculate the maximum element in the list
   (define max-element (apply max nums))
   
@@ -152,6 +177,6 @@
     (check-within (candidate (list 3 1) 1) 2 0.001)
     (check-within (candidate (list 99 166 166 5 166 44 83 73 40 64 166 135 166 24 166 41 70 93 166 166 166 49 157 3 135 137 1 133 18 166 15 82 4 166 13 55 95 166 166 151 102 166 166 34 32 31 48 166 166 13 166 166 94 28 166 166 119 103 157 12 103 19 126 13 117 71 85 166 166 81 132 105 128 166 166 125 73 161 166 139 6 32 5 31 137) 24) 49 0.001)
     (check-within (candidate (list 121 135 135 135 57 18 7 22 135 57 96 72 23 68 32 39 135 135 135 135 51 25 100 49 72 135 99 38 126 110 52 63 48 135 135 132 111 114 135 135 24 125 135 135 120 93 55 40 135 44 135 22 135 48 35 12 116 79 80 22 135 135 111 135) 20) 7 0.001)
-))
+    ))
 
 (test-humaneval)
