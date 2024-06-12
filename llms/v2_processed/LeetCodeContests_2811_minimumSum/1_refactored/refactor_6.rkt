@@ -20,8 +20,19 @@
 ;;  * 1 <= n, k <= 50
 
 
-
 (define (minimumSum n k)
+ 
+  (define (find-seq count current used sum)
+    (cond [(= count n) sum]
+          [(set-member? used (- k current))
+           (find-seq count (+ current 1) used sum)]
+          [else
+           (find-seq (+ count 1) (+ current 1) (set-add used current) (+ current sum))]))
+
+  (find-seq 0 1 (set) 0))
+
+
+(define (minimumSum-AI n k)
   (define (sum-seq seq)
     (for/sum ([x seq]) x))
 

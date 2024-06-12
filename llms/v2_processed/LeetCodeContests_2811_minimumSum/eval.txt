@@ -1,7 +1,0 @@
-LOW
-
-The helper function `find-seq` uses a list accumulator that should be a
-number. The helper unnecessarily accumulates a sequence of numbers, and then doubly
-unnecessarily reverses, and eventually adds all its elements. Secondarily,
-the helper `sum-seq' is using `for/sum' in a very simple way that can be
-replaced with `(apply + seq)'. 
