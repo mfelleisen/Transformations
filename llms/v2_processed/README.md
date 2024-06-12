@@ -78,6 +78,8 @@ is just a `for/fold` in modern Racket. See minIncrementOperations/
 
 (g) Only because it is somewhat natural, once one stupid thing is removed ... but it can be done with a `for/fold` that is even better in modern Racket 
 
+(h) but this helped me find a bug in Racket's for/fold stop-after 
+
 
 | done | name        | -> highest  | --> directory | --> file | score | 
 | ---- | ----------- | ----------- | ------------- | -------- | ----- | 
@@ -101,10 +103,10 @@ is just a `for/fold` in modern Racket. See minIncrementOperations/
 |   2 (g)  | findPeaks/ | [highest](LeetCodeContests_3221_findPeaks/highest_heuristic.txt) |  [dir](LeetCodeContests_3221_findPeaks) |  [path-to-selected-high](LeetCodeContests_3221_findPeaks/1_refactored/refactor_64.rkt) | 4 |
 |  3   | numberGame/ | [highest](LeetCodeContests_3226_numberGame/highest_heuristic.txt) |  [dir](LeetCodeContests_3226_numberGame) |  [path-to-selected-high](LeetCodeContests_3226_numberGame/8_refactored/refactor_26.rkt) | 7 |
 |  3  | findMissingAndRepeatedValues/ | [highest](LeetCodeContests_3227_findMissingAndRepeatedValues/highest_heuristic.txt) |  [dir](LeetCodeContests_3227_findMissingAndRepeatedValues) |  [path-to-selected-high](LeetCodeContests_3227_findMissingAndRepeatedValues/0_refactored/refactor_9.rkt) | 1 |
-|     | missingInteger/ | [highest](LeetCodeContests_3236_missingInteger/highest_heuristic.txt) |  [dir](LeetCodeContests_3236_missingInteger) |  [path-to-selected-high](LeetCodeContests_3236_missingInteger/8_refactored/refactor_52.rkt) | 7 |
-|     | minimumOperationsToMakeEqual/ | [highest](LeetCodeContests_3239_minimumOperationsToMakeEqual/highest_heuristic.txt) |  [dir](LeetCodeContests_3239_minimumOperationsToMakeEqual) |  [path-to-selected-high](LeetCodeContests_3239_minimumOperationsToMakeEqual/0_refactored/refactor_59.rkt) | 6 |
-|     | findMaximumNumber/ | [highest](LeetCodeContests_3240_findMaximumNumber/highest_heuristic.txt) |  [dir](LeetCodeContests_3240_findMaximumNumber) |  [path-to-selected-high](LeetCodeContests_3240_findMaximumNumber/1_refactored/refactor_94.rkt) | 4 |
-|     | divideArray/ | [highest](LeetCodeContests_3241_divideArray/highest_heuristic.txt) |  [dir](LeetCodeContests_3241_divideArray) |  [path-to-selected-high](LeetCodeContests_3241_divideArray/0_refactored/refactor_11.rkt) | 6 |
+|  0 (h)  | missingInteger/ | [highest](LeetCodeContests_3236_missingInteger/highest_heuristic.txt) |  [dir](LeetCodeContests_3236_missingInteger) |  [path-to-selected-high](LeetCodeContests_3236_missingInteger/8_refactored/refactor_52.rkt) | 7 |
+|  3  | minimumOperationsToMakeEqual/ | [highest](LeetCodeContests_3239_minimumOperationsToMakeEqual/highest_heuristic.txt) |  [dir](LeetCodeContests_3239_minimumOperationsToMakeEqual) |  [path-to-selected-high](LeetCodeContests_3239_minimumOperationsToMakeEqual/0_refactored/refactor_59.rkt) | 6 |
+|  2   | findMaximumNumber/ | [highest](LeetCodeContests_3240_findMaximumNumber/highest_heuristic.txt) |  [dir](LeetCodeContests_3240_findMaximumNumber) |  [path-to-selected-high](LeetCodeContests_3240_findMaximumNumber/1_refactored/refactor_94.rkt) | 4 |
+|   3  | divideArray/ | [highest](LeetCodeContests_3241_divideArray/highest_heuristic.txt) |  [dir](LeetCodeContests_3241_divideArray) |  [path-to-selected-high](LeetCodeContests_3241_divideArray/0_refactored/refactor_11.rkt) | 6 |
 |     | maxFrequencyElements/ | [highest](LeetCodeContests_3242_maxFrequencyElements/highest_heuristic.txt) |  [dir](LeetCodeContests_3242_maxFrequencyElements) |  [path-to-selected-high](LeetCodeContests_3242_maxFrequencyElements/4_refactored/refactor_23.rkt) | 5 |
 |     | hasTrailingZeros/ | [highest](LeetCodeContests_3246_hasTrailingZeros/highest_heuristic.txt) |  [dir](LeetCodeContests_3246_hasTrailingZeros) |  [path-to-selected-high](LeetCodeContests_3246_hasTrailingZeros/0_refactored/refactor_19.rkt) | 9 |
 |     | minOperations/ | [highest](LeetCodeContests_3249_minOperations/highest_heuristic.txt) |  [dir](LeetCodeContests_3249_minOperations) |  [path-to-selected-high](LeetCodeContests_3249_minOperations/17_refactored/refactor_58.rkt) | 5 |

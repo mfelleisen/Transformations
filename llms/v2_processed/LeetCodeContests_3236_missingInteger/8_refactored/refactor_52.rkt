@@ -1,20 +1,40 @@
 #lang racket
 
 ;; You are given a 0-indexed array of integers nums.
-;; A prefix nums[0..i] is sequential if, for all 1 <= j <= i, nums[j] = nums[j - 1] + 1. In particular, the prefix consisting only of nums[0] is sequential.
-;; Return the smallest integer x missing from nums such that x is greater than or equal to the sum of the longest sequential prefix.
+;; A prefix nums[0..i] is sequential if, for all 1 <= j <= i, nums[j] = nums[j - 1] + 1. In particular
+;; the prefix consisting only of nums[0] is sequential.
+;; Return the smallest integer x missing from nums such that x is greater than or equal to the sum of
+;; the longest sequential prefix.
+
 ;; Example 1:
 ;; Input: nums = [1,2,3,2,5]
 ;; Output: 6
-;; Explanation: The longest sequential prefix of nums is [1,2,3] with a sum of 6. 6 is not in the array, therefore 6 is the smallest missing integer greater than or equal to the sum of the longest sequential prefix.
+;; Explanation: The longest sequential prefix of nums is [1,2,3] with a sum of 6. 6 is not in the
+;; array, therefore 6 is the smallest missing integer greater than or equal to the sum of the longest
+;; sequential prefix.
+
 ;; Example 2:
 ;; Input: nums = [3,4,5,1,12,14,13]
 ;; Output: 15
-;; Explanation: The longest sequential prefix of nums is [3,4,5] with a sum of 12. 12, 13, and 14 belong to the array while 15 does not. Therefore 15 is the smallest missing integer greater than or equal to the sum of the longest sequential prefix.
+;; Explanation: The longest sequential prefix of nums is [3,4,5] with a sum of 12. 12, 13, and 14
+;; belong to the array while 15 does not. Therefore 15 is the smallest missing integer greater than
+;; or equal to the sum of the longest sequential prefix.
+
 ;; Constraints:
 ;; 1 <= nums.length <= 50
 ;; 1 <= nums[i] <= 50
+
 (define (missingInteger nums)
+  (define one (first nums))
+  (define sum
+    (for/fold ([r one] [last one] #:result r) ([x (rest nums)] #:break (not (= x (+ last 1))))
+      (values (+ x r) x)))
+  (for/first ([x (in-naturals sum)] #:unless (member x nums))
+    x))
+
+;; ---------------------------------------------------------------------------------------------------
+
+(define (missingInteger-AI nums)
   ;; Function to find the longest sequential prefix
   (define (longest-sequential-prefix nums)
     (define (helper lst last)
@@ -42,6 +62,8 @@
   (define prefix (longest-sequential-prefix nums))
   (define sum-of-prefix (sum-prefix prefix))
   (smallest-missing nums sum-of-prefix))
+
+;; ---------------------------------------------------------------------------------------------------
 
 ;; Example usage
 (missingInteger '(1 2 3 2 5))  ; Output: 6
@@ -153,6 +175,7 @@
     (check-within (candidate (list 3 4 5 6 7 8 9 10 11 10 1)) 63 0.001)
     (check-within (candidate (list 50)) 51 0.001)
     (check-within (candidate (list 14 15 16 17 7 10 3 10)) 62 0.001)
-))
+    ))
+
 
 (test-humaneval)

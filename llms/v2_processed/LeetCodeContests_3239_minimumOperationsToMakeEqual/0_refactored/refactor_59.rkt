@@ -7,6 +7,7 @@
 ;; Decrement x by 1.
 ;; Increment x by 1.
 ;; Return the minimum number of operations required to make  x and y equal.
+
 ;; Example 1:
 ;; Input: x = 26, y = 1
 ;; Output: 3
@@ -15,6 +16,7 @@
 ;; 2. Divide x by 5
 ;; 3. Divide x by 5
 ;; It can be shown that 3 is the minimum number of operations required to make 26 equal to 1.
+
 ;; Example 2:
 ;; Input: x = 54, y = 2
 ;; Output: 4
@@ -24,6 +26,7 @@
 ;; 3. Divide x by 5
 ;; 4. Increment x by 1
 ;; It can be shown that 4 is the minimum number of operations required to make 54 equal to 2.
+
 ;; Example 3:
 ;; Input: x = 25, y = 30
 ;; Output: 5
@@ -34,9 +37,36 @@
 ;; 4. Increment x by 1
 ;; 5. Increment x by 1
 ;; It can be shown that 5 is the minimum number of operations required to make 25 equal to 30.
+
 ;; Constraints:
 ;; 1 <= x, y <= 104
+
 (define (minimumOperationsToMakeEqual x y)
+  (define (next-states current)
+    (define (div-or-same n m) (if (zero? (remainder n m)) (/ n m) n))
+    (list (div-or-same current 11) 
+          (div-or-same current 5)
+          (- current 1) 
+          (+ current 1)))
+
+  ;; Breadth-first search to find the minimum number of operations
+  (define (bfs queue seen)
+    (match queue
+      [(cons (list current steps) rest-queue)
+       (cond
+         [(= current y) steps]
+         [(member current seen) (bfs rest-queue seen)]
+         [else
+          (define new-states (filter (λ (v) (> v 0)) (next-states current)))
+          (bfs (append rest-queue (map (λ (v) (list v (+ steps 1))) new-states))
+               (cons current seen))])]
+      [else -1]))
+
+  (if (= x y) 0 (bfs (list (list x 0)) '())))
+
+;; ---------------------------------------------------------------------------------------------------
+
+(define (minimumOperationsToMakeEqual-AI x y)
   ;; Define helper function to get next possible states
   (define (next-states current)
     (define (div-or-same n m) (if (zero? (remainder n m)) (/ n m) n))
