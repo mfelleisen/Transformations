@@ -7,6 +7,7 @@ We will score each program as follows:
 
 | score | [would] produce a versionthat is HIGHly modern  | ... |
 | ----- | ----------------------------------------------- | --- |
+|   4   | HIGHLY readable program as is                   | ... |
 |   3   | minor changes produce a HIGHLY readable program | ... | 
 |   2   | easy rewrites of functions into `for`           | ... |
 |       | obvious merger of functions                     | ... |
@@ -28,7 +29,7 @@ is just a `for/fold` in modern Racket. See minIncrementOperations/
 | done | name        | -> highest  | --> directory | --> file | score | 
 | ---- | ----------- | ----------- | ------------- | -------- | ----- | 
 |  0   | minimumSum/ | [highest](LeetCodeContests_2811_minimumSum/highest_heuristic.txt) |  [dir](LeetCodeContests_2811_minimumSum/) |  [path-to-selected-high](LeetCodeContests_2811_minimumSum/1_refactored/refactor_6.rkt) | 5 |
-|   X   | theMaximumAchievableX/ | [highest](LeetCodeContests_2812_theMaximumAchievableX/highest_heuristic.txt) |  [dir](LeetCodeContests_2812_theMaximumAchievableX) |  [path-to-selected-high](LeetCodeContests_2812_theMaximumAchievableX/10_refactored/refactor_14.rkt) | 2 |
+|   4   | theMaximumAchievableX/ | [highest](LeetCodeContests_2812_theMaximumAchievableX/highest_heuristic.txt) |  [dir](LeetCodeContests_2812_theMaximumAchievableX) |  [path-to-selected-high](LeetCodeContests_2812_theMaximumAchievableX/10_refactored/refactor_14.rkt) | 2 |
 |     | longestEqualSubarray/ | [highest](LeetCodeContests_2832_longestEqualSubarray/highest_heuristic.txt) |  [dir](LeetCodeContests_2832_longestEqualSubarray) |  [path-to-selected-high](LeetCodeContests_2832_longestEqualSubarray/1_refactored/refactor_95.rkt) | 0 |
 |     | sumOfSquares/ | [highest](LeetCodeContests_2844_sumOfSquares/highest_heuristic.txt) |  [dir](LeetCodeContests_2844_sumOfSquares) |  [path-to-selected-high](LeetCodeContests_2844_sumOfSquares/10_refactored/refactor_45.rkt) | 4 |
 |     | maximumJumps/ | [highest](LeetCodeContests_2855_maximumJumps/highest_heuristic.txt) |  [dir](LeetCodeContests_2855_maximumJumps) |  [path-to-selected-high](LeetCodeContests_2855_maximumJumps/3_refactored/refactor_43.rkt) | 1 |
