@@ -27,7 +27,14 @@
 ;; Constraints:
 ;;  * 1 <= n == hours.length <= 50
 ;;  * 0 <= hours[i], target <= 105
+
 (define (numberOfEmployeesWhoMetTarget hours target)
+  (for/fold ([how-many 0])
+            ([hour (in-list hours)]
+             #:when (>= hour target))
+    (add1 how-many)))
+
+(define (numberOfEmployeesWhoMetTarget-AI hours target)
   (define (meets-target? hour)
     (>= hour target))
   (length (filter meets-target? hours)))
