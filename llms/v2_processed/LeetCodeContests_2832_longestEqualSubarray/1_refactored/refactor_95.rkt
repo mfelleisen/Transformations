@@ -22,7 +22,31 @@
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= nums.length
 ;;  * 0 <= k <= nums.length
+
+
 (define (longestEqualSubarray nums k)
+  (define vnums (list->vector nums))
+  (for/fold ([left 0]
+             [count (hash)]
+             [max-length 0]
+             #:result max-length)
+            ([el (in-vector vnums)]
+             [right (in-range (vector-length vnums))])
+    (define new-count (hash-update count el add1 0))
+    (define max-freq (apply max (hash-values new-count)))
+    (define window-length (add1 (- right left)))
+    (define is-window-max? (> (- window-length max-freq) k))
+    (define new-left (if is-window-max? (add1 left) left))
+    (define final-count
+      (if is-window-max?
+          (hash-update new-count (vector-ref vnums left) sub1)
+          new-count))
+    (define new-max-length
+      (max max-length (- window-length (- window-length max-freq))))
+    (values new-left final-count new-max-length)))
+
+
+(define (longestEqualSubarray-AI nums k)
   ;; Helper function to update frequency counts immutably
   (define (update-counts counts num increment)
     (hash-update counts num (lambda (v) (+ v increment)) 0))
@@ -158,6 +182,6 @@
     (check-within (candidate (list 3 1 4 1 5 5 6) 6) 2 0.001)
     (check-within (candidate (list 1 5 5 7 7 7 4) 0) 3 0.001)
     (check-within (candidate (list 5 7 4 4 1 6 7) 5) 2 0.001)
-))
+    ))
 
 (test-humaneval)
