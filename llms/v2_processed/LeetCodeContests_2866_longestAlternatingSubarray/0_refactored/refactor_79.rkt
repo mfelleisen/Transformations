@@ -28,6 +28,31 @@
 ;;  * 1 <= nums[i] <= 100
 ;;  * 1 <= threshold <= 100
 (define (longestAlternatingSubarray nums threshold)
+
+  (define (valid-start? num)
+    (and (even? num) (<= num threshold)))
+
+   (define (max-subarray-length el nums)
+    (for/fold ([length-so-far 1]
+               [prev (modulo el 2)]
+               #:result length-so-far)
+              ([el nums])
+               #:break (or (> el threshold) (= (modulo el 2) prev))
+      (values (add1 length-so-far) (modulo el 2))))
+
+ ;; with in-suffixes this can be more concise
+  (define (find-max-length nums max-so-far)
+    (for/fold ([max-so-far 0]
+               [r nums]
+                #:result max-so-far)
+              ([el nums])
+      (if (valid-start? el)
+          (values (max max-so-far (max-subarray-length el (rest r))) (rest r))
+          (values max-so-far (rest r)))))
+
+(find-max-length nums 0))
+
+(define (longestAlternatingSubarray-AI nums threshold)
   ;; Helper function to determine if a number is even and within the threshold
   (define (valid-start? num)
     (and (= (modulo num 2) 0)
