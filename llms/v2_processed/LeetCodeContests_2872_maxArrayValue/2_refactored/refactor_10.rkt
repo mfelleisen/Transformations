@@ -22,7 +22,29 @@
 ;; Constraints:
 ;;  * 1 <= nums.length <= 105
 ;;  * 1 <= nums[i] <= 106
+
 (define (maxArrayValue nums)
+  (for/fold ([max 0])
+            ([el (in-list nums)])
+    
+  ;; Define a helper function for folding
+  (define (fold-nums lst)
+    ;; Use a right fold to combine elements from right to left
+    (foldr (lambda (current acc)
+             ;; Accumulate by adding current to the head of acc if condition is met
+             (match acc
+               ['() (list current)]
+               [(cons head tail)
+                (if (<= current head)
+                    (cons (+ current head) tail)
+                    (cons current acc))]))
+           '()  ;; Initial accumulator is an empty list
+           lst))
+
+  ;; Compute the maximum value in the folded list
+  (apply max (fold-nums nums)))
+
+(define (maxArrayValue-AI nums)
   ;; Define a helper function for folding
   (define (fold-nums lst)
     ;; Use a right fold to combine elements from right to left

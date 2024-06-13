@@ -36,7 +36,7 @@
     (for/fold ([length-so-far 1]
                [prev (modulo el 2)]
                #:result length-so-far)
-              ([el nums])
+              ([el (in-list nums)])
                #:break (or (> el threshold) (= (modulo el 2) prev))
       (values (add1 length-so-far) (modulo el 2))))
 
@@ -45,7 +45,7 @@
     (for/fold ([max-so-far 0]
                [r nums]
                 #:result max-so-far)
-              ([el nums])
+              ([el (in-list nums)])
       (if (valid-start? el)
           (values (max max-so-far (max-subarray-length el (rest r))) (rest r))
           (values max-so-far (rest r)))))

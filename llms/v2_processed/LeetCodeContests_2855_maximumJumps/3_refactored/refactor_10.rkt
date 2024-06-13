@@ -52,13 +52,13 @@
 
   (define (most-jumps i)
     (define previous-jumps (find-previous-feasible i))
-    (for ([previous-jump previous-jumps]
+    (for ([previous-jump (in-list previous-jumps)]
           #:unless (equal? previous-jump 0)
           #:when (equal? 'not-yet (vector-ref memo-jumps previous-jump)))
       (most-jumps previous-jump))
     (define most-jumps-to-i
       (for/fold ([most-jumps-so-far -1])
-                ([previous-jump previous-jumps]
+                ([previous-jump (in-list previous-jumps)]
                  #:do [(define most-jumps-previous (vector-ref memo-jumps previous-jump))] 
                  #:unless (= most-jumps-previous -1))
         (max most-jumps-so-far (add1 most-jumps-previous))))
