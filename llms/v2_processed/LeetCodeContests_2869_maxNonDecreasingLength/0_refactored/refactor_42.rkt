@@ -29,7 +29,19 @@
 ;; Constraints:
 ;;  * 1 <= nums1.length == nums2.length == n <= 105
 ;;  * 1 <= nums1[i], nums2[i] <= 109
-(define (maxNonDecreasingLength nums1 nums2)
+(define (maxNonDecreasingLength l1 l2)
+  (for/fold ([dp1 1] [dp2 1] [max-len 1] #:result max-len)
+              ([a (in-list (rest l1))] [b (in-list (rest l2))]
+               [prev-a (in-list l1)] [prev-b (in-list l2)])
+    (define new-dp1
+      (max (if (>= a prev-a) (+ dp1 1) 1)
+           (if (>= a prev-b) (+ dp2 1) 1)))
+    (define new-dp2
+      (max (if (>= b prev-a) (+ dp1 1) 1)
+           (if (>= b prev-b) (+ dp2 1) 1)))
+    (values new-dp1 new-dp2 (max max-len new-dp1 new-dp2))))
+
+(define (maxNonDecreasingLength-AI nums1 nums2)
   ;; Helper function to calculate the max non-decreasing length
   (define (max-lengths l1 l2)
     (for/fold ([dp1 1] [dp2 1] [max-len 1] #:result max-len)
