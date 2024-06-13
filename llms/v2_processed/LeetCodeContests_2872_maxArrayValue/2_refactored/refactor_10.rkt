@@ -24,25 +24,17 @@
 ;;  * 1 <= nums[i] <= 106
 
 (define (maxArrayValue nums)
-  (for/fold ([max 0])
-            ([el (in-list nums)])
-    
-  ;; Define a helper function for folding
-  (define (fold-nums lst)
-    ;; Use a right fold to combine elements from right to left
-    (foldr (lambda (current acc)
-             ;; Accumulate by adding current to the head of acc if condition is met
-             (match acc
-               ['() (list current)]
-               [(cons head tail)
-                (if (<= current head)
-                    (cons (+ current head) tail)
-                    (cons current acc))]))
-           '()  ;; Initial accumulator is an empty list
-           lst))
-
-  ;; Compute the maximum value in the folded list
-  (apply max (fold-nums nums)))
+  (for/foldr ([max-so-far 0]
+              [latest 'none]
+               #:result max-so-far)
+    ([el (in-list nums)])
+    (match latest
+      ['none (values el el)]
+      [(? (curry <= el))
+       (define new (+ el latest))
+       (values (max max-so-far new) new)]
+      [_ (values (max max-so-far el) el)])))
+  
 
 (define (maxArrayValue-AI nums)
   ;; Define a helper function for folding
