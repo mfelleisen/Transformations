@@ -19,8 +19,15 @@
         [(divisible? num 3) #f]
         [else (check-factors 5)]))
 
+(define (findPrimePairs limit)
+  (for/list ([this (in-range 2 (add1 (/ limit 2)))]
+             #:do [(define that (- limit this))]
+             #:when (and (<= this that) (is-prime? this) (is-prime? that)))
+    (list this that)))
+    
+
 ;; Function to find prime pairs that sum to n
-(define (findPrimePairs n)
+(define (findPrimePairs-AI n)
   ;; Helper function to generate all primes up to n
   (define (generate-primes limit)
     (filter is-prime? (range 2 (add1 limit))))
