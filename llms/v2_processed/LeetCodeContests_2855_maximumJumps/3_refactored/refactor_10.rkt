@@ -34,6 +34,42 @@
 ;;  * -109 <= nums[i] <= 109
 ;;  * 0 <= target <= 2 * 109
 (define (maximumJumps nums target)
+
+  (define vnums (list->vector nums))
+  (define n (length nums))
+  (define memo-jumps (make-vector n 'not-yet))
+
+  (vector-set! memo-jumps 0 0)  
+
+  (define (valid-jump? i j)
+     (<= (abs (- (vector-ref vnums j) (vector-ref vnums i))) target))
+  
+  (define (find-previous-feasible i)
+    (for/list ([j (in-range (sub1 i) -1 -1)]
+               #:when (valid-jump? i j))
+      j))
+  
+
+  (define (most-jumps i)
+    (define previous-jumps (find-previous-feasible i))
+    (for ([previous-jump previous-jumps]
+          #:unless (equal? previous-jump 0)
+          #:when (equal? 'not-yet (vector-ref memo-jumps previous-jump)))
+      (most-jumps previous-jump))
+    (define most-jumps-to-i
+      (for/fold ([most-jumps-so-far -1])
+                ([previous-jump previous-jumps]
+                 #:do [(define most-jumps-previous (vector-ref memo-jumps previous-jump))] 
+                 #:unless (= most-jumps-previous -1))
+        (max most-jumps-so-far (add1 most-jumps-previous))))
+    (vector-set! memo-jumps i most-jumps-to-i))
+    
+              
+  (most-jumps (sub1 n))
+  (vector-ref memo-jumps (sub1 n)))
+
+
+(define (maximumJumps-AI nums target)
   (define n (length nums))
   (define dp (cons 0 (make-list (- n 1) -inf.0)))
 
