@@ -18,6 +18,13 @@
 ;;  * 1 <= nums[i] <= 50
 (define (sumOfSquares nums)
   (define n (length nums))
+  (for/sum ([el nums]
+            [i (in-naturals 1)]
+            #:when (= (remainder n i) 0))
+    (* el el)))
+
+(define (sumOfSquares-AI nums)
+  (define n (length nums))
   (define (is-special? i)
     (zero? (remainder n i)))
   
