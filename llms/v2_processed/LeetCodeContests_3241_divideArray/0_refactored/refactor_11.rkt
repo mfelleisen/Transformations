@@ -30,21 +30,20 @@
 ;; 1 <= k <= 105
 
 (define (divideArray nums k)
-  (define sorted-nums (sort nums <))  ; Sort the list in ascending order
+  (define sorted-nums (sort nums <))
+  (define segments (split-into-lists-of sorted-nums 3))
+  (let/ec done 
+    (for*/fold ([r '()] #:result (reverse r)) ([x (in-list segments)] [y (in-value (valid? x k))])
+      (if y (cons x r) (done '[])))))
 
-  (define (valid-group? group)
-    (<= (- (third group) (first group)) k))
+;; the AI's specialized grouping by 3 is good code; but I don't like baking 3 into code 
+(define (split-into-lists-of lst n [size (length lst)])
+  (cond
+    [(< size n) '()]
+    [else (cons (take lst n) (split-into-lists-of (drop lst n) n (- size n)))]))
 
-  (define (group-elements elems result)
-    (match elems
-      [(list) (reverse result)]  ; If no elements left, return the result
-      [(list-rest a b c rest)
-       (if (valid-group? (list a b c))
-           (group-elements rest (cons (list a b c) result))
-           '())]
-      [_ '()]))  ; If fewer than 3 elements are left, return empty
-
-  (group-elements sorted-nums '()))
+(define (valid? group k)
+  (<= (- (third group) (first group)) k))
 
 ;; ---------------------------------------------------------------------------------------------------
 
@@ -65,10 +64,11 @@
 
   (group-elements sorted-nums '()))
 
+;; OUCH the AI defined those ... 
 ;; Helper functions to access elements of a list by index
-(define (first lst) (car lst))
-(define (second lst) (cadr lst))
-(define (third lst) (caddr lst))
+;; (define (first lst) (car lst))
+;; (define (second lst) (cadr lst))
+;; (define (third lst) (caddr lst))
 
 
 (require rackunit)
@@ -177,6 +177,6 @@
     (check-within (candidate (list 16 15 16 6 9 22 14 16 10 26 18 16 11 18 7) 10) (list (list 6 7 9) (list 10 11 14) (list 15 16 16) (list 16 16 18) (list 18 22 26)) 0.001)
     (check-within (candidate (list 5 16 12 26 16 18 1 6 23 2 1 21 8 11 9) 14) (list (list 1 1 2) (list 5 6 8) (list 9 11 12) (list 16 16 18) (list 21 23 26)) 0.001)
     (check-within (candidate (list 6 3 24 13 19 24 13 12 15 3 6 3) 17) (list (list 3 3 3) (list 6 6 12) (list 13 13 15) (list 19 24 24)) 0.001)
-))
+    ))
 
 (test-humaneval)

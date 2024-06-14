@@ -2,12 +2,16 @@
 
 ;; Function: areaOfMaxDiagonal
 ;; Description: Returns the area of the rectangle with the longest diagonal.
-;;              If multiple rectangles have the longest diagonal, returns the area of the one with the maximum area.
+;;              If multiple rectangles have the longest diagonal, returns the area of the one with
+;; the maximum area.
 ;; Input: dimensions - A list of pairs, where each pair contains the length and width of a rectangle.
-;; Output: The area of the rectangle with the maximum diagonal or maximum area if diagonals are equal.
+;; Output: The area of the rectangle with the maximum diagonal or maximum area if diagonals are equal
 ;; You are given a 2D 0-indexed integer array dimensions.
-;; For all indices i, 0 <= i < dimensions.length, dimensions[i][0] represents the length and dimensions[i][1] represents the width of the rectangle i.
-;; Return the area of the rectangle having the longest diagonal. If there are multiple rectangles with the longest diagonal, return the area of the rectangle having the maximum area.
+;; For all indices i, 0 <= i < dimensions.length, dimensions[i][0] represents the length and
+;; dimensions[i][1] represents the width of the rectangle i.
+;; Return the area of the rectangle having the longest diagonal. If there are multiple rectangles
+;; with the longest diagonal, return the area of the rectangle having the maximum area.
+
 ;; Example 1:
 ;; Input: dimensions = [[9,3],[8,6]]
 ;; Output: 48
@@ -15,15 +19,43 @@
 ;; For index = 0, length = 9 and width = 3. Diagonal length = sqrt(9 * 9 + 3 * 3) = sqrt(90) ≈ 9.487.
 ;; For index = 1, length = 8 and width = 6. Diagonal length = sqrt(8 * 8 + 6 * 6) = sqrt(100) = 10.
 ;; So, the rectangle at index 1 has a greater diagonal length therefore we return area = 8 * 6 = 48.
+
 ;; Example 2:
 ;; Input: dimensions = [[3,4],[4,3]]
 ;; Output: 12
 ;; Explanation: Length of diagonal is the same for both which is 5, so maximum area = 12.
+
 ;; Constraints:
 ;; 1 <= dimensions.length <= 100
 ;; dimensions[i].length == 2
 ;; 1 <= dimensions[i][0], dimensions[i][1] <= 100
+
 (define (areaOfMaxDiagonal dimensions)
+  (for/fold ([r '(0 0)] #:result (apply area r)) ([d dimensions])
+    (max-diagonal-area r d)))
+
+(define (max-diagonal-area d1 d2)
+  (match-define (list len1 wid1) d1)
+  (match-define (list len2 wid2) d2)
+  (define diag1 (diagonal-squared len1 wid1))
+  (define diag2 (diagonal-squared len2 wid2))
+  (define area1 (area len1 wid1))
+  (define area2 (area len2 wid2))
+  (cond
+    [(> diag1 diag2) d1]
+    [(> diag2 diag1) d2]
+    [(> area1 area2) d1]
+    [else d2]))
+
+(define (diagonal-squared length width)
+  (+ (* length length) (* width width)))
+
+(define (area length width)
+  (* length width))
+
+;; ---------------------------------------------------------------------------------------------------
+
+(define (areaOfMaxDiagonal-AI dimensions)
   (define (diagonal-squared length width)
     (+ (* length length) (* width width)))
   
@@ -162,6 +194,6 @@
     (check-within (candidate (list (list 9 2) (list 7 2) (list 2 7))) 18 0.001)
     (check-within (candidate (list (list 2 8) (list 10 6) (list 8 10) (list 9 9))) 80 0.001)
     (check-within (candidate (list (list 3 3))) 9 0.001)
-))
+    ))
 
 (test-humaneval)
