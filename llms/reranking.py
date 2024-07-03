@@ -111,9 +111,9 @@ def quicksort(client, model, arr: List, low: int, high: int) -> List:
 
 def main(args):
     random.seed(42)
-    tables = Path(args.programs_dir).rglob("heuristic.csv")
+    tables = list(Path(args.programs_dir).rglob("heuristic.csv"))
     client = openai.Client(api_key=get_openai_key())
-    for table in tables:
+    for table in tqdm(tables):
         d = table.parent
         reranking_out = d / "reranking.txt"
         if reranking_out.exists():
