@@ -1,0 +1,10 @@
+10_refactored/refactor_39.rkt
+8_refactored/refactor_24.rkt
+9_refactored/refactor_12.rkt
+10_refactored/refactor_70.rkt
+8_refactored/refactor_2.rkt
+8_refactored/refactor_98.rkt
+10_refactored/refactor_19.rkt
+8_refactored/refactor_4.rkt
+8_refactored/refactor_95.rkt
+10_refactored/refactor_34.rkt
