@@ -132,7 +132,6 @@ def main(args):
         paths_str = "\n".join(map(lambda p: str(p.relative_to(d)), paths))
         with open(reranking_out, "w") as f:
             f.write(paths_str)
-        break # TODO: remove once we have all the data
 
 
 if __name__ == "__main__":
