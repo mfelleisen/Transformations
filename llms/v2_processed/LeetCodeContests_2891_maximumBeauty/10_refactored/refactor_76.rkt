@@ -24,7 +24,24 @@
 ;; Constraints:
 ;;  * 1 <= nums.length <= 105
 ;;  * 0 <= nums[i], k <= 105
+
 (define (maximumBeauty nums k) ;; contract  mb/c
+
+  (define (bucket->universe l k)
+    (define (bucket-range x)
+      (range (- x k) (+ x k 1)))
+    (apply append (map bucket-range l)))
+
+  (define (key-frequencies vals)
+    (for/fold ([counts (hash)])
+              ([v vals])
+      (hash-update counts v add1 0)))
+  
+  (define universe (bucket->universe nums k))
+  (define counts (key-frequencies universe))
+  (apply max (hash-values counts)))
+
+(define (maximumBeauty-AI nums k) ;; contract  mb/c
   (define (bucket->universe l k)
     (define (bucket-range x)
       (range (- x k) (+ x k 1)))
