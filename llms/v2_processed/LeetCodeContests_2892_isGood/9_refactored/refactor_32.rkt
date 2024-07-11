@@ -23,7 +23,21 @@
 ;; Constraints:
 ;;  * 1 <= nums.length <= 100
 ;;  * 1 <= num[i] <= 200
+
 (define (isGood nums)
+  ;; Determine if the list nums is a "good" array.
+  ;; A "good" array is a permutation of [1, 2, ..., n - 1, n, n] where n is the maximum element in nums.
+  
+  (define (generate-base n)
+    (append (range 1 n) (list n n)))
+  
+  ;; Compare the counts
+  (equal?
+   (sort nums <=)
+   (generate-base (argmax values nums))))
+
+
+(define (isGood-AI nums)
   ;; Determine if the list nums is a "good" array.
   ;; A "good" array is a permutation of [1, 2, ..., n - 1, n, n] where n is the maximum element in nums.
   
