@@ -18,7 +18,20 @@
 ;; Constraints:
 ;;  * 1 <= n <= 300
 ;;  * 1 <= x <= 5
+
 (define (numberOfWays n x)
+
+  (define (calc-ways n x i)
+    (cond
+      [(= n 0) 1]
+      [(> (expt i x) n) 0]
+      [else (+ (calc-ways (- n (expt i x)) x (+ i 1))
+               (calc-ways n x (+ i 1)))]))
+
+  (modulo (calc-ways n x 1) (+ (expt 10 9) 7)))
+
+
+(define (numberOfWays-AI n x)
   (define MOD (+ (expt 10 9) 7))
 
   (define (mod-add a b)
