@@ -29,7 +29,37 @@
 ;;  * 0 <= coordinates[i][0] < m
 ;;  * 0 <= coordinates[i][1] < n
 ;;  * It is guaranteed that coordinates contains pairwise distinct coordinates.
+
 (define (countBlackBlocks m n coordinates)
+
+  (define (blocks-around c)
+    (match-define (list x y) c)
+    (for/list ([i (in-list (list (sub1 x) x))]
+               #:when (and (>= i 0) (< (+ i 1) m))
+               [j (in-list (list (sub1 y) y))]
+               #:when (and (>= j 0) (< (+ j 1) n)))
+      (cons i j)))
+
+  (define (incr-hash h l)
+    (for/fold ([h h])
+              ([el (in-list l)])
+      (hash-update h el add1 0))) 
+      
+  (define blocks
+    (for/fold ([counts (hash)])
+              ([c (in-list coordinates)])
+      (incr-hash counts (blocks-around c))))
+
+  (define init-v (vector (* (- m 1) (- n 1)) 0 0 0 0))
+
+  (for ([(b c) (in-hash blocks)])
+    (vector-set! init-v c (add1 (vector-ref init-v c)))
+    (vector-set! init-v 0 (sub1 (vector-ref init-v 0))))
+
+  (vector->list init-v))
+    
+
+(define (countBlackBlocks-AI m n coordinates)
   ;; Create a hash table to count black cells in each potential 2x2 block's top-left corner.
   (define block-count (make-hash))
 
