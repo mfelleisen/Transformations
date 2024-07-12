@@ -28,6 +28,41 @@
   (define (memoize key val)
     (hash-set! memo key val)
     val)
+ 
+  (struct in-suffixes (l)
+    #:methods gen:stream
+    [(define (stream-empty? s)
+       (empty? (in-suffixes-l s)))
+     (define (stream-first s)
+       (in-suffixes-l s))
+     (define (stream-rest s)
+       (in-suffixes (rest (in-suffixes-l s))))])
+
+  (define (penalty current next)
+    (if (not (= (modulo current 2) (modulo next 2))) x 0))
+
+  (define (max-score nums current)
+    (for/fold  ([maxscore current])
+               ([s (in-suffixes nums)])
+      (match s
+        ['() maxscore]
+        [(cons h t)
+         (define intermediate-score
+           (or (hash-ref memo s #f)
+               (memoize s (max-score t h))))
+         (max maxscore
+              (- (+ current intermediate-score)
+                 (penalty current h)))])))
+
+  (max-score (rest nums) (first nums)))
+
+(define (maxScore-AI nums x)
+  ;; Recursive helper function with memoization
+  (define memo (make-hash))
+  
+  (define (memoize key val)
+    (hash-set! memo key val)
+    val)
   
   (define (max-score-from i)
     (cond
@@ -49,7 +84,10 @@
   
   ;; Compute the maximum score for all positions
   (apply max (for/list ([i (in-range (length nums))])
-                (max-score-from i))))
+               (max-score-from i))))
+
+
+
 
 ;; Example usage:
 (maxScore '(2 3 6 1 9 2) 5)  ;; Output: 13
@@ -161,6 +199,6 @@
     (check-within (candidate (list 13 26 3 19 21 43 33 62 32 61 40 22 56 69 15 21 10 87 84 66 26 35 54 64 7 53 32 14 7) 76) 649 0.001)
     (check-within (candidate (list 73 93 27 67 11 40 18 88 78 77 79 80 15 100 83 33 36 63 90 44 89 23 25 79 56 41 8 62 32 98 58) 10) 1641 0.001)
     (check-within (candidate (list 38 97 76 72 85 23 70 90 89 1 65 50 1 93 41 33 94 43 45 39 98 52 85 18 70 79 79 33 22 93 72 25 20 42 19 66 64 64 95 29 3 75 54 40 17 86 71 23 26 23) 66) 1683 0.001)
-))
+    ))
 
 (test-humaneval)
