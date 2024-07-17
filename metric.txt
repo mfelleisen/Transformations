@@ -1,0 +1,19 @@
+(define (fn x) x)
+
+# 1
+(assert (fn [FILL]) 4)
+
+# 2
+(assert (fn 2) 2)
+(assert (fn 3) 3)
+(assert (fn [FILL]) 4)
+
+# 2-1
+(assert (fn 3) 3)
+(assert (fn 2) 2)
+(assert (fn [FILL]) 4)
+
+
+
+# input@{k, e}
+# output@{k, e}
