@@ -316,7 +316,9 @@ class HiLoDataset:
         self.items: List[HiLoItem] = items
 
     def to_dict(self):
-        return [item.to_dict() for item in self.items]
+        return {
+            "items": [item.to_dict() for item in self.items]
+        }
 
 END_FOOTER = ";;;;;;;;; END PROGRAM ;;;;;;;;;;"
 
@@ -353,7 +355,7 @@ def main(args):
 
     model = model_factory(args.model, args.model_kind)
     
-    for item in tqdm(ds.items, total=sum(len(item.los) + len(item.his) for item in ds.items)):
+    for item in tqdm(ds.items):
         for example in item.los + item.his:
             batch = {
                 "prompts": [], # actual prompts
@@ -409,6 +411,14 @@ def main(args):
                 example.results.append(Result(to_predict, resp, correct, examples))
 
     d = ds.to_dict()
+    # dump args that we care about
+    d["model"] = args.model
+    d["max_priors"] = args.max_priors
+    d["format"] = args.format
+    d["temperature"] = args.temperature
+    d["top_p"] = args.top_p
+    d["max_tokens"] = args.max_tokens
+    d["completion_limit"] = args.completion_limit
     outpath = Path(args.output)
     outpath.parent.mkdir(parents=True, exist_ok=True)
     gunzip_json_write(outpath, d)
@@ -426,7 +436,7 @@ if __name__ == "__main__":
     parser.add_argument("--top-p", type=float, default=0.95, help="Top-p")
     parser.add_argument("--max-tokens", type=int, default=128, help="Max tokens")
     parser.add_argument("--max-priors", type=int, default=5, help="Max test examples drawn from previous ground truth I/O")
-    parser.add_argument("--completion-limit", type=int, default=20, help="Max completions per test")
+    parser.add_argument("--completion-limit", type=int, default=200, help="Max completions per test")
     parser.add_argument("--sample", type=int, default=None, help="Evaluate a sample of N only")
     parser.add_argument("--executor", type=str,
                         default="http://127.0.0.1:8000",
