@@ -1,14 +1,15 @@
 import json
 import gzip
 from pathlib import Path
-from typing import Optional
+from typing import Optional, TypeVar, List
+
 
 
 def gunzip_json_write(path: Path, data: dict) -> None:
     """
     Write a dictionary to a gzip-compressed JSON file.
     """
-    with gzip.open(path, "wt") as f:
+    with gzip.open(str(path), "wt") as f:
         json.dump(data, f)
 
 
@@ -57,3 +58,16 @@ def markdown_codeblock_extract(new: str) -> str:
         elif in_codeblock:
             buf += ln + "\n"
     return buf
+
+T = TypeVar("T")
+
+
+def chunkify(lst: List[T], n: int) -> List[List[T]]:
+    chunks = []
+    for i in range(0, len(lst), n):
+        chunk = []
+        for j in range(n):
+            if i + j < len(lst):
+                chunk.append(lst[i + j])
+        chunks.append(chunk)
+    return chunks
