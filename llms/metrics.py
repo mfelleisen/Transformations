@@ -37,7 +37,7 @@ def per_file_metrics(file: Path, e: int, k: int) -> str:
 
 
 def main(args):
-    header = "name,dataset size,e,k,lo fmt@{k|e},hi fmt@{k|e}"
+    header = "name,dataset size,e,k,hi fmt@{k|e},lo fmt@{k|e}"
     print(header)
     for file in args.inputs:
         print(
