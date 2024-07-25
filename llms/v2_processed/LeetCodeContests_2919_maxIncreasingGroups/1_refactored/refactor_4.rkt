@@ -38,7 +38,20 @@
 ;; Constraints:
 ;;  * 1 <= usageLimits.length <= 105
 ;;  * 1 <= usageLimits[i] <= 109
+
 (define (maxIncreasingGroups usageLimits)
+  (for/fold ([current-min-size 1]
+             [total 0]
+             [num-groups 0]
+             #:result num-groups)
+            ([x (in-list (sort usageLimits <))])
+    (define new-total (+ total x))
+    (if (>= new-total current-min-size)
+        (values (+ current-min-size 1) (- new-total current-min-size) (+ num-groups 1))
+        (values current-min-size new-total num-groups))))
+
+
+(define (maxIncreasingGroups-AI usageLimits)
   (define sorted-limits (sort usageLimits <))
 
   (define (count-groups limits)
