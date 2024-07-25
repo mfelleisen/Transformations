@@ -33,9 +33,8 @@
     (define-values (new-max-for-d new-max-sum-for-d)
       (if (equal? current-max-for-d 'none)
           (values num -1)
-          (values
-           (max num current-max-for-d)
-           (max current-max-sum-for-d (+ num current-max-for-d)))))
+          (values (max num current-max-for-d)
+                  (max current-max-sum-for-d (+ num current-max-for-d)))))
     (define new-max (max new-max-sum-for-d max-so-far))
     (values (hash-set maxs d new-max-for-d)
             (hash-set maxs-sum d new-max-sum-for-d)
