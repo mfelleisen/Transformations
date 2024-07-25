@@ -26,7 +26,24 @@
 ;; Constraints:
 ;;  * 1 <= nums.length == n <= 50
 ;;  * -50 <= nums[i], target <= 50
+
+
 (define (countPairs nums target)
+  ;; Use higher-order functions and recursion to generate all pairs (i, j) where i < j
+  (define (count-pairs-helper nums target count)
+    (match nums
+      [(cons x xs)
+       (define pair-count
+         (for/fold ([count 0])
+                   ([y (in-list xs)])
+           (if (< (+ x y) target) (add1 count) count)))
+       (count-pairs-helper xs target (+ count pair-count))]
+      [empty count]))
+
+  ;; Call the helper function with the initial index 0 and count 0
+  (count-pairs-helper nums target 0))
+
+(define (countPairs-AI nums target)
   ;; Use higher-order functions and recursion to generate all pairs (i, j) where i < j
   (define (count-pairs-helper nums target index count)
     (match nums
