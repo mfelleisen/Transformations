@@ -16,7 +16,34 @@
 ;; Constraints:
 ;;  * 2 <= nums.length <= 100
 ;;  * 1 <= nums[i] <= 104
+
 (define (maxSum nums)
+  ;; Helper function to extract the maximum digit from a number
+  (define (max-digit n)
+    (first (sort (string->list (number->string n)) char>=?)))
+  
+  (for/fold ([maxs (hash)]
+             [maxs-sum (hash)]
+             [max-so-far -1]
+             #:result max-so-far)
+            ([num nums])
+    (define d (max-digit num))
+    (define current-max-for-d (hash-ref maxs d 'none))
+    (define current-max-sum-for-d (hash-ref maxs-sum d 'none))
+    (define-values (new-max-for-d new-max-sum-for-d)
+      (if (equal? current-max-for-d 'none)
+          (values num -1)
+          (values
+           (max num current-max-for-d)
+           (max current-max-sum-for-d (+ num current-max-for-d)))))
+    (define new-max (max new-max-sum-for-d max-so-far))
+    (values (hash-set maxs d new-max-for-d)
+            (hash-set maxs-sum d new-max-sum-for-d)
+            new-max)))
+
+
+
+(define (maxSum-AI nums)
   ;; Helper function to extract the maximum digit from a number
   (define (max-digit n)
     (define char-to-int (lambda (c) (- (char->integer c) (char->integer #\0))))
