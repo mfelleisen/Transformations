@@ -18,6 +18,12 @@
 ;; Constraints:
 ;;  * 0 <= purchaseAmount <= 100
 (define (accountBalanceAfterPurchase purchaseAmount)
+  (define q (remainder purchaseAmount 10))
+  (cond [(< q 5) (- 100 (- purchaseAmount q))]
+        [else  (- 100 (+ purchaseAmount (- 10 q)))]))
+
+
+(define (accountBalanceAfterPurchase-AI purchaseAmount)
   (define initial-balance 100)
   
   (define (round-to-nearest-multiple-of-10 n)
@@ -140,6 +146,6 @@
     (check-within (candidate 98) 0 0.001)
     (check-within (candidate 99) 0 0.001)
     (check-within (candidate 100) 0 0.001)
-))
+    ))
 
 (test-humaneval)
