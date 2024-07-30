@@ -436,7 +436,7 @@ if __name__ == "__main__":
     parser.add_argument("--top-p", type=float, default=0.95, help="Top-p")
     parser.add_argument("--max-tokens", type=int, default=128, help="Max tokens")
     parser.add_argument("--max-priors", type=int, default=5, help="Max test examples drawn from previous ground truth I/O")
-    parser.add_argument("--completion-limit", type=int, default=200, help="Max completions per test")
+    parser.add_argument("--completion-limit", type=int, default=100, help="Max completions per test")
     parser.add_argument("--sample", type=int, default=None, help="Evaluate a sample of N only")
     parser.add_argument("--executor", type=str,
                         default="http://127.0.0.1:8000",
