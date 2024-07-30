@@ -430,7 +430,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, required=True, help="Model to evaluate")
     parser.add_argument("--output", type=str, required=True, help="Output file")
     parser.add_argument("--model-kind", type=str, default="hf", choices=["hf"], help="Model kind")
-    parser.add_argument("--batch-size", type=int, default=512, help="Batch size")
+    parser.add_argument("--batch-size", type=int, default=4096, help="Batch size")
     parser.add_argument("--format", type=str, default="output", choices=["input", "output"], help="Format for predictions")
     parser.add_argument("--temperature", type=float, default=0.2, help="Temperature")
     parser.add_argument("--top-p", type=float, default=0.95, help="Top-p")
