@@ -441,7 +441,7 @@ if __name__ == "__main__":
     parser.add_argument("--completion-limit", type=int, default=100, help="Max completions per test")
     parser.add_argument("--sample", type=int, default=None, help="Evaluate a sample of N only")
     parser.add_argument("--executor", type=str,
-                        default="http://127.0.0.1:8000",
+                        default="http://127.0.0.1:5005",
                         help="Code exec server URL")
     args = parser.parse_args()
     main(args)
