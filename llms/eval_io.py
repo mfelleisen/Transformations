@@ -189,17 +189,19 @@ class TestCase:
 
 
 class Result:
-    def __init__(self, to_predict: TestCase, completion: str, correct: bool, num_examples: int):
+    def __init__(self, to_predict: TestCase, completion: str, correct: bool, num_examples: int, exec_output: str):
         self.to_predict = to_predict
         self.completion = completion
         self.correct = correct
         self.num_examples = num_examples
+        self.exec_output = exec_output
 
     def to_dict(self):
         return {
             "to_predict": str(self.to_predict),
             "completion": self.completion,
             "correct": self.correct,
+            "exec_output": self.exec_output,
             "num_examples": self.num_examples
         }
 
@@ -401,14 +403,14 @@ def main(args):
                 correct = []
                 for p, out in results:
                     if not p or "FAILURE" in out or "ERROR" in out:
-                        correct.append(False)
+                        correct.append((False, out))
                     else:
-                        correct.append(True)
+                        correct.append((True, out))
                 for i, c in enumerate(correct):
                     batch["correct"][indices[i]] = c
 
             for resp, to_predict, correct, examples in zip(batch["responses"], batch["to_predict"], batch["correct"], batch["examples"]):
-                example.results.append(Result(to_predict, resp, correct, examples))
+                example.results.append(Result(to_predict, resp, correct[0], examples, correct[1]))
 
     d = ds.to_dict()
     # dump args that we care about
